@@ -1,2 +1,2 @@
 # driveby
-Documentation Driven Testing Worfklow that can be integrated into the SDLC 
+Documentation Driven Testing Worfklow that can be easily integrated into the SDLC loop.
