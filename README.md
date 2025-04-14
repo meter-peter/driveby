@@ -1,6 +1,6 @@
 # DriveBy API: Testing and Validation Platform
 
-DriveBy is a Kubernetes-native API for managing testing of microservices in your organization. It provides three core testing capabilities:
+DriveBy is a Kubernetes-native API for managing testing of APIs in your organization. It provides three core testing capabilities:
 
 1. **Documentation Validation** - Validate OpenAPI documentation for compliance and completeness
 2. **Load Testing** - Perform load tests against your services with detailed reporting
