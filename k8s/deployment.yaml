@@ -1,0 +1,322 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveby-api
+  labels:
+    app: driveby
+    component: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: driveby
+      component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: driveby
+        component: api
+    spec:
+      containers:
+        - name: api
+          image: ${DOCKER_REGISTRY}/driveby-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: DRIVEBY_SERVER_PORT
+              value: "8080"
+            - name: DRIVEBY_REDIS_HOST
+              value: "driveby-redis"
+            - name: DRIVEBY_REDIS_PORT
+              value: "6379"
+            - name: DRIVEBY_MINIO_ENDPOINT
+              value: "driveby-minio:9000"
+            - name: DRIVEBY_MINIO_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: driveby-minio
+                  key: access-key
+            - name: DRIVEBY_MINIO_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: driveby-minio
+                  key: secret-key
+            - name: DRIVEBY_MINIO_BUCKET_NAME
+              value: "driveby"
+            - name: DRIVEBY_MINIO_USE_SSL
+              value: "false"
+            - name: DRIVEBY_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: driveby-github
+                  key: token
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/driveby
+      volumes:
+        - name: config-volume
+          configMap:
+            name: driveby-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driveby-api
+  labels:
+    app: driveby
+    component: api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: driveby
+    component: api
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: driveby-config
+data:
+  config.yaml: |
+    server:
+      mode: release
+      timeout: 30s
+      shutdown_timeout: 10s
+    
+    logging:
+      level: info
+      format: json
+    
+    testing:
+      validation:
+        compliance_threshold: 95.0
+        fail_on_validation: true
+      load_test:
+        default_rps: 10
+        default_duration: 30s
+        default_timeout: 5s
+      acceptance:
+        default_timeout: 30s
+    
+    features:
+      enable_validation: true
+      enable_load_test: true
+      enable_acceptance: true
+      enable_github: true
+      enable_workers: true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: driveby-minio
+type: Opaque
+data:
+  access-key: bWluaW9hZG1pbg== # minioadmin (base64 encoded)
+  secret-key: bWluaW9hZG1pbg== # minioadmin (base64 encoded)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: driveby-github
+type: Opaque
+data:
+  token: "" # Add your GitHub token here (base64 encoded)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveby-redis
+  labels:
+    app: driveby
+    component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driveby
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: driveby
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:6.2-alpine
+          ports:
+            - name: redis
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driveby-redis
+  labels:
+    app: driveby
+    component: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    app: driveby
+    component: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveby-minio
+  labels:
+    app: driveby
+    component: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driveby
+      component: minio
+  template:
+    metadata:
+      labels:
+        app: driveby
+        component: minio
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          args:
+            - server
+            - /data
+          ports:
+            - name: api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: driveby-minio
+                  key: access-key
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: driveby-minio
+                  key: secret-key
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: driveby-minio-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driveby-minio
+  labels:
+    app: driveby
+    component: minio
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: api
+      protocol: TCP
+      name: api
+    - port: 9001
+      targetPort: console
+      protocol: TCP
+      name: console
+  selector:
+    app: driveby
+    component: minio
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: driveby-minio-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: driveby-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: driveby.example.com
+      http:
+        paths:
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: driveby-api
+                port:
+                  name: http
+    - host: minio.driveby.example.com
+      http:
+        paths:
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: driveby-minio
+                port:
+                  name: api
