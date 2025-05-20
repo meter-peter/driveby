@@ -2,6 +2,46 @@
 
 A documentation-driven API testing framework that validates OpenAPI documentation, runs integration and load tests, and enforces quality gates.
 
+## Principles of a Testable API
+
+To be effectively validated and tested by Driveby (or any documentation-driven testing tool), an API should adhere to the following principles:
+
+### 1. **Examplable**
+- **Every request and response must include examples** in the OpenAPI schema.
+- Examples should be realistic and cover typical as well as edge cases.
+- Parameter, request body, and response examples are essential for automated test generation and validation.
+
+### 2. **Describable**
+- **All endpoints, parameters, and schemas must have clear descriptions.**
+- Descriptions help both humans and machines understand the intent and usage of each part of the API.
+- Error responses and edge cases should be described, not just success paths.
+
+### 3. **Deterministic**
+- **Given the same input, the API should produce the same output.**
+- Determinism is crucial for reliable automated testing and reproducibility.
+
+### 4. **Observable**
+- **The API should provide clear, observable outputs for all operations.**
+- Error conditions, validation failures, and business logic errors should be surfaced in responses, not hidden.
+
+### 5. **Complete**
+- **All possible responses (success, error, validation, etc.) must be documented.**
+- Status codes, error structures, and edge cases should be included in the OpenAPI spec.
+
+### 6. **Consistent**
+- **Naming, status codes, and error formats should be consistent across the API.**
+- Consistency reduces ambiguity and makes automated validation more effective.
+
+### 7. **Versioned**
+- **The API and its documentation should be versioned.**
+- This allows for safe evolution and backward compatibility.
+
+### 8. **Discoverable**
+- **The OpenAPI spec should be available at a standard endpoint (e.g., `/openapi.json`).**
+- Interactive documentation (e.g., Swagger UI at `/docs`) should be provided for human users.
+
+---
+
 ## API Documentation
 
 ### Driveby Testing API Documentation
