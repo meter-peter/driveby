@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.19-alpine AS builder
+FROM golang:1.22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -8,39 +8,39 @@ WORKDIR /app
 RUN apk add --no-cache git
 
 # Copy go mod and sum files
-COPY go.mod go.sum ./
+COPY go.mod ./
 
-# Download dependencies
-RUN go mod download
+# Download dependencies and generate go.sum
+RUN go mod download && \
+    go mod tidy
 
 # Copy the source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o driveby ./cmd/driveby
+RUN CGO_ENABLED=0 GOOS=linux go build -o api ./cmd/api
 
-# Run stage
-FROM alpine:3.16
+# Use a smaller image for the final container
+FROM alpine:latest
 
-# Set working directory
 WORKDIR /app
 
-# Add ca-certificates for HTTPS
-RUN apk --no-cache add ca-certificates tzdata
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Copy the binary from builder
-COPY --from=builder /app/driveby .
+COPY --from=builder /app/api .
 
 # Expose the application port
-EXPOSE 8080
+EXPOSE 8081
 
 # Create config directory
 RUN mkdir -p /etc/driveby
 
 # Set environment variables
 ENV DRIVEBY_SERVER_HOST=0.0.0.0 \
-    DRIVEBY_SERVER_PORT=8080 \
+    DRIVEBY_SERVER_PORT=8081 \
     DRIVEBY_SERVER_MODE=release
 
 # Run the application
-CMD ["./driveby"]
+CMD ["./api"]

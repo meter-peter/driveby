@@ -2,711 +2,929 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"time"
 
-	"github.com/example/driveby/internal/config"
-	"github.com/example/driveby/internal/core/models"
-	"github.com/example/driveby/internal/core/services"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"driveby/internal/config"
+	"driveby/internal/core"
+	"driveby/internal/core/models"
+	"driveby/internal/core/services"
+	"driveby/internal/types"
+
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @title           Driveby Testing API
+// @version         1.0.0
+// @description     Documentation-driven API testing service. Validates OpenAPI documentation, runs integration and load tests, and enforces quality gates.
+// @termsOfService  http://example.com/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.example.com/support
+// @contact.email  support@example.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8081
+// @BasePath  /api/v1
 
 // Server represents the API server
 type Server struct {
-	router  *gin.Engine
-	server  *http.Server
-	config  *config.Config
-	logger  *logrus.Logger
-	manager *services.ServiceManager
+	router      *mux.Router
+	logger      *logrus.Logger
+	testingSvc  *core.TestingService
+	apiHost     string
+	apiPort     string
+	apiBasePath string
+	config      *config.Config
+	manager     *services.ServiceManager
 }
 
 // NewServer creates a new API server
-func NewServer(cfg *config.Config, manager *services.ServiceManager, logger *logrus.Logger) *Server {
-	// Set Gin mode
-	switch cfg.Server.Mode {
-	case "debug":
-		gin.SetMode(gin.DebugMode)
-	case "release":
-		gin.SetMode(gin.ReleaseMode)
-	case "test":
-		gin.SetMode(gin.TestMode)
-	default:
-		gin.SetMode(gin.ReleaseMode)
+func NewServer(logger *logrus.Logger, testingSvc *core.TestingService, apiHost, apiPort, apiBasePath string, cfg *config.Config, manager *services.ServiceManager) *Server {
+	s := &Server{
+		router:      mux.NewRouter(),
+		logger:      logger,
+		testingSvc:  testingSvc,
+		apiHost:     apiHost,
+		apiPort:     apiPort,
+		apiBasePath: apiBasePath,
+		config:      cfg,
+		manager:     manager,
 	}
 
-	// Create router
-	router := gin.New()
-
-	// Setup middleware
-	router.Use(
-		gin.Recovery(),
-		loggerMiddleware(logger),
-		corsMiddleware(),
-	)
-
-	server := &Server{
-		router:  router,
-		config:  cfg,
-		logger:  logger,
-		manager: manager,
-	}
-
-	// Setup routes
-	server.setupRoutes()
-
-	// Create HTTP server
-	server.server = &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
-		Handler:      router,
-		ReadTimeout:  cfg.Server.Timeout,
-		WriteTimeout: cfg.Server.Timeout,
-		IdleTimeout:  2 * cfg.Server.Timeout,
-	}
-
-	return server
+	s.setupRoutes()
+	return s
 }
 
-// Start starts the server
-func (s *Server) Start() error {
-	s.logger.WithField("addr", s.server.Addr).Info("Starting HTTP server")
-	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		return err
+// setupRoutes configures the API routes
+func (s *Server) setupRoutes() {
+	// API routes
+	apiRouter := s.router.PathPrefix(s.apiBasePath).Subrouter()
+
+	// Health check endpoint under API base path
+	apiRouter.HandleFunc("/health", s.handleHealthCheck).Methods(http.MethodGet)
+
+	// OpenAPI documentation endpoints
+	apiRouter.HandleFunc("/docs", s.handleSwaggerUI).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/openapi.json", s.handleOpenAPISpec).Methods(http.MethodGet)
+
+	// Testing endpoints
+	apiRouter.HandleFunc("/tests", s.handleRunTests).Methods(http.MethodPost)
+	apiRouter.HandleFunc("/tests/{test_id}", s.handleGetTestResult).Methods(http.MethodGet)
+
+	// Validation routes
+	apiRouter.HandleFunc("/validation", s.createValidationHandler).Methods(http.MethodPost)
+	apiRouter.HandleFunc("/validation", s.listValidationsHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/validation/{id}", s.getValidationHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/validation/{id}/report", s.getValidationReportHandler).Methods(http.MethodGet)
+
+	// Load test routes
+	apiRouter.HandleFunc("/loadtest", s.createLoadTestHandler).Methods(http.MethodPost)
+	apiRouter.HandleFunc("/loadtest", s.listLoadTestsHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/loadtest/{id}", s.getLoadTestHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/loadtest/{id}/report", s.getLoadTestReportHandler).Methods(http.MethodGet)
+
+	// Acceptance test routes
+	apiRouter.HandleFunc("/acceptance", s.createAcceptanceTestHandler).Methods(http.MethodPost)
+	apiRouter.HandleFunc("/acceptance", s.listAcceptanceTestsHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/acceptance/{id}", s.getAcceptanceTestHandler).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/acceptance/{id}/report", s.getAcceptanceTestReportHandler).Methods(http.MethodGet)
+}
+
+// @Summary     Health check endpoint
+// @Description Returns the health status of the API
+// @Tags        health
+// @Produce     json
+// @Success     200 {object} HealthResponse
+// @Router      /health [get]
+func (s *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":    "healthy",
+		"version":   "1.0.0",
+		"timestamp": time.Now().Format(time.RFC3339),
+	})
+}
+
+// @Summary     Run full test suite
+// @Description Runs documentation, integration, and load tests against a target API using its OpenAPI spec
+// @Tags        tests
+// @Accept      json
+// @Produce     json
+// @Param       request body TestRequest true "Test configuration"
+// @Success     200 {object} TestResponse
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /tests [post]
+func (s *Server) handleRunTests(w http.ResponseWriter, r *http.Request) {
+	var req types.TestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.logger.WithError(err).Error("Failed to decode test request")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
 	}
-	return nil
+
+	// Run the tests
+	result, err := s.testingSvc.RunTests(r.Context(), req)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to run tests")
+		http.Error(w, "Failed to run tests", http.StatusInternalServerError)
+		return
+	}
+
+	// Return the results
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+// handleGetTestResult handles retrieving test results
+func (s *Server) handleGetTestResult(w http.ResponseWriter, r *http.Request) {
+	_ = mux.Vars(r)["test_id"] // Ignore test_id for now
+	http.Error(w, "Test result retrieval not implemented", http.StatusNotImplemented)
+}
+
+// Start starts the API server
+func (s *Server) Start() error {
+	addr := s.apiHost + ":" + s.apiPort
+	s.logger.Infof("Starting API server on %s", addr)
+	return http.ListenAndServe(addr, s.router)
 }
 
 // Shutdown gracefully shuts down the server
 func (s *Server) Shutdown(ctx context.Context) error {
-	s.logger.Info("Shutting down HTTP server")
-	return s.server.Shutdown(ctx)
+	// TODO: Implement graceful shutdown
+	return nil
 }
 
-// setupRoutes sets up the API routes
-func (s *Server) setupRoutes() {
-	// API version grouping
-	api := s.router.Group("/api/v1")
-
-	// Health check
-	api.GET("/health", s.healthCheckHandler)
-
-	// Documentation routes
-	api.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// Validation routes
-	validation := api.Group("/validation")
-	{
-		validation.POST("", s.createValidationHandler)
-		validation.GET("", s.listValidationsHandler)
-		validation.GET("/:id", s.getValidationHandler)
-		validation.GET("/:id/report", s.getValidationReportHandler)
+// @Summary     Create and run validation tests
+// @Description Validates API implementation against OpenAPI spec
+// @Tags        validation
+// @Accept      json
+// @Produce     json
+// @Param       request body ValidationRequest true "Validation test configuration"
+// @Success     200 {object} ValidationResult
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /validation [post]
+func (s *Server) createValidationHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		OpenAPISpec string `json:"openapi_spec"`
 	}
 
-	// Load test routes
-	loadtest := api.Group("/loadtest")
-	{
-		loadtest.POST("", s.createLoadTestHandler)
-		loadtest.GET("", s.listLoadTestsHandler)
-		loadtest.GET("/:id", s.getLoadTestHandler)
-		loadtest.GET("/:id/report", s.getLoadTestReportHandler)
-	}
-
-	// Acceptance test routes
-	acceptance := api.Group("/acceptance")
-	{
-		acceptance.POST("", s.createAcceptanceTestHandler)
-		acceptance.GET("", s.listAcceptanceTestsHandler)
-		acceptance.GET("/:id", s.getAcceptanceTestHandler)
-		acceptance.GET("/:id/report", s.getAcceptanceTestReportHandler)
-	}
-}
-
-// authMiddleware handles API authentication
-func authMiddleware(logger *logrus.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Get authorization header
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Authorization header required",
-			})
-			return
-		}
-
-		// TODO: Implement proper JWT or OAuth authentication
-		// For now, just check for a token prefix
-		if len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Invalid authorization format",
-			})
-			return
-		}
-
-		// Set user info in context
-		c.Set("user_id", "demo-user") // Replace with actual user ID from token
-
-		c.Next()
-	}
-}
-
-// loggerMiddleware logs HTTP requests
-func loggerMiddleware(logger *logrus.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Start timer
-		start := time.Now()
-		path := c.Request.URL.Path
-		method := c.Request.Method
-
-		// Add request ID
-		requestID := c.GetHeader("X-Request-ID")
-		if requestID == "" {
-			requestID = uuid.New().String()
-			c.Header("X-Request-ID", requestID)
-		}
-
-		// Process request
-		c.Next()
-
-		// Calculate latency
-		latency := time.Since(start)
-
-		// Log request
-		logger.WithFields(logrus.Fields{
-			"status":      c.Writer.Status(),
-			"method":      method,
-			"path":        path,
-			"ip":          c.ClientIP(),
-			"latency":     latency,
-			"request_id":  requestID,
-			"user_agent":  c.Request.UserAgent(),
-			"error_count": len(c.Errors),
-		}).Info("HTTP request")
-	}
-}
-
-// corsMiddleware handles CORS headers
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Request-ID")
-		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-Request-ID")
-		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
-
-		// Handle preflight requests
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-
-		c.Next()
-	}
-}
-
-// healthCheckHandler handles health check requests
-func (s *Server) healthCheckHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":    "ok",
-		"timestamp": time.Now().Format(time.RFC3339),
-		"version":   "1.0.0",
-	})
-}
-
-// createValidationHandler creates a new validation test
-func (s *Server) createValidationHandler(c *gin.Context) {
-	var request models.ValidationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.logger.WithError(err).Error("Failed to decode validation test request")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Set defaults if not provided
-	if request.ComplianceThreshold == nil {
-		threshold := s.config.Testing.Validation.ComplianceThreshold
-		request.ComplianceThreshold = &threshold
-	}
-	if request.FailOnValidation == nil {
-		failOnValidation := s.config.Testing.Validation.FailOnValidation
-		request.FailOnValidation = &failOnValidation
+	if req.OpenAPISpec == "" {
+		s.logger.Error("OpenAPI spec URL is required")
+		http.Error(w, "OpenAPI spec URL is required", http.StatusBadRequest)
+		return
 	}
 
-	// Create test
+	// Create validation test
 	test := models.NewValidationTest(
-		request.Name,
-		request.Description,
-		request.OpenAPIURL,
-		*request.ComplianceThreshold,
+		"OpenAPI Validation",
+		"Validating API implementation against OpenAPI specification",
+		req.OpenAPISpec,
+		95.0, // Default compliance threshold
 	)
-	test.FailOnValidation = *request.FailOnValidation
-	test.Tags = request.Tags
 
-	// Setup GitHub issue creation if requested
-	if request.CreateGitHubIssue && request.GitHubRepo != nil {
-		if request.GitHubRepo.Owner == "" {
-			request.GitHubRepo.Owner = s.config.GitHub.DefaultOrg
-		}
-		if request.GitHubRepo.Repository == "" {
-			request.GitHubRepo.Repository = s.config.GitHub.DefaultRepo
-		}
-		test.GitHubIssueRequest = request.GitHubRepo
-	}
-
-	// Queue test for processing
-	if err := s.manager.GetValidationService().QueueValidationTest(c.Request.Context(), test); err != nil {
-		s.logger.WithError(err).Error("Failed to queue validation test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to queue validation test"})
+	// Run validation
+	result, err := s.manager.GetValidationService().ValidateOpenAPI(r.Context(), test)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to validate OpenAPI spec")
+		// Return a more detailed error response
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":   "Failed to validate OpenAPI spec",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	// Return response
-	c.JSON(http.StatusAccepted, models.ValidationResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-	})
+	// Return the results
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // listValidationsHandler lists all validation tests
-func (s *Server) listValidationsHandler(c *gin.Context) {
-	tests, err := s.manager.GetValidationService().ListValidationTests(c.Request.Context())
+func (s *Server) listValidationsHandler(w http.ResponseWriter, r *http.Request) {
+	tests, err := s.manager.GetValidationService().ListValidationTests(r.Context())
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to list validation tests")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list validation tests"})
+		http.Error(w, "Failed to list validation tests", http.StatusInternalServerError)
 		return
 	}
 
-	// Convert to response objects
-	var responses []models.ValidationResponse
-	for _, test := range tests {
-		responses = append(responses, models.ValidationResponse{
-			TestID:    test.ID,
-			Status:    test.Status,
-			CreatedAt: test.CreatedAt,
-			Result:    test.Result,
-		})
-	}
-
-	c.JSON(http.StatusOK, responses)
+	// Return the tests
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tests)
 }
 
 // getValidationHandler gets a validation test by ID
-func (s *Server) getValidationHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getValidationHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	test, err := s.manager.GetValidationService().GetValidationTest(c.Request.Context(), testID)
+	test, err := s.manager.GetValidationService().GetValidationTest(r.Context(), testID)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to get validation test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get validation test"})
+		http.Error(w, "Failed to get validation test", http.StatusInternalServerError)
 		return
 	}
 
 	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Validation test not found"})
+		http.Error(w, "Validation test not found", http.StatusNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.ValidationResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-		Result:    test.Result,
-	})
+	// Return the test
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(test)
 }
 
 // getValidationReportHandler gets a validation test report
-func (s *Server) getValidationReportHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getValidationReportHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	// Get test
-	test, err := s.manager.GetValidationService().GetValidationTest(c.Request.Context(), testID)
+	report, err := s.manager.GetValidationService().GenerateReport(r.Context(), testID)
 	if err != nil {
-		s.logger.WithError(err).Error("Failed to get validation test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get validation test"})
+		s.logger.WithError(err).Error("Failed to generate validation report")
+		http.Error(w, "Failed to generate validation report", http.StatusInternalServerError)
 		return
 	}
 
-	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Validation test not found"})
-		return
-	}
-
-	// Check if test has completed
-	if test.Status != models.TestStatusCompleted && test.Status != models.TestStatusFailed {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test has not completed yet"})
-		return
-	}
-
-	// Check if test has report
-	if test.Result == nil || test.Result.ReportPath == "" {
-		// Generate report if not already generated
-		reportPath, err := s.manager.GetValidationService().GenerateReport(c.Request.Context(), testID)
-		if err != nil {
-			s.logger.WithError(err).Error("Failed to generate validation report")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate validation report"})
-			return
-		}
-
-		// Update test result with report path
-		if test.Result != nil {
-			test.Result.ReportPath = reportPath
-		}
-	}
-
-	// Get report content
-	reportContent, err := s.manager.GetStorageService().GetReport(c.Request.Context(), test.Result.ReportPath)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to get validation report")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get validation report"})
-		return
-	}
-
-	// Return report
-	c.Header("Content-Type", "text/markdown")
-	c.String(http.StatusOK, reportContent)
+	// Return the report
+	w.Header().Set("Content-Type", "text/markdown")
+	w.Write([]byte(report))
 }
 
-// createLoadTestHandler creates a new load test
-func (s *Server) createLoadTestHandler(c *gin.Context) {
-	var request models.LoadTestRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// @Summary     Create and run load tests
+// @Description Performs load testing with configurable parameters
+// @Tags        loadtest
+// @Accept      json
+// @Produce     json
+// @Param       request body LoadTest true "Load test configuration"
+// @Success     200 {object} LoadTestResult
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /loadtest [post]
+func (s *Server) createLoadTestHandler(w http.ResponseWriter, r *http.Request) {
+	var test models.LoadTest
+	if err := json.NewDecoder(r.Body).Decode(&test); err != nil {
+		s.logger.WithError(err).Error("Failed to decode load test request")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Set defaults if not provided
-	if request.Timeout == nil {
-		timeout := int(s.config.Testing.LoadTest.DefaultTimeout.Seconds())
-		request.Timeout = &timeout
+	if test.Timeout == 0 {
+		test.Timeout = s.config.Testing.LoadTest.DefaultTimeout
 	}
-	if request.SuccessThreshold == nil {
-		threshold := 95.0
-		request.SuccessThreshold = &threshold
+	if test.RequestRate == 0 {
+		test.RequestRate = s.config.Testing.LoadTest.DefaultRPS
 	}
-
-	// Create test
-	duration := time.Duration(request.Duration) * time.Second
-	test := models.NewLoadTest(
-		request.Name,
-		request.Description,
-		request.TargetURL,
-		request.RequestRate,
-		duration,
-	)
-	test.Timeout = time.Duration(*request.Timeout) * time.Second
-	test.SuccessThreshold = *request.SuccessThreshold
-	test.Tags = request.Tags
-	test.Method = request.Method
-	test.Headers = request.Headers
-	test.Body = request.Body
-
-	// Add endpoints if provided
-	if len(request.Endpoints) > 0 {
-		test.Endpoints = request.Endpoints
+	if test.Duration == 0 {
+		test.Duration = s.config.Testing.LoadTest.DefaultDuration
 	}
 
-	// Setup GitHub issue creation if requested
-	if request.CreateGitHubIssue && request.GitHubRepo != nil {
-		if request.GitHubRepo.Owner == "" {
-			request.GitHubRepo.Owner = s.config.GitHub.DefaultOrg
-		}
-		if request.GitHubRepo.Repository == "" {
-			request.GitHubRepo.Repository = s.config.GitHub.DefaultRepo
-		}
-		test.GitHubIssueRequest = request.GitHubRepo
-	}
-
-	// Queue test for processing
-	if err := s.manager.GetLoadTestService().QueueLoadTest(c.Request.Context(), test); err != nil {
-		s.logger.WithError(err).Error("Failed to queue load test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to queue load test"})
+	// Run load test
+	result, err := s.manager.GetLoadTestService().RunLoadTest(r.Context(), &test)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to run load test")
+		http.Error(w, "Failed to run load test", http.StatusInternalServerError)
 		return
 	}
 
-	// Return response
-	c.JSON(http.StatusAccepted, models.LoadTestResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-	})
+	// Return the results
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // listLoadTestsHandler lists all load tests
-func (s *Server) listLoadTestsHandler(c *gin.Context) {
-	tests, err := s.manager.GetLoadTestService().ListLoadTests(c.Request.Context())
+func (s *Server) listLoadTestsHandler(w http.ResponseWriter, r *http.Request) {
+	tests, err := s.manager.GetLoadTestService().ListLoadTests(r.Context())
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to list load tests")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list load tests"})
+		http.Error(w, "Failed to list load tests", http.StatusInternalServerError)
 		return
 	}
 
-	// Convert to response objects
-	var responses []models.LoadTestResponse
-	for _, test := range tests {
-		responses = append(responses, models.LoadTestResponse{
-			TestID:    test.ID,
-			Status:    test.Status,
-			CreatedAt: test.CreatedAt,
-			Result:    test.Result,
-		})
-	}
-
-	c.JSON(http.StatusOK, responses)
+	// Return the tests
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tests)
 }
 
 // getLoadTestHandler gets a load test by ID
-func (s *Server) getLoadTestHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getLoadTestHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	test, err := s.manager.GetLoadTestService().GetLoadTest(c.Request.Context(), testID)
+	test, err := s.manager.GetLoadTestService().GetLoadTest(r.Context(), testID)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to get load test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get load test"})
+		http.Error(w, "Failed to get load test", http.StatusInternalServerError)
 		return
 	}
 
 	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Load test not found"})
+		http.Error(w, "Load test not found", http.StatusNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.LoadTestResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-		Result:    test.Result,
-	})
+	// Return the test
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(test)
 }
 
 // getLoadTestReportHandler gets a load test report
-func (s *Server) getLoadTestReportHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getLoadTestReportHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	// Get test
-	test, err := s.manager.GetLoadTestService().GetLoadTest(c.Request.Context(), testID)
+	report, err := s.manager.GetLoadTestService().GenerateReport(r.Context(), testID)
 	if err != nil {
-		s.logger.WithError(err).Error("Failed to get load test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get load test"})
+		s.logger.WithError(err).Error("Failed to generate load test report")
+		http.Error(w, "Failed to generate load test report", http.StatusInternalServerError)
 		return
 	}
 
-	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Load test not found"})
-		return
-	}
-
-	// Check if test has completed
-	if test.Status != models.TestStatusCompleted && test.Status != models.TestStatusFailed {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test has not completed yet"})
-		return
-	}
-
-	// Check if test has report
-	if test.Result == nil || test.Result.ReportPath == "" {
-		// Generate report if not already generated
-		reportPath, err := s.manager.GetLoadTestService().GenerateReport(c.Request.Context(), testID)
-		if err != nil {
-			s.logger.WithError(err).Error("Failed to generate load test report")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate load test report"})
-			return
-		}
-
-		// Update test result with report path
-		if test.Result != nil {
-			test.Result.ReportPath = reportPath
-		}
-	}
-
-	// Get report content
-	reportContent, err := s.manager.GetStorageService().GetReport(c.Request.Context(), test.Result.ReportPath)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to get load test report")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get load test report"})
-		return
-	}
-
-	// Return report
-	c.Header("Content-Type", "text/markdown")
-	c.String(http.StatusOK, reportContent)
+	// Return the report
+	w.Header().Set("Content-Type", "text/markdown")
+	w.Write([]byte(report))
 }
 
-// createAcceptanceTestHandler creates a new acceptance test
-func (s *Server) createAcceptanceTestHandler(c *gin.Context) {
-	var request models.AcceptanceTestRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// @Summary     Create and run acceptance tests
+// @Description Validates business requirements
+// @Tags        acceptance
+// @Accept      json
+// @Produce     json
+// @Param       request body AcceptanceTest true "Acceptance test configuration"
+// @Success     200 {object} AcceptanceTestResult
+// @Failure     400 {object} ErrorResponse
+// @Failure     500 {object} ErrorResponse
+// @Router      /acceptance [post]
+func (s *Server) createAcceptanceTestHandler(w http.ResponseWriter, r *http.Request) {
+	var test models.AcceptanceTest
+	if err := json.NewDecoder(r.Body).Decode(&test); err != nil {
+		s.logger.WithError(err).Error("Failed to decode acceptance test request")
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Set defaults if not provided
-	if request.Timeout == nil {
-		timeout := int(s.config.Testing.Acceptance.DefaultTimeout.Seconds())
-		request.Timeout = &timeout
+	if test.Timeout == 0 {
+		test.Timeout = s.config.Testing.Acceptance.DefaultTimeout
 	}
 
-	// Create test
-	test := models.NewAcceptanceTest(
-		request.Name,
-		request.Description,
-		request.BaseURL,
-	)
-	test.Timeout = time.Duration(*request.Timeout) * time.Second
-	test.Tags = request.Tags
-	test.Headers = request.Headers
-	test.TestCases = request.TestCases
-	
-	if request.GlobalVariables != nil {
-		test.GlobalVariables = request.GlobalVariables
-	}
-
-	// Setup GitHub issue creation if requested
-	if request.CreateGitHubIssue && request.GitHubRepo != nil {
-		if request.GitHubRepo.Owner == "" {
-			request.GitHubRepo.Owner = s.config.GitHub.DefaultOrg
-		}
-		if request.GitHubRepo.Repository == "" {
-			request.GitHubRepo.Repository = s.config.GitHub.DefaultRepo
-		}
-		test.GitHubIssueRequest = request.GitHubRepo
-	}
-
-	// Queue test for processing
-	if err := s.manager.GetAcceptanceService().QueueAcceptanceTest(c.Request.Context(), test); err != nil {
-		s.logger.WithError(err).Error("Failed to queue acceptance test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to queue acceptance test"})
+	// Run acceptance test
+	result, err := s.manager.GetAcceptanceService().RunAcceptanceTest(r.Context(), &test)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to run acceptance test")
+		http.Error(w, "Failed to run acceptance test", http.StatusInternalServerError)
 		return
 	}
 
-	// Return response
-	c.JSON(http.StatusAccepted, models.AcceptanceTestResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-	})
+	// Return the results
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // listAcceptanceTestsHandler lists all acceptance tests
-func (s *Server) listAcceptanceTestsHandler(c *gin.Context) {
-	tests, err := s.manager.GetAcceptanceService().ListAcceptanceTests(c.Request.Context())
+func (s *Server) listAcceptanceTestsHandler(w http.ResponseWriter, r *http.Request) {
+	tests, err := s.manager.GetAcceptanceService().ListAcceptanceTests(r.Context())
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to list acceptance tests")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list acceptance tests"})
+		http.Error(w, "Failed to list acceptance tests", http.StatusInternalServerError)
 		return
 	}
 
-	// Convert to response objects
-	var responses []models.AcceptanceTestResponse
-	for _, test := range tests {
-		responses = append(responses, models.AcceptanceTestResponse{
-			TestID:    test.ID,
-			Status:    test.Status,
-			CreatedAt: test.CreatedAt,
-			Result:    test.Result,
-		})
-	}
-
-	c.JSON(http.StatusOK, responses)
+	// Return the tests
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tests)
 }
 
 // getAcceptanceTestHandler gets an acceptance test by ID
-func (s *Server) getAcceptanceTestHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getAcceptanceTestHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	test, err := s.manager.GetAcceptanceService().GetAcceptanceTest(c.Request.Context(), testID)
+	test, err := s.manager.GetAcceptanceService().GetAcceptanceTest(r.Context(), testID)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to get acceptance test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get acceptance test"})
+		http.Error(w, "Failed to get acceptance test", http.StatusInternalServerError)
 		return
 	}
 
 	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Acceptance test not found"})
+		http.Error(w, "Acceptance test not found", http.StatusNotFound)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.AcceptanceTestResponse{
-		TestID:    test.ID,
-		Status:    test.Status,
-		CreatedAt: test.CreatedAt,
-		Result:    test.Result,
-	})
+	// Return the test
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(test)
 }
 
 // getAcceptanceTestReportHandler gets an acceptance test report
-func (s *Server) getAcceptanceTestReportHandler(c *gin.Context) {
-	testID := c.Param("id")
+func (s *Server) getAcceptanceTestReportHandler(w http.ResponseWriter, r *http.Request) {
+	testID := mux.Vars(r)["id"]
 	if testID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test ID is required"})
+		http.Error(w, "Test ID is required", http.StatusBadRequest)
 		return
 	}
 
-	// Get test
-	test, err := s.manager.GetAcceptanceService().GetAcceptanceTest(c.Request.Context(), testID)
+	report, err := s.manager.GetAcceptanceService().GenerateReport(r.Context(), testID)
 	if err != nil {
-		s.logger.WithError(err).Error("Failed to get acceptance test")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get acceptance test"})
+		s.logger.WithError(err).Error("Failed to generate acceptance test report")
+		http.Error(w, "Failed to generate acceptance test report", http.StatusInternalServerError)
 		return
 	}
 
-	if test == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Acceptance test not found"})
-		return
-	}
-
-	// Check if test has completed
-	if test.Status != models.TestStatusCompleted && test.Status != models.TestStatusFailed {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test has not completed yet"})
-		return
-	}
-
-	// Check if test has report
-	if test.Result == nil || test.Result.ReportPath == "" {
-		// Generate report if not already generated
-		reportPath, err := s.manager.GetAcceptanceService().GenerateReport(c.Request.Context(), testID)
-		if err != nil {
-			s.logger.WithError(err).Error("Failed to generate acceptance test report")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate acceptance test report"})
-			return
-		}
-
-		// Update test result with report path
-		if test.Result != nil {
-			test.Result.ReportPath = reportPath
-		}
-	}
-
-	// Get report content
-	reportContent, err := s.manager.GetStorageService().GetReport(c.Request.Context(), test.Result.ReportPath)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to get acceptance test report")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get acceptance test report"})
-		return
-	}
-
-	// Return report
-	c.Header("Content-Type", "text/markdown")
-	c.String(http.StatusOK, reportContent)
+	// Return the report
+	w.Header().Set("Content-Type", "text/markdown")
+	w.Write([]byte(report))
 }
+
+// handleSwaggerUI serves the Swagger UI
+func (s *Server) handleSwaggerUI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(swaggerUIHTML))
+}
+
+// handleOpenAPISpec serves the OpenAPI specification
+func (s *Server) handleOpenAPISpec(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(openAPISpec))
+}
+
+// Swagger UI HTML template
+const swaggerUIHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Driveby API Documentation</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css" />
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
+    <script>
+        window.onload = function() {
+            SwaggerUIBundle({
+                url: "openapi.json",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+            });
+        }
+    </script>
+</body>
+</html>`
+
+// OpenAPI specification
+const openAPISpec = `{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Driveby Testing API",
+        "version": "1.0.0",
+        "description": "Documentation-driven API testing service. Validates OpenAPI documentation, runs integration and load tests, and enforces quality gates."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8081/api/v1",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Health Check",
+                "description": "Returns the health status of the API.",
+                "responses": {
+                    "200": {
+                        "description": "API is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": { "type": "string" },
+                                        "version": { "type": "string" },
+                                        "timestamp": { "type": "string", "format": "date-time" }
+                                    }
+                                },
+                                "example": {
+                                    "status": "healthy",
+                                    "version": "1.0.0",
+                                    "timestamp": "2024-03-20T10:00:00Z"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tests": {
+            "post": {
+                "summary": "Run Full Test Suite",
+                "description": "Runs documentation, integration, and load tests against a target API using its OpenAPI spec.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/TestRequest" },
+                            "example": {
+                                "openapi_spec": "http://perfect-api:8080/openapi.json",
+                                "thresholds": {
+                                    "documentation": {
+                                        "threshold": 0.95
+                                    },
+                                    "load_test": {
+                                        "success_rate": 0.99,
+                                        "max_latency": "500ms"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Test results",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/TestResponse" },
+                                "example": {
+                                    "test_id": "test_123456",
+                                    "timestamp": "2024-03-20T10:00:00Z",
+                                    "results": {
+                                        "documentation": {
+                                            "compliance_score": 0.98,
+                                            "missing_examples": 1,
+                                            "undocumented_endpoints": ["/api/v1/health"],
+                                            "errors": []
+                                        },
+                                        "integration": {
+                                            "total_tests": 25,
+                                            "passed": 24,
+                                            "failed": 1,
+                                            "failed_endpoints": [
+                                                {
+                                                    "endpoint": "/api/v1/users",
+                                                    "error": "Response schema mismatch"
+                                                }
+                                            ]
+                                        },
+                                        "load_test": {
+                                            "total_requests": 1000,
+                                            "success_rate": 0.995,
+                                            "latency_p95": "450ms",
+                                            "status_codes": {
+                                                "200": 995,
+                                                "500": 5
+                                            },
+                                            "errors": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/validation": {
+            "post": {
+                "summary": "Validate OpenAPI Documentation",
+                "description": "Checks endpoint documentation completeness, response descriptions, examples, and error documentation.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/ValidationRequest" },
+                            "example": {
+                                "openapi_spec": "http://perfect-api:8080/openapi.json"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Validation results",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/ValidationResult" },
+                                "example": {
+                                    "compliance_score": 0.98,
+                                    "missing_examples": 1,
+                                    "undocumented_endpoints": ["/api/v1/health"],
+                                    "errors": [
+                                        "Missing response example for POST /api/v1/users"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/loadtest": {
+            "post": {
+                "summary": "Run Load Test",
+                "description": "Runs a load test using Vegeta against the endpoints in the OpenAPI spec.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/LoadTestRequest" },
+                            "example": {
+                                "openapi_spec": "http://perfect-api:8080/openapi.json",
+                                "request_rate": 100,
+                                "duration": "30s"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Load test results",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/LoadTestResult" },
+                                "example": {
+                                    "total_requests": 3000,
+                                    "success_rate": 0.995,
+                                    "latency_p95": "450ms",
+                                    "status_codes": {
+                                        "200": 2985,
+                                        "500": 15
+                                    },
+                                    "errors": [
+                                        "Connection timeout on POST /api/v1/users"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/acceptance": {
+            "post": {
+                "summary": "Run Acceptance Test",
+                "description": "Runs acceptance tests to validate business requirements as described in the OpenAPI spec.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/AcceptanceTestRequest" },
+                            "example": {
+                                "openapi_spec": "http://perfect-api:8080/openapi.json"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Acceptance test results",
+                        "content": {
+                            "application/json": {
+                                "schema": { "$ref": "#/components/schemas/AcceptanceTestResult" },
+                                "example": {
+                                    "passed": true,
+                                    "details": "All business requirements met. User creation, authentication, and data retrieval workflows validated successfully."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TestRequest": {
+                "type": "object",
+                "properties": {
+                    "openapi_spec": { 
+                        "type": "string", 
+                        "description": "URL to the OpenAPI specification",
+                        "example": "http://perfect-api:8080/openapi.json"
+                    },
+                    "thresholds": {
+                        "type": "object",
+                        "properties": {
+                            "documentation": { 
+                                "type": "object", 
+                                "properties": { 
+                                    "threshold": { 
+                                        "type": "number",
+                                        "example": 0.95
+                                    } 
+                                } 
+                            },
+                            "load_test": {
+                                "type": "object",
+                                "properties": {
+                                    "success_rate": { 
+                                        "type": "number",
+                                        "example": 0.99
+                                    },
+                                    "max_latency": { 
+                                        "type": "string",
+                                        "example": "500ms"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "TestResponse": {
+                "type": "object",
+                "properties": {
+                    "test_id": { 
+                        "type": "string",
+                        "example": "test_123456"
+                    },
+                    "timestamp": { 
+                        "type": "string", 
+                        "format": "date-time",
+                        "example": "2024-03-20T10:00:00Z"
+                    },
+                    "results": {
+                        "type": "object",
+                        "properties": {
+                            "documentation": { "$ref": "#/components/schemas/ValidationResult" },
+                            "integration": { "$ref": "#/components/schemas/IntegrationResult" },
+                            "load_test": { "$ref": "#/components/schemas/LoadTestResult" }
+                        }
+                    }
+                }
+            },
+            "ValidationRequest": {
+                "type": "object",
+                "properties": {
+                    "openapi_spec": { 
+                        "type": "string",
+                        "example": "http://perfect-api:8080/openapi.json"
+                    }
+                }
+            },
+            "ValidationResult": {
+                "type": "object",
+                "properties": {
+                    "compliance_score": { 
+                        "type": "number", 
+                        "description": "Percent of endpoints fully documented",
+                        "example": 0.98
+                    },
+                    "missing_examples": { 
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "undocumented_endpoints": { 
+                        "type": "array", 
+                        "items": { "type": "string" },
+                        "example": ["/api/v1/health"]
+                    },
+                    "errors": { 
+                        "type": "array", 
+                        "items": { "type": "string" },
+                        "example": ["Missing response example for POST /api/v1/users"]
+                    }
+                }
+            },
+            "IntegrationResult": {
+                "type": "object",
+                "properties": {
+                    "total_tests": { 
+                        "type": "integer",
+                        "example": 25
+                    },
+                    "passed": { 
+                        "type": "integer",
+                        "example": 24
+                    },
+                    "failed": { 
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "failed_endpoints": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "endpoint": { 
+                                    "type": "string",
+                                    "example": "/api/v1/users"
+                                },
+                                "error": { 
+                                    "type": "string",
+                                    "example": "Response schema mismatch"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "LoadTestRequest": {
+                "type": "object",
+                "properties": {
+                    "openapi_spec": { 
+                        "type": "string",
+                        "example": "http://perfect-api:8080/openapi.json"
+                    },
+                    "request_rate": { 
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "duration": { 
+                        "type": "string",
+                        "example": "30s"
+                    }
+                }
+            },
+            "LoadTestResult": {
+                "type": "object",
+                "properties": {
+                    "total_requests": { 
+                        "type": "integer",
+                        "example": 3000
+                    },
+                    "success_rate": { 
+                        "type": "number",
+                        "example": 0.995
+                    },
+                    "latency_p95": { 
+                        "type": "string",
+                        "example": "450ms"
+                    },
+                    "status_codes": {
+                        "type": "object",
+                        "additionalProperties": { "type": "integer" },
+                        "example": {
+                            "200": 2985,
+                            "500": 15
+                        }
+                    },
+                    "errors": { 
+                        "type": "array", 
+                        "items": { "type": "string" },
+                        "example": ["Connection timeout on POST /api/v1/users"]
+                    }
+                }
+            },
+            "AcceptanceTestRequest": {
+                "type": "object",
+                "properties": {
+                    "openapi_spec": { 
+                        "type": "string",
+                        "example": "http://perfect-api:8080/openapi.json"
+                    }
+                }
+            },
+            "AcceptanceTestResult": {
+                "type": "object",
+                "properties": {
+                    "passed": { 
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "details": { 
+                        "type": "string",
+                        "example": "All business requirements met. User creation, authentication, and data retrieval workflows validated successfully."
+                    }
+                }
+            }
+        }
+    }
+}`

@@ -9,36 +9,30 @@ import (
 	"strings"
 	"time"
 
-	"github.com/example/driveby/internal/config"
-	"github.com/example/driveby/internal/core/models"
-	"github.com/example/driveby/internal/queue"
+	"driveby/internal/config"
+	"driveby/internal/core/models"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/sirupsen/logrus"
 )
 
 // ValidationServiceImpl implements the ValidationService interface
 type ValidationServiceImpl struct {
-	config         *config.Config
-	logger         *logrus.Logger
-	storageService StorageService
-	githubService  GitHubService
-	queueService   queue.QueueService
+	config        *config.Config
+	logger        *logrus.Logger
+	githubService GitHubService
 }
 
 // NewValidationService creates a new validation service
 func NewValidationService(
 	cfg *config.Config,
 	logger *logrus.Logger,
-	storageService StorageService,
 	githubService GitHubService,
-	queueService queue.QueueService,
 ) ValidationService {
 	return &ValidationServiceImpl{
-		config:         cfg,
-		logger:         logger,
-		storageService: storageService,
-		githubService:  githubService,
-		queueService:   queueService,
+		config:        cfg,
+		logger:        logger,
+		githubService: githubService,
 	}
 }
 
@@ -97,7 +91,7 @@ func (s *ValidationServiceImpl) ValidateOpenAPI(ctx context.Context, test *model
 
 	if result.ComplianceScore < test.ComplianceThreshold && test.FailOnValidation {
 		result.Status = models.TestStatusFailed
-		result.ErrorDetail = fmt.Sprintf("Compliance score %.2f%% is below threshold %.2f%%", 
+		result.ErrorDetail = fmt.Sprintf("Compliance score %.2f%% is below threshold %.2f%%",
 			result.ComplianceScore, test.ComplianceThreshold)
 	} else {
 		result.Status = models.TestStatusCompleted
@@ -105,14 +99,6 @@ func (s *ValidationServiceImpl) ValidateOpenAPI(ctx context.Context, test *model
 
 	// Update test with result
 	test.Result = result
-
-	// Save test to storage
-	if s.storageService != nil {
-		err = s.storageService.SaveTest(ctx, models.TestTypeValidation, test.ID, test)
-		if err != nil {
-			s.logger.WithError(err).Error("Failed to save validation test")
-		}
-	}
 
 	s.logger.WithFields(logrus.Fields{
 		"test_id":          test.ID,
@@ -125,73 +111,17 @@ func (s *ValidationServiceImpl) ValidateOpenAPI(ctx context.Context, test *model
 
 // GetValidationTest retrieves a validation test by ID
 func (s *ValidationServiceImpl) GetValidationTest(ctx context.Context, testID string) (*models.ValidationTest, error) {
-	if s.storageService == nil {
-		return nil, fmt.Errorf("storage service not initialized")
-	}
-
-	var test models.ValidationTest
-	err := s.storageService.GetTest(ctx, models.TestTypeValidation, testID, &test)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get validation test: %w", err)
-	}
-
-	return &test, nil
+	return nil, fmt.Errorf("not implemented")
 }
 
 // ListValidationTests retrieves all validation tests
 func (s *ValidationServiceImpl) ListValidationTests(ctx context.Context) ([]*models.ValidationTest, error) {
-	if s.storageService == nil {
-		return nil, fmt.Errorf("storage service not initialized")
-	}
-
-	// Get test IDs
-	testIDs, err := s.storageService.ListTests(ctx, models.TestTypeValidation)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list validation tests: %w", err)
-	}
-
-	// Get tests
-	var tests []*models.ValidationTest
-	for _, testID := range testIDs {
-		test, err := s.GetValidationTest(ctx, testID)
-		if err != nil {
-			s.logger.WithError(err).Errorf("Failed to get validation test %s", testID)
-			continue
-		}
-		tests = append(tests, test)
-	}
-
-	return tests, nil
+	return nil, fmt.Errorf("not implemented")
 }
 
 // QueueValidationTest queues a validation test for asynchronous processing
 func (s *ValidationServiceImpl) QueueValidationTest(ctx context.Context, test *models.ValidationTest) error {
-	s.logger.WithField("test_id", test.ID).Info("Queueing validation test")
-
-	if s.queueService == nil {
-		return fmt.Errorf("queue service not initialized")
-	}
-
-	// Save test to storage
-	if s.storageService != nil {
-		err := s.storageService.SaveTest(ctx, models.TestTypeValidation, test.ID, test)
-		if err != nil {
-			return fmt.Errorf("failed to save validation test: %w", err)
-		}
-	}
-
-	// Queue task
-	taskID, err := s.queueService.Enqueue(ctx, "validation_test", test)
-	if err != nil {
-		return fmt.Errorf("failed to queue validation test: %w", err)
-	}
-
-	s.logger.WithFields(logrus.Fields{
-		"test_id": test.ID,
-		"task_id": taskID,
-	}).Info("Validation test queued")
-
-	return nil
+	return fmt.Errorf("not implemented")
 }
 
 // GenerateReport creates a validation report for a completed test
@@ -212,17 +142,7 @@ func (s *ValidationServiceImpl) GenerateReport(ctx context.Context, testID strin
 	// Build report
 	reportContent := s.buildValidationReport(test)
 
-	// Save report to storage
-	if s.storageService != nil {
-		reportPath, err := s.storageService.SaveReport(ctx, models.TestTypeValidation, testID, reportContent)
-		if err != nil {
-			return "", fmt.Errorf("failed to save validation report: %w", err)
-		}
-		return reportPath, nil
-	}
-
-	// If no storage service, just return the report content
-	return "", nil
+	return reportContent, nil
 }
 
 // fetchOpenAPI fetches an OpenAPI specification from a URL
@@ -277,20 +197,20 @@ func (s *ValidationServiceImpl) validateAPIDocumentation(doc *openapi3.T) (model
 	totalEndpoints := 0
 	compliantEndpoints := 0
 
-	for path, pathItem := range doc.Paths {
+	for path, pathItem := range doc.Paths.Map() {
 		for method, operation := range pathItem.Operations() {
 			totalEndpoints++
 			endpointCompliant := true
 			endpointId := fmt.Sprintf("%s %s", method, path)
 
 			// Check response documentation
-			if len(operation.Responses) == 0 {
+			if operation.Responses == nil || len(operation.Responses.Map()) == 0 {
 				errors = append(errors, fmt.Errorf("%s: missing response documentation", endpointId))
 				endpointCompliant = false
 			}
 
 			// Check all response status codes have documentation
-			for statusCode, response := range operation.Responses {
+			for statusCode, response := range operation.Responses.Map() {
 				if response.Value.Description == nil || *response.Value.Description == "" {
 					errors = append(errors, fmt.Errorf("%s: missing description for status code %s",
 						endpointId, statusCode))

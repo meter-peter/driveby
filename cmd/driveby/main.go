@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"driveby/internal/api"
+	"driveby/internal/config"
+	"driveby/internal/core"
+	"driveby/internal/core/services"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/example/driveby/internal/api"
-	"github.com/example/driveby/internal/config"
-	"github.com/example/driveby/internal/core/services"
-	"github.com/example/driveby/internal/queue"
-	"github.com/example/driveby/internal/utils/logging"
+	"github.com/sirupsen/logrus"
 )
 
 // @title           DriveBy API
@@ -34,66 +34,54 @@ import (
 
 func main() {
 	// Initialize logger
-	logger := logging.NewLogger()
-	logger.Info("Starting DriveBy API Service")
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
 
 	// Load configuration
-	cfg, err := config.Load()
+	cfg, err := config.LoadConfig("")
 	if err != nil {
 		logger.WithError(err).Fatal("Failed to load configuration")
 	}
 
-	// Create context that listens for termination signals
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	// Initialize queue service
-	queueService, err := queue.NewRedisQueue(ctx, cfg.Redis)
+	// Set log level
+	level, err := logrus.ParseLevel(cfg.LogLevel)
 	if err != nil {
-		logger.WithError(err).Fatal("Failed to initialize queue service")
+		logger.WithError(err).Fatal("Failed to parse log level")
 	}
-	defer queueService.Close()
+	logger.SetLevel(level)
 
-	// Initialize services
-	serviceManager := services.NewManager(cfg, queueService, logger.Logger)
+	// Initialize service manager
+	serviceManager := services.NewServiceManager(cfg, logger)
+	if err := serviceManager.Initialize(context.Background()); err != nil {
+		logger.WithError(err).Fatal("Failed to initialize services")
+	}
+
+	// Initialize testing service
+	testingSvc := core.NewTestingService(logger, "0.0.0.0", "8081")
 
 	// Initialize API server
-	server := api.NewServer(cfg, serviceManager, logger.Logger)
+	server := api.NewServer(logger, testingSvc, "0.0.0.0", "8081", "/api/v1", cfg, serviceManager)
 
-	// Start the server in a separate goroutine
-	serverErrors := make(chan error, 1)
+	// Start server in a goroutine
 	go func() {
-		logger.WithField("port", cfg.Server.Port).Info("Starting HTTP server")
-		serverErrors <- server.Start()
-	}()
-
-	// Start the queue worker processor in a separate goroutine
-	go func() {
-		logger.Info("Starting queue worker")
-		err := serviceManager.StartWorkers(ctx)
-		if err != nil {
-			logger.WithError(err).Error("Queue worker failed")
+		if err := server.Start(); err != nil {
+			logger.WithError(err).Fatal("Failed to start server")
 		}
 	}()
 
-	// Wait for interrupt signal or server error
-	select {
-	case err := <-serverErrors:
-		if err != nil {
-			logger.WithError(err).Error("Server error")
-		}
-	case <-ctx.Done():
-		logger.Info("Received termination signal")
+	// Wait for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	// Create shutdown context
+	ctx, cancel := context.WithTimeout(context.Background(), 5)
+	defer cancel()
+
+	// Shutdown server
+	if err := server.Shutdown(ctx); err != nil {
+		logger.WithError(err).Fatal("Server forced to shutdown")
 	}
 
-	// Graceful shutdown
-	logger.Info("Shutting down server...")
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
-	defer shutdownCancel()
-
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.WithError(err).Error("Server shutdown error")
-	}
-
-	logger.Info("Server gracefully stopped")
+	logger.Info("Server exiting")
 }

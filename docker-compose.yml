@@ -1,91 +1,40 @@
 version: '3.8'
 
 services:
-  api:
+  testing-api:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
-      - DRIVEBY_SERVER_HOST=0.0.0.0
-      - DRIVEBY_SERVER_PORT=8080
-      - DRIVEBY_SERVER_MODE=debug
-      - DRIVEBY_REDIS_HOST=redis
-      - DRIVEBY_REDIS_PORT=6379
-      - DRIVEBY_MINIO_ENDPOINT=minio:9000
-      - DRIVEBY_MINIO_ACCESS_KEY_ID=minioadmin
-      - DRIVEBY_MINIO_SECRET_ACCESS_KEY=minioadmin
-      - DRIVEBY_MINIO_BUCKET_NAME=driveby
-      - DRIVEBY_MINIO_USE_SSL=false
-      - DRIVEBY_LOGGING_LEVEL=debug
-      - DRIVEBY_GITHUB_TOKEN=${GITHUB_TOKEN:-}
-    volumes:
-      - ./config:/etc/driveby
-    depends_on:
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_started
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
+      - API_BASE_PATH=/api/v1
     networks:
-      - driveby-network
-    restart: unless-stopped
-
-  redis:
-    image: redis:6.2-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - driveby-network
-    restart: unless-stopped
-    command: redis-server --appendonly yes
+      - api-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-
-  minio:
-    image: minio/minio:latest
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
-    volumes:
-      - minio-data:/data
-    networks:
-      - driveby-network
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
-      timeout: 20s
+      timeout: 10s
       retries: 3
+    restart: unless-stopped
 
-  mc:
-    image: minio/mc
-    depends_on:
-      - minio
+  perfect-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.perfect-api
+    ports:
+      - "8082:8080"
     networks:
-      - driveby-network
-    entrypoint: >
-      /bin/sh -c "
-      sleep 5;
-      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/driveby;
-      /usr/bin/mc policy set public myminio/driveby;
-      exit 0;
-      "
-
-volumes:
-  redis-data:
-  minio-data:
+      - api-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
 
 networks:
-  driveby-network:
+  api-network:
     driver: bridge

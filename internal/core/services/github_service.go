@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/example/driveby/internal/config"
-	"github.com/example/driveby/internal/core/models"
+	"driveby/internal/config"
+	"driveby/internal/core/models"
+
 	"github.com/sirupsen/logrus"
 )
 

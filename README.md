@@ -1,248 +1,258 @@
-# DriveBy API: Testing and Validation Platform
+# Driveby API Testing Framework
 
-DriveBy is a Kubernetes-native API for managing testing of APIs in your organization. It provides three core testing capabilities:
+A documentation-driven API testing framework that validates OpenAPI documentation, runs integration and load tests, and enforces quality gates.
 
-1. **Documentation Validation** - Validate OpenAPI documentation for compliance and completeness
-2. **Load Testing** - Perform load tests against your services with detailed reporting
-3. **Acceptance Testing** - Run comprehensive acceptance test suites against your APIs
+## API Documentation
 
-All test failures can automatically create GitHub issues in the appropriate repositories, providing a seamless feedback loop for your development workflow.
+### Driveby Testing API Documentation
+- Interactive Documentation (Swagger UI): `http://localhost:8081/api/v1/docs`
+- OpenAPI Specification: `http://localhost:8081/api/v1/openapi.json`
 
-## Architecture
+### Example API Documentation
+- Interactive Documentation (Swagger UI): `http://localhost:8082/docs`
+- OpenAPI Specification: `http://localhost:8082/openapi.json`
 
-DriveBy follows a modular, microservices-oriented architecture with clean separation of concerns:
+## API Endpoints
 
-![Architecture Diagram](architecture.png)
+### Testing Endpoints
 
-### Core Components
+#### POST /api/v1/tests
+Executes a complete test suite including documentation validation, integration tests, and load tests.
 
-- **API Server**: RESTful API built with Gin framework
-- **Queue System**: Redis-based asynchronous task processing
-- **Storage**: Minio (S3-compatible) storage for test results and reports
-- **Service Layer**: Modular services for different testing capabilities
-- **GitHub Integration**: Automatic issue creation for test failures
+Example Request:
+```json
+{
+    "openapi_spec": "http://localhost:8082/openapi.json",
+    "thresholds": {
+        "documentation": {
+            "threshold": 0.95
+        },
+        "load_test": {
+            "success_rate": 0.99,
+            "max_latency": "500ms"
+        }
+  }
+}
+```
 
-### Design Principles
+Example Response:
+```json
+{
+    "test_id": "test_123456",
+    "timestamp": "2024-03-20T10:00:00Z",
+    "results": {
+        "documentation": {
+            "compliance_score": 0.98,
+            "missing_examples": 1,
+            "undocumented_endpoints": ["/api/v1/health"],
+            "errors": []
+        },
+        "integration": {
+            "total_tests": 25,
+            "passed": 24,
+            "failed": 1,
+            "failed_endpoints": [
+                {
+                    "endpoint": "/api/v1/users",
+                    "error": "Response schema mismatch"
+                }
+            ]
+        },
+        "load_test": {
+            "total_requests": 1000,
+            "success_rate": 0.995,
+            "latency_p95": "450ms",
+            "status_codes": {
+                "200": 995,
+                "500": 5
+            },
+            "errors": []
+        }
+  }
+}
+```
 
-The system is built using the following design principles:
+#### POST /api/v1/validation
+Runs validation tests against the OpenAPI specification.
 
-- **Domain-Driven Design**: Core business logic is organized around domain models
-- **Clean Architecture**: Dependency inversion and clear boundaries between layers
-- **Interface-Based Design**: All services are defined by interfaces for testability
-- **Modular Components**: Each testing capability is a separate module
-- **Kubernetes-Native**: Designed to run in Kubernetes from the ground up
+Example Request:
+```json
+{
+    "openapi_spec": "http://localhost:8082/openapi.json"
+}
+```
+
+Example Response:
+```json
+{
+    "compliance_score": 0.98,
+    "missing_examples": 1,
+    "undocumented_endpoints": ["/api/v1/health"],
+    "errors": [
+        "Missing response example for POST /api/v1/users"
+    ]
+}
+```
+
+#### POST /api/v1/loadtest
+Conducts load tests with configurable parameters.
+
+Example Request:
+```json
+{
+    "openapi_spec": "http://localhost:8082/openapi.json",
+    "request_rate": 100,
+    "duration": "30s"
+}
+```
+
+Example Response:
+```json
+{
+    "total_requests": 3000,
+    "success_rate": 0.995,
+    "latency_p95": "450ms",
+    "status_codes": {
+        "200": 2985,
+        "500": 15
+    },
+    "errors": [
+        "Connection timeout on POST /api/v1/users"
+    ]
+}
+```
+
+#### POST /api/v1/acceptance
+Runs acceptance tests to validate business requirements.
+
+Example Request:
+```json
+{
+    "openapi_spec": "http://localhost:8082/openapi.json"
+}
+```
+
+Example Response:
+```json
+{
+    "passed": true,
+    "details": "All business requirements met. User creation, authentication, and data retrieval workflows validated successfully."
+}
+```
+
+## Testing Methods
+
+### Documentation Validation
+The `validateDocumentation` method performs comprehensive validation of API documentation:
+
+#### Validation Checks
+- **Response Documentation**
+  - Presence of response documentation for each endpoint
+  - Completeness of response descriptions
+  - Example presence for all responses
+  - Error response documentation (4xx and 5xx status codes)
+
+- **Request Documentation**
+  - Request body examples
+  - Parameter examples
+  - Query parameter documentation
+  - Path parameter documentation
+
+#### Compliance Metrics
+- **Compliance Score**
+  - Calculated as: (Compliant Endpoints / Total Endpoints) * 100
+  - Minimum threshold: 95%
+
+- **Documentation Gaps**
+  - Missing examples count
+  - Undocumented endpoints list
+  - Incomplete response documentation
+  - Missing error documentation
+
+### Integration Testing
+The `runIntegrationTests` method performs automated integration testing:
+
+#### Test Discovery
+- Discovers testable endpoints from OpenAPI spec
+- Extracts examples from parameters
+- Gets request body examples
+- Validates endpoint implementation against specification
+
+#### Test Tracking
+- **Test Metrics**
+  - Total tests run
+  - Passed tests count
+  - Failed tests count
+  - Failed endpoints with error messages
+
+#### Success Criteria
+- Minimum pass rate: 95%
+- All critical endpoints must pass
+- No schema mismatches
+- All examples must validate
+
+### Load Testing
+The `runLoadTests` method performs performance testing using Vegeta:
+
+#### Performance Metrics
+- **Success Rate**
+  - Minimum threshold: 99%
+  - Tracks failed requests
+  - Monitors error distribution
+
+- **Latency**
+  - P95 latency threshold: 500ms
+  - Tracks response time distribution
+  - Monitors slow endpoints
+
+- **Error Rate**
+  - Maximum threshold: 1%
+  - Tracks status code distribution
+  - Monitors error patterns
+
+#### Test Configuration
+- Configurable request rate
+- Adjustable test duration
+- Customizable endpoints
+- Threshold configuration
+
+## Quality Standards
+
+### Documentation
+- Complete OpenAPI documentation
+- All endpoints documented
+- Request/response examples
+- Error documentation
+- Parameter descriptions
+
+### Tests
+- 95% test coverage
+- Integration test suite
+- Load test suite
+- Acceptance test suite
+- Automated test execution
+
+### API Implementation
+- Response time < 500ms
+- 99% success rate
+- Error handling
+- Input validation
+- Security measures
 
 ## Getting Started
 
-### Prerequisites
+1. Clone the repository
+2. Install dependencies
+3. Configure the API endpoints
+4. Run the test suite
 
-- Docker and Docker Compose
-- Kubernetes cluster (for production deployment)
-- Go 1.19+ (for local development)
-- Redis instance
-- Minio instance (or S3 bucket)
-- GitHub token (for issue creation)
+## Contributing
 
-### Configuration
-
-DriveBy is configured through environment variables and/or a configuration file. See [Configuration](#configuration) section for details.
-
-### Running Locally
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-org/driveby
-   cd driveby
-   ```
-
-2. Run with Docker Compose:
-   ```bash
-   docker-compose up
-   ```
-
-3. Or build and run locally:
-   ```bash
-   go build -o driveby ./cmd/driveby
-   ./driveby
-   ```
-
-### Kubernetes Deployment
-
-1. Apply the Kubernetes manifests:
-   ```bash
-   kubectl apply -f k8s/deployment.yaml
-   ```
-
-2. Update the GitHub token secret:
-   ```bash
-   kubectl create secret generic driveby-github \
-     --from-literal=token=your-github-token
-   ```
-
-3. Access the API through the defined ingress.
-
-## Testing Capabilities
-
-### API Documentation Validation
-
-Validates OpenAPI specifications for compliance and documentation quality:
-
-```http
-POST /api/v1/validation
-Content-Type: application/json
-
-{
-  "name": "User Service API Validation",
-  "description": "Validation of User Service OpenAPI documentation",
-  "openapi_url": "https://api.example.com/swagger/doc.json",
-  "compliance_threshold": 95.0,
-  "create_github_issue": true,
-  "github_repo": {
-    "owner": "your-org",
-    "repository": "user-service"
-  }
-}
-```
-
-### Load Testing
-
-Performs load testing against your services:
-
-```http
-POST /api/v1/loadtest
-Content-Type: application/json
-
-{
-  "name": "User Service Load Test",
-  "description": "Load test for User Service API",
-  "target_url": "https://api.example.com",
-  "request_rate": 50,
-  "duration": 300,
-  "timeout": 5,
-  "method": "GET",
-  "create_github_issue": true,
-  "github_repo": {
-    "owner": "your-org",
-    "repository": "user-service"
-  }
-}
-```
-
-### Acceptance Testing
-
-Runs acceptance test suites against your APIs:
-
-```http
-POST /api/v1/acceptance
-Content-Type: application/json
-
-{
-  "name": "User Service Acceptance Tests",
-  "description": "Acceptance tests for User Service API",
-  "base_url": "https://api.example.com",
-  "test_cases": [
-    {
-      "name": "Get User Profile",
-      "description": "Verify user profile retrieval",
-      "path": "/users/123",
-      "method": "GET",
-      "assertions": [
-        {
-          "type": "status",
-          "target": "status_code",
-          "value": 200,
-          "command": "eq"
-        },
-        {
-          "type": "json",
-          "target": "$.name",
-          "value": "John Doe",
-          "command": "eq"
-        }
-      ]
-    }
-  ],
-  "create_github_issue": true,
-  "github_repo": {
-    "owner": "your-org",
-    "repository": "user-service"
-  }
-}
-```
-
-## API Reference
-
-Full API documentation is available at `/api/v1/docs/index.html` when the server is running.
-
-## Configuration
-
-Configuration can be provided via environment variables, config file, or both.
-
-### Environment Variables
-
-All environment variables are prefixed with `DRIVEBY_`. Examples:
-
-```
-DRIVEBY_SERVER_PORT=8080
-DRIVEBY_REDIS_HOST=localhost
-DRIVEBY_MINIO_ENDPOINT=localhost:9000
-DRIVEBY_GITHUB_TOKEN=your-github-token
-```
-
-### Configuration File
-
-The configuration file uses YAML format. Example:
-
-```yaml
-server:
-  host: 0.0.0.0
-  port: 8080
-  mode: release
-  timeout: 30s
-  shutdown_timeout: 10s
-
-redis:
-  host: localhost
-  port: 6379
-  password: ""
-  db: 0
-  enabled: true
-
-minio:
-  endpoint: localhost:9000
-  access_key_id: minioadmin
-  secret_access_key: minioadmin
-  use_ssl: false
-  bucket_name: driveby
-  region: us-east-1
-  enabled: true
-
-github:
-  api_base_url: https://api.github.com
-  token: your-github-token
-
-logging:
-  level: info
-  format: json
-
-testing:
-  validation:
-    compliance_threshold: 95.0
-    fail_on_validation: true
-  load_test:
-    default_rps: 10
-    default_duration: 30s
-    default_timeout: 5s
-  acceptance:
-    default_timeout: 30s
-
-features:
-  enable_validation: true
-  enable_load_test: true
-  enable_acceptance: true
-  enable_github: true
-  enable_workers: true
-```
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
