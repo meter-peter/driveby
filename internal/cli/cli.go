@@ -2,10 +2,13 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/meter-peter/driveby/internal/logger"
+	"github.com/meter-peter/driveby/internal/report"
 	"github.com/meter-peter/driveby/internal/validation"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -67,11 +70,33 @@ var validateOnlyCmd = &cobra.Command{
 				MinSuccessRate: viper.GetFloat64("performance.min_success_rate"),
 			},
 		}
-		report, err := validation.RunValidation(context.Background(), cfg)
+		reportDir := viper.GetString("report-dir")
+		generator := report.NewGenerator(reportDir)
+		validator, err := validation.NewAPIValidator(cfg)
 		if err != nil {
-			return err
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
 		}
-		fmt.Printf("Validation summary: %+v\n", report.Summary)
+		report, err := validator.Validate(context.Background())
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		err = generator.SaveValidationReport(report)
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		json.NewEncoder(os.Stdout).Encode(report)
 		return nil
 	},
 }
@@ -111,11 +136,33 @@ var functionOnlyCmd = &cobra.Command{
 				MinSuccessRate: viper.GetFloat64("performance.min_success_rate"),
 			},
 		}
-		report, err := validation.RunFunctional(context.Background(), cfg)
+		reportDir := viper.GetString("report-dir")
+		generator := report.NewGenerator(reportDir)
+		validator, err := validation.NewAPIValidator(cfg)
 		if err != nil {
-			return err
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
 		}
-		fmt.Printf("Functional summary: %+v\n", report.Summary)
+		report, err := validator.Validate(context.Background())
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		err = generator.SaveValidationReport(report)
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		json.NewEncoder(os.Stdout).Encode(report)
 		return nil
 	},
 }
@@ -155,11 +202,33 @@ var loadOnlyCmd = &cobra.Command{
 				MinSuccessRate: viper.GetFloat64("performance.min_success_rate"),
 			},
 		}
-		report, err := validation.RunPerformance(context.Background(), cfg)
+		reportDir := viper.GetString("report-dir")
+		generator := report.NewGenerator(reportDir)
+		validator, err := validation.NewAPIValidator(cfg)
 		if err != nil {
-			return err
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
 		}
-		fmt.Printf("Performance summary: %+v\n", report.Summary)
+		report, err := validator.Validate(context.Background())
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		err = generator.SaveValidationReport(report)
+		if err != nil {
+			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+				"level": "error",
+				"msg":   err.Error(),
+			})
+			os.Exit(1)
+		}
+		json.NewEncoder(os.Stdout).Encode(report)
 		return nil
 	},
 }
@@ -191,6 +260,10 @@ func init() {
 	validateOnlyCmd.Flags().String("openapi", "", "Path to OpenAPI specification")
 	functionOnlyCmd.Flags().String("openapi", "", "Path to OpenAPI specification")
 	loadOnlyCmd.Flags().String("openapi", "", "Path to OpenAPI specification")
+
+	// Add a --report-dir flag to the root command, defaulting to ./reports
+	rootCmd.PersistentFlags().String("report-dir", "./reports", "report output directory")
+	viper.BindPFlag("report-dir", rootCmd.PersistentFlags().Lookup("report-dir"))
 }
 
 func initConfig() {

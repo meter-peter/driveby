@@ -11,7 +11,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/meter-peter/driveby/internal/openapi"
-	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
 // PerformanceTargetConfig holds configuration for performance test targets
@@ -39,6 +38,7 @@ type APIValidator struct {
 	loader    *openapi.Loader
 	client    *http.Client
 	validator *Validator
+	baseURL   string
 }
 
 // NewAPIValidator creates a new validator instance
@@ -51,6 +51,40 @@ func NewAPIValidator(config ValidatorConfig) (*APIValidator, error) {
 	validationValidator := NewValidator()
 	validationValidator.SetBaseURL(config.BaseURL)
 
+	// Determine the baseURL based on specPath. If specPath is a URL ending in a file extension (.json/.yaml), extract the directory path. Otherwise, use config.BaseURL.
+	baseURL := config.BaseURL // Default to provided BaseURL
+	log.Debugf("Initial specPath: %s, initial baseURL: %s", config.SpecPath, baseURL)
+	if strings.HasPrefix(config.SpecPath, "http://") || strings.HasPrefix(config.SpecPath, "https://") {
+		log.Debugf("specPath is a URL: %s", config.SpecPath)
+		// Check if the URL ends with a file extension indicating the spec file
+		if strings.HasSuffix(strings.ToLower(config.SpecPath), ".json") || strings.HasSuffix(strings.ToLower(config.SpecPath), ".yaml") || strings.HasSuffix(strings.ToLower(config.SpecPath), ".yml") {
+			log.Debug("specPath ends with .json/.yaml, extracting directory")
+			// Extract the base URL by removing the filename part
+			lastSlash := strings.LastIndex(config.SpecPath, "/")
+			if lastSlash != -1 {
+				baseURL = config.SpecPath[:lastSlash]
+				log.Debugf("Extracted baseURL from specPath: %s", baseURL)
+			} else {
+				// Should not happen for a valid URL, but handle defensively
+				baseURL = config.SpecPath
+				log.Debugf("Could not find slash in specPath, using full specPath as baseURL: %s", baseURL)
+			}
+		} else {
+			log.Debug("specPath is a URL but does not end with .json/.yaml, using provided config.BaseURL")
+			// Use the provided config.BaseURL if the specPath is a base URL itself
+			baseURL = config.BaseURL
+		}
+	} else {
+		log.Debug("specPath is not a URL, using provided config.BaseURL")
+		// If specPath is a local file path, use the provided config.BaseURL for API calls
+		baseURL = config.BaseURL
+	}
+
+	// The internal validator instance uses the calculated baseURL for making requests
+	validationValidator.SetBaseURL(baseURL)
+
+	log.Debugf("Final baseURL determined: %s", baseURL)
+
 	return &APIValidator{
 		config: config,
 		logger: logger,
@@ -59,6 +93,7 @@ func NewAPIValidator(config ValidatorConfig) (*APIValidator, error) {
 			Timeout: config.Timeout,
 		},
 		validator: validationValidator,
+		baseURL:   baseURL,
 	}, nil
 }
 
@@ -71,7 +106,7 @@ func (v *APIValidator) Validate(ctx context.Context) (*ValidationReport, error) 
 	}
 
 	// Load and validate OpenAPI spec
-	if err := v.loader.LoadFromFile(v.config.SpecPath); err != nil {
+	if err := v.loader.LoadFromFileOrURL(v.config.SpecPath); err != nil {
 		return nil, fmt.Errorf("failed to load OpenAPI spec: %w", err)
 	}
 	doc := v.loader.GetDocument()
@@ -79,34 +114,122 @@ func (v *APIValidator) Validate(ctx context.Context) (*ValidationReport, error) 
 		return nil, fmt.Errorf("failed to get OpenAPI document")
 	}
 
-	// Validate against each principle
+	// Process principles sequentially to handle dependencies
+	var principlesResults []PrincipleResult
+	var p006Result PrincipleResult // Store P006 result for P007 dependency
+
 	for _, principle := range CorePrinciples {
-		result := v.validatePrinciple(ctx, principle, doc)
-		report.Principles = append(report.Principles, result)
 
-		if result.Passed {
-			report.PassedChecks++
-		} else {
-			report.FailedChecks++
+		// Handle P007 dependency on P006 before validating P007
+		// If P006 indicates widespread functional failures (e.g., auth or network errors), skip P007
 
-			// Attempt auto-fix if enabled and principle is auto-fixable
-			if v.config.AutoFix && principle.AutoFixable {
-				fixResult := v.attemptAutoFix(ctx, principle, result, doc)
-				report.AutoFixes = append(report.AutoFixes, fixResult)
+		if principle.ID == "P007" {
+			skipPerformance := false
+			// Check P006 result if available and failed
+			if p006Result.Principle.ID != "" && !p006Result.Passed {
+				if detailsMap, ok := p006Result.Details.(map[string]interface{}); ok {
+					totalEndpoints := 0
+					if totalVal, totalOk := detailsMap["total_endpoints"].(int); totalOk {
+						totalEndpoints = totalVal
+					}
 
-				if fixResult.Success {
-					// Revalidate after fix
-					result = v.validatePrinciple(ctx, principle, doc)
-					if result.Passed {
-						report.PassedChecks++
-						report.FailedChecks--
+					if totalEndpoints > 0 {
+						authFailed, authOk := detailsMap["auth_failed_count"].(int)
+						otherFailed, otherOk := detailsMap["other_failed_count"].(int)
+
+						if (authOk && authFailed > totalEndpoints/2) || (otherOk && otherFailed > totalEndpoints/2) {
+							skipPerformance = true
+
+							// Create a skipped result for P007
+							result := PrincipleResult{
+								Principle:   principle,
+								Passed:      false, // Mark as failed or skipped in report
+								Message:     "Performance test skipped due to widespread functional test failures (likely auth/network issues).",
+								Explanation: "Functional tests (P006) indicated widespread failures, making performance metrics unreliable. Address functional issues first.",
+								Details:     nil, // No performance details if skipped
+							}
+							principlesResults = append(principlesResults, result)
+							log.Debug("P007 skipped due to P006 widespread failure")
+						}
+					}
+				}
+			}
+
+			// If not skipped, validate P007 as usual
+			if !skipPerformance {
+				result := v.validatePrinciple(ctx, principle, doc)
+				principlesResults = append(principlesResults, result)
+
+				// Update passed/failed counts based on P007 result
+				if result.Passed {
+					report.PassedChecks++
+				} else {
+					report.FailedChecks++
+				}
+			}
+
+		} else { // For all other principles (including P006)
+			result := v.validatePrinciple(ctx, principle, doc)
+			principlesResults = append(principlesResults, result)
+
+			// Store P006 result for P007 dependency check
+			if principle.ID == "P006" {
+				p006Result = result
+			}
+
+			// Update passed/failed counts for non-P007 principles
+			if result.Passed {
+				report.PassedChecks++
+			} else {
+				report.FailedChecks++
+
+				// Attempt auto-fix if enabled and principle is auto-fixable (only for non-P007)
+				if v.config.AutoFix && principle.AutoFixable {
+					fixResult := v.attemptAutoFix(ctx, principle, result, doc)
+					report.AutoFixes = append(report.AutoFixes, fixResult)
+
+					if fixResult.Success {
+						// Revalidate after fix
+						revalidatedResult := v.validatePrinciple(ctx, principle, doc)
+						// Replace the original result with the revalidated one
+						for i, r := range principlesResults {
+							if r.Principle.ID == principle.ID {
+								// Adjust counts before replacing
+								if principlesResults[i].Passed && !revalidatedResult.Passed {
+									report.PassedChecks--
+									report.FailedChecks++
+								} else if !principlesResults[i].Passed && revalidatedResult.Passed {
+									report.PassedChecks++
+									report.FailedChecks--
+								}
+								principlesResults[i] = revalidatedResult
+								log.Debugf("Revalidated principle %s after autofix. Passed: %v", principle.ID, revalidatedResult.Passed)
+								break
+							}
+						}
 					}
 				}
 			}
 		}
 	}
 
+	report.Principles = principlesResults // Assign the collected results
 	report.TotalChecks = len(CorePrinciples)
+
+	// Ensure total checks is correct even if principles were skipped/modified
+	report.TotalChecks = len(report.Principles) + len(report.AutoFixes) // Adjust if auto-fixes add principles or counts? Revisit this.
+
+	// Recalculate passed/failed checks based on final principles list
+	report.PassedChecks = 0
+	report.FailedChecks = 0
+	for _, res := range report.Principles {
+		if res.Passed {
+			report.PassedChecks++
+		} else {
+			report.FailedChecks++
+		}
+	}
+
 	v.updateSummary(report)
 
 	// Log the report
@@ -140,79 +263,94 @@ func (v *APIValidator) validatePrinciple(ctx context.Context, principle Principl
 	case "P005": // Authentication Requirements (Documentation check)
 		result = ValidateAuthentication(doc)
 	case "P006": // Endpoint Functional Testing
-		endpointResult, err := v.validator.ValidateEndpoints(ctx, doc, v.config.BaseURL)
+		log.Debug("Running P006: Endpoint Functional Testing")
+		endpointResult, err := v.validator.ValidateEndpoints(ctx, doc, v.baseURL)
 		if err != nil {
 			result.Passed = false
-			result.Message = fmt.Sprintf("Endpoint functional testing failed: %v", err)
+			result.Message = fmt.Sprintf("Endpoint functional testing failed to run: %v", err)
 			result.Details = map[string]interface{}{"error": err.Error()}
+			log.WithError(err).Error("P006 failed to run")
 		} else {
 			result.Details = endpointResult.Endpoints
 
-			allSuccess := true
-			var failedEndpoints []string
+			// Count different failure statuses
+			total := len(endpointResult.Endpoints)
+			passedCount := 0
+			authFailedCount := 0
+			clientErrorCount := 0
+			serverErrorCount := 0
+			failedCount := 0 // Network errors, timeouts, etc.
+			undocumentedCount := 0
+
 			for _, epVal := range endpointResult.Endpoints {
-				if epVal.Status != "success" {
-					allSuccess = false
-					failedEndpoints = append(failedEndpoints, fmt.Sprintf("%s %s (Status: %s, Code: %d)", epVal.Method, epVal.Path, epVal.Status, epVal.StatusCode))
+				switch epVal.Status {
+				case "success":
+					passedCount++
+				case "auth_failed":
+					authFailedCount++
+				case "client_error":
+					clientErrorCount++
+				case "server_error":
+					serverErrorCount++
+				case "undocumented":
+					undocumentedCount++
+				case "failed": // Catch all for other failures like network errors
+					failedCount++
 				}
 			}
 
-			if allSuccess {
+			// Determine overall status and message
+			if passedCount == total && total > 0 {
 				result.Passed = true
-				result.Message = "All documented endpoints are reachable and return documented status codes."
+				result.Message = fmt.Sprintf("All %d documented endpoints are reachable and returned documented status codes.", total)
+				log.Debug("P006 passed: All endpoints successful")
+			} else if total == 0 {
+				result.Passed = true // Or handle as 'info' or 'skipped'
+				result.Message = "No endpoints found in OpenAPI spec for functional testing."
+				log.Debug("P006 passed: No endpoints to test")
 			} else {
 				result.Passed = false
-				result.Message = fmt.Sprintf("Some endpoints failed functional tests. Failed: %d/%d", len(failedEndpoints), len(endpointResult.Endpoints))
-				result.Details = map[string]interface{}{"failed_endpoints": failedEndpoints, "all_results": endpointResult.Endpoints}
+				messageParts := []string{}
+				if authFailedCount > 0 {
+					messageParts = append(messageParts, fmt.Sprintf("%d authentication failures (401/403)", authFailedCount))
+				}
+				if clientErrorCount > 0 {
+					messageParts = append(messageParts, fmt.Sprintf("%d client errors (4xx)", clientErrorCount))
+				}
+				if serverErrorCount > 0 {
+					messageParts = append(messageParts, fmt.Sprintf("%d server errors (5xx)", serverErrorCount))
+				}
+				if undocumentedCount > 0 {
+					messageParts = append(messageParts, fmt.Sprintf("%d undocumented status codes", undocumentedCount))
+				}
+				if failedCount > 0 {
+					messageParts = append(messageParts, fmt.Sprintf("%d network/other failures", failedCount))
+				}
+
+				result.Message = fmt.Sprintf("Some endpoints failed functional tests (%d/%d failed): %s", total-passedCount, total, strings.Join(messageParts, ", "))
+				result.Details = map[string]interface{}{
+					"total_endpoints":    total,
+					"passed_count":       passedCount,
+					"auth_failed_count":  authFailedCount,
+					"client_error_count": clientErrorCount,
+					"server_error_count": serverErrorCount,
+					"undocumented_count": undocumentedCount,
+					"other_failed_count": failedCount,
+					"all_results":        endpointResult.Endpoints,
+				}
+				log.Debugf("P006 failed: %s", result.Message)
 			}
 		}
-	case "P007": // API Performance Compliance (Execution and Validation)
-		var targets []vegeta.Target
-		for path, pathItem := range doc.Paths.Map() {
-			for method := range pathItem.Operations() {
-				targets = append(targets, vegeta.Target{
-					Method: method,
-					URL:    fmt.Sprintf("%s%s", v.config.BaseURL, path),
-				})
-			}
-		}
-
-		if len(targets) == 0 {
-			result.Passed = true
-			result.Message = "No targets found in OpenAPI spec for performance testing."
-			break
-		}
-
-		rate := 50.0
-		duration := 10 * time.Second
-
-		perfResult, err := v.validator.RunPerformanceTests(targets, rate, duration)
-		if err != nil {
+	case "P008": // API Versioning
+		log.Debug("Running P008: API Versioning")
+		if doc.Info == nil || doc.Info.Version == "" {
 			result.Passed = false
-			result.Message = fmt.Sprintf("Performance testing failed: %v", err)
-			result.Details = map[string]interface{}{"error": err.Error()}
+			result.Message = "API version is not specified in the OpenAPI document info section."
+			result.SuggestedFix = "Add or update the 'version' field in the 'info' section of your OpenAPI specification."
+			log.Debug("P008 failed: Version not specified")
 		} else {
-			result.Details = perfResult.Performance
-
-			metTargets := true
-			var failureReasons []string
-
-			if perfResult.Performance.LatencyP95 > v.config.PerformanceTarget.MaxLatencyP95 && v.config.PerformanceTarget.MaxLatencyP95 != 0 {
-				metTargets = false
-				failureReasons = append(failureReasons, fmt.Sprintf("P95 latency (%s) exceeded target (%s)", perfResult.Performance.LatencyP95, v.config.PerformanceTarget.MaxLatencyP95))
-			}
-			if perfResult.Performance.ErrorRate > (1.0-v.config.PerformanceTarget.MinSuccessRate/100.0) && v.config.PerformanceTarget.MinSuccessRate != 0 {
-				metTargets = false
-				failureReasons = append(failureReasons, fmt.Sprintf("Error rate (%.2f%%) exceeded allowed (%.2f%% success rate target)", perfResult.Performance.ErrorRate*100, v.config.PerformanceTarget.MinSuccessRate))
-			}
-
-			if metTargets {
-				result.Passed = true
-				result.Message = "API performance meets configured targets."
-			} else {
-				result.Passed = false
-				result.Message = fmt.Sprintf("API performance failed to meet targets: %s", strings.Join(failureReasons, ", "))
-			}
+			result.Message = fmt.Sprintf("API version is specified as: %s", doc.Info.Version)
+			log.Debugf("P008 passed: Version specified as %s", doc.Info.Version)
 		}
 	default:
 		result.Passed = false
@@ -543,3 +681,5 @@ func (v *APIValidator) updateSummary(report *ValidationReport) {
 
 	report.Summary = summary
 }
+
+// ValidationReport represents a detailed report of validation results

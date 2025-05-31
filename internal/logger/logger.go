@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -67,6 +68,12 @@ func Configure(cfg Config) error {
 	case "stderr":
 		log.SetOutput(os.Stderr)
 	default:
+		dir := filepath.Dir(cfg.Output)
+		if dir != "." && dir != "" {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				return fmt.Errorf("failed to create log directory: %w", err)
+			}
+		}
 		file, err := os.OpenFile(cfg.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			return fmt.Errorf("failed to open log file: %w", err)

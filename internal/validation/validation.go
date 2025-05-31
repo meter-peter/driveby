@@ -88,6 +88,7 @@ func (v *Validator) SetBaseURL(baseURL string) {
 
 // preprocessNullTypes recursively converts "type": "null" or ["string", "null"] to "type": "string", "nullable": true
 func preprocessNullTypes(m map[string]interface{}) {
+	log.Debugf("Enter preprocessNullTypes with m: %+v", m)
 	for k, v := range m {
 		switch val := v.(type) {
 		case map[string]interface{}:
@@ -125,10 +126,12 @@ func preprocessNullTypes(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from preprocessNullTypes with m: %+v", m)
 }
 
 // removeTitleFields recursively removes any 'title' field from the spec, except in the root 'info' object
 func removeTitleFields(m map[string]interface{}) {
+	log.Debugf("Enter removeTitleFields with m: %+v", m)
 	for k, v := range m {
 		if k == "paths" {
 			if paths, ok := v.(map[string]interface{}); ok {
@@ -151,10 +154,12 @@ func removeTitleFields(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from removeTitleFields with m: %+v", m)
 }
 
 // removeTitleFieldsFromPathItem removes 'title' fields from a path item and its operations
 func removeTitleFieldsFromPathItem(m map[string]interface{}) {
+	log.Debugf("Enter removeTitleFieldsFromPathItem with m: %+v", m)
 	for k, v := range m {
 		if k == "title" {
 			delete(m, k)
@@ -169,10 +174,12 @@ func removeTitleFieldsFromPathItem(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from removeTitleFieldsFromPathItem with m: %+v", m)
 }
 
 // stripInvalidPathItemFields removes fields not allowed in OpenAPI path item objects
 func stripInvalidPathItemFields(m map[string]interface{}) {
+	log.Debugf("Enter stripInvalidPathItemFields with m: %+v", m)
 	if paths, ok := m["paths"].(map[string]interface{}); ok {
 		for _, pathItem := range paths {
 			if pathMap, ok := pathItem.(map[string]interface{}); ok {
@@ -189,10 +196,12 @@ func stripInvalidPathItemFields(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from stripInvalidPathItemFields with m: %+v", m)
 }
 
 // stripInvalidOperationFields removes fields not allowed in OpenAPI operation objects
 func stripInvalidOperationFields(m map[string]interface{}) {
+	log.Debugf("Enter stripInvalidOperationFields with m: %+v", m)
 	if paths, ok := m["paths"].(map[string]interface{}); ok {
 		for _, pathItem := range paths {
 			if pathMap, ok := pathItem.(map[string]interface{}); ok {
@@ -214,10 +223,12 @@ func stripInvalidOperationFields(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from stripInvalidOperationFields with m: %+v", m)
 }
 
 // Helper to check if a string is a valid HTTP response code or 'default'
 func isValidResponseCode(key string) bool {
+	log.Debugf("Enter isValidResponseCode with key: %s", key)
 	if key == "default" {
 		return true
 	}
@@ -235,6 +246,7 @@ func isValidResponseCode(key string) bool {
 // cleanOpenAPIPaths ensures all path items and operations only have valid fields
 // Now, only logs unexpected fields but does not delete them unless they are known to break the validator.
 func cleanOpenAPIPaths(m map[string]interface{}) {
+	log.Debugf("Enter cleanOpenAPIPaths with m: %+v", m)
 	if paths, ok := m["paths"].(map[string]interface{}); ok {
 		for path, pathItem := range paths {
 			if pathMap, ok := pathItem.(map[string]interface{}); ok {
@@ -284,20 +296,23 @@ func cleanOpenAPIPaths(m map[string]interface{}) {
 			}
 		}
 	}
+	log.Debugf("Returning from cleanOpenAPIPaths with m: %+v", m)
 }
 
 // Helper function to get map keys for logging
 func getKeys(m map[string]interface{}) []string {
+	log.Debugf("Enter getKeys with m: %+v", m)
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
+	log.Debugf("Returning from getKeys with keys: %+v", keys)
 	return keys
 }
 
 // ValidateDocumentation validates the API documentation
 func (v *Validator) ValidateDocumentation(doc *openapi3.T) (*ValidationResult, error) {
-	log.Debug("Starting ValidateDocumentation")
+	log.Debugf("Enter ValidateDocumentation with doc: %+v", doc)
 	result := &ValidationResult{
 		Timestamp: time.Now(),
 		Documentation: DocumentationReport{
@@ -368,11 +383,13 @@ func (v *Validator) ValidateDocumentation(doc *openapi3.T) (*ValidationResult, e
 	}
 
 	log.Debugf("Validation result: %+v", result)
+	log.Debugf("Returning from ValidateDocumentation with result: %+v, error: %v", result, nil)
 	return result, nil
 }
 
 // generateParameterValue generates an example value for an OpenAPI parameter schema.
 func (v *Validator) generateParameterValue(schema *openapi3.Schema) (interface{}, error) {
+	log.Debugf("Enter generateParameterValue with schema: %+v", schema)
 	if schema == nil {
 		return nil, fmt.Errorf("schema is nil")
 	}
@@ -447,6 +464,7 @@ func (v *Validator) generateParameterValue(schema *openapi3.Schema) (interface{}
 
 // generateRequestBody generates an example request body based on the OpenAPI content object.
 func (v *Validator) generateRequestBody(content openapi3.Content) (io.Reader, string, error) {
+	log.Debugf("Enter generateRequestBody with content: %+v", content)
 	// Prioritize JSON content
 	if mediaType, ok := content["application/json"]; ok && mediaType.Schema != nil && mediaType.Schema.Value != nil {
 		exampleData, err := v.generateParameterValue(mediaType.Schema.Value)
@@ -467,12 +485,19 @@ func (v *Validator) generateRequestBody(content openapi3.Content) (io.Reader, st
 
 // ValidateEndpoints tests the API endpoints
 func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, baseURL string) (*ValidationResult, error) {
-	log.Debug("Starting ValidateEndpoints")
+	log.Debugf("Enter ValidateEndpoints with doc: %+v, baseURL: %s", doc, baseURL)
 	result := &ValidationResult{
 		Timestamp: time.Now(),
 	}
 
-	// Iterate over paths
+	total := 0
+	passed := 0
+	failed := 0
+	authFailed := 0
+	serverError := 0
+	clientError := 0
+	undocumented := 0
+
 	for path, pathItem := range doc.Paths.Map() {
 		log.Debugf("Validating path: %s", path)
 		// Replace path parameters with generated values for URL construction
@@ -496,7 +521,7 @@ func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, base
 			endpointId := fmt.Sprintf("%s %s", method, path)
 			log.Debugf("Validating endpoint: %s", endpointId)
 			validation := EndpointValidation{
-				Path:   path, // Store original path for reporting
+				Path:   path,
 				Method: method,
 				Status: "pending",
 			}
@@ -510,6 +535,8 @@ func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, base
 				log.WithError(err).Errorf("Failed to create request for endpoint %s", endpointId)
 				validation.Status = "failed"
 				validation.Errors = append(validation.Errors, fmt.Sprintf("failed to create request: %v", err))
+				failed++
+				log.Warnf("Endpoint %s failed: %v", endpointId, err)
 				result.Endpoints = append(result.Endpoints, validation)
 				continue
 			}
@@ -555,6 +582,7 @@ func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, base
 					log.WithError(err).Warnf("Failed to generate request body for '%s %s'", method, path)
 					// Continue without a request body
 				} else {
+					log.Debugf("Generated request body for '%s %s' with content-type %s", method, path, contentType)
 					req.Body = ioutil.NopCloser(body)
 					req.Header.Set("Content-Type", contentType)
 				}
@@ -564,9 +592,12 @@ func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, base
 			start := time.Now()
 			resp, err := v.client.Do(req)
 			validation.ResponseTime = time.Since(start)
+			total++
 			if err != nil {
 				validation.Status = "failed"
 				validation.Errors = append(validation.Errors, fmt.Sprintf("request failed: %v", err))
+				failed++
+				log.Warnf("Endpoint %s failed: %v", endpointId, err)
 				result.Endpoints = append(result.Endpoints, validation)
 				continue
 			}
@@ -581,29 +612,55 @@ func (v *Validator) ValidateEndpoints(ctx context.Context, doc *openapi3.T, base
 				}
 			}
 
-			// Check if response status code is documented
-			if operation.Responses != nil {
-				statusCodeStr := fmt.Sprintf("%d", resp.StatusCode)
+			statusCodeStr := fmt.Sprintf("%d", resp.StatusCode)
+			if resp.StatusCode == 401 || resp.StatusCode == 403 {
+				validation.Status = "auth_failed"
+				validation.Errors = append(validation.Errors, fmt.Sprintf("authentication failed: status %d", resp.StatusCode))
+				authFailed++
+				log.Warnf("Endpoint %s authentication failed (status %d)", endpointId, resp.StatusCode)
+			} else if resp.StatusCode >= 500 && resp.StatusCode < 600 {
+				validation.Status = "server_error"
+				validation.Errors = append(validation.Errors, fmt.Sprintf("server error: status %d", resp.StatusCode))
+				serverError++
+				log.Warnf("Endpoint %s server error (status %d)", endpointId, resp.StatusCode)
+			} else if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+				validation.Status = "client_error"
+				validation.Errors = append(validation.Errors, fmt.Sprintf("client error: status %d", resp.StatusCode))
+				clientError++
+				log.Warnf("Endpoint %s client error (status %d)", endpointId, resp.StatusCode)
+			} else if operation.Responses != nil {
 				if _, ok := operation.Responses.Map()[statusCodeStr]; ok {
 					validation.Status = "success"
+					passed++
+					log.Infof("Endpoint %s passed (status %d)", endpointId, resp.StatusCode)
 				} else {
-					validation.Status = "warning"
+					validation.Status = "undocumented"
 					validation.Errors = append(validation.Errors, fmt.Sprintf("response status code %d not documented in OpenAPI spec", resp.StatusCode))
+					undocumented++
+					log.Warnf("Endpoint %s returned undocumented status code %d", endpointId, resp.StatusCode)
 				}
 			} else {
-				validation.Status = "warning"
+				validation.Status = "undocumented"
 				validation.Errors = append(validation.Errors, "no responses documented in OpenAPI spec")
+				undocumented++
+				log.Warnf("Endpoint %s has no responses documented in OpenAPI spec", endpointId)
 			}
 
 			result.Endpoints = append(result.Endpoints, validation)
 		}
 	}
 
+	log.Infof("Validation summary: total=%d, passed=%d, failed=%d, auth_failed=%d, server_error=%d, client_error=%d, undocumented=%d", total, passed, failed, authFailed, serverError, clientError, undocumented)
+	// Optionally, add a summary to result (if struct allows)
+	// result.Summary = ...
+
+	log.Debugf("Returning from ValidateEndpoints with result: %+v, error: %v", result, nil)
 	return result, nil
 }
 
 // RunPerformanceTests runs load tests against the API
 func (v *Validator) RunPerformanceTests(targets []vegeta.Target, rate float64, duration time.Duration) (*ValidationResult, error) {
+	log.Debugf("Enter RunPerformanceTests with targets: %+v, rate: %.2f, duration: %s", targets, rate, duration)
 	metrics := &PerformanceMetrics{
 		StartTime: time.Now(),
 	}
@@ -627,6 +684,8 @@ func (v *Validator) RunPerformanceTests(targets []vegeta.Target, rate float64, d
 	metrics.LatencyP95 = vegetaMetrics.Latencies.P95
 	metrics.LatencyP99 = vegetaMetrics.Latencies.P99
 
+	log.Debugf("Performance metrics: %+v", metrics)
+
 	return &ValidationResult{
 		Timestamp:   time.Now(),
 		Performance: metrics,
@@ -640,12 +699,15 @@ func init() {
 
 // RunValidation runs only OpenAPI/documentation validation checks (P001, P003, P004, P005)
 func RunValidation(ctx context.Context, config ValidatorConfig) (*ValidationReport, error) {
+	log.Debugf("Starting RunValidation with config: %+v", config)
 	loader := openapi.NewLoader()
 	if err := loader.LoadFromFileOrURL(config.SpecPath); err != nil {
+		log.WithError(err).Errorf("Failed to load OpenAPI spec from %s", config.SpecPath)
 		return nil, fmt.Errorf("failed to load OpenAPI spec: %w", err)
 	}
 	doc := loader.GetDocument()
 	if doc == nil {
+		log.Error("Failed to get OpenAPI document after loading")
 		return nil, fmt.Errorf("failed to get OpenAPI document")
 	}
 
@@ -653,6 +715,7 @@ func RunValidation(ctx context.Context, config ValidatorConfig) (*ValidationRepo
 	var results []PrincipleResult
 	for _, pid := range principles {
 		var res PrincipleResult
+		log.Debugf("Validating principle: %s", pid)
 		switch pid {
 		case "P001":
 			res = ValidateOpenAPICompliance(doc)
@@ -663,6 +726,7 @@ func RunValidation(ctx context.Context, config ValidatorConfig) (*ValidationRepo
 		case "P005":
 			res = ValidateAuthentication(doc)
 		}
+		log.Debugf("Result for principle %s: %+v", pid, res)
 		results = append(results, res)
 	}
 
@@ -672,5 +736,6 @@ func RunValidation(ctx context.Context, config ValidatorConfig) (*ValidationRepo
 		Timestamp:   time.Now(),
 		Principles:  results,
 	}
+	log.Debugf("Final validation report: %+v", report)
 	return report, nil
 }

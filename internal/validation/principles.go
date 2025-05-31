@@ -42,6 +42,7 @@ type PrincipleResult struct {
 	Location     string    `json:"location,omitempty"`
 	Details      any       `json:"details,omitempty"`
 	SuggestedFix string    `json:"suggested_fix,omitempty"`
+	Explanation  string    `json:"explanation,omitempty"`
 }
 
 // AutoFixResult represents the result of an automatic fix attempt
@@ -130,6 +131,15 @@ var CorePrinciples = []Principle{
 		AutoFixable: false,
 		Tags:        []string{"testing", "performance", "sla"},
 	},
+	{
+		ID:          "P008",
+		Name:        "API Versioning",
+		Description: "API documentation should specify a version",
+		Category:    "Documentation",
+		Severity:    "warning",
+		AutoFixable: false,
+		Tags:        []string{"documentation", "versioning"},
+	},
 }
 
 // Logger handles validation report logging
@@ -140,6 +150,17 @@ type Logger struct {
 
 // NewLogger creates a new validation logger
 func NewLogger(logPath string) (*Logger, error) {
+	if logPath == "" {
+		logger := logrus.New()
+		logger.SetFormatter(&logrus.JSONFormatter{})
+		logger.SetLevel(logrus.DebugLevel)
+		logger.SetOutput(os.Stdout)
+		logger.Infof("[validation/principles] Logger set to DEBUG (verbose) mode (stdout fallback)")
+		return &Logger{
+			logger: logger,
+			path:   "",
+		}, nil
+	}
 	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
 		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
