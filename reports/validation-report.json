@@ -1,0 +1,633 @@
+{
+  "timestamp": "2025-05-31T16:06:12.743850218+03:00",
+  "compliance_score": 76.66666666666667,
+  "endpoints": [
+    {
+      "path": "/feedback/recent/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 5491337098,
+      "status_code": 404
+    },
+    {
+      "path": "/user/{userID}/feedback/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 363196044,
+      "status_code": 404
+    },
+    {
+      "path": "/ai_summary",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 292421060,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/{feedbackID}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 302036132,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/{feedbackID}/neutral/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 325412901,
+      "status_code": 404
+    },
+    {
+      "path": "/user/metadata",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 294106852,
+      "status_code": 404
+    },
+    {
+      "path": "/user/metadata",
+      "method": "PUT",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 266595606,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/add",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 318725131,
+      "status_code": 404
+    },
+    {
+      "path": "/notifications_summary",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 290569315,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/advancedDetails",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 312301831,
+      "status_code": 404
+    },
+    {
+      "path": "/search_query",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 300939830,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/feedback/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 296530548,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/add",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 296860449,
+      "status_code": 404
+    },
+    {
+      "path": "/user/activity/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 315166577,
+      "status_code": 404
+    },
+    {
+      "path": "/user",
+      "method": "DELETE",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 283112140,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback_batch",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 318845180,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback_batch",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 280766799,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/clusters",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 304338410,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/overview",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 284294952,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/popular/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 370899639,
+      "status_code": 404
+    },
+    {
+      "path": "/clusters_batch",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 332916871,
+      "status_code": 404
+    },
+    {
+      "path": "/clusters_batch",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 294353104,
+      "status_code": 404
+    },
+    {
+      "path": "/search/{query}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 318501293,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/{clusterID}/feedback/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 375171550,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 321562422,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/advancedDetails/recent",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 312107402,
+      "status_code": 404
+    },
+    {
+      "path": "/topics_batch",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 285263077,
+      "status_code": 404
+    },
+    {
+      "path": "/topics_batch",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 294449889,
+      "status_code": 404
+    },
+    {
+      "path": "/",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 334455640,
+      "status_code": 404
+    },
+    {
+      "path": "/user/{userID}/reply/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 281665663,
+      "status_code": 404
+    },
+    {
+      "path": "/image/{topic_id}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 294767689,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/{clusterID}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 285704167,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/popular/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 317949110,
+      "status_code": 404
+    },
+    {
+      "path": "/user/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 301829833,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/edit",
+      "method": "PUT",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 293408861,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/reply",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 290549213,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/{feedbackID}/dislike/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 295916688,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/view",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 316065780,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/{clusterID}/advancedDetails",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 350284094,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/neutral/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 334839456,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 316609958,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 280666012,
+      "status_code": 404
+    },
+    {
+      "path": "/user/updateName",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 322029177,
+      "status_code": 404
+    },
+    {
+      "path": "/user/{userID}/advancedDetails",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 279201759,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/{feedbackID}/like/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 320704627,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/{clusterID}/feedback/popular/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 279077530,
+      "status_code": 404
+    },
+    {
+      "path": "/keyword/top/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 332823179,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/overview",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 272182988,
+      "status_code": 404
+    },
+    {
+      "path": "/interests/get",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 316154296,
+      "status_code": 404
+    },
+    {
+      "path": "/user/updateUser",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 305940726,
+      "status_code": 404
+    },
+    {
+      "path": "/feedback/{feedbackID}/reply/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 279329586,
+      "status_code": 404
+    },
+    {
+      "path": "/cluster/recent/{topN}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 315011586,
+      "status_code": 404
+    },
+    {
+      "path": "/search",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 287039223,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 306679738,
+      "status_code": 404
+    },
+    {
+      "path": "/contact/form",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 291506127,
+      "status_code": 404
+    },
+    {
+      "path": "/user/register",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 293371256,
+      "status_code": 404
+    },
+    {
+      "path": "/user/{userID}/engagement/paginated/{page}/{pageSize}",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 302305690,
+      "status_code": 404
+    },
+    {
+      "path": "/user/{userID}/participation",
+      "method": "GET",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 300926893,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/dislike/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 305899062,
+      "status_code": 404
+    },
+    {
+      "path": "/topic/{topicID}/like/{userID}",
+      "method": "POST",
+      "status": "warning",
+      "errors": [
+        "response status code not documented in OpenAPI spec"
+      ],
+      "response_time": 296481106,
+      "status_code": 404
+    }
+  ],
+  "documentation": {
+    "compliance_score": 76.66666666666667,
+    "missing_examples": [
+      "POST /search",
+      "POST /feedback/add",
+      "POST /feedback/reply",
+      "POST /topics_batch",
+      "POST /search_query",
+      "POST /ai_summary",
+      "POST /contact/form",
+      "POST /clusters_batch",
+      "PUT /user/metadata",
+      "PUT /feedback/edit",
+      "POST /feedback_batch",
+      "POST /topic/add"
+    ],
+    "undocumented_endpoints": [
+      "POST /feedback/add",
+      "POST /feedback/reply",
+      "GET /image/{topic_id}",
+      "GET /"
+    ],
+    "error_responses": {
+      "422": 55
+    },
+    "undocumented_errors": null
+  }
+}

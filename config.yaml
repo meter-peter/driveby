@@ -1,0 +1,27 @@
+api:
+  host: deliberate-dashboard-api.dev.deliberate.v2.novelcore.org
+  port: 443
+  base_path: ""
+
+validation:
+  openapi_path: openapi.json
+  compliance_threshold: 85
+  fail_on_validation: true
+
+testing:
+  request_rate: 10
+  test_duration: 1m
+  request_timeout: 10s
+
+logger:
+  # Log level (debug, info, warn, error, fatal)
+  level: info
+  # Log format (json, text)
+  format: json
+  # Log output (stdout, stderr, or file path)
+  output: stdout
+  # Additional fields to include in every log entry
+  fields:
+    app: driveby
+    version: 1.0.0
+    environment: development
