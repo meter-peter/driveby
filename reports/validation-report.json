@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-05-31T17:18:55.626017995+03:00",
+  "timestamp": "2025-05-31T17:24:37.686792856+03:00",
   "version": "",
   "environment": "",
   "total_checks": 8,
-  "passed_checks": 3,
-  "failed_checks": 5,
+  "passed_checks": 2,
+  "failed_checks": 6,
   "principles": [
     {
       "principle": {
@@ -20,8 +20,8 @@
           "documentation"
         ]
       },
-      "passed": true,
-      "message": ""
+      "passed": false,
+      "message": "OpenAPI spec validation failed: invalid components: schema \"Task\": unsupported 'type' value \"null\""
     },
     {
       "principle": {
@@ -56,11 +56,8 @@
       "passed": false,
       "message": "Endpoints missing error response documentation",
       "details": [
-        "POST /user/updateUser",
-        "DELETE /user",
-        "POST /user/updateName",
-        "GET /user/metadata",
-        "GET /"
+        "GET /test/health",
+        "GET /health"
       ],
       "suggested_fix": "Add error responses (4xx, 5xx) to all endpoints"
     },
@@ -94,12 +91,8 @@
         ]
       },
       "passed": false,
-      "message": "Endpoints missing authentication requirements",
-      "details": [
-        "GET /",
-        "GET /image/{topic_id}"
-      ],
-      "suggested_fix": "Add security requirements to endpoints or global security"
+      "message": "No security schemes defined",
+      "suggested_fix": "Define security schemes in components.securitySchemes"
     },
     {
       "principle": {
@@ -116,973 +109,145 @@
         ]
       },
       "passed": false,
-      "message": "Some endpoints failed functional tests (59/60 failed): 58 authentication failures (401/403), 1 client errors (4xx)",
+      "message": "Some endpoints failed functional tests (4/9 failed): 4 client errors (4xx)",
       "details": {
         "all_results": [
           {
-            "path": "/topic/{topicID}/like/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 73147213,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:49 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/{feedbackID}/neutral/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 84831965,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:49 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/overview",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 73234760,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/keyword/top/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79793519,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/{clusterID}/feedback/popular/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 88711385,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/{feedbackID}/reply/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79209591,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}/dislike/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 71565238,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/reply",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 85380387,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/{feedbackID}/like/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 74010080,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback_batch",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 82779460,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback_batch",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 76123033,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/interests/get",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 84145766,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/popular/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 75939469,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:50 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/clusters_batch",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 90326708,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/clusters_batch",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 75841515,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 71378802,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79286799,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/{userID}/feedback/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79978529,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/notifications_summary",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79982960,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/{userID}/engagement/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79244172,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/{userID}/reply/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79973254,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topics_batch",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79189413,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topics_batch",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 85785399,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/edit",
-            "method": "PUT",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79815381,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/popular/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 74442949,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 84450806,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/updateName",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 83614466,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:51 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}/neutral/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 70737144,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/{userID}/advancedDetails",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79431912,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/contact/form",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 85327904,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/metadata",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 74277991,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/metadata",
-            "method": "PUT",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 89279589,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/recent/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79033841,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/{clusterID}/feedback/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79147486,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/add",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 78909695,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/advancedDetails/recent",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 70405135,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:52 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}/advancedDetails",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 104465585,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/{feedbackID}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 75442943,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/add",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 88836820,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/updateUser",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 70844271,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}/clusters",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79394599,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/ai_summary",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 96362890,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/{userID}/participation",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 90997478,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/search/{query}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 87645992,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/",
-            "method": "GET",
-            "status": "success",
-            "response_time": 83818060,
-            "status_code": 200,
-            "headers": {
-              "Content-Length": "15",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}/view",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 81889654,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/recent/{topN}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 77568085,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/feedback/{feedbackID}/dislike/{userID}",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79730805,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:53 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/cluster/{clusterID}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 87236971,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/activity/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 81130333,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/{topicID}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 82329128,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/register",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 77881027,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user",
+            "path": "/products/{product_id}",
             "method": "DELETE",
-            "status": "auth_failed",
+            "status": "client_error",
             "errors": [
-              "authentication failed: status 403"
+              "client error: status 404"
             ],
-            "response_time": 72079033,
-            "status_code": 403,
+            "response_time": 91176587,
+            "status_code": 404,
             "headers": {
-              "Content-Length": "30",
+              "Content-Length": "51",
               "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
               "Server": "uvicorn"
             }
           },
           {
-            "path": "/search",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 92465995,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/user/paginated/{page}/{pageSize}",
+            "path": "/products/{product_id}",
             "method": "GET",
-            "status": "auth_failed",
+            "status": "client_error",
             "errors": [
-              "authentication failed: status 403"
+              "client error: status 404"
             ],
-            "response_time": 68760964,
-            "status_code": 403,
+            "response_time": 72852071,
+            "status_code": 404,
             "headers": {
-              "Content-Length": "30",
+              "Content-Length": "51",
               "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
               "Server": "uvicorn"
             }
           },
           {
-            "path": "/search_query",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 77100829,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/topic/overview",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 78403831,
-            "status_code": 403,
-            "headers": {
-              "Content-Length": "30",
-              "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
-              "Server": "uvicorn"
-            }
-          },
-          {
-            "path": "/image/{topic_id}",
-            "method": "GET",
+            "path": "/products/{product_id}",
+            "method": "PUT",
             "status": "client_error",
             "errors": [
               "client error: status 422"
             ],
-            "response_time": 79613566,
+            "response_time": 76491808,
             "status_code": 422,
             "headers": {
-              "Content-Length": "105",
+              "Content-Length": "188",
               "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
               "Server": "uvicorn"
             }
           },
           {
-            "path": "/cluster/{clusterID}/advancedDetails",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79832651,
-            "status_code": 403,
+            "path": "/tasks",
+            "method": "POST",
+            "status": "success",
+            "response_time": 78745066,
+            "status_code": 201,
             "headers": {
-              "Content-Length": "30",
+              "Content-Length": "89",
               "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:54 GMT",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
               "Server": "uvicorn"
             }
           },
           {
-            "path": "/topic/{topicID}/feedback/paginated/{page}/{pageSize}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 403"
-            ],
-            "response_time": 79650277,
-            "status_code": 403,
+            "path": "/test/echo",
+            "method": "POST",
+            "status": "success",
+            "response_time": 76585048,
+            "status_code": 200,
             "headers": {
-              "Content-Length": "30",
+              "Content-Length": "2",
               "Content-Type": "application/json",
-              "Date": "Sat, 31 May 2025 14:18:55 GMT",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
+              "Server": "uvicorn"
+            }
+          },
+          {
+            "path": "/test/health",
+            "method": "GET",
+            "status": "success",
+            "response_time": 82071926,
+            "status_code": 200,
+            "headers": {
+              "Content-Length": "79",
+              "Content-Type": "application/json",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
+              "Server": "uvicorn"
+            }
+          },
+          {
+            "path": "/health",
+            "method": "GET",
+            "status": "success",
+            "response_time": 76502934,
+            "status_code": 200,
+            "headers": {
+              "Content-Length": "79",
+              "Content-Type": "application/json",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
+              "Server": "uvicorn"
+            }
+          },
+          {
+            "path": "/products",
+            "method": "GET",
+            "status": "success",
+            "response_time": 80232458,
+            "status_code": 200,
+            "headers": {
+              "Content-Length": "965",
+              "Content-Type": "application/json",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
+              "Server": "uvicorn"
+            }
+          },
+          {
+            "path": "/products",
+            "method": "POST",
+            "status": "client_error",
+            "errors": [
+              "client error: status 422"
+            ],
+            "response_time": 82934142,
+            "status_code": 422,
+            "headers": {
+              "Content-Length": "188",
+              "Content-Type": "application/json",
+              "Date": "Sat, 31 May 2025 14:24:36 GMT",
               "Server": "uvicorn"
             }
           }
         ],
-        "auth_failed_count": 58,
-        "client_error_count": 1,
+        "auth_failed_count": 0,
+        "client_error_count": 4,
         "other_failed_count": 0,
-        "passed_count": 1,
+        "passed_count": 5,
         "server_error_count": 0,
-        "total_endpoints": 60,
+        "total_endpoints": 9,
         "undocumented_count": 0
       }
     },
@@ -1101,8 +266,7 @@
         ]
       },
       "passed": false,
-      "message": "Performance test skipped due to widespread functional test failures (likely auth/network issues).",
-      "explanation": "Functional tests (P006) indicated widespread failures, making performance metrics unreliable. Address functional issues first."
+      "message": "Unknown principle ID: P007"
     },
     {
       "principle": {
@@ -1118,31 +282,33 @@
         ]
       },
       "passed": true,
-      "message": "API version is specified as: 0.2.0"
+      "message": "API version is specified as: 1.0.0"
     }
   ],
   "auto_fixes": null,
   "summary": {
-    "critical_issues": 4,
+    "critical_issues": 5,
     "warnings": 1,
     "info": 0,
     "categories": [
-      "Performance",
       "Documentation",
+      "Performance",
       "Security",
       "Testing"
     ],
     "failed_tags": [
-      "errors",
       "documentation",
-      "security",
-      "auth",
-      "functional",
-      "endpoints",
-      "latency",
       "testing",
+      "functional",
       "sla",
-      "performance"
+      "auth",
+      "endpoints",
+      "openapi",
+      "spec",
+      "performance",
+      "latency",
+      "errors",
+      "security"
     ]
   }
 }

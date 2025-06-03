@@ -1,22 +1,22 @@
 # API Validation Report
 
-Generated: 2025-05-31T17:18:55+03:00
+Generated: 2025-05-31T17:24:37+03:00
 
 ## Summary
 
 - Total Checks: 8
-- Passed Checks: 3
-- Failed Checks: 5
-- Critical Issues: 4
+- Passed Checks: 2
+- Failed Checks: 6
+- Critical Issues: 5
 - Warnings: 1
 - Info: 0
 
 ## Principle Results
 
-### P001: OpenAPI Specification Compliance (Passed)
+### P001: OpenAPI Specification Compliance (Failed)
 
-- **Status:** Passed
-- **Message:** 
+- **Status:** Failed
+- **Message:** OpenAPI spec validation failed: invalid components: schema "Task": unsupported 'type' value "null"
 
 ### P002: Response Time Performance (Failed)
 
@@ -32,11 +32,8 @@ Generated: 2025-05-31T17:18:55+03:00
 
 ```json
 [
-    "POST /user/updateUser",
-    "DELETE /user",
-    "POST /user/updateName",
-    "GET /user/metadata",
-    "GET /"
+    "GET /test/health",
+    "GET /health"
   ]
 ```
 
@@ -49,30 +46,20 @@ Generated: 2025-05-31T17:18:55+03:00
 ### P005: Authentication Requirements (Failed)
 
 - **Status:** Failed
-- **Message:** Endpoints missing authentication requirements
-
-#### Details
-
-```json
-[
-    "GET /",
-    "GET /image/{topic_id}"
-  ]
-```
-
+- **Message:** No security schemes defined
 
 ### P006: Endpoint Functional Testing (Failed)
 
 - **Status:** Failed
-- **Message:** Some endpoints failed functional tests (59/60 failed): 58 authentication failures (401/403), 1 client errors (4xx)
+- **Message:** Some endpoints failed functional tests (4/9 failed): 4 client errors (4xx)
 
 ### P007: API Performance Compliance (Failed)
 
 - **Status:** Failed
-- **Message:** Performance test skipped due to widespread functional test failures (likely auth/network issues).
+- **Message:** Unknown principle ID: P007
 
 ### P008: API Versioning (Passed)
 
 - **Status:** Passed
-- **Message:** API version is specified as: 0.2.0
+- **Message:** API version is specified as: 1.0.0
 

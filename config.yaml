@@ -1,5 +1,5 @@
 api:
-  host: deliberate-dashboard-api.dev.deliberate.v2.novelcore.org
+  host: kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu
   port: 443
   base_path: ""
 
