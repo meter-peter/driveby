@@ -8,8 +8,8 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: docker.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+  # Use specific repository name instead of github.repository
+  IMAGE_NAME: meterpeter99/driveby
 
 jobs:
   build-and-push:
@@ -40,9 +40,8 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=latest
           type=sha,format=short
-          type=ref,event=branch
 
     # Build and push Docker image
     - name: Build and push Docker image
