@@ -275,6 +275,11 @@ func initConfig() {
 		viper.AddConfigPath(".")
 	}
 
+	// Set up environment variable bindings for auth
+	viper.BindEnv("auth.token", "DRIVEBY_AUTH_TOKEN")
+	viper.BindEnv("auth.token_type", "DRIVEBY_AUTH_TOKEN_TYPE")
+	viper.BindEnv("auth.token_header", "DRIVEBY_AUTH_TOKEN_HEADER")
+
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -284,6 +289,13 @@ func initConfig() {
 		logger.Warn("No config file found, using defaults")
 	} else {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
+	}
+
+	// Log authentication status (without exposing the token)
+	if viper.GetString("auth.token") != "" {
+		logger.Info("Authentication token is configured")
+	} else {
+		logger.Warn("No authentication token configured - some endpoints may require authentication")
 	}
 }
 

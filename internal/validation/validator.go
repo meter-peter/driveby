@@ -19,6 +19,13 @@ type PerformanceTargetConfig struct {
 	MinSuccessRate float64
 }
 
+// AuthConfig holds authentication configuration
+type AuthConfig struct {
+	Token       string
+	TokenType   string
+	TokenHeader string
+}
+
 // ValidatorConfig holds configuration for the validator
 type ValidatorConfig struct {
 	BaseURL           string
@@ -29,6 +36,7 @@ type ValidatorConfig struct {
 	AutoFix           bool
 	Timeout           time.Duration
 	PerformanceTarget PerformanceTargetConfig
+	Auth              AuthConfig
 }
 
 // APIValidator implements the validation logic
@@ -50,6 +58,15 @@ func NewAPIValidator(config ValidatorConfig) (*APIValidator, error) {
 
 	validationValidator := NewValidator()
 	validationValidator.SetBaseURL(config.BaseURL)
+
+	// Set up HTTP client with authentication
+	client := &http.Client{
+		Timeout: config.Timeout,
+		Transport: &authTransport{
+			base: http.DefaultTransport,
+			auth: config.Auth,
+		},
+	}
 
 	// Determine the baseURL based on specPath. If specPath is a URL ending in a file extension (.json/.yaml), extract the directory path. Otherwise, use config.BaseURL.
 	baseURL := config.BaseURL // Default to provided BaseURL
@@ -86,15 +103,37 @@ func NewAPIValidator(config ValidatorConfig) (*APIValidator, error) {
 	log.Debugf("Final baseURL determined: %s", baseURL)
 
 	return &APIValidator{
-		config: config,
-		logger: logger,
-		loader: openapi.NewLoader(),
-		client: &http.Client{
-			Timeout: config.Timeout,
-		},
+		config:    config,
+		logger:    logger,
+		loader:    openapi.NewLoader(),
+		client:    client,
 		validator: validationValidator,
 		baseURL:   baseURL,
 	}, nil
+}
+
+// authTransport implements http.RoundTripper to add authentication headers
+type authTransport struct {
+	base http.RoundTripper
+	auth AuthConfig
+}
+
+func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.auth.Token != "" {
+		headerName := t.auth.TokenHeader
+		if headerName == "" {
+			headerName = "Authorization"
+		}
+
+		tokenType := t.auth.TokenType
+		if tokenType == "" {
+			tokenType = "Bearer"
+		}
+
+		req.Header.Set(headerName, fmt.Sprintf("%s %s", tokenType, t.auth.Token))
+	}
+
+	return t.base.RoundTrip(req)
 }
 
 // Validate runs the complete validation suite

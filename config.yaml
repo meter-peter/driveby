@@ -1,7 +1,15 @@
 api:
-  host: kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu
-  port: 443
+  host: localhost
+  port: 3000
   base_path: ""
+
+auth:
+  # Authentication token for API access
+  token: ""
+  # Token type (e.g., "Bearer", "Basic", etc.)
+  token_type: "Bearer"
+  # Optional: Token header name (defaults to "Authorization")
+  token_header: "Authorization"
 
 validation:
   openapi_path: openapi.json
