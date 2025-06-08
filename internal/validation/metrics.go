@@ -9,6 +9,7 @@ type EndpointValidation struct {
 	Status       string        `json:"status"`
 	StatusCode   int           `json:"status_code"`
 	ResponseTime time.Duration `json:"response_time"`
+	ResponseBody []byte        `json:"response_body,omitempty"`
 	Errors       []string      `json:"errors,omitempty"`
 }
 

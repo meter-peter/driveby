@@ -3,8 +3,11 @@ package validation
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
+
+	"encoding/base64"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/meter-peter/driveby/internal/openapi"
@@ -19,11 +22,14 @@ type FunctionalTester struct {
 
 // NewFunctionalTester creates a new functional tester instance
 func NewFunctionalTester(config ValidatorConfig) *FunctionalTester {
+	if config.Timeout == 0 {
+		config.Timeout = 5 * time.Second // Default timeout if not specified
+	}
 	return &FunctionalTester{
 		config: config,
 		loader: openapi.NewLoader(),
 		client: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: config.Timeout,
 		},
 	}
 }
@@ -109,16 +115,16 @@ func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc *openapi3.
 			}
 
 			// Add authentication if configured
-			if t.config.Auth.Token != "" {
-				headerName := t.config.Auth.TokenHeader
-				if headerName == "" {
-					headerName = "Authorization"
+			if t.config.Auth != nil {
+				if err := t.addAuthHeaders(req); err != nil {
+					result.Endpoints = append(result.Endpoints, EndpointValidation{
+						Method: method,
+						Path:   path,
+						Status: "error",
+						Errors: []string{fmt.Sprintf("Failed to add authentication: %v", err)},
+					})
+					continue
 				}
-				tokenType := t.config.Auth.TokenType
-				if tokenType == "" {
-					tokenType = "Bearer"
-				}
-				req.Header.Set(headerName, fmt.Sprintf("%s %s", tokenType, t.config.Auth.Token))
 			}
 
 			req.Header.Set("Accept", "application/json")
@@ -138,18 +144,24 @@ func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc *openapi3.
 				validation.Status = "error"
 				validation.Errors = []string{fmt.Sprintf("Request failed: %v", err)}
 			} else {
-				defer resp.Body.Close()
-				validation.StatusCode = resp.StatusCode
-
-				_, documented := operation.Responses.Map()[fmt.Sprintf("%d", resp.StatusCode)]
-				if !documented {
-					validation.Status = "warning"
-					validation.Errors = []string{fmt.Sprintf("Status code %d is not documented in the OpenAPI spec", resp.StatusCode)}
-				} else if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-					validation.Status = "success"
-				} else {
+				// Ensure response body is closed
+				body, err := io.ReadAll(resp.Body)
+				resp.Body.Close()
+				if err != nil {
 					validation.Status = "error"
-					validation.Errors = []string{fmt.Sprintf("Unexpected status code: %d", resp.StatusCode)}
+					validation.Errors = []string{fmt.Sprintf("Failed to read response body: %v", err)}
+				} else {
+					validation.StatusCode = resp.StatusCode
+					validation.ResponseBody = body
+
+					// Check if status code is documented
+					if _, documented := operation.Responses.Map()[fmt.Sprintf("%d", resp.StatusCode)]; documented {
+						// If documented, it's a success regardless of status code
+						validation.Status = "success"
+					} else {
+						validation.Status = "warning"
+						validation.Errors = []string{fmt.Sprintf("Status code %d is not documented in the OpenAPI spec", resp.StatusCode)}
+					}
 				}
 			}
 
@@ -158,4 +170,51 @@ func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc *openapi3.
 	}
 
 	return result, nil
+}
+
+// addAuthHeaders adds authentication headers to the request based on the configured auth method
+func (t *FunctionalTester) addAuthHeaders(req *http.Request) error {
+	if t.config.Auth == nil {
+		return nil
+	}
+
+	// Only one authentication method should be used
+	authMethods := 0
+	if t.config.Auth.Token != "" {
+		authMethods++
+	}
+	if t.config.Auth.APIKey != "" {
+		authMethods++
+	}
+	if t.config.Auth.Username != "" {
+		authMethods++
+	}
+	if authMethods > 1 {
+		return fmt.Errorf("only one authentication method can be specified")
+	}
+
+	// Add the appropriate auth header
+	if t.config.Auth.Token != "" {
+		headerName := t.config.Auth.TokenHeader
+		if headerName == "" {
+			headerName = "Authorization"
+		}
+		tokenType := t.config.Auth.TokenType
+		if tokenType == "" {
+			tokenType = "Bearer"
+		}
+		req.Header.Set(headerName, fmt.Sprintf("%s %s", tokenType, t.config.Auth.Token))
+	} else if t.config.Auth.APIKey != "" {
+		headerName := t.config.Auth.APIKeyHeader
+		if headerName == "" {
+			headerName = "X-API-Key"
+		}
+		req.Header.Set(headerName, t.config.Auth.APIKey)
+	} else if t.config.Auth.Username != "" {
+		// Basic auth
+		auth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", t.config.Auth.Username, t.config.Auth.Password)))
+		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", auth))
+	}
+
+	return nil
 }

@@ -90,6 +90,9 @@ func (l *Loader) LoadFromURL(url string) error {
 
 // LoadFromFileOrURL loads an OpenAPI spec from a local file or a URL
 func (l *Loader) LoadFromFileOrURL(path string) error {
+	if path == "" {
+		return fmt.Errorf("OpenAPI spec path is empty")
+	}
 	log.Debugf("[openapi] Enter LoadFromFileOrURL with path: %s", path)
 	var data []byte
 	var err error

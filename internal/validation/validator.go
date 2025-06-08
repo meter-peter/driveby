@@ -20,8 +20,52 @@ type OpenAPIValidator struct {
 	loader *openapi.Loader
 }
 
+// validateConfig validates the validator configuration
+func validateConfig(config ValidatorConfig) error {
+	if config.SpecPath == "" {
+		return fmt.Errorf("spec path is required")
+	}
+	if config.BaseURL == "" {
+		return fmt.Errorf("base URL is required")
+	}
+	if config.Timeout <= 0 {
+		return fmt.Errorf("timeout must be greater than 0")
+	}
+	if config.Auth != nil {
+		authMethods := 0
+		if config.Auth.Token != "" {
+			authMethods++
+		}
+		if config.Auth.APIKey != "" {
+			authMethods++
+		}
+		if config.Auth.Username != "" {
+			authMethods++
+		}
+		if authMethods > 1 {
+			return fmt.Errorf("only one authentication method can be specified")
+		}
+	}
+	if config.PerformanceTarget != nil {
+		if config.PerformanceTarget.Duration <= 0 {
+			return fmt.Errorf("performance test duration must be greater than 0")
+		}
+		if config.PerformanceTarget.ConcurrentUsers <= 0 {
+			return fmt.Errorf("concurrent users must be greater than 0")
+		}
+		if config.PerformanceTarget.MinSuccessRate < 0 || config.PerformanceTarget.MinSuccessRate > 1 {
+			return fmt.Errorf("minimum success rate must be between 0 and 1")
+		}
+	}
+	return nil
+}
+
 // NewOpenAPIValidator creates a new validator instance
-func NewOpenAPIValidator(config ValidatorConfig) *OpenAPIValidator {
+func NewOpenAPIValidator(config ValidatorConfig) (*OpenAPIValidator, error) {
+	if err := validateConfig(config); err != nil {
+		return nil, fmt.Errorf("invalid validator config: %w", err)
+	}
+
 	// Default to minimal mode if not specified
 	if config.ValidationMode == "" {
 		config.ValidationMode = ValidationModeMinimal
@@ -30,7 +74,7 @@ func NewOpenAPIValidator(config ValidatorConfig) *OpenAPIValidator {
 	return &OpenAPIValidator{
 		config: config,
 		loader: openapi.NewLoader(),
-	}
+	}, nil
 }
 
 // ValidateSpec runs validation against an OpenAPI specification
@@ -81,10 +125,6 @@ func (v *OpenAPIValidator) ValidateSpec(ctx context.Context) (*ValidationReport,
 			report.PassedChecks++
 		} else {
 			report.FailedChecks++
-			if v.config.AutoFix && principle.AutoFixable {
-				fixResult := v.attemptAutoFix(principle, result)
-				report.AutoFixes = append(report.AutoFixes, fixResult)
-			}
 		}
 	}
 
@@ -1109,18 +1149,6 @@ func (v *OpenAPIValidator) updateSummary(report *ValidationReport) {
 	}
 
 	report.Summary = summary
-}
-
-// attemptAutoFix tries to automatically fix a validation issue
-func (v *OpenAPIValidator) attemptAutoFix(principle Principle, result PrincipleResult) AutoFixResult {
-	// TODO: Implement auto-fix logic for each principle
-	return AutoFixResult{
-		PrincipleID: principle.ID,
-		Timestamp:   time.Now(),
-		Success:     false,
-		Message:     "Auto-fix not implemented yet",
-		Original:    result,
-	}
 }
 
 func init() {

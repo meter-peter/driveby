@@ -187,50 +187,20 @@ const (
 type ValidatorConfig struct {
 	BaseURL           string
 	SpecPath          string
-	LogPath           string
 	Environment       string
 	Version           string
-	AutoFix           bool
 	Timeout           time.Duration
 	ValidationMode    ValidationMode
-	TestMode          TestMode
-	PerformanceTarget PerformanceTargetConfig
-	FunctionalConfig  FunctionalTestConfig
-	Auth              AuthConfig
-}
-
-// FunctionalTestConfig holds configuration for functional testing
-type FunctionalTestConfig struct {
-	MaxConcurrentTests int
-	RequestTimeout     time.Duration
-	RetryCount         int
-	RetryDelay         time.Duration
-	SkipPaths          []string
-	RequiredPaths      []string
-	TestCases          []TestCaseConfig
-}
-
-// TestCaseConfig defines a test case configuration
-type TestCaseConfig struct {
-	Name        string
-	Path        string
-	Method      string
-	Input       interface{}
-	Expected    interface{}
-	Description string
-	Required    bool
+	Auth              *AuthConfig // Add back Auth field for token support
+	PerformanceTarget *PerformanceTargetConfig
 }
 
 // PerformanceTargetConfig holds configuration for performance test targets
 type PerformanceTargetConfig struct {
 	MaxLatencyP95   time.Duration
 	MinSuccessRate  float64
-	RequestRate     float64
-	Duration        time.Duration
 	ConcurrentUsers int
-	RampUpTime      time.Duration
-	RampUpSteps     int
-	ThinkTime       time.Duration
+	Duration        time.Duration
 }
 
 // AuthConfig holds authentication configuration

@@ -1,0 +1,151 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: driveby-functional-test-
+spec:
+  entrypoint: functional-test
+  arguments:
+    parameters:
+    - name: app-namespace
+      value: "default" # The namespace where your application is deployed
+    - name: app-service
+      value: "your-app-service" # The service name of your application
+    - name: openapi-spec-path
+      value: "/openapi.json" # Path to your OpenAPI spec in the container
+    - name: auth-token
+      value: "" # Optional: Set this if your API requires authentication
+    - name: protocol
+      value: "http" # Can be "http" or "https"
+    - name: port
+      value: "8080" # Default port, will be overridden for https
+
+  templates:
+  - name: functional-test
+    inputs:
+      parameters:
+      - name: app-namespace
+      - name: app-service
+      - name: openapi-spec-path
+      - name: auth-token
+      - name: protocol
+      - name: port
+    steps:
+    - - name: set-port
+        template: set-port
+        arguments:
+          parameters:
+          - name: protocol
+            value: "{{inputs.parameters.protocol}}"
+          - name: port
+            value: "{{inputs.parameters.port}}"
+
+    - - name: wait-for-app
+        template: wait-for-app
+        arguments:
+          parameters:
+          - name: app-namespace
+            value: "{{inputs.parameters.app-namespace}}"
+          - name: app-service
+            value: "{{inputs.parameters.app-service}}"
+          - name: protocol
+            value: "{{steps.set-port.outputs.parameters.protocol}}"
+          - name: port
+            value: "{{steps.set-port.outputs.parameters.port}}"
+
+    - - name: run-tests
+        template: run-tests
+        arguments:
+          parameters:
+          - name: app-namespace
+            value: "{{inputs.parameters.app-namespace}}"
+          - name: app-service
+            value: "{{inputs.parameters.app-service}}"
+          - name: openapi-spec-path
+            value: "{{inputs.parameters.openapi-spec-path}}"
+          - name: auth-token
+            value: "{{inputs.parameters.auth-token}}"
+          - name: protocol
+            value: "{{steps.set-port.outputs.parameters.protocol}}"
+          - name: port
+            value: "{{steps.set-port.outputs.parameters.port}}"
+
+  - name: set-port
+    inputs:
+      parameters:
+      - name: protocol
+      - name: port
+    outputs:
+      parameters:
+      - name: protocol
+        value: "{{inputs.parameters.protocol}}"
+      - name: port
+        value: "{{inputs.parameters.protocol == 'https' && '443' || inputs.parameters.port}}"
+
+  - name: wait-for-app
+    inputs:
+      parameters:
+      - name: app-namespace
+      - name: app-service
+      - name: protocol
+      - name: port
+    script:
+      image: curlimages/curl:latest
+      command: [ sh ]
+      source: |
+        #!/bin/sh
+        echo "Waiting for application to be ready..."
+        while true; do
+          if curl -s "{{inputs.parameters.protocol}}://{{inputs.parameters.app-service}}.{{inputs.parameters.app-namespace}}.svc.cluster.local:{{inputs.parameters.port}}/health" > /dev/null; then
+            echo "Application is ready!"
+            exit 0
+          fi
+          echo "Waiting for application to be ready..."
+          sleep 5
+        done
+
+  - name: run-tests
+    inputs:
+      parameters:
+      - name: app-namespace
+      - name: app-service
+      - name: openapi-spec-path
+      - name: auth-token
+      - name: protocol
+      - name: port
+    container:
+      image: driveby:latest # Your Driveby container image
+      command: [ "./driveby" ]
+      args:
+      - "validate"
+      - "--config"
+      - "/config/config.yaml"
+      env:
+      - name: DRIVEBY_BASE_URL
+        value: "{{inputs.parameters.protocol}}://{{inputs.parameters.app-service}}.{{inputs.parameters.app-namespace}}.svc.cluster.local:{{inputs.parameters.port}}"
+      - name: DRIVEBY_OPENAPI_SPEC
+        value: "{{inputs.parameters.openapi-spec-path}}"
+      - name: DRIVEBY_AUTH_TOKEN
+        value: "{{inputs.parameters.auth-token}}"
+      volumeMounts:
+      - name: config-volume
+        mountPath: /config
+    volumes:
+    - name: config-volume
+      configMap:
+        name: driveby-config # We'll create this ConfigMap separately
+---
+# ConfigMap for Driveby configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: driveby-config
+data:
+  config.yaml: |
+    version: "1.0"
+    environment: "kubernetes"
+    specPath: "/openapi.json"
+    baseURL: "{{workflow.parameters.protocol}}://{{workflow.parameters.app-service}}.{{workflow.parameters.app-namespace}}.svc.cluster.local:{{workflow.parameters.port}}"
+    auth:
+      token: "{{workflow.parameters.auth-token}}"
+      tokenHeader: "Authorization"
+      tokenType: "Bearer" 

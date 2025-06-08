@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/meter-peter/driveby/internal/openapi"
@@ -17,86 +16,39 @@ import (
 
 // APIValidator implements the validation logic
 type APIValidator struct {
-	config  ValidatorConfig
-	logger  *Logger
-	loader  *openapi.Loader
-	client  *http.Client
-	baseURL string
+	config    ValidatorConfig
+	logger    *Logger
+	loader    *openapi.Loader
+	client    *http.Client
+	baseURL   string
+	validator *OpenAPIValidator
 }
 
 // NewAPIValidator creates a new validator instance
 func NewAPIValidator(config ValidatorConfig) (*APIValidator, error) {
-	logger, err := NewLogger(config.LogPath)
+	logger, err := NewLogger("stdout") // Force stdout for Kubernetes environment
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
 
-	// Set up HTTP client with authentication
+	// Set up HTTP client
 	client := &http.Client{
 		Timeout: config.Timeout,
-		Transport: &authTransport{
-			base: http.DefaultTransport,
-			auth: config.Auth,
-		},
 	}
 
-	// Determine the baseURL based on specPath
-	baseURL := config.BaseURL
-	logger.logger.Debugf("Initial specPath: %s, initial baseURL: %s", config.SpecPath, baseURL)
-	if strings.HasPrefix(config.SpecPath, "http://") || strings.HasPrefix(config.SpecPath, "https://") {
-		logger.logger.Debugf("specPath is a URL: %s", config.SpecPath)
-		if strings.HasSuffix(strings.ToLower(config.SpecPath), ".json") || strings.HasSuffix(strings.ToLower(config.SpecPath), ".yaml") || strings.HasSuffix(strings.ToLower(config.SpecPath), ".yml") {
-			logger.logger.Debug("specPath ends with .json/.yaml, extracting directory")
-			lastSlash := strings.LastIndex(config.SpecPath, "/")
-			if lastSlash != -1 {
-				baseURL = config.SpecPath[:lastSlash]
-				logger.logger.Debugf("Extracted baseURL from specPath: %s", baseURL)
-			} else {
-				baseURL = config.SpecPath
-				logger.logger.Debugf("Could not find slash in specPath, using full specPath as baseURL: %s", baseURL)
-			}
-		} else {
-			logger.logger.Debug("specPath is a URL but does not end with .json/.yaml, using provided config.BaseURL")
-			baseURL = config.BaseURL
-		}
-	} else {
-		logger.logger.Debug("specPath is not a URL, using provided config.BaseURL")
-		baseURL = config.BaseURL
+	validator, err := NewOpenAPIValidator(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OpenAPI validator: %w", err)
 	}
-
-	logger.logger.Debugf("Final baseURL determined: %s", baseURL)
 
 	return &APIValidator{
-		config:  config,
-		logger:  logger,
-		loader:  openapi.NewLoader(),
-		client:  client,
-		baseURL: baseURL,
+		config:    config,
+		logger:    logger,
+		loader:    openapi.NewLoader(),
+		client:    client,
+		baseURL:   config.BaseURL,
+		validator: validator,
 	}, nil
-}
-
-// authTransport implements http.RoundTripper to add authentication headers
-type authTransport struct {
-	base http.RoundTripper
-	auth AuthConfig
-}
-
-func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t.auth.Token != "" {
-		headerName := t.auth.TokenHeader
-		if headerName == "" {
-			headerName = "Authorization"
-		}
-
-		tokenType := t.auth.TokenType
-		if tokenType == "" {
-			tokenType = "Bearer"
-		}
-
-		req.Header.Set(headerName, fmt.Sprintf("%s %s", tokenType, t.auth.Token))
-	}
-
-	return t.base.RoundTrip(req)
 }
 
 // Validate runs the complete validation suite
@@ -107,18 +59,8 @@ func (v *APIValidator) Validate(ctx context.Context) (*ValidationReport, error) 
 		Timestamp:   time.Now(),
 	}
 
-	// Load and validate OpenAPI spec
-	if err := v.loader.LoadFromFileOrURL(v.config.SpecPath); err != nil {
-		return nil, fmt.Errorf("failed to load OpenAPI spec: %w", err)
-	}
-	doc := v.loader.GetDocument()
-	if doc == nil {
-		return nil, fmt.Errorf("failed to get OpenAPI document")
-	}
-
-	// Run validation
-	validator := NewOpenAPIValidator(v.config)
-	validationReport, err := validator.ValidateSpec(ctx)
+	// Use the OpenAPI validator to validate the spec
+	validationReport, err := v.validator.ValidateSpec(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
@@ -178,7 +120,10 @@ func NewOrchestrator(config ValidatorConfig) *Orchestrator {
 func (o *Orchestrator) RunValidation(ctx context.Context, validationType ValidationType) (*ValidationResult, error) {
 	switch validationType {
 	case ValidationTypeSpec:
-		validator := NewOpenAPIValidator(o.config)
+		validator, err := NewOpenAPIValidator(o.config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create validator: %w", err)
+		}
 		report, err := validator.ValidateSpec(ctx)
 		return &ValidationResult{
 			Type:   ValidationTypeSpec,
@@ -196,7 +141,10 @@ func (o *Orchestrator) RunValidation(ctx context.Context, validationType Validat
 		}, nil
 
 	case ValidationTypePerformance:
-		tester := NewPerformanceTester(o.config)
+		tester, err := NewPerformanceTester(o.config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create performance tester: %w", err)
+		}
 		report, err := tester.TestPerformance(ctx)
 		return &ValidationResult{
 			Type:   ValidationTypePerformance,
@@ -218,6 +166,9 @@ func (o *Orchestrator) RunAllValidations(ctx context.Context) ([]ValidationResul
 	if err != nil {
 		return nil, fmt.Errorf("spec validation failed: %w", err)
 	}
+	if specResult.Error != nil {
+		return nil, fmt.Errorf("spec validation error: %w", specResult.Error)
+	}
 	results = append(results, *specResult)
 
 	// Run functional tests
@@ -225,12 +176,18 @@ func (o *Orchestrator) RunAllValidations(ctx context.Context) ([]ValidationResul
 	if err != nil {
 		return nil, fmt.Errorf("functional testing failed: %w", err)
 	}
+	if funcResult.Error != nil {
+		return nil, fmt.Errorf("functional testing error: %w", funcResult.Error)
+	}
 	results = append(results, *funcResult)
 
 	// Run performance tests
 	perfResult, err := o.RunValidation(ctx, ValidationTypePerformance)
 	if err != nil {
 		return nil, fmt.Errorf("performance testing failed: %w", err)
+	}
+	if perfResult.Error != nil {
+		return nil, fmt.Errorf("performance testing error: %w", perfResult.Error)
 	}
 	results = append(results, *perfResult)
 

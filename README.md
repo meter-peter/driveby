@@ -109,14 +109,94 @@ driveby load-only
 
 ## Configuration
 
-DriveBy is configured through a YAML file. See `config.yaml` for all available options:
+DriveBy supports configuration via environment variables or command-line flags. The following variables are available:
 
-- **API Configuration**: Base URL, host, port, and base path
-- **Validation Configuration**: OpenAPI spec path, environment, version, etc.
-- **Performance Configuration**: Latency targets, success rates, test duration
-- **Authentication**: Token-based authentication settings
-- **Logging**: Log level, format, and output settings
-- **Reporting**: Report output directory and formats
+- **DRIVEBY_OPENAPI** (or --openapi):  
+  The path or URL (with protocol, e.g. "https://..." or "http://...") to your OpenAPI specification.  
+  If the value starts with "http://" or "https://", DriveBy treats it as a remote URL and fetches the spec from the network; otherwise, it is treated as a local file path.  
+  If the --openapi flag is not set, DriveBy falls back to the DRIVEBY_OPENAPI environment variable (and logs a debug message).
+
+- **DRIVEBY_PROTOCOL** (or --protocol):  
+  The protocol (e.g. "http" or "https") used to construct the API's base URL for testing.  
+  (This is separate from the protocol in DRIVEBY_OPENAPI.)
+
+- **DRIVEBY_HOST** (or --host):  
+  The host (e.g. "api.example.com") used to construct the API's base URL.
+
+- **DRIVEBY_PORT** (or --port):  
+  The port (e.g. "443" or "8080") used to construct the API's base URL.
+
+- **DRIVEBY_API_URL** (or --api-url):  
+  (Optional) If provided, this overrides the constructed base URL (from protocol, host, and port).
+
+- **DRIVEBY_ENVIRONMENT** (or --environment):  
+  The environment name (e.g. "production", "staging") for reporting.
+
+- **DRIVEBY_VERSION** (or --version):  
+  The API version being tested.
+
+- **DRIVEBY_TIMEOUT** (or --timeout):  
+  Request timeout (in seconds).
+
+- **DRIVEBY_VALIDATION_MODE** (or --validation-mode):  
+  Validation mode (e.g. "strict", "minimal").
+
+- **DRIVEBY_REPORT_DIR** (or --report-dir):  
+  Directory where validation reports are saved.
+
+- **DRIVEBY_MAX_LATENCY_P95** (or --max-latency-p95):  
+  (Load test only) Maximum allowed P95 latency (in milliseconds).
+
+- **DRIVEBY_MIN_SUCCESS_RATE** (or --min-success-rate):  
+  (Load test only) Minimum required success rate (0–1).
+
+- **DRIVEBY_CONCURRENT_USERS** (or --concurrent-users):  
+  (Load test only) Number of concurrent users for load testing.
+
+- **DRIVEBY_TEST_DURATION** (or --test-duration):  
+  (Load test only) Duration (in seconds) of the load test.
+
+---
+
+## Workflow
+
+### Sample Workflow Using Environment Variables
+
+1. **Set your environment variables** (or use command-line flags) to configure DriveBy. For example:
+
+   ```bash
+   # Set the OpenAPI spec path or URL – if you intend to load a local file, omit the protocol (http:// or https://).
+   # If you include a protocol (e.g. "https://..."), DriveBy treats it as a remote URL.
+   export DRIVEBY_OPENAPI="https://docs.example.com/openapi.json"
+   # (Alternatively, for a local file, you can omit the protocol, e.g. "/path/to/openapi.json".)
+
+   # Set the API's base URL (used for testing endpoints) – these are separate from the OpenAPI spec URL.
+   export DRIVEBY_PROTOCOL="https"
+   export DRIVEBY_HOST="api.example.com"
+   export DRIVEBY_PORT="443"
+
+   # (Optional) Override the constructed base URL if needed.
+   # export DRIVEBY_API_URL="https://api.example.com:443"
+
+   # Set additional configuration (e.g. environment, version, timeout, etc.)
+   export DRIVEBY_ENVIRONMENT="production"
+   export DRIVEBY_VERSION="1.0.0"
+   export DRIVEBY_TIMEOUT="30"
+   export DRIVEBY_VALIDATION_MODE="minimal"
+   export DRIVEBY_REPORT_DIR="/tmp/driveby-reports"
+   ```
+
+2. **Run DriveBy** (for example, to run only OpenAPI validation):
+
+   ```bash
+   ./driveby validate-only
+   ```
+
+   (You can also run "function-only" or "load-only" commands as needed.)
+
+3. **Review the validation report** (saved in the report directory) to see if your API spec meets the validation criteria.
+
+---
 
 ## Validation Principles
 
