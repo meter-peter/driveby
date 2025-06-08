@@ -9,5 +9,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o driveby ./cmd/driveby
 FROM gcr.io/distroless/static
 WORKDIR /
 COPY --from=builder /app/driveby /driveby
-COPY config.yaml ./
 ENTRYPOINT ["/driveby"] 

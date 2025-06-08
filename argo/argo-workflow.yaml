@@ -1,0 +1,40 @@
+# Revised Argo Workflow (using docker repository meterpeter99/driveby) (with post-step checking return codes and logic after DriveBy validation)
+# (If the file does not exist, create it with a minimal Argo workflow example.)
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: driveby-validate-
+spec:
+  entrypoint: driveby-validate
+  templates:
+  - name: driveby-validate
+    steps:
+    - - name: driveby-validate
+        template: driveby-validate-container
+    - - name: post-validate
+        template: post-validate
+  - name: driveby-validate-container
+    container:
+      image: meterpeter99/driveby:latest # (Updated: using docker repository meterpeter99/driveby)
+      command: [ "./driveby" ]
+      args: [ "validate-only" ]
+      env:
+      - name: DRIVEBY_OPENAPI
+        value: "https://kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu/openapi.json"
+      - name: DRIVEBY_PROTOCOL
+        value: "https"
+      - name: DRIVEBY_HOST
+        value: "kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu"
+      - name: DRIVEBY_PORT
+        value: "443"
+      - name: DRIVEBY_ENVIRONMENT
+        value: "production"
+      - name: DRIVEBY_VERSION
+        value: "1.0.0"
+      - name: DRIVEBY_TIMEOUT
+        value: "30"
+      - name: DRIVEBY_VALIDATION_MODE
+        value: "minimal"
+      - name: DRIVEBY_REPORT_DIR
+        value: "/tmp/driveby-reports"
