@@ -10,135 +10,169 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Principle represents a validation principle that the API must adhere to
+// Principle represents a validation principle
 type Principle struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Category    string   `json:"category"`
-	Severity    string   `json:"severity"` // "critical", "warning", "info"
-	AutoFixable bool     `json:"auto_fixable"`
+	Severity    string   `json:"severity"`
 	Tags        []string `json:"tags"`
+	AutoFixable bool     `json:"auto_fixable"`
+	Checks      []string `json:"checks,omitempty"`
 }
 
-// ValidationReport represents a detailed report of validation results
-type ValidationReport struct {
-	Timestamp    time.Time         `json:"timestamp"`
-	Version      string            `json:"version"`
-	Environment  string            `json:"environment"`
-	TotalChecks  int               `json:"total_checks"`
-	PassedChecks int               `json:"passed_checks"`
-	FailedChecks int               `json:"failed_checks"`
-	Principles   []PrincipleResult `json:"principles"`
-	AutoFixes    []AutoFixResult   `json:"auto_fixes"`
-	Summary      ValidationSummary `json:"summary"`
-}
-
-// PrincipleResult represents the result of checking a single principle
-type PrincipleResult struct {
-	Principle    Principle `json:"principle"`
-	Passed       bool      `json:"passed"`
-	Message      string    `json:"message"`
-	Location     string    `json:"location,omitempty"`
-	Details      any       `json:"details,omitempty"`
-	SuggestedFix string    `json:"suggested_fix,omitempty"`
-	Explanation  string    `json:"explanation,omitempty"`
-}
-
-// AutoFixResult represents the result of an automatic fix attempt
-type AutoFixResult struct {
-	PrincipleID string    `json:"principle_id"`
-	Success     bool      `json:"success"`
-	Message     string    `json:"message"`
-	Location    string    `json:"location"`
-	Original    any       `json:"original,omitempty"`
-	Fixed       any       `json:"fixed,omitempty"`
-	Error       string    `json:"error,omitempty"`
-	Timestamp   time.Time `json:"timestamp"`
-}
-
-// ValidationSummary provides a high-level overview of the validation results
-type ValidationSummary struct {
-	CriticalIssues int      `json:"critical_issues"`
-	Warnings       int      `json:"warnings"`
-	Info           int      `json:"info"`
-	Categories     []string `json:"categories"`
-	FailedTags     []string `json:"failed_tags"`
-}
-
-// Define our core principles
+// CorePrinciples defines the core validation principles
 var CorePrinciples = []Principle{
 	{
 		ID:          "P001",
 		Name:        "OpenAPI Specification Compliance",
-		Description: "API must fully comply with OpenAPI 3.0 specification",
-		Category:    "Documentation",
+		Description: "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+		Category:    "Specification",
 		Severity:    "critical",
+		Tags:        []string{"openapi", "specification", "compliance"},
 		AutoFixable: true,
-		Tags:        []string{"openapi", "spec", "documentation"},
+		Checks: []string{
+			"OpenAPI version is 3.0.x or 3.1.0",
+			"Required info fields (title, version) are present",
+			"Paths are properly defined",
+			"Components are valid",
+			"References are resolvable",
+			"No duplicate operationIds",
+			"Valid HTTP methods used",
+		},
 	},
 	{
 		ID:          "P002",
-		Name:        "Response Time Performance",
-		Description: "API endpoints must respond within acceptable time limits",
-		Category:    "Performance",
-		Severity:    "critical",
-		AutoFixable: false,
-		Tags:        []string{"performance", "latency"},
+		Name:        "API Documentation Quality",
+		Description: "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
+		Category:    "Documentation",
+		Severity:    "warning",
+		Tags:        []string{"documentation", "quality", "usability"},
+		AutoFixable: true,
+		Checks: []string{
+			"All operations have clear summaries",
+			"All operations have detailed descriptions",
+			"All operations have unique operationIds",
+			"All parameters have descriptions",
+			"All request/response bodies have examples",
+			"All schemas have descriptions",
+			"All enums have descriptions",
+			"API has a general description",
+			"Contact information is provided",
+			"License information is provided",
+		},
 	},
 	{
 		ID:          "P003",
-		Name:        "Error Response Documentation",
-		Description: "All endpoints must document possible error responses",
-		Category:    "Documentation",
+		Name:        "Error Handling Standards",
+		Description: "Validates comprehensive error response documentation and consistent error handling patterns",
+		Category:    "Error Handling",
 		Severity:    "warning",
+		Tags:        []string{"errors", "responses", "standards"},
 		AutoFixable: true,
-		Tags:        []string{"errors", "documentation"},
+		Checks: []string{
+			"All operations document 4xx error responses",
+			"All operations document 5xx error responses",
+			"Error responses include error codes",
+			"Error responses include error messages",
+			"Error responses include error details schema",
+			"Common error responses are defined in components",
+			"Error responses follow consistent format",
+		},
 	},
 	{
 		ID:          "P004",
-		Name:        "Request Validation",
-		Description: "All endpoints must validate request parameters",
-		Category:    "Security",
-		Severity:    "critical",
+		Name:        "Request Schema Definitions",
+		Description: "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+		Category:    "Schema",
+		Severity:    "warning",
+		Tags:        []string{"schema", "validation", "request"},
 		AutoFixable: true,
-		Tags:        []string{"validation", "security"},
+		Checks: []string{
+			"All path parameters have schemas",
+			"All query parameters have schemas",
+			"All header parameters have schemas",
+			"All request bodies have content schemas",
+			"All schemas specify data types",
+			"All schemas have appropriate constraints",
+			"All required fields are marked",
+			"All enums have valid values",
+			"All numeric fields have min/max values",
+			"All string fields have length constraints",
+		},
 	},
 	{
 		ID:          "P005",
-		Name:        "Authentication Requirements",
-		Description: "Endpoints must specify authentication requirements",
+		Name:        "Security Standards",
+		Description: "Validates comprehensive security requirements and authentication mechanisms",
 		Category:    "Security",
 		Severity:    "critical",
+		Tags:        []string{"security", "authentication", "authorization"},
 		AutoFixable: false,
-		Tags:        []string{"security", "auth"},
+		Checks: []string{
+			"Security schemes are defined",
+			"Global security requirements are set",
+			"Operation-level security is defined",
+			"OAuth2 scopes are documented",
+			"API keys are properly described",
+			"Authentication headers are specified",
+			"Security requirements are consistent",
+		},
 	},
 	{
 		ID:          "P006",
-		Name:        "Endpoint Functional Testing",
-		Description: "API endpoints should be reachable and return documented responses",
+		Name:        "API Contract Testing",
+		Description: "Validates that the API implementation matches its specification through functional testing",
 		Category:    "Testing",
 		Severity:    "critical",
+		Tags:        []string{"testing", "contract", "implementation"},
 		AutoFixable: false,
-		Tags:        []string{"testing", "functional", "endpoints"},
+		Checks: []string{
+			"All endpoints are reachable",
+			"Response status codes match documentation",
+			"Response schemas match documentation",
+			"Authentication works as documented",
+			"Required parameters are enforced",
+			"Request validation works as documented",
+			"Error responses match documentation",
+		},
 	},
 	{
 		ID:          "P007",
-		Name:        "API Performance Compliance",
-		Description: "API performance metrics must meet defined targets",
+		Name:        "Performance Requirements",
+		Description: "Validates that the API meets performance targets and SLAs",
 		Category:    "Performance",
-		Severity:    "critical",
+		Severity:    "warning",
+		Tags:        []string{"performance", "sla", "load-testing"},
 		AutoFixable: false,
-		Tags:        []string{"testing", "performance", "sla"},
+		Checks: []string{
+			"Response time meets targets",
+			"Success rate meets targets",
+			"Error rate is within limits",
+			"Latency percentiles are acceptable",
+			"Throughput meets requirements",
+			"Concurrent request handling",
+			"Resource utilization is acceptable",
+		},
 	},
 	{
 		ID:          "P008",
-		Name:        "API Versioning",
-		Description: "API documentation should specify a version",
-		Category:    "Documentation",
+		Name:        "API Versioning Strategy",
+		Description: "Validates proper API versioning implementation and documentation",
+		Category:    "Versioning",
 		Severity:    "warning",
-		AutoFixable: false,
-		Tags:        []string{"documentation", "versioning"},
+		Tags:        []string{"versioning", "compatibility", "lifecycle"},
+		AutoFixable: true,
+		Checks: []string{
+			"API version is specified",
+			"Version follows semantic versioning",
+			"Versioning strategy is documented",
+			"Deprecation notices are present",
+			"Breaking changes are documented",
+			"Version compatibility is specified",
+			"Migration guides are referenced",
+		},
 	},
 }
 

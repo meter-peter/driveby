@@ -59,12 +59,13 @@ var validateOnlyCmd = &cobra.Command{
 			}
 		}
 		cfg := validation.ValidatorConfig{
-			BaseURL:     viper.GetString("api.base_url"),
-			SpecPath:    openapiPath,
-			LogPath:     viper.GetString("validation.log_path"),
-			Environment: viper.GetString("validation.environment"),
-			Version:     viper.GetString("validation.version"),
-			Timeout:     viper.GetDuration("validation.timeout"),
+			BaseURL:        viper.GetString("api.base_url"),
+			SpecPath:       openapiPath,
+			LogPath:        viper.GetString("validation.log_path"),
+			Environment:    viper.GetString("validation.environment"),
+			Version:        viper.GetString("validation.version"),
+			Timeout:        viper.GetDuration("validation.timeout"),
+			ValidationMode: validation.ValidationMode(viper.GetString("validation.mode")),
 			PerformanceTarget: validation.PerformanceTargetConfig{
 				MaxLatencyP95:  viper.GetDuration("performance.max_latency_p95"),
 				MinSuccessRate: viper.GetFloat64("performance.min_success_rate"),
@@ -103,7 +104,7 @@ var validateOnlyCmd = &cobra.Command{
 
 var functionOnlyCmd = &cobra.Command{
 	Use:   "function-only",
-	Short: "Run only endpoint functional tests",
+	Short: "Run only functional tests",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Build OpenAPI URL if needed
 		openapiPath := viper.GetString("validation.openapi_path")
@@ -131,14 +132,11 @@ var functionOnlyCmd = &cobra.Command{
 			Environment: viper.GetString("validation.environment"),
 			Version:     viper.GetString("validation.version"),
 			Timeout:     viper.GetDuration("validation.timeout"),
-			PerformanceTarget: validation.PerformanceTargetConfig{
-				MaxLatencyP95:  viper.GetDuration("performance.max_latency_p95"),
-				MinSuccessRate: viper.GetFloat64("performance.min_success_rate"),
-			},
 		}
 		reportDir := viper.GetString("report-dir")
 		generator := report.NewGenerator(reportDir)
-		validator, err := validation.NewAPIValidator(cfg)
+		tester := validation.NewFunctionalTester(cfg)
+		report, err := tester.TestEndpoints(context.Background())
 		if err != nil {
 			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
 				"level": "error",
@@ -146,15 +144,7 @@ var functionOnlyCmd = &cobra.Command{
 			})
 			os.Exit(1)
 		}
-		report, err := validator.Validate(context.Background())
-		if err != nil {
-			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
-				"level": "error",
-				"msg":   err.Error(),
-			})
-			os.Exit(1)
-		}
-		err = generator.SaveValidationReport(report)
+		err = generator.SaveFunctionalTestReport(report)
 		if err != nil {
 			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
 				"level": "error",
@@ -204,7 +194,8 @@ var loadOnlyCmd = &cobra.Command{
 		}
 		reportDir := viper.GetString("report-dir")
 		generator := report.NewGenerator(reportDir)
-		validator, err := validation.NewAPIValidator(cfg)
+		tester := validation.NewPerformanceTester(cfg)
+		report, err := tester.TestPerformance(context.Background())
 		if err != nil {
 			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
 				"level": "error",
@@ -212,15 +203,7 @@ var loadOnlyCmd = &cobra.Command{
 			})
 			os.Exit(1)
 		}
-		report, err := validator.Validate(context.Background())
-		if err != nil {
-			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
-				"level": "error",
-				"msg":   err.Error(),
-			})
-			os.Exit(1)
-		}
-		err = generator.SaveValidationReport(report)
+		err = generator.SaveLoadTestReport(report)
 		if err != nil {
 			json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
 				"level": "error",
@@ -245,11 +228,13 @@ func init() {
 	rootCmd.PersistentFlags().String("log-level", "info", "log level (debug, info, warn, error, fatal)")
 	rootCmd.PersistentFlags().String("log-format", "json", "log format (json, text)")
 	rootCmd.PersistentFlags().String("log-output", "stdout", "log output (stdout, stderr, or file path)")
+	rootCmd.PersistentFlags().String("validation-mode", "minimal", "validation mode (strict, minimal)")
 
 	// Bind flags to viper
 	viper.BindPFlag("logger.level", rootCmd.PersistentFlags().Lookup("log-level"))
 	viper.BindPFlag("logger.format", rootCmd.PersistentFlags().Lookup("log-format"))
 	viper.BindPFlag("logger.output", rootCmd.PersistentFlags().Lookup("log-output"))
+	viper.BindPFlag("validation.mode", rootCmd.PersistentFlags().Lookup("validation-mode"))
 
 	// Add commands
 	rootCmd.AddCommand(validateOnlyCmd)

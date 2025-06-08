@@ -4,18 +4,17 @@ import (
 	"os"
 
 	"github.com/meter-peter/driveby/internal/cli"
-	"github.com/meter-peter/driveby/internal/logger"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// Initialize logger with defaults
-	if err := logger.Configure(logger.DefaultConfig()); err != nil {
-		logger.Fatalf("Failed to configure logger: %v", err)
-	}
+	// Set up logging
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetLevel(logrus.InfoLevel)
 
-	// Execute CLI
+	// Execute the root command
 	if err := cli.Execute(); err != nil {
-		logger.WithError(err).Fatal("Application error")
+		logrus.WithError(err).Error("Command execution failed")
 		os.Exit(1)
 	}
 }

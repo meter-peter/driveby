@@ -1,35 +1,129 @@
+# DriveBy API Validation Framework Configuration
+
+# API Configuration
 api:
-  host: localhost
-  port: 3000
+  # Base URL for API requests
+  host: kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu
+  port: 443
   base_path: ""
+  base_url: https://kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu:443
 
-auth:
-  # Authentication token for API access
-  token: ""
-  # Token type (e.g., "Bearer", "Basic", etc.)
-  token_type: "Bearer"
-  # Optional: Token header name (defaults to "Authorization")
-  token_header: "Authorization"
-
+# Validation Configuration
 validation:
-  openapi_path: openapi.json
-  compliance_threshold: 85
-  fail_on_validation: true
+  openapi_path: https://kubeapp-python-rc.dev.release-q2-2025-workflows.kubecore.eu/openapi.json
+  log_path: logs/validation.log
+  environment: development
+  version: 1.0.0
+  timeout: 30s
+  auto_fix: false
+  mode: "strict"
+  test_mode: "schema-driven" # Using schema-driven testing
 
-testing:
-  request_rate: 10
-  test_duration: 1m
-  request_timeout: 10s
+# Functional Testing Configuration
+functional_test:
+  max_concurrent_tests: 5
+  request_timeout: 30s
+  retry_count: 3
+  retry_delay: 1s
+  skip_paths: []
+  required_paths: []
+  test_cases:
+  - name: "Create Product"
+    path: "/products"
+    method: "POST"
+    input:
+      name: "Test Product"
+      description: "A test product for API validation"
+      price: 99.99
+      category: "electronics"
+      in_stock: true
+      tags: [ "test", "api" ]
+    expected:
+      status_code: 201
+      schema: "Product"
+    required: true
 
+  - name: "Get Product"
+    path: "/products/{product_id}"
+    method: "GET"
+    input:
+      product_id: "{{create_product.id}}"
+    expected:
+      status_code: 200
+      schema: "Product"
+    required: true
+
+  - name: "Update Product"
+    path: "/products/{product_id}"
+    method: "PUT"
+    input:
+      product_id: "{{create_product.id}}"
+      name: "Updated Test Product"
+      description: "Updated test product description"
+      price: 149.99
+      category: "electronics"
+      in_stock: true
+      tags: [ "test", "api", "updated" ]
+    expected:
+      status_code: 200
+      schema: "Product"
+    required: true
+
+  - name: "Create Task"
+    path: "/tasks"
+    method: "POST"
+    input:
+      title: "Test Task"
+      description: "A test task for API validation"
+    expected:
+      status_code: 201
+      schema: "Task"
+    required: true
+
+  - name: "Test Echo"
+    path: "/test/echo"
+    method: "POST"
+    input:
+      message: "Test echo message"
+    expected:
+      status_code: 200
+      schema: "object"
+    required: false
+
+# Performance Testing Configuration
+performance:
+  max_latency_p95: 500ms
+  min_success_rate: 99.9
+  request_rate: 10 # requests per second
+  duration: 30s
+  concurrent_users: 5
+  ramp_up_time: 5s
+  ramp_up_steps: 2
+  think_time: 1s
+  request_timeout: 5s
+
+# Authentication Configuration
+auth:
+  token: "" # Authentication token
+  token_type: "bearer"
+  token_header: "Authorization" # Header name for token
+  username: "" # Username for basic auth
+  password: "" # Password for basic auth
+  api_key: "" # API key for API key auth
+  api_key_header: "X-API-Key" # Header name for API key
+
+# Logger Configuration
 logger:
-  # Log level (debug, info, warn, error, fatal)
-  level: info
-  # Log format (json, text)
-  format: json
-  # Log output (stdout, stderr, or file path)
-  output: stdout
-  # Additional fields to include in every log entry
-  fields:
-    app: driveby
-    version: 1.0.0
-    environment: development
+  level: "debug" # Set to debug for detailed validation output
+  format: "json" # Log format (json, text)
+  output: "stdout" # Log output (stdout, stderr, or file path)
+  test_log_path: "logs/test.log" # Path for test-specific logs
+
+# Report Configuration
+report:
+  output_dir: "reports"
+  formats: [ "json", "markdown" ]
+  include_test_details: true
+  include_summary: true
+  save_failed_requests: true
+  test_impact_threshold: 0.8

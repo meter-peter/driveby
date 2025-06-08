@@ -1,0 +1,961 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Product API",
+    "description": "\n    A fully documented Product API that demonstrates documentation-driven testing.\n    \n    This API allows you to:\n    * Create new products\n    * Retrieve product information\n    * Update existing products\n    * Delete products\n    * Search for products by various criteria\n    \n    ## Documentation-Driven Testing\n    This API is designed for automated testing directly from the OpenAPI specification.\n    Each endpoint includes complete request and response examples that can be used for:\n    \n    * Generating test cases\n    * Validating responses\n    * Performing load testing\n    * Creating mock servers\n    \n    ## Test Automation\n    The OpenAPI schema is designed to be consumed by automated test tools that can:\n    1. Parse the schema to discover endpoints\n    2. Extract example data for requests\n    3. Validate responses against the defined schemas\n    4. Generate load test scenarios\n    ",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/tasks": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Create a new task",
+        "description": "Creates a task with title and description",
+        "operationId": "create_task_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successfully created task",
+                    "value": {
+                      "id": "f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+                      "title": "Sample Task",
+                      "description": "Example description"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "validation_error": {
+                    "summary": "Validation Error",
+                    "value": {
+                      "error": "Validation failed: title required",
+                      "code": 400,
+                      "details": [
+                        "Field 'title' is required"
+                      ]
+                    }
+                  },
+                  "invalid_json": {
+                    "summary": "Invalid JSON",
+                    "value": {
+                      "error": "Invalid JSON payload",
+                      "code": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get all products",
+        "description": "Retrieve a list of all products with optional filtering by category",
+        "operationId": "get_products_products_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ProductCategory"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter by Category",
+              "description": "Filter products by category"
+            },
+            "description": "Filter products by category",
+            "example": "electronics"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Minimum Price",
+              "description": "Filter products with price greater than or equal to this value"
+            },
+            "description": "Filter products with price greater than or equal to this value",
+            "example": 50.0
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Maximum Price",
+              "description": "Filter products with price less than or equal to this value"
+            },
+            "description": "Filter products with price less than or equal to this value",
+            "example": 200.0
+          },
+          {
+            "name": "in_stock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "In Stock Only",
+              "description": "Filter products by stock availability"
+            },
+            "description": "Filter products by stock availability",
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with list of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  },
+                  "title": "Response Get Products Products Get"
+                },
+                "examples": {
+                  "all_products": {
+                    "summary": "All products",
+                    "value": [
+                      {
+                        "id": "f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+                        "name": "Wireless Headphones",
+                        "description": "Noise-cancelling wireless headphones with 20h battery life",
+                        "price": 99.99,
+                        "category": "electronics",
+                        "in_stock": true,
+                        "tags": [
+                          "wireless",
+                          "audio",
+                          "bluetooth"
+                        ],
+                        "created_at": "2023-01-15T14:30:00Z",
+                        "updated_at": "2023-01-15T14:30:00Z"
+                      },
+                      {
+                        "id": "c9b7e908-18dd-4f7c-af1d-65e7b2adf0a2",
+                        "name": "Cotton T-Shirt",
+                        "description": "Comfortable 100% cotton t-shirt, available in multiple colors",
+                        "price": 19.99,
+                        "category": "clothing",
+                        "in_stock": true,
+                        "tags": [
+                          "cotton",
+                          "casual",
+                          "summer"
+                        ],
+                        "created_at": "2023-01-15T14:30:00Z",
+                        "updated_at": "2023-01-15T14:30:00Z"
+                      }
+                    ]
+                  },
+                  "filtered_products": {
+                    "summary": "Filtered products by category",
+                    "value": [
+                      {
+                        "id": "f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+                        "name": "Wireless Headphones",
+                        "description": "Noise-cancelling wireless headphones with 20h battery life",
+                        "price": 99.99,
+                        "category": "electronics",
+                        "in_stock": true,
+                        "tags": [
+                          "wireless",
+                          "audio",
+                          "bluetooth"
+                        ],
+                        "created_at": "2023-01-15T14:30:00Z",
+                        "updated_at": "2023-01-15T14:30:00Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Create a new product",
+        "description": "Add a new product to the catalog",
+        "operationId": "create_product_products_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreate",
+                "title": "Product Data",
+                "description": "The data for the new product"
+              },
+              "example": {
+                "name": "Wireless Headphones",
+                "description": "Noise-cancelling wireless headphones with 20h battery life",
+                "price": 99.99,
+                "category": "electronics",
+                "in_stock": true,
+                "tags": [
+                  "wireless",
+                  "audio",
+                  "bluetooth"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created product with system-generated fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product_id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get a specific product",
+        "description": "Retrieve detailed information about a specific product by its ID",
+        "operationId": "get_product_products__product_id__get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product ID",
+              "description": "The unique identifier of the product"
+            },
+            "description": "The unique identifier of the product",
+            "example": "f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Product not found",
+                  "code": 404
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Update a product",
+        "description": "Update an existing product's details",
+        "operationId": "update_product_products__product_id__put",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product ID",
+              "description": "The unique identifier of the product to update"
+            },
+            "description": "The unique identifier of the product to update",
+            "example": "f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductBase",
+                "title": "Updated Product Data",
+                "description": "The new data for the product"
+              },
+              "example": {
+                "name": "Updated Wireless Headphones",
+                "description": "Improved noise-cancelling wireless headphones with 30h battery life",
+                "price": 129.99,
+                "category": "electronics",
+                "in_stock": true,
+                "tags": [
+                  "wireless",
+                  "audio",
+                  "bluetooth",
+                  "noise-cancelling"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Product not found",
+                  "code": 404
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Delete a product",
+        "description": "Remove a product from the catalog",
+        "operationId": "delete_product_products__product_id__delete",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product ID",
+              "description": "The unique identifier of the product to delete"
+            },
+            "description": "The unique identifier of the product to delete",
+            "example": "f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Product successfully deleted"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Product not found",
+                  "code": 404
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/test/health": {
+      "get": {
+        "tags": [
+          "Testing"
+        ],
+        "summary": "Health check endpoint",
+        "description": "Validate that the API is running properly",
+        "operationId": "health_check_test_health_get",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "healthy",
+                  "version": "1.0.0",
+                  "timestamp": "2023-01-15T14:30:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/test/echo": {
+      "post": {
+        "tags": [
+          "Testing"
+        ],
+        "summary": "Echo test endpoint",
+        "description": "Return the request body as-is for testing request/response handling",
+        "operationId": "echo_test_test_echo_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              },
+              "example": {
+                "message": "Test message",
+                "number": 42,
+                "active": true
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Echo response",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "message": "This is a test message",
+                  "number": 42,
+                  "active": true
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check endpoint",
+        "description": "Basic health check endpoint that provides API status information",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {},
+                "example": {
+                  "status": "healthy",
+                  "version": "1.0.0",
+                  "timestamp": "2023-01-15T14:30:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Product": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Product Name",
+            "description": "Name of the product",
+            "example": "Wireless Headphones"
+          },
+          "description": {
+            "type": "string",
+            "title": "Product Description",
+            "description": "Detailed description of the product",
+            "example": "Noise-cancelling wireless headphones with 20h battery life"
+          },
+          "price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Product Price",
+            "description": "Price of the product in USD",
+            "example": 99.99
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory",
+            "title": "Product Category",
+            "description": "Category the product belongs to",
+            "example": "electronics"
+          },
+          "in_stock": {
+            "type": "boolean",
+            "title": "Stock Status",
+            "description": "Whether the product is in stock",
+            "default": true,
+            "example": true
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Tags",
+            "description": "Tags associated with the product",
+            "default": [],
+            "example": [
+              "wireless",
+              "audio",
+              "bluetooth"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "title": "Product ID",
+            "description": "Unique identifier for the product",
+            "example": "f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creation Date",
+            "description": "Date and time when the product was created",
+            "example": "2023-01-15T14:30:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Update Date",
+            "description": "Date and time when the product was last updated",
+            "example": "2023-01-15T14:30:00Z"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "price",
+          "category",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Product",
+        "description": "Complete product model including system fields.",
+        "example": {
+          "category": "electronics",
+          "created_at": "2023-01-15T14:30:00Z",
+          "description": "Noise-cancelling wireless headphones with 20h battery life",
+          "id": "f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+          "in_stock": true,
+          "name": "Wireless Headphones",
+          "price": 99.99,
+          "tags": [
+            "wireless",
+            "audio",
+            "bluetooth"
+          ],
+          "updated_at": "2023-01-15T14:30:00Z"
+        }
+      },
+      "ProductBase": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Product Name",
+            "description": "Name of the product",
+            "example": "Wireless Headphones"
+          },
+          "description": {
+            "type": "string",
+            "title": "Product Description",
+            "description": "Detailed description of the product",
+            "example": "Noise-cancelling wireless headphones with 20h battery life"
+          },
+          "price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Product Price",
+            "description": "Price of the product in USD",
+            "example": 99.99
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory",
+            "title": "Product Category",
+            "description": "Category the product belongs to",
+            "example": "electronics"
+          },
+          "in_stock": {
+            "type": "boolean",
+            "title": "Stock Status",
+            "description": "Whether the product is in stock",
+            "default": true,
+            "example": true
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Tags",
+            "description": "Tags associated with the product",
+            "default": [],
+            "example": [
+              "wireless",
+              "audio",
+              "bluetooth"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "price",
+          "category"
+        ],
+        "title": "ProductBase",
+        "description": "Base product model with common attributes."
+      },
+      "ProductCategory": {
+        "type": "string",
+        "enum": [
+          "electronics",
+          "clothing",
+          "food",
+          "books",
+          "other"
+        ],
+        "title": "ProductCategory",
+        "description": "Product category enumeration."
+      },
+      "ProductCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Product Name",
+            "description": "Name of the product",
+            "example": "Wireless Headphones"
+          },
+          "description": {
+            "type": "string",
+            "title": "Product Description",
+            "description": "Detailed description of the product",
+            "example": "Noise-cancelling wireless headphones with 20h battery life"
+          },
+          "price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Product Price",
+            "description": "Price of the product in USD",
+            "example": 99.99
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory",
+            "title": "Product Category",
+            "description": "Category the product belongs to",
+            "example": "electronics"
+          },
+          "in_stock": {
+            "type": "boolean",
+            "title": "Stock Status",
+            "description": "Whether the product is in stock",
+            "default": true,
+            "example": true
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Tags",
+            "description": "Tags associated with the product",
+            "default": [],
+            "example": [
+              "wireless",
+              "audio",
+              "bluetooth"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "price",
+          "category"
+        ],
+        "title": "ProductCreate",
+        "description": "Model for creating a new product."
+      },
+      "Task": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Task ID",
+            "description": "Unique identifier for the task",
+            "example": "f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Task Title",
+            "description": "Title of the task",
+            "example": "Sample Task"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Description",
+            "description": "Detailed description of the task",
+            "example": "Example description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "Task",
+        "description": "Complete task model including system-generated fields."
+      },
+      "TaskCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Task Title",
+            "description": "Title of the task",
+            "example": "Sample Task"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Description",
+            "description": "Detailed description of the task",
+            "example": "Example description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "TaskCreate",
+        "description": "Model for creating a new task."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

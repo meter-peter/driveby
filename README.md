@@ -1,112 +1,152 @@
-# driveby
+# DriveBy - Modern API Validation Framework
 
-`driveby` is a modern API validation and testing framework built on the principle of **Documentation Driven Testing**. This approach treats your API documentation, specifically OpenAPI (Swagger) specifications, as the single source of truth for validating and testing your API.
+DriveBy is a comprehensive API validation framework that helps you validate, test, and monitor your APIs. It supports OpenAPI/Swagger specifications and provides extensive validation, testing, and monitoring capabilities.
 
-## Concept and Purpose
+## Features
 
-The core concept behind `driveby` is to shift the focus of API quality assurance from manually written tests to automated validation based on comprehensive and accurate documentation. By using your OpenAPI specification, `driveby` can automatically verify that your API implementation adheres to its documented contract.
+- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0 standards
+- **Functional Testing**: Tests API endpoints for functionality and correctness
+- **Performance Testing**: Load tests APIs with configurable targets
+- **Documentation Validation**: Ensures API documentation is complete and accurate
+- **Auto-fixing**: Automatically fixes common documentation issues (TODO)
+- **Comprehensive Reporting**: Generates detailed reports in JSON and Markdown formats
+- **Authentication Support**: Supports various authentication methods
+- **Configurable**: Highly configurable through YAML configuration
+- **Validation Modes**: Supports different validation levels (minimal/strict) for different use cases
 
-The primary purpose of `driveby` is to help development teams ensure their APIs are consistently reliable, performant, and well-documented. It aims to catch discrepancies between the documentation and the implementation early in the development lifecycle.
+## Validation Modes
 
-## Principles of a Testable API
+DriveBy supports two validation modes to accommodate different use cases:
 
-To be effectively validated and tested by Driveby (or any documentation-driven testing tool), an API should adhere to the following principles:
+1. **Minimal Mode** (default)
+   - Focuses on essential validation only
+   - Validates basic schema existence and structure
+   - Only checks documentation for present error codes (doesn't require specific codes to be present)
+   - Skips functional testing and performance testing
+   - No load testing or functional testing reports are generated
+   - Faster execution with fewer checks
+   - Suitable for development and CI/CD pipelines
+   - Validates:
+     - OpenAPI Specification Compliance (P001)
+     - Basic Request Schema Validation (P004)
+     - Documentation for any present error responses
 
-1.  **Examplable:** Every request and response must include realistic and representative examples in the OpenAPI schema. Examples for parameters, request bodies, and responses are crucial for automated test generation and validation.
-2.  **Describable:** All endpoints, parameters, and schemas must have clear and informative descriptions. Descriptions aid both human and machine understanding of the API's intended behavior, including error responses and edge cases.
-3.  **Deterministic:** Given the same valid input under the same conditions, the API should consistently produce the same output. Determinism is fundamental for reliable and reproducible automated testing.
-4.  **Observable:** The API should provide clear and discernible outputs for all operations. This includes surfacing error conditions, validation failures, and business logic outcomes in responses rather than hiding them.
-5.  **Complete:** All possible responses, including success, various error states (validation, business logic), and edge cases, must be comprehensively documented in the OpenAPI specification.
-6.  **Consistent:** Adhering to consistent naming conventions, status code usage, and error response formats across the API reduces ambiguity and enhances the effectiveness of automated validation.
-7.  **Versioned:** The API and its corresponding documentation should be clearly versioned. This practice is essential for managing API evolution and ensuring backward compatibility while allowing for safe testing of different versions.
-8.  **Discoverable:** The OpenAPI specification should be readily available, ideally at a standard, well-known endpoint (e.g., `/openapi.json`). Providing interactive documentation (e.g., Swagger UI at `/docs`) further aids human discoverability and understanding.
+2. **Strict Mode**
+   - Comprehensive validation of all aspects
+   - Validates schema constraints, types, and formats
+   - Requires complete documentation including all standard error codes
+   - Enforces all validation principles
+   - Generates full reports including load testing and functional testing
+   - Suitable for production readiness checks
+   - Validates all principles (P001-P008):
+     - OpenAPI Specification Compliance
+     - API Documentation Completeness
+     - Error Response Documentation
+     - Request Validation
+     - Authentication Requirements
+     - Endpoint Functional Testing
+     - API Performance Compliance
+     - API Versioning
 
-## Driveby's Operational Principles
+You can set the validation mode through:
+- Command line: `--validation-mode=strict|minimal`
+- Config file: `validation.mode: strict|minimal`
+- Environment variable: `DRIVEBY_VALIDATION_MODE=strict|minimal`
 
-`driveby` itself operates based on a set of core principles that guide its validation and testing processes. These principles, embedded within the framework, define what `driveby` checks for when analyzing an API against its documentation:
-
-*   **Documentation as the Source of Truth:** Reinforcing the core concept, the OpenAPI specification is treated as the definitive source for validation criteria.
-*   **Comprehensive Validation:** `driveby` aims to cover various aspects beyond just schema compliance, including functional correctness and performance characteristics derived from or implied by the documentation.
-*   **Early Detection of Discrepancies:** The framework is designed to quickly identify divergences between the live API's behavior and its documented contract.
-*   **Actionable Reporting:** Providing clear, detailed, and easy-to-understand reports on validation failures is crucial for efficient issue resolution.
-*   **Support for Automation:** `driveby` is built to be easily integrated into CI/CD pipelines for continuous and automated quality assurance.
-
-## Core Principles and Management within Driveby
-
-`driveby`'s validation process is driven by a set of internal principles that represent key aspects of API quality and documentation adherence. These principles are implemented as specific checks within the framework, automatically performed against your live API based on its OpenAPI specification. The key internal principles include:
-
-*   **P001: OpenAPI Specification Compliance:** Ensures the API's structure, paths, operations, and schemas strictly adhere to the OpenAPI 3.0 specification.
-*   **P002: Response Time Performance:** Validates that API endpoints respond within acceptable time limits, often derived from or compared against configured performance targets.
-*   **P003: Error Response Documentation:** Checks if the OpenAPI spec documents possible error responses (status codes and schemas) for all relevant endpoints.
-*   **P004: Request Validation:** Verifies, where possible through documentation analysis and potential interaction, that the API properly validates incoming request parameters as defined in the documentation.
-*   **P005: Authentication Requirements:** Confirms that the OpenAPI spec clearly specifies the authentication and authorization requirements for endpoints.
-*   **P006: Endpoint Functional Testing:** Performs basic functional tests by sending requests to documented endpoints and verifying that the responses align with the documented status codes and potentially schemas.
-*   **P007: API Performance Compliance:** Assesses the overall performance of the API, measuring metrics like P95 latency and error rates, and comparing them against configured benchmarks.
-*   **P008: API Versioning:** Checks for the presence and format of versioning information within the API documentation (e.g., in the `info.version` field).
-
-These internal principles are managed and applied by the `Validator` component. The `Validator` parses the OpenAPI specification and uses the information to execute the checks corresponding to each principle against the live API. The results are compiled into a `ValidationReport`, providing a clear assessment of the API's compliance with its documentation and the defined quality standards.
-
-## General Idea
-
-The general idea is simple: provide `driveby` with the endpoint of your running API and its OpenAPI specification. `driveby` will then:
-
-1.  Fetch and parse the OpenAPI specification.
-2.  Apply the core validation principles against the live API endpoint, using the documentation to guide the tests.
-3.  Perform functional tests by making requests based on the documented paths, parameters, and expected responses.
-4.  Execute performance checks to ensure endpoints meet documented or configured performance targets.
-5.  Generate detailed reports highlighting any violations of the principles or discrepancies found, outputting results in formats like JSON and Markdown.
-
-This process ensures that your API not only functions correctly but also accurately reflects its documentation, reinforcing the Documentation Driven Testing methodology.
-
-## Functional Testing in Practice
-
-`driveby` incorporates functional testing (aligned with Principle P006) by automatically verifying the reachability and expected responses of the endpoints defined in your OpenAPI specification. By parsing the documented paths and HTTP methods, `driveby` sends requests to your live API to ensure that the endpoints are active and return the documented status codes. This practical application helps confirm that your API's basic functionality aligns with its documentation, serving as a continuous integration check.
-
-## Performance Testing in Practice
-
-Addressing performance concerns (aligned with Principles P002 and P007), `driveby` utilizes your OpenAPI specification to identify API endpoints and generate load targets. It then performs performance tests to measure key metrics such as P95 latency and error rate using tools like `vegeta`. These measured metrics are compared against performance targets that you can configure, allowing you to ensure that your API not only functions correctly but also consistently meets the necessary performance benchmarks as expected or required for a production environment.
-
-# Report Formats
-
-## JSON Reports
-All validation, functional, and performance results are output as JSON to stdout and saved in the report output directory (default: ./reports). Example:
-
-```json
-{
-  "timestamp": "2025-05-31T16:43:30.975+03:00",
-  "version": "1.0.0",
-  "environment": "development",
-  "principles": [ ... ],
-  "summary": { ... }
-}
+Example config.yaml:
+```yaml
+validation:
+  mode: "minimal"  # or "strict"
+  openapi_path: "openapi.json"
+  environment: "development"
 ```
 
-## Markdown Reports
-A human-readable Markdown report is also generated for each run. Example:
+Note: In minimal mode, the focus is on ensuring that any documented endpoints and responses are properly documented, rather than enforcing a complete set of documentation. This makes it ideal for development and test generation scenarios where you want to validate what's present without requiring comprehensive documentation.
 
-```markdown
-# API Validation Report
+## Installation
 
-Generated: 2025-05-31T16:43:30.975+03:00
+```bash
+# Clone the repository
+git clone https://github.com/meter-peter/driveby.git
+cd driveby
 
-## Summary
-| Total Checks | Passed | Failed | Critical | Warnings | Info |
-|--------------|--------|--------|----------|----------|------|
-| 7            | 5      | 2      | 1        | 1        | 0    |
+# Build the project
+go build -o driveby ./cmd/driveby
 
-## Principle Results
-| Principle | Status | Message |
-|-----------|--------|---------|
-| P001      | Passed | ...     |
-| P003      | Failed | ...     |
+# Install globally (optional)
+go install ./cmd/driveby
 ```
 
-## Configuring Output Directory
+## Quick Start
 
-You can set the report output directory with the `--report-dir` flag:
+1. Create a configuration file (config.yaml):
+```yaml
+api:
+  base_url: "http://localhost:8080"
+  host: "localhost"
+  port: "8080"
+  base_path: "/api/v1"
 
+validation:
+  openapi_path: "openapi.json"
+  environment: "development"
 ```
-driveby validate-only --report-dir ./my-reports
+
+2. Run validation:
+```bash
+# Run all validations
+driveby validate
+
+# Run only documentation validation
+driveby validate-only
+
+# Run only functional tests
+driveby function-only
+
+# Run only performance tests
+driveby load-only
 ```
 
-All reports will be saved in the specified directory. 
+## Configuration
+
+DriveBy is configured through a YAML file. See `config.yaml` for all available options:
+
+- **API Configuration**: Base URL, host, port, and base path
+- **Validation Configuration**: OpenAPI spec path, environment, version, etc.
+- **Performance Configuration**: Latency targets, success rates, test duration
+- **Authentication**: Token-based authentication settings
+- **Logging**: Log level, format, and output settings
+- **Reporting**: Report output directory and formats
+
+## Validation Principles
+
+DriveBy implements several validation principles (P001-P008):
+
+1. **P001**: OpenAPI Specification Compliance
+2. **P002**: Response Time Performance
+3. **P003**: Error Response Documentation
+4. **P004**: Request Validation
+5. **P005**: Authentication Requirements
+6. **P006**: Endpoint Functional Testing
+7. **P007**: API Performance Compliance
+8. **P008**: API Versioning
+
+## Reports
+
+DriveBy generates detailed reports in both JSON and Markdown formats, including:
+
+- Validation results for each principle
+- Performance metrics
+- Documentation quality scores
+- Auto-fix attempts and results
+- Summary statistics
+
+Reports are saved in the configured output directory (default: `./reports`).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 

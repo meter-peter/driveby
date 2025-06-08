@@ -1,1284 +1,374 @@
 {
-  "timestamp": "2025-06-07T16:50:07.162718658+03:00",
-  "version": "",
-  "environment": "",
-  "total_checks": 8,
-  "passed_checks": 3,
-  "failed_checks": 5,
-  "principles": [
+  "Version": "1.0.0",
+  "Environment": "development",
+  "Timestamp": "2025-06-08T20:32:21.727884734+03:00",
+  "Principles": [
     {
-      "principle": {
+      "Principle": {
         "id": "P001",
         "name": "OpenAPI Specification Compliance",
-        "description": "API must fully comply with OpenAPI 3.0 specification",
-        "category": "Documentation",
+        "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+        "category": "Specification",
         "severity": "critical",
-        "auto_fixable": true,
         "tags": [
           "openapi",
-          "spec",
-          "documentation"
-        ]
-      },
-      "passed": true,
-      "message": ""
-    },
-    {
-      "principle": {
-        "id": "P002",
-        "name": "Response Time Performance",
-        "description": "API endpoints must respond within acceptable time limits",
-        "category": "Performance",
-        "severity": "critical",
-        "auto_fixable": false,
-        "tags": [
-          "performance",
-          "latency"
-        ]
-      },
-      "passed": false,
-      "message": "Performance targets are not configured.",
-      "suggested_fix": "Configure performance_target.max_latency_p95 and performance_target.min_success_rate in the config."
-    },
-    {
-      "principle": {
-        "id": "P003",
-        "name": "Error Response Documentation",
-        "description": "All endpoints must document possible error responses",
-        "category": "Documentation",
-        "severity": "warning",
-        "auto_fixable": true,
-        "tags": [
-          "errors",
-          "documentation"
-        ]
-      },
-      "passed": false,
-      "message": "Endpoints missing error response documentation",
-      "details": [
-        "GET /admin/initialized"
-      ],
-      "suggested_fix": "Add error responses (4xx, 5xx) to all endpoints"
-    },
-    {
-      "principle": {
-        "id": "P004",
-        "name": "Request Validation",
-        "description": "All endpoints must validate request parameters",
-        "category": "Security",
-        "severity": "critical",
-        "auto_fixable": true,
-        "tags": [
-          "validation",
-          "security"
-        ]
-      },
-      "passed": true,
-      "message": ""
-    },
-    {
-      "principle": {
-        "id": "P005",
-        "name": "Authentication Requirements",
-        "description": "Endpoints must specify authentication requirements",
-        "category": "Security",
-        "severity": "critical",
-        "auto_fixable": false,
-        "tags": [
-          "security",
-          "auth"
-        ]
-      },
-      "passed": false,
-      "message": "Endpoints missing authentication requirements",
-      "details": [
-        "POST /admin/register",
-        "POST /auth/login",
-        "POST /auth/logout",
-        "GET /admin/initialized",
-        "POST /auth/register"
-      ],
-      "suggested_fix": "Add security requirements to endpoints or global security"
-    },
-    {
-      "principle": {
-        "id": "P006",
-        "name": "Endpoint Functional Testing",
-        "description": "API endpoints should be reachable and return documented responses",
-        "category": "Testing",
-        "severity": "critical",
-        "auto_fixable": false,
-        "tags": [
-          "testing",
-          "functional",
-          "endpoints"
-        ]
-      },
-      "passed": false,
-      "message": "Some endpoints failed functional tests (48/50 failed): 46 authentication failures (401/403), 2 client errors (4xx)",
-      "details": {
-        "all_results": [
-          {
-            "path": "/customer/appointments",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 3649418,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/appointments",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4103288,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/initialized",
-            "method": "GET",
-            "status": "success",
-            "response_time": 11485322,
-            "status_code": 200,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "20",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"14-ucD8Lj7IplxzVgcnhzJeisPLles\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/appointments",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5299047,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/cars/{carId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 8959050,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/cars/{carId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5962609,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/cars/{carId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 6419770,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/cars/{carId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 3698380,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/cars/{carId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4431679,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/cars/{carId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 6755246,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/auth/login",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 13753825,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "43",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"2b-9mJiBIICChLuN71IEEIuRSxoGD0\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/register",
-            "method": "POST",
-            "status": "client_error",
-            "errors": [
-              "client error: status 400"
-            ],
-            "response_time": 5124728,
-            "status_code": 400,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "32",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"20-iqOWAheTgnCUvaeJvdAxdCDWNbY\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/activate/{userId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2346311,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/cars/{carId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1561450,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/cars/{carId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1406113,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/cars/{carId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2153430,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/cars/import",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2994236,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/cars",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 3371701,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:06 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/auth/register",
-            "method": "POST",
-            "status": "client_error",
-            "errors": [
-              "client error: status 400"
-            ],
-            "response_time": 14962936,
-            "status_code": 400,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "222",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"de-YZ1Rm7kI1ve/AQSSy5s1ww0IlGA\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/auth/logout",
-            "method": "POST",
-            "status": "success",
-            "response_time": 1822331,
-            "status_code": 200,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "37",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"25-71uUsMgZY3FdZp9j1h5YMrBIOgg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/users/{userId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 893923,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/users/{userId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1519651,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/users/{userId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2501327,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments/{appointmentId}/cancel",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2097701,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/appointments/{appointmentId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2839415,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/appointments/{appointmentId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4960705,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/appointments/{appointmentId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 8120263,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/cars",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4235893,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/users/{userId}/active",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5935439,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/appointments/{appointmentId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4867853,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/appointments/{appointmentId}/cancel",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1682061,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users/import",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2393646,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users/{userId}/active",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1633074,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/register-secretary",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5025142,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments/{appointmentId}/status",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 7214617,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/customers/{customerId}/export",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5618690,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 6336897,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5447125,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments/{appointmentId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 6082313,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments/{appointmentId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 10039745,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/appointments/{appointmentId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 3850595,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/admin/users",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 8237431,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users/{userId}",
-            "method": "DELETE",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1532909,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users/{userId}",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1634947,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users/{userId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 3099213,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/cars",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 5411395,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/customer/cars",
-            "method": "POST",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4871064,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/secretary/users",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 1854920,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/mechanic/appointments",
-            "method": "GET",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 2125867,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          },
-          {
-            "path": "/mechanic/appointments/{appointmentId}",
-            "method": "PATCH",
-            "status": "auth_failed",
-            "errors": [
-              "authentication failed: status 401"
-            ],
-            "response_time": 4106113,
-            "status_code": 401,
-            "headers": {
-              "Access-Control-Allow-Credentials": "true",
-              "Access-Control-Allow-Origin": "http://localhost:8080",
-              "Connection": "keep-alive",
-              "Content-Length": "29",
-              "Content-Type": "application/json; charset=utf-8",
-              "Date": "Sat, 07 Jun 2025 13:50:07 GMT",
-              "Etag": "W/\"1d-TdeScqFQy+dbnhB6tfnSArDhevg\"",
-              "Keep-Alive": "timeout=5",
-              "Vary": "Origin",
-              "X-Powered-By": "Express"
-            }
-          }
+          "specification",
+          "compliance"
         ],
-        "auth_failed_count": 46,
-        "client_error_count": 2,
-        "other_failed_count": 0,
-        "passed_count": 2,
-        "server_error_count": 0,
-        "total_endpoints": 50,
-        "undocumented_count": 0
-      }
-    },
-    {
-      "principle": {
-        "id": "P007",
-        "name": "API Performance Compliance",
-        "description": "API performance metrics must meet defined targets",
-        "category": "Performance",
-        "severity": "critical",
-        "auto_fixable": false,
-        "tags": [
-          "testing",
-          "performance",
-          "sla"
+        "auto_fixable": true,
+        "checks": [
+          "OpenAPI version is 3.0.x or 3.1.0",
+          "Required info fields (title, version) are present",
+          "Paths are properly defined",
+          "Components are valid",
+          "References are resolvable",
+          "No duplicate operationIds",
+          "Valid HTTP methods used"
         ]
       },
-      "passed": false,
-      "message": "Performance test skipped due to widespread functional test failures (likely auth/network issues).",
-      "explanation": "Functional tests (P006) indicated widespread failures, making performance metrics unreliable. Address functional issues first."
+      "Passed": false,
+      "Message": "OpenAPI spec validation failed: References are resolvable: invalid components: schema \"Task\": unsupported 'type' value \"null\"",
+      "Details": {
+        "checks": {
+          "Components are valid": true,
+          "No duplicate operationIds": true,
+          "OpenAPI version is 3.0.x or 3.1.0": true,
+          "Paths are properly defined": true,
+          "References are resolvable": false,
+          "Required info fields (title, version) are present": true,
+          "Valid HTTP methods used": true
+        },
+        "messages": {
+          "References are resolvable": "invalid components: schema \"Task\": unsupported 'type' value \"null\""
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
     },
     {
-      "principle": {
-        "id": "P008",
-        "name": "API Versioning",
-        "description": "API documentation should specify a version",
+      "Principle": {
+        "id": "P002",
+        "name": "API Documentation Quality",
+        "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
         "category": "Documentation",
         "severity": "warning",
-        "auto_fixable": false,
         "tags": [
           "documentation",
-          "versioning"
+          "quality",
+          "usability"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations have clear summaries",
+          "All operations have detailed descriptions",
+          "All operations have unique operationIds",
+          "All parameters have descriptions",
+          "All request/response bodies have examples",
+          "All schemas have descriptions",
+          "All enums have descriptions",
+          "API has a general description",
+          "Contact information is provided",
+          "License information is provided"
         ]
       },
-      "passed": true,
-      "message": "API version is specified as: 1.0.0"
+      "Passed": false,
+      "Message": "Documentation quality issues found: All request/response bodies have examples: GET /products: 422 application/json response, POST /products: request body, POST /products: 201 application/json response, POST /products: 422 application/json response, DELETE /products/{product_id}: 422 application/json response, GET /products/{product_id}: 200 application/json response, GET /products/{product_id}: 422 application/json response, PUT /products/{product_id}: request body, PUT /products/{product_id}: 422 application/json response, PUT /products/{product_id}: 200 application/json response, POST /tasks: request body, POST /tasks: application/json request body, POST /tasks: 422 application/json response, POST /test/echo: request body, POST /test/echo: 422 application/json response; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other; All schemas have descriptions: ValidationError, HTTPValidationError",
+      "Details": {
+        "checks": {
+          "API has a general description": true,
+          "All enums have descriptions": false,
+          "All request/response bodies have examples": false,
+          "All schemas have descriptions": false,
+          "Contact information is provided": true,
+          "License information is provided": true
+        },
+        "messages": {},
+        "missing_docs": {
+          "All enums have descriptions": [
+            "ProductCategory: enum value electronics",
+            "ProductCategory: enum value clothing",
+            "ProductCategory: enum value food",
+            "ProductCategory: enum value books",
+            "ProductCategory: enum value other"
+          ],
+          "All request/response bodies have examples": [
+            "GET /products: 422 application/json response",
+            "POST /products: request body",
+            "POST /products: 201 application/json response",
+            "POST /products: 422 application/json response",
+            "DELETE /products/{product_id}: 422 application/json response",
+            "GET /products/{product_id}: 200 application/json response",
+            "GET /products/{product_id}: 422 application/json response",
+            "PUT /products/{product_id}: request body",
+            "PUT /products/{product_id}: 422 application/json response",
+            "PUT /products/{product_id}: 200 application/json response",
+            "POST /tasks: request body",
+            "POST /tasks: application/json request body",
+            "POST /tasks: 422 application/json response",
+            "POST /test/echo: request body",
+            "POST /test/echo: 422 application/json response"
+          ],
+          "All schemas have descriptions": [
+            "ValidationError",
+            "HTTPValidationError"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add missing documentation including descriptions, examples, and operation details",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P003",
+        "name": "Error Handling Standards",
+        "description": "Validates comprehensive error response documentation and consistent error handling patterns",
+        "category": "Error Handling",
+        "severity": "warning",
+        "tags": [
+          "errors",
+          "responses",
+          "standards"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations document 4xx error responses",
+          "All operations document 5xx error responses",
+          "Error responses include error codes",
+          "Error responses include error messages",
+          "Error responses include error details schema",
+          "Common error responses are defined in components",
+          "Error responses follow consistent format"
+        ]
+      },
+      "Passed": false,
+      "Message": "Error handling issues found: All operations document 4xx error responses: GET /health, GET /test/health; All operations document 5xx error responses: GET /health, GET /products, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health; Error responses include error details schema: GET /products: 422 response, POST /products: 422 response, DELETE /products/{product_id}: 422 response, DELETE /products/{product_id}: 404 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, POST /tasks: 400 response, POST /tasks: 422 response, POST /test/echo: 422 response",
+      "Details": {
+        "checks": {
+          "All operations document 4xx error responses": false,
+          "All operations document 5xx error responses": false,
+          "Common error responses are defined in components": false,
+          "Error responses follow consistent format": true,
+          "Error responses include error details schema": false
+        },
+        "messages": {
+          "Common error responses are defined in components": "No common error responses defined in components"
+        },
+        "missing_errors": {
+          "All operations document 4xx error responses": [
+            "GET /health",
+            "GET /test/health"
+          ],
+          "All operations document 5xx error responses": [
+            "GET /health",
+            "GET /products",
+            "POST /products",
+            "DELETE /products/{product_id}",
+            "GET /products/{product_id}",
+            "PUT /products/{product_id}",
+            "POST /tasks",
+            "POST /test/echo",
+            "GET /test/health"
+          ],
+          "Error responses include error details schema": [
+            "GET /products: 422 response",
+            "POST /products: 422 response",
+            "DELETE /products/{product_id}: 422 response",
+            "DELETE /products/{product_id}: 404 response",
+            "GET /products/{product_id}: 404 response",
+            "GET /products/{product_id}: 422 response",
+            "PUT /products/{product_id}: 404 response",
+            "PUT /products/{product_id}: 422 response",
+            "POST /tasks: 400 response",
+            "POST /tasks: 422 response",
+            "POST /test/echo: 422 response"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive error response documentation including codes, messages, and consistent error schemas",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P004",
+        "name": "Request Schema Definitions",
+        "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+        "category": "Schema",
+        "severity": "warning",
+        "tags": [
+          "schema",
+          "validation",
+          "request"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All path parameters have schemas",
+          "All query parameters have schemas",
+          "All header parameters have schemas",
+          "All request bodies have content schemas",
+          "All schemas specify data types",
+          "All schemas have appropriate constraints",
+          "All required fields are marked",
+          "All enums have valid values",
+          "All numeric fields have min/max values",
+          "All string fields have length constraints"
+        ]
+      },
+      "Passed": false,
+      "Message": "Request validation issues found: All required fields are marked: POST /tasks: application/json.title, POST /products: application/json.name, POST /products: application/json.description, POST /products: application/json.price, POST /products: application/json.category, DELETE /products/{product_id}: parameter product_id, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, PUT /products/{product_id}: application/json.name, PUT /products/{product_id}: application/json.description, PUT /products/{product_id}: application/json.price, PUT /products/{product_id}: application/json.category; All schemas specify data types: POST /tasks.description: application/json schema, GET /products: parameter category, GET /products: parameter min_price, GET /products: parameter max_price, GET /products: parameter in_stock; All string fields have length constraints: POST /products.category: application/json schema, POST /products.description: application/json schema, POST /products.tags[]: application/json schema, DELETE /products/{product_id}: parameter product_id, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, PUT /products/{product_id}.category: application/json schema, PUT /products/{product_id}.description: application/json schema, PUT /products/{product_id}.tags[]: application/json schema; All numeric fields have min/max values: POST /products.price: application/json schema, PUT /products/{product_id}.price: application/json schema",
+      "Details": {
+        "checks": {
+          "All enums have valid values": true,
+          "All header parameters have schemas": true,
+          "All numeric fields have min/max values": false,
+          "All path parameters have schemas": true,
+          "All query parameters have schemas": true,
+          "All request bodies have content schemas": true,
+          "All required fields are marked": false,
+          "All schemas have appropriate constraints": true,
+          "All schemas specify data types": false,
+          "All string fields have length constraints": false
+        },
+        "messages": {},
+        "missing_validation": {
+          "All numeric fields have min/max values": [
+            "POST /products.price: application/json schema",
+            "PUT /products/{product_id}.price: application/json schema"
+          ],
+          "All required fields are marked": [
+            "POST /tasks: application/json.title",
+            "POST /products: application/json.name",
+            "POST /products: application/json.description",
+            "POST /products: application/json.price",
+            "POST /products: application/json.category",
+            "DELETE /products/{product_id}: parameter product_id",
+            "GET /products/{product_id}: parameter product_id",
+            "PUT /products/{product_id}: parameter product_id",
+            "PUT /products/{product_id}: application/json.name",
+            "PUT /products/{product_id}: application/json.description",
+            "PUT /products/{product_id}: application/json.price",
+            "PUT /products/{product_id}: application/json.category"
+          ],
+          "All schemas specify data types": [
+            "POST /tasks.description: application/json schema",
+            "GET /products: parameter category",
+            "GET /products: parameter min_price",
+            "GET /products: parameter max_price",
+            "GET /products: parameter in_stock"
+          ],
+          "All string fields have length constraints": [
+            "POST /products.category: application/json schema",
+            "POST /products.description: application/json schema",
+            "POST /products.tags[]: application/json schema",
+            "DELETE /products/{product_id}: parameter product_id",
+            "GET /products/{product_id}: parameter product_id",
+            "PUT /products/{product_id}: parameter product_id",
+            "PUT /products/{product_id}.category: application/json schema",
+            "PUT /products/{product_id}.description: application/json schema",
+            "PUT /products/{product_id}.tags[]: application/json schema"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive schema validation including data types, constraints, and required fields",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P005",
+        "name": "Security Standards",
+        "description": "Validates comprehensive security requirements and authentication mechanisms",
+        "category": "Security",
+        "severity": "critical",
+        "tags": [
+          "security",
+          "authentication",
+          "authorization"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Security schemes are defined",
+          "Global security requirements are set",
+          "Operation-level security is defined",
+          "OAuth2 scopes are documented",
+          "API keys are properly described",
+          "Authentication headers are specified",
+          "Security requirements are consistent"
+        ]
+      },
+      "Passed": false,
+      "Message": "No security schemes defined",
+      "Details": null,
+      "Explanation": "",
+      "SuggestedFix": "Define security schemes in components.securitySchemes",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P008",
+        "name": "API Versioning Strategy",
+        "description": "Validates proper API versioning implementation and documentation",
+        "category": "Versioning",
+        "severity": "warning",
+        "tags": [
+          "versioning",
+          "compatibility",
+          "lifecycle"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "API version is specified",
+          "Version follows semantic versioning",
+          "Versioning strategy is documented",
+          "Deprecation notices are present",
+          "Breaking changes are documented",
+          "Version compatibility is specified",
+          "Migration guides are referenced"
+        ]
+      },
+      "Passed": true,
+      "Message": "",
+      "Details": null,
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
     }
   ],
-  "auto_fixes": null,
-  "summary": {
-    "critical_issues": 4,
-    "warnings": 1,
-    "info": 0,
-    "categories": [
-      "Security",
-      "Testing",
-      "Performance",
-      "Documentation"
+  "TotalChecks": 6,
+  "PassedChecks": 1,
+  "FailedChecks": 5,
+  "Summary": {
+    "CriticalIssues": 2,
+    "Warnings": 3,
+    "Info": 0,
+    "Categories": [
+      "Specification",
+      "Documentation",
+      "Error Handling",
+      "Schema",
+      "Security"
     ],
-    "failed_tags": [
-      "latency",
+    "FailedTags": [
+      "openapi",
+      "compliance",
+      "quality",
+      "schema",
+      "authentication",
+      "usability",
+      "responses",
+      "standards",
       "security",
-      "testing",
-      "functional",
-      "endpoints",
-      "performance",
-      "errors",
+      "authorization",
+      "specification",
       "documentation",
-      "auth",
-      "sla"
-    ]
-  }
+      "errors",
+      "validation",
+      "request"
+    ],
+    "TestSummary": null
+  },
+  "AutoFixes": null,
+  "TestResults": null
 }
