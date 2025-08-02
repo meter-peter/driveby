@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  perfect-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./perfect-api.py:/app/perfect-api.py
+      - ./openapi.json:/app/openapi.json
+    command: uvicorn perfect-api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s 

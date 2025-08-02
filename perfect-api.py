@@ -41,8 +41,8 @@ class TaskCreate(BaseModel):
         min_length=1,
         max_length=100
     )
-    description: Optional[str] = Field(
-        None,
+    description: str = Field(
+        default="",
         title="Task Description",
         description="Detailed description of the task",
         example="Example description"
@@ -64,8 +64,8 @@ class Task(BaseModel):
         min_length=1,
         max_length=100
     )
-    description: Optional[str] = Field(
-        None,
+    description: str = Field(
+        default="",
         title="Task Description",
         description="Detailed description of the task",
         example="Example description"
@@ -298,28 +298,29 @@ async def create_task(
     }
 )
 async def get_products(
-    category: Optional[ProductCategory] = Query(
-        None,
+    category: str = Query(
+        default="",
         title="Filter by Category",
         description="Filter products by category",
-        example=ProductCategory.ELECTRONICS
+        example="electronics",
+        enum=["", "electronics", "clothing", "food", "books", "other"]
     ),
-    min_price: Optional[float] = Query(
-        None,
+    min_price: float = Query(
+        default=0.0,
         title="Minimum Price",
         description="Filter products with price greater than or equal to this value",
         example=50.0,
         ge=0
     ),
-    max_price: Optional[float] = Query(
-        None,
+    max_price: float = Query(
+        default=999999.0,
         title="Maximum Price",
         description="Filter products with price less than or equal to this value",
         example=200.0,
         ge=0
     ),
-    in_stock: Optional[bool] = Query(
-        None,
+    in_stock: bool = Query(
+        default=True,
         title="In Stock Only",
         description="Filter products by stock availability",
         example=True
@@ -335,17 +336,16 @@ async def get_products(
     """
     filtered_products = list(products_db.values())
     
-    if category:
+    if category and category != "":
         filtered_products = [p for p in filtered_products if p["category"] == category]
     
-    if min_price is not None:
+    if min_price > 0.0:
         filtered_products = [p for p in filtered_products if p["price"] >= min_price]
     
-    if max_price is not None:
+    if max_price < 999999.0:
         filtered_products = [p for p in filtered_products if p["price"] <= max_price]
     
-    if in_stock is not None:
-        filtered_products = [p for p in filtered_products if p["in_stock"] == in_stock]
+    filtered_products = [p for p in filtered_products if p["in_stock"] == in_stock]
     
     return filtered_products
 

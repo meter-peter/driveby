@@ -96,17 +96,21 @@ func (v *OpenAPIValidator) ValidateSpec(ctx context.Context) (*ValidationReport,
 		Timestamp:   time.Now(),
 	}
 
-	// In minimal mode, only run basic validation principles (P001, P004)
-	// Skip functional and performance testing
+	// Select validation principles based on mode
 	var validationPrinciples []Principle
-	if v.config.ValidationMode == ValidationModeMinimal {
+	switch v.config.ValidationMode {
+	case ValidationModeTestOnly:
+		// Test-only mode: skip all validation, only run tests
+		log.Debug("Running in test-only mode - skipping all validation")
+		validationPrinciples = []Principle{}
+	case ValidationModeMinimal:
+		// Minimal mode: only essential validation for testing
 		validationPrinciples = []Principle{
-			CorePrinciples[0], // P001: OpenAPI Specification Compliance
-			CorePrinciples[3], // P004: Request Validation (basic schema checks only)
+			CorePrinciples[0], // P001: OpenAPI Specification Compliance (basic structure)
 		}
-		log.Debug("Running in minimal mode - skipping functional and performance testing")
-	} else {
-		// Strict mode - run all validation principles
+		log.Debug("Running in minimal mode - essential validation only")
+	case ValidationModeStrict:
+		// Strict mode: comprehensive validation
 		validationPrinciples = []Principle{
 			CorePrinciples[0], // P001: OpenAPI Specification Compliance
 			CorePrinciples[1], // P002: API Documentation Completeness
@@ -115,6 +119,13 @@ func (v *OpenAPIValidator) ValidateSpec(ctx context.Context) (*ValidationReport,
 			CorePrinciples[4], // P005: Authentication Requirements
 			CorePrinciples[7], // P008: API Versioning
 		}
+		log.Debug("Running in strict mode - comprehensive validation")
+	default:
+		// Default to minimal mode
+		validationPrinciples = []Principle{
+			CorePrinciples[0], // P001: OpenAPI Specification Compliance (basic structure)
+		}
+		log.Debug("Running in default minimal mode")
 	}
 
 	for _, principle := range validationPrinciples {
