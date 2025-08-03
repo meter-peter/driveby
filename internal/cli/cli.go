@@ -220,9 +220,11 @@ var functionOnlyCmd = &cobra.Command{
 		}
 
 		// Check if any endpoints failed
-		for _, endpoint := range report.TestResults.Functional.EndpointResults {
-			if endpoint.Status == validation.TestStatusFailed {
-				os.Exit(ExitValidationFailed)
+		if report.TestResults != nil && report.TestResults.Functional != nil {
+			for _, endpoint := range report.TestResults.Functional.EndpointResults {
+				if endpoint.Status == validation.TestStatusFailed {
+					os.Exit(ExitValidationFailed)
+				}
 			}
 		}
 		os.Exit(ExitSuccess)
@@ -348,14 +350,18 @@ var testOnlyCmd = &cobra.Command{
 
 		// Check if any tests failed
 		hasFailures := false
-		for _, endpoint := range functionalReport.TestResults.Functional.EndpointResults {
-			if endpoint.Status == validation.TestStatusFailed {
-				hasFailures = true
-				break
+		if functionalReport.TestResults != nil && functionalReport.TestResults.Functional != nil {
+			for _, endpoint := range functionalReport.TestResults.Functional.EndpointResults {
+				if endpoint.Status == validation.TestStatusFailed {
+					hasFailures = true
+					break
+				}
 			}
 		}
-		if performanceReport.TestResults.Performance.Status == validation.TestStatusFailed {
-			hasFailures = true
+		if performanceReport.TestResults != nil && performanceReport.TestResults.Performance != nil {
+			if performanceReport.TestResults.Performance.Status == validation.TestStatusFailed {
+				hasFailures = true
+			}
 		}
 
 		if hasFailures {

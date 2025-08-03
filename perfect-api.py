@@ -29,6 +29,83 @@ class ErrorResponse(BaseModel):
         description="Additional error details",
         example=["Field 'title' is required"]
     )
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "error": "Invalid request data",
+                "code": 400,
+                "details": ["Field 'name' is required"]
+            }
+        }
+
+# Common error responses
+class CommonErrorResponses:
+    """Common error response definitions."""
+    
+    @staticmethod
+    def get_400_response():
+        return {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": "Invalid request data",
+                        "code": 400,
+                        "details": ["Field 'name' is required"]
+                    }
+                }
+            }
+        }
+    
+    @staticmethod
+    def get_404_response():
+        return {
+            "description": "Not Found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": "Resource not found",
+                        "code": 404,
+                        "details": ["Product with specified ID does not exist"]
+                    }
+                }
+            }
+        }
+    
+    @staticmethod
+    def get_422_response():
+        return {
+            "description": "Validation Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": [
+                            {
+                                "loc": ["body", "price"],
+                                "msg": "ensure this value is greater than 0",
+                                "type": "value_error.number.not_gt"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    
+    @staticmethod
+    def get_500_response():
+        return {
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": "Internal server error",
+                        "code": 500,
+                        "details": ["An unexpected error occurred"]
+                    }
+                }
+            }
+        }
 
 # Task models for the /tasks endpoint
 class TaskCreate(BaseModel):
@@ -74,11 +151,11 @@ class Task(BaseModel):
 # Define our product models with comprehensive documentation
 class ProductCategory(str, Enum):
     """Product category enumeration."""
-    ELECTRONICS = "electronics"
-    CLOTHING = "clothing"
-    FOOD = "food"
-    BOOKS = "books"
-    OTHER = "other"
+    ELECTRONICS = "electronics"  # Electronic devices and gadgets
+    CLOTHING = "clothing"        # Apparel and fashion items
+    FOOD = "food"                # Food and beverage products
+    BOOKS = "books"              # Books and publications
+    OTHER = "other"              # Miscellaneous products
 
 class ProductBase(BaseModel):
     """Base product model with common attributes."""
@@ -146,7 +223,16 @@ app = FastAPI(
     4. Generate load test scenarios
     """,
     version="1.0.0",
-    openapi_version="3.0.3"  # Force OpenAPI 3.0 instead of 3.1
+    openapi_version="3.0.3",  # Force OpenAPI 3.0 instead of 3.1
+    contact={
+        "name": "API Support Team",
+        "email": "support@example.com",
+        "url": "https://example.com/support"
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+    }
 )
 
 # In-memory storage for demo purposes
@@ -185,22 +271,9 @@ def get_current_time():
                 }
             }
         },
-        422: {
-            "description": "Validation Error",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "loc": ["body", "title"],
-                                "msg": "field required",
-                                "type": "value_error.missing"
-                            }
-                        ]
-                    }
-                }
-            }
-        }
+        400: CommonErrorResponses.get_400_response(),
+        422: CommonErrorResponses.get_422_response(),
+        500: CommonErrorResponses.get_500_response()
     }
 )
 async def create_task(
@@ -279,22 +352,9 @@ async def create_task(
                 }
             }
         },
-        422: {
-            "description": "Validation Error",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": [
-                            {
-                                "loc": ["query", "min_price"],
-                                "msg": "ensure this value is greater than 0",
-                                "type": "value_error.number.not_gt"
-                            }
-                        ]
-                    }
-                }
-            }
-        }
+        400: CommonErrorResponses.get_400_response(),
+        422: CommonErrorResponses.get_422_response(),
+        500: CommonErrorResponses.get_500_response()
     }
 )
 async def get_products(
@@ -303,7 +363,9 @@ async def get_products(
         title="Filter by Category",
         description="Filter products by category",
         example="electronics",
-        enum=["", "electronics", "clothing", "food", "books", "other"]
+        enum=["", "electronics", "clothing", "food", "books", "other"],
+        min_length=0,
+        max_length=20
     ),
     min_price: float = Query(
         default=0.0,
@@ -398,7 +460,10 @@ async def get_product(
         ...,
         title="Product ID",
         description="The unique identifier of the product",
-        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+        min_length=36,
+        max_length=36,
+        pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     )
 ):
     """
@@ -545,7 +610,10 @@ async def update_product(
         ...,
         title="Product ID",
         description="The unique identifier of the product to update",
-        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+        min_length=36,
+        max_length=36,
+        pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     ),
     product_update: ProductBase = Body(
         ...,
@@ -629,7 +697,10 @@ async def delete_product(
         ...,
         title="Product ID",
         description="The unique identifier of the product to delete",
-        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42"
+        example="f7cfc49d-824b-4728-a4c4-45e5901e3d42",
+        min_length=36,
+        max_length=36,
+        pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     )
 ):
     """
@@ -734,7 +805,10 @@ async def startup_event():
                     }
                 }
             }
-        }
+        },
+        400: CommonErrorResponses.get_400_response(),
+        404: CommonErrorResponses.get_404_response(),
+        500: CommonErrorResponses.get_500_response()
     }
 )
 async def health_check():
@@ -814,6 +888,29 @@ def custom_openapi():
         description=app.description,
         routes=app.routes,
     )
+    
+    # Add security schemes
+    openapi_schema["components"]["securitySchemes"] = {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key",
+            "description": "API key for authentication"
+        },
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "JWT token for authentication"
+        }
+    }
+    
+    # Add global security requirement
+    openapi_schema["security"] = [
+        {"ApiKeyAuth": []},
+        {"BearerAuth": []}
+    ]
+    
     patch_exclusive_min_max(openapi_schema)
     app.openapi_schema = openapi_schema
     return app.openapi_schema

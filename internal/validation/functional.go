@@ -74,6 +74,37 @@ func (t *FunctionalTester) TestEndpoints(ctx context.Context) (*ValidationReport
 		principleResult.Details = map[string]interface{}{"failed_endpoints": failedEndpoints, "all_results": endpointResult.Endpoints}
 	}
 
+	// Convert EndpointValidation to EndpointTestResult
+	var endpointResults []EndpointTestResult
+	for _, epVal := range endpointResult.Endpoints {
+		status := TestStatusPassed
+		if epVal.Status != "success" {
+			status = TestStatusFailed
+		}
+		
+		endpointResults = append(endpointResults, EndpointTestResult{
+			Method:       epVal.Method,
+			Path:         epVal.Path,
+			Status:       status,
+			StatusCode:   epVal.StatusCode,
+			ResponseTime: epVal.ResponseTime,
+			Errors:       epVal.Errors,
+		})
+	}
+
+	// Create functional test results
+	functionalResults := &FunctionalTestResults{
+		TotalEndpoints:      len(endpointResult.Endpoints),
+		TestedEndpoints:     len(endpointResult.Endpoints),
+		PassedEndpoints:     countSuccessfulEndpoints(endpointResult.Endpoints),
+		FailedEndpoints:     countFailedEndpoints(endpointResult.Endpoints),
+		SkippedEndpoints:    0,
+		EndpointResults:     endpointResults,
+		AverageResponseTime: calculateAverageResponseTime(endpointResult.Endpoints),
+		MaxResponseTime:     calculateMaxResponseTime(endpointResult.Endpoints),
+		MinResponseTime:     calculateMinResponseTime(endpointResult.Endpoints),
+	}
+
 	report := &ValidationReport{
 		Version:      t.config.Version,
 		Environment:  t.config.Environment,
@@ -82,14 +113,83 @@ func (t *FunctionalTester) TestEndpoints(ctx context.Context) (*ValidationReport
 		TotalChecks:  1,
 		PassedChecks: 0,
 		FailedChecks: 0,
+		TestResults: &TestResults{
+			Functional: functionalResults,
+			StartTime:  time.Now(),
+			EndTime:    time.Now(),
+			Status:     TestStatusPassed,
+		},
 	}
 	if allSuccess {
 		report.PassedChecks = 1
+		report.TestResults.Status = TestStatusPassed
 	} else {
 		report.FailedChecks = 1
+		report.TestResults.Status = TestStatusFailed
 	}
 
 	return report, nil
+}
+
+// Helper functions for calculating test statistics
+func countSuccessfulEndpoints(endpoints []EndpointValidation) int {
+	count := 0
+	for _, ep := range endpoints {
+		if ep.Status == "success" {
+			count++
+		}
+	}
+	return count
+}
+
+func countFailedEndpoints(endpoints []EndpointValidation) int {
+	count := 0
+	for _, ep := range endpoints {
+		if ep.Status != "success" {
+			count++
+		}
+	}
+	return count
+}
+
+func calculateAverageResponseTime(endpoints []EndpointValidation) time.Duration {
+	if len(endpoints) == 0 {
+		return 0
+	}
+	
+	total := time.Duration(0)
+	for _, ep := range endpoints {
+		total += ep.ResponseTime
+	}
+	return total / time.Duration(len(endpoints))
+}
+
+func calculateMaxResponseTime(endpoints []EndpointValidation) time.Duration {
+	if len(endpoints) == 0 {
+		return 0
+	}
+	
+	max := endpoints[0].ResponseTime
+	for _, ep := range endpoints {
+		if ep.ResponseTime > max {
+			max = ep.ResponseTime
+		}
+	}
+	return max
+}
+
+func calculateMinResponseTime(endpoints []EndpointValidation) time.Duration {
+	if len(endpoints) == 0 {
+		return 0
+	}
+	
+	min := endpoints[0].ResponseTime
+	for _, ep := range endpoints {
+		if ep.ResponseTime < min {
+			min = ep.ResponseTime
+		}
+	}
+	return min
 }
 
 // validateEndpoints tests each endpoint in the OpenAPI spec
