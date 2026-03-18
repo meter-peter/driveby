@@ -1,10 +1,10 @@
 # DriveBy - Modern API Validation Framework
 
-DriveBy is a comprehensive API validation framework that helps you validate, test, and monitor your APIs. It supports OpenAPI/Swagger specifications and provides extensive validation, testing, and monitoring capabilities.
+DriveBy is a comprehensive API validation framework that helps you validate, test, and monitor your APIs. It supports OpenAPI 3.x specifications and provides extensive validation, testing, and monitoring capabilities.
 
 ## Features
 
-- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0 standards
+- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0/3.1 standards
 - **Functional Testing**: Tests API endpoints for functionality and correctness
 - **Performance Testing**: Load tests APIs with configurable targets
 - **Documentation Validation**: Ensures API documentation is complete and accurate

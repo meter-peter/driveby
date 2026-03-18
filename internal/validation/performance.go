@@ -51,17 +51,20 @@ func (t *PerformanceTester) TestPerformance(ctx context.Context) (*ValidationRep
 
 	// Load OpenAPI spec
 	if err := t.loader.LoadFromFileOrURL(t.config.SpecPath); err != nil {
-		return nil, fmt.Errorf("failed to load OpenAPI spec: %w", err)
+		return nil, fmt.Errorf("failed to load API spec: %w", err)
 	}
 	doc := t.loader.GetDocument()
 	if doc == nil {
-		return nil, fmt.Errorf("failed to get OpenAPI document")
+		return nil, fmt.Errorf("failed to get API document")
 	}
 
 	// Create targets for all endpoints
 	var targets []vegeta.Target
-	for path, pathItem := range doc.Paths.Map() {
-		for method := range pathItem.Operations() {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method := range pathItem.Operations {
 			// Skip endpoints that are not suitable for load testing
 			if method == "DELETE" || method == "PATCH" {
 				continue

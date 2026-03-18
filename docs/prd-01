@@ -1,0 +1,136 @@
+Documentation-Driven Testing (DDT) Platform Product Requirements Document
+1. Project Overview and Strategic Objectives
+1.1 Mission Statement
+The mission of the Documentation-Driven Testing (DDT) platform is to transform OpenAPI specifications from passive documentation into autonomous, executable quality gates within a pure Crossplane and GitOps framework. By operationalizing the "Documentation as Contracts" paradigm, the platform ensures that API implementation never drifts from the documented source of truth, effectively treating the specification as the ultimate source of truth for both infrastructure and validation.
+1.2 Target Audience
+Platform Engineers: Architects designing automated quality gates, managing IaC lifecycles, and scaling GitOps promotion logic.
+API Developers: Service owners requiring immediate, actionable feedback on API compliance and performance without manual test maintenance.
+1.3 Key Value Propositions
+89% Reduction in QA Effort: Eliminates manual test authorship by deriving validation rules, functional cases, and SLO checks directly from OpenAPI 3.0/3.1 specs.
+40% Fewer Production Incidents: Dynamically identifies documentation drift and contract violations pre-merge, preventing breaking changes from reaching production.
+Zero Operational Overhead: Tests are self-updating; any change to the specification in Git automatically triggers a re-generation of the quality gate.
+Kubernetes-Native Enforcement: Seamlessly integrates with the Argo project suite and Crossplane, providing a closed-loop system for release gating.
+--------------------------------------------------------------------------------
+2. Infrastructure Architecture (Pure Crossplane)
+The platform architecture avoids custom operators, utilizing Pure Crossplane to manage the lifecycle of cloud resources, SCM configurations, and GitOps parameters through a hierarchical composition model.
+2.1 Crossplane Core Components
+The foundation utilizes standard Managed Resources (MRs) to interface with external APIs.
+Managed Resource
+Function
+Provider
+Logic for specific APIs (e.g., provider-github, provider-aws).
+ProviderConfig
+Credentials management; must reference K8s Secrets (spec.credentials.source: Secret).
+Repository
+Declarative management of GitHub repositories for Application and GitOps code.
+EnvironmentConfig
+The Data Sharing Layer: Injects org-wide and project-specific settings into Compositions.
+Webhook
+Configures SCM events to trigger Argo Workflows or GitOps Promoter logic.
+2.2 Composite Resource Definitions (XRDs)
+Infrastructure is abstracted into high-level, opinionated types:
+KubeOrg: The root resource. It initializes the ProviderConfig for GitHub and AWS and creates org-wide EnvironmentConfig objects (e.g., GitHub Org names, AWS Account IDs) that are referenced by all child resources.
+KubeProject: Manages environment-level tenancy. It materializes namespaces, project-specific GitOps repositories, and team permissions within the SCM.
+KubeApp: The application-level abstraction. It manages source code repositories, links CI/CD templates, and handles the generation of deployment manifests.
+2.3 Composition Logic and Wiring
+Compositions wire XRDs to Managed Resources using patches and transforms. A critical architectural detail is the use of EnvironmentConfig to maintain idempotency. When a KubeApp claim is created, the Composition selects the relevant EnvironmentConfig via labels (e.g., kubecore.io/kubeorg=primary) to inject repository prefixes and runtime parameters without manual configuration.
+--------------------------------------------------------------------------------
+3. GitOps Promotion & Release Management
+Promotion is governed by the GitOps Promoter toolset, which manages state transitions between environment branches.
+3.1 Promotion Resources
+PromotionStrategy: Configures the sequence of hydrated environment branches (e.g., dev -> stage -> prod). It defines the mandatory checks via activeCommitStatuses and proposedCommitStatuses.
+ChangeTransferPolicy: Manages the pair-based logic between a "proposed" branch and a "live" branch. It autonomously manages the lifecycle of promotion Pull Requests.
+3.2 Gating Mechanics: CommitStatus Integration
+The CommitStatus CRD is the primary source of truth for promotion gates.
+The Key Link: For a promotion to occur, the metadata.labels['promoter.argoproj.io/commit-status'] of a CommitStatus must match the keys defined in the PromotionStrategy (e.g., performance-test).
+Autonomous Merging: The ChangeTransferPolicy will only merge a promotion PR if the CommitStatus phase for the specific Git SHA is success.
+--------------------------------------------------------------------------------
+4. Quality Gate Feature: DriveBy CLI Integration
+The DriveBy CLI is a stateless, OCI-compliant execution engine that performs Documentation-Driven Testing.
+4.1 Validation Principles (P001-P008)
+The CLI evaluates the API against eight technical principles:
+P001: OpenAPI Specification Compliance: Validates specs follow 3.0/3.1 standards (resolvable references, required info fields).
+P002: API Documentation Quality: Ensures comprehensive descriptions, examples, and usage guidelines for all operations.
+P003: Error Response Documentation: Validates that 4xx/5xx error responses are documented with consistent schemas.
+P004: Request Schema Definitions: Ensures data types, constraints (length, min/max), and required fields are explicitly defined.
+P005: Security Standards: Validates that security schemes (OAuth2, API Keys) are defined and consistently applied.
+P006: Endpoint Functional Testing: Automated verification using documented examples to ensure implementation matches spec.
+P007: API Performance Compliance: Validates SLOs (latency, error budgets) via synthetic traffic generation.
+P008: API Versioning Strategy: Validates semantic versioning and the presence of deprecation notices.
+4.2 Validation Modes
+Mode
+Validation
+Functional Tests
+Performance Tests
+Speed
+Use Case
+test-only
+❌ None
+✅ Yes
+✅ Yes
+🚀 Fastest
+Pure testing; ignores spec drift.
+minimal
+✅ Basic (P001)
+❌ No
+❌ No
+⚡ Fast
+Local development; default mode.
+strict
+✅ Full (P001-P008)
+✅ Yes
+✅ Yes
+🐌 Slowest
+Production readiness/Release gates.
+4.3 CLI Configuration Flags
+Global and Required Flags
+--openapi: (Required) Path or URL to the OpenAPI specification.
+--host: (Required) Target API host.
+--validation-mode: depth selection (strict, minimal, test-only).
+--report-dir: Output directory for JSON/Markdown reports.
+--protocol, --port, --api-url, --timeout.
+Authentication Flags (Single-Method Enforcement)
+Bearer: --auth-token, --auth-token-type, --auth-token-header.
+API Key: --auth-api-key, --auth-api-key-header.
+Basic: --auth-username, --auth-password.
+GitHub Integration (App & Legacy)
+--github-comment: Enable PR commenting.
+--github-app-id, --github-installation-id, --github-app-slug.
+--github-private-key: PEM content or file path (Preferred over tokens).
+--github-owner, --github-repo, --github-pr-number.
+Load Testing Specifics
+--max-latency-p95, --min-success-rate, --concurrent-users, --test-duration.
+
+Reference External API
+For external, real-world validation and functional testing examples, the platform uses the public Swagger Petstore:
+- OpenAPI spec: https://petstore3.swagger.io/api/v3/openapi.json
+- Host: petstore3.swagger.io (HTTPS, port 443)
+This API is exercised via validate-only (minimal/strict) and function-only runs as part of the DriveBy self-test suites.
+--------------------------------------------------------------------------------
+5. Automated Workflow & Autonomous Gating
+5.1 The Quality Gate Workflow
+Upon a PR or commit, an Argo Workflow is triggered:
+Execution: Runs DriveBy CLI using the flags derived from the KubeApp environment.
+Reporting: Generates a JSON/Markdown report.
+Status Propagation: The workflow creates/patches a CommitStatus CRD in the cluster.
+5.2 Autonomous Status & Error Handling
+The Workflow must interpret CLI exit codes to update the CommitStatus phase:
+Exit Code 0 (Success): Sets CommitStatus phase to success. ChangeTransferPolicy merges the PR.
+Exit Code 1 (Validation Failure): Sets CommitStatus phase to failure. Promotion is blocked; drift detected.
+Exit Code 2 (Execution Error): Sets CommitStatus phase to failure. Indicates a breakdown in the test environment.
+Exit Code 3 (Configuration Error): Triggers a Platform Failure alert. This indicates invalid CLI arguments (e.g., violating the Single-Method Auth rule) and requires Platform Engineer intervention.
+--------------------------------------------------------------------------------
+6. Security and Authentication Model
+6.1 GitHub Authentication
+The platform mandates GitHub App Authentication for SCM operations. This ensures granular, repository-specific permissions. The ProviderConfig for the GitHub provider must reference a Secret containing the appID, installationID, and the privateKey (PEM format).
+6.2 API Authentication
+The DriveBy engine enforces a Single Method validation rule. If more than one authentication method is configured via CLI flags, the tool will return Exit Code 3 and fail. This prevents ambiguous security contexts during validation.
+--------------------------------------------------------------------------------
+7. Observability and Feedback Loop
+7.1 Developer Feedback
+The platform provides direct feedback in the developer's workflow:
+PR Comments: Using the --github-comment flag, the Markdown report is posted directly to the GitHub PR.
+Commit Status: Visual pass/fail indicators appear in the GitHub UI, driven by the CommitStatus controller.
+7.2 Resource Health & Reporting
+Conditions: All KubeCore and Crossplane resources must expose .status.conditions. Platform health is monitored via the Ready and Synced types.
+Artifacts: Validation reports (JSON/Markdown) must be archived by the Argo Workflow in the configured report-dir for historical drift analysis and auditability.

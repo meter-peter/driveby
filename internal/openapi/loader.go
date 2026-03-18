@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,7 +12,9 @@ import (
 
 	stdlog "log"
 
+	"github.com/getkin/kin-openapi/openapi2"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/meter-peter/driveby/internal/spec"
 	"github.com/meter-peter/driveby/internal/util"
 	"github.com/sirupsen/logrus"
 )
@@ -27,9 +28,9 @@ func init() {
 	stdlog.SetOutput(logrus.StandardLogger().Writer())
 }
 
-// Loader handles loading and validating OpenAPI specifications
+// Loader handles loading and validating OpenAPI/Swagger specifications
 type Loader struct {
-	doc *openapi3.T
+	doc spec.APISpec
 }
 
 // NewLoader creates a new OpenAPI loader
@@ -41,14 +42,9 @@ func NewLoader() *Loader {
 // LoadFromFile loads an OpenAPI specification from a file
 func (l *Loader) LoadFromFile(path string) error {
 	log.Debugf("[openapi] Enter LoadFromFile with path: %s", path)
-	loader := openapi3.NewLoader()
-	doc, err := loader.LoadFromFile(path)
-	if err != nil {
-		log.WithError(err).Errorf("[openapi] Failed to load OpenAPI spec from file: %s", path)
-		return fmt.Errorf("failed to load OpenAPI spec from file: %w", err)
+	if err := l.loadFromData(path, data); err != nil {
+		return err
 	}
-	l.doc = doc
-	log.Debugf("[openapi] Loaded OpenAPI doc: %+v", doc)
 	log.Infof("[openapi] Successfully loaded OpenAPI spec from file: %s", path)
 	return nil
 }
@@ -63,27 +59,22 @@ func (l *Loader) LoadFromURL(url string) error {
 	}
 	defer resp.Body.Close()
 
-	log.Debugf("[openapi] HTTP status: %s", resp.Status)
+	log.Debugf("[openapi] HTTP status: %d", resp.StatusCode)
 	if resp.StatusCode != http.StatusOK {
-		log.Errorf("[openapi] Failed to fetch OpenAPI spec: status %s", resp.Status)
-		return fmt.Errorf("failed to fetch OpenAPI spec: status %s", resp.Status)
+		log.Errorf("[openapi] Failed to fetch OpenAPI spec: status %d", resp.StatusCode)
+		return fmt.Errorf("failed to fetch OpenAPI spec: status %d", resp.StatusCode)
 	}
 
-	data, err := io.ReadAll(resp.Body)
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.WithError(err).Errorf("[openapi] Failed to read OpenAPI spec from response: %s", url)
 		return fmt.Errorf("failed to read OpenAPI spec from response: %w", err)
 	}
 	log.Debugf("[openapi] Read %d bytes from response", len(data))
 
-	loader := openapi3.NewLoader()
-	doc, err := loader.LoadFromData(data)
-	if err != nil {
-		log.WithError(err).Errorf("[openapi] Failed to load OpenAPI spec from data: %s", url)
-		return fmt.Errorf("failed to load OpenAPI spec from data: %w", err)
+	if err := l.loadFromData(url, data); err != nil {
+		return err
 	}
-	l.doc = doc
-	log.Debugf("[openapi] Loaded OpenAPI doc: %+v", doc)
 	log.Infof("[openapi] Successfully loaded OpenAPI spec from URL: %s", url)
 	return nil
 }
@@ -124,27 +115,61 @@ func (l *Loader) LoadFromFileOrURL(path string) error {
 		}
 		log.Debugf("[openapi] Read %d bytes from file", len(data))
 	}
-	// Preprocess exclusiveMinimum/exclusiveMaximum
-	var raw map[string]interface{}
-	if err := json.Unmarshal(data, &raw); err == nil {
-		log.Debugf("[openapi] Preprocessing exclusiveMinimum/exclusiveMaximum for: %s", path)
-		util.PreprocessExclusiveMinMax(raw)
-		if data, err = json.Marshal(raw); err != nil {
-			log.WithError(err).Errorf("[openapi] Failed to marshal preprocessed data for: %s", path)
-			return err
-		}
-		log.Debugf("[openapi] Marshaled preprocessed data, length: %d", len(data))
-	}
-	loader := openapi3.NewLoader()
-	doc, err := loader.LoadFromData(data)
-	if err != nil {
-		log.WithError(err).Errorf("[openapi] Failed to load OpenAPI spec from data: %s", path)
+
+	if err := l.loadFromData(path, data); err != nil {
 		return err
 	}
-	l.doc = doc
-	log.Debugf("[openapi] Loaded OpenAPI doc: %+v", doc)
 	log.Infof("[openapi] Successfully loaded OpenAPI spec from: %s", path)
 	return nil
+}
+
+// loadFromData inspects the raw document, detects the specification flavour,
+// and populates the Loader with the appropriate APISpec adapter.
+func (l *Loader) loadFromData(source string, data []byte) error {
+	// First, try to unmarshal into a generic map to detect "openapi" vs "swagger".
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		log.WithError(err).Errorf("[openapi] Failed to unmarshal spec for detection: %s", source)
+		return fmt.Errorf("failed to parse spec for detection: %w", err)
+	}
+
+	// OpenAPI 3.x: has "openapi" field.
+	if ver, ok := raw["openapi"].(string); ok && ver != "" {
+		log.Debugf("[openapi] Detected OpenAPI spec (version=%s) for: %s", ver, source)
+
+		// Preprocess exclusiveMinimum/exclusiveMaximum for native OpenAPI 3.x specs.
+		util.PreprocessExclusiveMinMax(raw)
+		processed, err := json.Marshal(raw)
+		if err != nil {
+			log.WithError(err).Errorf("[openapi] Failed to marshal preprocessed OpenAPI data for: %s", source)
+			return err
+		}
+
+		loader := openapi3.NewLoader()
+		doc, err := loader.LoadFromData(processed)
+		if err != nil {
+			log.WithError(err).Errorf("[openapi] Failed to load OpenAPI 3.x spec from data: %s", source)
+			return err
+		}
+		l.doc = spec.NewOpenAPI3Spec(doc)
+		log.Debugf("[openapi] Loaded OpenAPI 3.x doc: %+v", doc)
+		return nil
+	}
+
+	// Swagger 2.0: has "swagger" field with value "2.0".
+	if ver, ok := raw["swagger"].(string); ok && ver == "2.0" {
+		log.Debugf("[openapi] Detected Swagger 2.0 spec for: %s", source)
+		var doc openapi2.T
+		if err := json.Unmarshal(data, &doc); err != nil {
+			log.WithError(err).Errorf("[openapi] Failed to unmarshal Swagger 2.0 spec: %s", source)
+			return fmt.Errorf("failed to unmarshal Swagger 2.0 spec: %w", err)
+		}
+		l.doc = spec.NewSwagger2Spec(&doc)
+		log.Debugf("[openapi] Loaded Swagger 2.0 doc")
+		return nil
+	}
+
+	return fmt.Errorf("unsupported API specification format for: %s (missing 'openapi' or 'swagger: \"2.0\"')", source)
 }
 
 // Validate validates the loaded OpenAPI specification
@@ -155,32 +180,41 @@ func (l *Loader) Validate() error {
 		return fmt.Errorf("no OpenAPI specification loaded")
 	}
 
-	if err := l.doc.Validate(context.Background()); err != nil {
-		log.WithError(err).Error("[openapi] Invalid OpenAPI specification")
-		return fmt.Errorf("invalid OpenAPI specification: %w", err)
+	if err := l.doc.ValidateStructure(context.Background()); err != nil {
+		log.WithError(err).Error("[openapi] Invalid API specification")
+		return fmt.Errorf("invalid API specification: %w", err)
 	}
-	log.Debug("[openapi] OpenAPI specification is valid")
+	log.Debug("[openapi] API specification is valid")
 	return nil
 }
 
-// GetDocument returns the loaded OpenAPI document
-func (l *Loader) GetDocument() *openapi3.T {
-	log.Debugf("[openapi] GetDocument called, doc: %+v", l.doc)
+// GetDocument returns the loaded API specification in normalized form.
+func (l *Loader) GetDocument() spec.APISpec {
+	log.Debugf("[openapi] GetDocument called, spec type: %T", l.doc)
 	return l.doc
 }
 
 // GetEndpoints returns a list of all endpoints in the specification
 func (l *Loader) GetEndpoints() []string {
 	log.Debug("[openapi] Enter GetEndpoints")
-	if l.doc == nil || l.doc.Paths == nil {
-		log.Warn("[openapi] No document or paths loaded")
+	if l.doc == nil {
+		log.Warn("[openapi] No document loaded")
+		return nil
+	}
+
+	paths := l.doc.Paths()
+	if paths == nil {
+		log.Warn("[openapi] No paths loaded")
 		return nil
 	}
 
 	var endpoints []string
-	for path, pathItem := range l.doc.Paths.Map() {
+	for path, pathItem := range paths {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
 		log.Debugf("[openapi] Path: %s", path)
-		for method := range pathItem.Operations() {
+		for method := range pathItem.Operations {
 			log.Debugf("[openapi] Method: %s for path %s", method, path)
 			endpoints = append(endpoints, fmt.Sprintf("%s %s", method, path))
 		}
@@ -249,10 +283,20 @@ func (l *Loader) SaveToFile(path string) error {
 		return fmt.Errorf("no OpenAPI specification loaded")
 	}
 
-	data, err := l.doc.MarshalJSON()
+	// Persist the original JSON form is not currently tracked; for now,
+	// marshal the normalized OpenAPI 3.x representation when available.
+	// Swagger 2.0 documents will be re-encoded from the adapter.
+	var data []byte
+	var err error
+	switch d := l.doc.(type) {
+	case interface{ MarshalJSON() ([]byte, error) }:
+		data, err = d.MarshalJSON()
+	default:
+		data, err = json.Marshal(d)
+	}
 	if err != nil {
-		log.WithError(err).Errorf("[openapi] Failed to marshal OpenAPI spec for saving: %s", path)
-		return fmt.Errorf("failed to marshal OpenAPI spec: %w", err)
+		log.WithError(err).Errorf("[openapi] Failed to marshal API spec for saving: %s", path)
+		return fmt.Errorf("failed to marshal API spec: %w", err)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {

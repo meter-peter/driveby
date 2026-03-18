@@ -1,6 +1,6 @@
 # DriveBy CLI Usage
 
-DriveBy is now a pure CLI tool that follows standard CLI principles. All configuration is done through command-line flags - no environment variables are required or supported.
+DriveBy is now a pure CLI tool that follows standard CLI principles. All configuration is done through command-line flags - no environment variables are required or supported. DriveBy supports OpenAPI 3.0/3.1 specifications.
 
 ## Basic Usage
 
@@ -94,6 +94,36 @@ driveby function-only \
   --timeout 60 \
   --validation-mode strict \
   --environment staging
+```
+
+### Public Example: Swagger Petstore
+
+The public Swagger Petstore is used as a reference external API for DriveBy examples and internal test suites:
+
+```bash
+# Minimal OpenAPI validation against Petstore
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https \
+  --port 443 \
+  --validation-mode minimal
+
+# Strict validation against Petstore
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https \
+  --port 443 \
+  --validation-mode strict
+
+# Functional testing against Petstore
+driveby function-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https \
+  --port 443 \
+  --timeout 30s
 ```
 
 ### Load Testing with High Concurrency
@@ -267,3 +297,35 @@ If you were previously using environment variables, replace them with the corres
 6. **Self-Documenting**: Help text and examples are built into the CLI
 7. **Authentication Support**: Multiple auth methods with validation
 8. **GitHub Integration**: Automatic PR commenting with validation results 
+
+## Tools: Running a Small Public OpenAPI Batch (Max 20)
+
+For smoke-testing DriveBy against a small, curated set of public OpenAPI specifications, this repository includes a helper script limited to **20 entries per run**:
+
+- **Script path**: `tools/run-openapi-batch.sh`
+- **Purpose**: run `driveby validate-only` in `minimal` mode against up to 20 OpenAPI URLs and collect a CSV summary.
+
+### CSV Format
+
+Create a CSV file with at most 20 rows (excluding the header):
+
+```text
+name,url,host
+petstore,https://petstore3.swagger.io/api/v3/openapi.json,petstore3.swagger.io
+github,https://example.com/github-openapi.json,api.github.com
+```
+
+The script enforces the **max 20 OpenAPIs** constraint and will fail fast if the CSV contains more than 20 non-empty data rows.
+
+### Running the Batch Tool
+
+```bash
+tools/run-openapi-batch.sh openapis-sample.csv /tmp/driveby-openapi-batch
+```
+
+This will:
+
+- Run `driveby validate-only --validation-mode minimal` once per row.
+- Store individual reports under `/tmp/driveby-openapi-batch/<name>-<timestamp>/`.
+- Write a summary CSV to `/tmp/driveby-openapi-batch/summary-<timestamp>.csv` containing:
+  - `name,url,host,exit_code,mode,report_dir`.

@@ -9,8 +9,8 @@ import (
 
 	"encoding/base64"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/meter-peter/driveby/internal/openapi"
+	"github.com/meter-peter/driveby/internal/spec"
 )
 
 // FunctionalTester handles functional testing of API endpoints
@@ -192,13 +192,16 @@ func calculateMinResponseTime(endpoints []EndpointValidation) time.Duration {
 	return min
 }
 
-// validateEndpoints tests each endpoint in the OpenAPI spec
-func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc *openapi3.T) (*EndpointValidationResult, error) {
+// validateEndpoints tests each endpoint in the API spec.
+func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc spec.APISpec) (*EndpointValidationResult, error) {
 	result := &EndpointValidationResult{}
 
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
-			if operation.Deprecated {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation == nil || operation.Deprecated {
 				continue
 			}
 
@@ -255,9 +258,14 @@ func (t *FunctionalTester) validateEndpoints(ctx context.Context, doc *openapi3.
 					validation.ResponseBody = body
 
 					// Check if status code is documented
-					if _, documented := operation.Responses.Map()[fmt.Sprintf("%d", resp.StatusCode)]; documented {
-						// If documented, it's a success regardless of status code
-						validation.Status = "success"
+					if operation.Responses != nil {
+						if _, documented := operation.Responses[fmt.Sprintf("%d", resp.StatusCode)]; documented {
+							// If documented, it's a success regardless of status code
+							validation.Status = "success"
+						} else {
+							validation.Status = "warning"
+							validation.Errors = []string{fmt.Sprintf("Status code %d is not documented in the OpenAPI spec", resp.StatusCode)}
+						}
 					} else {
 						validation.Status = "warning"
 						validation.Errors = []string{fmt.Sprintf("Status code %d is not documented in the OpenAPI spec", resp.StatusCode)}

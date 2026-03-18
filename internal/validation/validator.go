@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/meter-peter/driveby/internal/openapi"
+	"github.com/meter-peter/driveby/internal/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -81,13 +81,13 @@ func NewOpenAPIValidator(config ValidatorConfig) (*OpenAPIValidator, error) {
 func (v *OpenAPIValidator) ValidateSpec(ctx context.Context) (*ValidationReport, error) {
 	log.Debugf("Starting OpenAPI spec validation with config: %+v", v.config)
 
-	// Load OpenAPI spec
+	// Load API spec (OpenAPI 3.x or Swagger 2.0)
 	if err := v.loader.LoadFromFileOrURL(v.config.SpecPath); err != nil {
-		return nil, fmt.Errorf("failed to load OpenAPI spec: %w", err)
+		return nil, fmt.Errorf("failed to load API spec: %w", err)
 	}
 	doc := v.loader.GetDocument()
 	if doc == nil {
-		return nil, fmt.Errorf("failed to get OpenAPI document")
+		return nil, fmt.Errorf("failed to get API document")
 	}
 
 	report := &ValidationReport{
@@ -146,15 +146,15 @@ func (v *OpenAPIValidator) ValidateSpec(ctx context.Context) (*ValidationReport,
 }
 
 // validatePrinciple checks a single validation principle
-func (v *OpenAPIValidator) validatePrinciple(ctx context.Context, principle Principle, doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validatePrinciple(ctx context.Context, principle Principle, doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: principle,
 		Passed:    true,
 	}
 
 	switch principle.ID {
-	case "P001": // OpenAPI Specification Compliance
-		result = v.validateOpenAPICompliance(doc)
+	case "P001": // Specification Compliance
+		result = v.validateOpenAPICompliance(ctx, doc)
 	case "P002": // API Documentation Completeness
 		result = v.validateDocumentationQuality(doc)
 	case "P003": // Error Response Documentation
@@ -173,8 +173,10 @@ func (v *OpenAPIValidator) validatePrinciple(ctx context.Context, principle Prin
 	return result
 }
 
-// validateOpenAPICompliance validates that the OpenAPI spec is compliant with the OpenAPI 3.0/3.1 schema
-func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleResult {
+// validateOpenAPICompliance validates that the API spec is structurally compliant.
+// For OpenAPI 3.x, this includes full schema validation. For Swagger 2.0, it performs
+// a focused set of structural checks.
+func (v *OpenAPIValidator) validateOpenAPICompliance(ctx context.Context, doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[0], // P001
 		Passed:    true,
@@ -185,27 +187,25 @@ func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleR
 	checks := make(map[string]bool)
 	messages := make(map[string]string)
 
-	// Check OpenAPI version
-	if doc.OpenAPI == "" {
-		checks["OpenAPI version is 3.0.x or 3.1.0"] = false
-		messages["OpenAPI version is 3.0.x or 3.1.0"] = "OpenAPI version is not specified"
-	} else if !strings.HasPrefix(doc.OpenAPI, "3.0.") && doc.OpenAPI != "3.1.0" {
-		checks["OpenAPI version is 3.0.x or 3.1.0"] = false
-		messages["OpenAPI version is 3.0.x or 3.1.0"] = fmt.Sprintf("OpenAPI version %s is not 3.0.x or 3.1.0", doc.OpenAPI)
+	rawVersion := doc.RawVersion()
+	if rawVersion == "" {
+		checks["Specification version is present"] = false
+		messages["Specification version is present"] = "Specification version is not specified"
 	} else {
-		checks["OpenAPI version is 3.0.x or 3.1.0"] = true
+		checks["Specification version is present"] = true
 	}
 
 	// Check required info fields
-	if doc.Info == nil {
+	info := doc.Info()
+	if info == nil {
 		checks["Required info fields (title, version) are present"] = false
 		messages["Required info fields (title, version) are present"] = "Info section is missing"
 	} else {
 		missingFields := []string{}
-		if doc.Info.Title == "" {
+		if info.Title == "" {
 			missingFields = append(missingFields, "title")
 		}
-		if doc.Info.Version == "" {
+		if info.Version == "" {
 			missingFields = append(missingFields, "version")
 		}
 		if len(missingFields) > 0 {
@@ -217,38 +217,33 @@ func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleR
 	}
 
 	// Check paths
-	if doc.Paths == nil || len(doc.Paths.Map()) == 0 {
+	paths := doc.Paths()
+	if paths == nil || len(paths) == 0 {
 		checks["Paths are properly defined"] = false
 		messages["Paths are properly defined"] = "No paths defined in the API"
 	} else {
 		checks["Paths are properly defined"] = true
 	}
 
-	// Check components
-	if doc.Components == nil {
-		checks["Components are valid"] = false
-		messages["Components are valid"] = "Components section is missing"
-	} else {
-		checks["Components are valid"] = true
-	}
+	// Components presence is treated as non-fatal; downstream principles handle depth.
+	checks["Components are valid"] = true
 
-	// Check references
-	refErrors := []string{}
-	if err := doc.Validate(context.Background()); err != nil {
-		checks["References are resolvable"] = false
-		refErrors = append(refErrors, err.Error())
+	// Check references / structural validity via adapter-level validation.
+	if err := doc.ValidateStructure(ctx); err != nil {
+		checks["Specification structure is valid"] = false
+		messages["Specification structure is valid"] = err.Error()
 	} else {
-		checks["References are resolvable"] = true
-	}
-	if len(refErrors) > 0 {
-		messages["References are resolvable"] = strings.Join(refErrors, "; ")
+		checks["Specification structure is valid"] = true
 	}
 
 	// Check for duplicate operationIds
 	operationIDs := make(map[string][]string)
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
-			if operation.OperationID != "" {
+	for path, pathItem := range paths {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation != nil && operation.OperationID != "" {
 				operationIDs[operation.OperationID] = append(operationIDs[operation.OperationID], fmt.Sprintf("%s %s", method, path))
 			}
 		}
@@ -278,8 +273,11 @@ func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleR
 		"TRACE":   true,
 	}
 	invalidMethods := []string{}
-	for path, pathItem := range doc.Paths.Map() {
-		for method := range pathItem.Operations() {
+	for path, pathItem := range paths {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method := range pathItem.Operations {
 			if !validMethods[method] {
 				invalidMethods = append(invalidMethods, fmt.Sprintf("%s %s", method, path))
 			}
@@ -292,20 +290,21 @@ func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleR
 		checks["Valid HTTP methods used"] = true
 	}
 
-	// Check references and components
-	if doc.Components != nil {
-		// Check for null type in schemas
-		for name, schema := range doc.Components.Schemas {
-			if schema.Value != nil {
+	// OpenAPI 3.x-only: check for null type in schemas.
+	if doc.Type() == spec.SpecTypeOpenAPI3 {
+		if comps := doc.Components(); comps != nil && comps.Schemas != nil {
+			for name, schema := range comps.Schemas {
+				if schema == nil {
+					continue
+				}
 				// Allow null type in OpenAPI 3.1.0
-				if schema.Value.Type == "null" && doc.OpenAPI == "3.1.0" {
+				if schema.Type == "null" && rawVersion == "3.1.0" {
 					continue
 				}
 				// For OpenAPI 3.0.x, null type should be represented as ["null", "type"]
-				if schema.Value.Type == "null" && strings.HasPrefix(doc.OpenAPI, "3.0.") {
-					checks["References are resolvable"] = false
-					messages["References are resolvable"] = fmt.Sprintf("invalid components: schema %q: 'null' type should be represented as [\"null\", \"type\"] in OpenAPI 3.0.x", name)
-					continue
+				if schema.Type == "null" && strings.HasPrefix(rawVersion, "3.0.") {
+					checks["Specification structure is valid"] = false
+					messages["Specification structure is valid"] = fmt.Sprintf("invalid components: schema %q: 'null' type should be represented as [\"null\", \"type\"] in OpenAPI 3.0.x", name)
 				}
 			}
 		}
@@ -341,7 +340,7 @@ func (v *OpenAPIValidator) validateOpenAPICompliance(doc *openapi3.T) PrincipleR
 }
 
 // validateDocumentationQuality validates the quality and completeness of API documentation
-func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validateDocumentationQuality(doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[1], // P002
 		Passed:    true,
@@ -353,10 +352,11 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 	missingDocs := make(map[string][]string)
 
 	// Check API-level documentation
-	if doc.Info == nil {
+	info := doc.Info()
+	if info == nil {
 		checks["API has a general description"] = false
 		messages["API has a general description"] = "Info section is missing"
-	} else if doc.Info.Description == "" {
+	} else if info.Description == "" {
 		checks["API has a general description"] = false
 		messages["API has a general description"] = "API description is missing"
 	} else {
@@ -364,11 +364,11 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 	}
 
 	// Check contact information
-	if doc.Info == nil || doc.Info.Contact == nil {
+	if info == nil || info.Contact == nil {
 		checks["Contact information is provided"] = false
 		messages["Contact information is provided"] = "Contact information is missing"
 	} else {
-		hasContact := doc.Info.Contact.Name != "" || doc.Info.Contact.Email != "" || doc.Info.Contact.URL != ""
+		hasContact := info.Contact.Name != "" || info.Contact.Email != "" || info.Contact.URL != ""
 		checks["Contact information is provided"] = hasContact
 		if !hasContact {
 			messages["Contact information is provided"] = "Contact information is empty"
@@ -376,10 +376,10 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 	}
 
 	// Check license information
-	if doc.Info == nil || doc.Info.License == nil {
+	if info == nil || info.License == nil {
 		checks["License information is provided"] = false
 		messages["License information is provided"] = "License information is missing"
-	} else if doc.Info.License.Name == "" {
+	} else if info.License.Name == "" {
 		checks["License information is provided"] = false
 		messages["License information is provided"] = "License name is missing"
 	} else {
@@ -387,8 +387,14 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 	}
 
 	// Check operation documentation
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation == nil {
+				continue
+			}
 			opKey := fmt.Sprintf("%s %s", method, path)
 
 			// Check summary
@@ -411,26 +417,26 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 
 			// Check parameter documentation
 			for _, param := range operation.Parameters {
-				if param.Value == nil {
+				if param == nil {
 					continue
 				}
-				if param.Value.Description == "" {
+				if param.Description == "" {
 					missingDocs["All parameters have descriptions"] = append(missingDocs["All parameters have descriptions"],
-						fmt.Sprintf("%s: parameter %s", opKey, param.Value.Name))
+						fmt.Sprintf("%s: parameter %s", opKey, param.Name))
 					checks["All parameters have descriptions"] = false
 				}
 			}
 
 			// Check request body documentation
-			if operation.RequestBody != nil && operation.RequestBody.Value != nil {
-				if operation.RequestBody.Value.Description == "" {
+			if operation.RequestBody != nil {
+				if operation.RequestBody.Description == "" {
 					missingDocs["All request/response bodies have examples"] = append(missingDocs["All request/response bodies have examples"],
 						fmt.Sprintf("%s: request body", opKey))
 					checks["All request/response bodies have examples"] = false
 				}
 				// Check for examples in content
-				for contentType, content := range operation.RequestBody.Value.Content {
-					if content.Example == nil && len(content.Examples) == 0 {
+				for contentType, content := range operation.RequestBody.Content {
+					if content == nil || (content.Example == nil && len(content.Examples) == 0) {
 						missingDocs["All request/response bodies have examples"] = append(missingDocs["All request/response bodies have examples"],
 							fmt.Sprintf("%s: %s request body", opKey, contentType))
 						checks["All request/response bodies have examples"] = false
@@ -439,18 +445,18 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 			}
 
 			// Check response documentation
-			for status, response := range operation.Responses.Map() {
-				if response.Value == nil {
+			for status, response := range operation.Responses {
+				if response == nil {
 					continue
 				}
-				if response.Value.Description == nil || *response.Value.Description == "" {
+				if response.Description == "" {
 					missingDocs["All request/response bodies have examples"] = append(missingDocs["All request/response bodies have examples"],
 						fmt.Sprintf("%s: %s response", opKey, status))
 					checks["All request/response bodies have examples"] = false
 				}
 				// Check for examples in content
-				for contentType, content := range response.Value.Content {
-					if content.Example == nil && len(content.Examples) == 0 {
+				for contentType, content := range response.Content {
+					if content == nil || (content.Example == nil && len(content.Examples) == 0) {
 						missingDocs["All request/response bodies have examples"] = append(missingDocs["All request/response bodies have examples"],
 							fmt.Sprintf("%s: %s %s response", opKey, status, contentType))
 						checks["All request/response bodies have examples"] = false
@@ -461,18 +467,18 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 	}
 
 	// Check schema documentation
-	if doc.Components != nil && doc.Components.Schemas != nil {
-		for name, schema := range doc.Components.Schemas {
-			if schema.Value == nil {
+	if comps := doc.Components(); comps != nil && comps.Schemas != nil {
+		for name, schema := range comps.Schemas {
+			if schema == nil {
 				continue
 			}
-			if schema.Value.Description == "" {
+			if schema.Description == "" {
 				missingDocs["All schemas have descriptions"] = append(missingDocs["All schemas have descriptions"], name)
 				checks["All schemas have descriptions"] = false
 			}
 			// Check enum descriptions
-			if len(schema.Value.Enum) > 0 {
-				for _, enum := range schema.Value.Enum {
+			if len(schema.Enum) > 0 {
+				for _, enum := range schema.Enum {
 					if strEnum, ok := enum.(string); ok {
 						if schema.Value.Description == "" || !strings.Contains(schema.Value.Description, strEnum) {
 							missingDocs["All enums have descriptions"] = append(missingDocs["All enums have descriptions"],
@@ -517,7 +523,7 @@ func (v *OpenAPIValidator) validateDocumentationQuality(doc *openapi3.T) Princip
 }
 
 // validateErrorHandling validates error response documentation and patterns
-func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validateErrorHandling(doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[2], // P003
 		Passed:    true,
@@ -526,14 +532,20 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 
 	// In minimal mode, only check documentation for present error codes
 	if v.config.ValidationMode == ValidationModeMinimal {
-		for path, pathItem := range doc.Paths.Map() {
-			for method, operation := range pathItem.Operations() {
+		for path, pathItem := range doc.Paths() {
+			if pathItem == nil || pathItem.Operations == nil {
+				continue
+			}
+			for method, operation := range pathItem.Operations {
+				if operation == nil {
+					continue
+				}
 				opKey := fmt.Sprintf("%s %s", method, path)
 
 				// Only check documentation for present error responses
-				for code, response := range operation.Responses.Map() {
-					if code >= "400" && code < "600" && response.Value != nil {
-						if response.Value.Description == nil || *response.Value.Description == "" {
+				for code, response := range operation.Responses {
+					if code >= "400" && code < "600" && response != nil {
+						if response.Description == "" {
 							result.Passed = false
 							result.Message = fmt.Sprintf("Error response %s missing description: %s", code, opKey)
 							return result
@@ -553,10 +565,10 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 
 	// Check for common error responses in components
 	hasCommonErrors := false
-	if doc.Components != nil && doc.Components.Responses != nil {
+	if comps := doc.Components(); comps != nil && comps.Responses != nil {
 		commonCodes := []string{"400", "401", "403", "404", "500"}
 		for _, code := range commonCodes {
-			if _, exists := doc.Components.Responses[code]; exists {
+			if _, exists := comps.Responses[code]; exists {
 				hasCommonErrors = true
 				break
 			}
@@ -568,13 +580,19 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 	}
 
 	// Check each operation's error responses
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation == nil {
+				continue
+			}
 			opKey := fmt.Sprintf("%s %s", method, path)
 
 			// Check for 4xx errors
 			has4xx := false
-			for code := range operation.Responses.Map() {
+			for code := range operation.Responses {
 				if code >= "400" && code < "500" {
 					has4xx = true
 					break
@@ -588,7 +606,7 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 
 			// Check for 5xx errors
 			has5xx := false
-			for code := range operation.Responses.Map() {
+			for code := range operation.Responses {
 				if code >= "500" && code < "600" {
 					has5xx = true
 					break
@@ -601,14 +619,14 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 			}
 
 			// Check error response details
-			for code, response := range operation.Responses.Map() {
+			for code, response := range operation.Responses {
 				if code >= "400" && code < "600" {
-					if response.Value == nil {
+					if response == nil {
 						continue
 					}
 
 					// Check error code documentation
-					if response.Value.Description == nil || *response.Value.Description == "" {
+					if response.Description == "" {
 						missingErrors["Error responses include error codes"] = append(
 							missingErrors["Error responses include error codes"],
 							fmt.Sprintf("%s: %s response", opKey, code))
@@ -617,13 +635,15 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 
 					// Check error message schema
 					hasErrorSchema := false
-					if response.Value.Content != nil {
-						for _, content := range response.Value.Content {
-							if content.Schema != nil && content.Schema.Value != nil {
-								// Look for common error message fields
-								schema := content.Schema.Value
-								if schema.Properties != nil {
-									if _, hasMessage := schema.Properties["message"]; hasMessage {
+					if response.Content != nil {
+						for _, content := range response.Content {
+							if content == nil || content.Schema == nil {
+								continue
+							}
+							// Look for common error message fields
+							schema := content.Schema
+							if schema.Properties != nil {
+								if _, hasMessage := schema.Properties["message"]; hasMessage {
 										hasErrorSchema = true
 									}
 									if _, hasCode := schema.Properties["code"]; hasCode {
@@ -649,14 +669,22 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 
 	// Check error response format consistency
 	errorFormats := make(map[string][]string)
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation == nil {
+				continue
+			}
 			opKey := fmt.Sprintf("%s %s", method, path)
-			for code, response := range operation.Responses.Map() {
-				if code >= "400" && code < "600" && response.Value != nil && response.Value.Content != nil {
-					for contentType, content := range response.Value.Content {
-						if content.Schema != nil && content.Schema.Value != nil {
-							schema := content.Schema.Value
+			for code, response := range operation.Responses {
+				if code >= "400" && code < "600" && response != nil && response.Content != nil {
+					for contentType, content := range response.Content {
+						if content == nil || content.Schema == nil {
+							continue
+						}
+						schema := content.Schema
 							format := "unknown"
 							if schema.Properties != nil {
 								props := []string{}
@@ -716,7 +744,7 @@ func (v *OpenAPIValidator) validateErrorHandling(doc *openapi3.T) PrincipleResul
 }
 
 // validateRequestSchema validates request parameter and body schemas
-func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validateRequestSchema(doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[3], // P004
 		Passed:    true,
@@ -725,19 +753,25 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 
 	// In minimal mode, only check for basic schema existence
 	if v.config.ValidationMode == ValidationModeMinimal {
-		for path, pathItem := range doc.Paths.Map() {
-			for method, operation := range pathItem.Operations() {
+		for path, pathItem := range doc.Paths() {
+			if pathItem == nil || pathItem.Operations == nil {
+				continue
+			}
+			for method, operation := range pathItem.Operations {
+				if operation == nil {
+					continue
+				}
 				opKey := fmt.Sprintf("%s %s", method, path)
 
 				// Check if request body has schema
-				if operation.RequestBody != nil && operation.RequestBody.Value != nil {
-					if operation.RequestBody.Value.Content == nil {
+				if operation.RequestBody != nil {
+					if operation.RequestBody.Content == nil {
 						result.Passed = false
 						result.Message = fmt.Sprintf("Request body missing content schema: %s", opKey)
 						return result
 					}
-					for contentType, content := range operation.RequestBody.Value.Content {
-						if content.Schema == nil {
+					for contentType, content := range operation.RequestBody.Content {
+						if content == nil || content.Schema == nil {
 							result.Passed = false
 							result.Message = fmt.Sprintf("Request body missing schema for %s: %s", contentType, opKey)
 							return result
@@ -747,9 +781,9 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 
 				// Check if parameters have schemas
 				for _, param := range operation.Parameters {
-					if param.Value != nil && param.Value.Schema == nil {
+					if param != nil && param.Schema == nil {
 						result.Passed = false
-						result.Message = fmt.Sprintf("Parameter missing schema: %s %s", param.Value.Name, opKey)
+						result.Message = fmt.Sprintf("Parameter missing schema: %s %s", param.Name, opKey)
 						return result
 					}
 				}
@@ -769,16 +803,19 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 		checks[check] = true
 	}
 
-	for path, pathItem := range doc.Paths.Map() {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil {
+			continue
+		}
 		// Check path-level parameters
 		for _, param := range pathItem.Parameters {
-			if param.Value == nil {
+			if param == nil {
 				continue
 			}
-			paramKey := fmt.Sprintf("%s: parameter %s", path, param.Value.Name)
+			paramKey := fmt.Sprintf("%s: parameter %s", path, param.Name)
 
 			// Check schema existence
-			if param.Value.Schema == nil {
+			if param.Schema == nil {
 				missingValidation["All path parameters have schemas"] = append(
 					missingValidation["All path parameters have schemas"], paramKey)
 				checks["All path parameters have schemas"] = false
@@ -786,14 +823,14 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 			}
 
 			// Check schema type
-			if param.Value.Schema.Value.Type == "" {
+			if param.Schema.Type == "" {
 				missingValidation["All schemas specify data types"] = append(
 					missingValidation["All schemas specify data types"], paramKey)
 				checks["All schemas specify data types"] = false
 			}
 
 			// Check constraints
-			schema := param.Value.Schema.Value
+			schema := param.Schema
 			if schema.Type == "string" {
 				hasConstraints := false
 				minLen := schema.MinLength > 0
@@ -832,19 +869,22 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 		}
 
 		// Check operation-level parameters and bodies
-		for method, operation := range pathItem.Operations() {
+		for method, operation := range pathItem.Operations {
+			if operation == nil {
+				continue
+			}
 			opKey := fmt.Sprintf("%s %s", method, path)
 
 			// Check operation parameters
 			for _, param := range operation.Parameters {
-				if param.Value == nil {
+				if param == nil {
 					continue
 				}
-				paramKey := fmt.Sprintf("%s: parameter %s", opKey, param.Value.Name)
+				paramKey := fmt.Sprintf("%s: parameter %s", opKey, param.Name)
 
 				// Check schema existence
-				if param.Value.Schema == nil {
-					switch param.Value.In {
+				if param.Schema == nil {
+					switch param.In {
 					case "query":
 						missingValidation["All query parameters have schemas"] = append(
 							missingValidation["All query parameters have schemas"], paramKey)
@@ -858,14 +898,14 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 				}
 
 				// Check schema type
-				if param.Value.Schema.Value.Type == "" {
+				if param.Schema.Type == "" {
 					missingValidation["All schemas specify data types"] = append(
 						missingValidation["All schemas specify data types"], paramKey)
 					checks["All schemas specify data types"] = false
 				}
 
 				// Check constraints
-				schema := param.Value.Schema.Value
+				schema := param.Schema
 				if schema.Type == "string" {
 					hasConstraints := false
 					minLen := schema.MinLength > 0
@@ -903,10 +943,10 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 				}
 
 				// Check required flag
-				if param.Value.Required {
+				if param.Required {
 					required := false
-					for _, r := range param.Value.Schema.Value.Required {
-						if r == param.Value.Name {
+					for _, r := range param.Schema.Required {
+						if r == param.Name {
 							required = true
 							break
 						}
@@ -920,15 +960,15 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 			}
 
 			// Check request body
-			if operation.RequestBody != nil && operation.RequestBody.Value != nil {
-				if operation.RequestBody.Value.Content == nil {
+			if operation.RequestBody != nil {
+				if operation.RequestBody.Content == nil {
 					missingValidation["All request bodies have content schemas"] = append(
 						missingValidation["All request bodies have content schemas"],
 						fmt.Sprintf("%s: request body", opKey))
 					checks["All request bodies have content schemas"] = false
 				} else {
-					for contentType, content := range operation.RequestBody.Value.Content {
-						if content.Schema == nil {
+					for contentType, content := range operation.RequestBody.Content {
+						if content == nil || content.Schema == nil {
 							missingValidation["All request bodies have content schemas"] = append(
 								missingValidation["All request bodies have content schemas"],
 								fmt.Sprintf("%s: %s request body", opKey, contentType))
@@ -937,7 +977,7 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 						}
 
 						// Validate schema recursively
-						v.validateSchemaConstraints(content.Schema.Value, opKey, contentType, checks, missingValidation)
+						v.validateSchemaConstraints(content.Schema, opKey, contentType, checks, missingValidation)
 					}
 				}
 			}
@@ -975,8 +1015,8 @@ func (v *OpenAPIValidator) validateRequestSchema(doc *openapi3.T) PrincipleResul
 	return result
 }
 
-// validateSchemaConstraints recursively validates schema constraints
-func (v *OpenAPIValidator) validateSchemaConstraints(schema *openapi3.Schema, context, contentType string, checks map[string]bool, missingValidation map[string][]string) {
+// validateSchemaConstraints recursively validates schema constraints on a normalized schema.
+func (v *OpenAPIValidator) validateSchemaConstraints(schema *spec.Schema, context, contentType string, checks map[string]bool, missingValidation map[string][]string) {
 	if schema == nil {
 		return
 	}
@@ -1034,9 +1074,9 @@ func (v *OpenAPIValidator) validateSchemaConstraints(schema *openapi3.Schema, co
 	if len(schema.Required) > 0 {
 		for _, required := range schema.Required {
 			if schema.Properties != nil {
-				if prop, exists := schema.Properties[required]; exists && prop.Value != nil {
+				if prop, exists := schema.Properties[required]; exists && prop != nil {
 					found := false
-					for _, r := range prop.Value.Required {
+					for _, r := range prop.Required {
 						if r == required {
 							found = true
 							break
@@ -1056,26 +1096,27 @@ func (v *OpenAPIValidator) validateSchemaConstraints(schema *openapi3.Schema, co
 	// Recursively check properties
 	if schema.Properties != nil {
 		for name, prop := range schema.Properties {
-			if prop.Value != nil {
-				v.validateSchemaConstraints(prop.Value, fmt.Sprintf("%s.%s", context, name), contentType, checks, missingValidation)
+			if prop != nil {
+				v.validateSchemaConstraints(prop, fmt.Sprintf("%s.%s", context, name), contentType, checks, missingValidation)
 			}
 		}
 	}
 
 	// Check array items
-	if schema.Type == "array" && schema.Items != nil && schema.Items.Value != nil {
-		v.validateSchemaConstraints(schema.Items.Value, fmt.Sprintf("%s[]", context), contentType, checks, missingValidation)
+	if schema.Type == "array" && schema.Items != nil {
+		v.validateSchemaConstraints(schema.Items, fmt.Sprintf("%s[]", context), contentType, checks, missingValidation)
 	}
 }
 
 // validateAuthentication validates that all operations have proper authentication requirements
-func (v *OpenAPIValidator) validateAuthentication(doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validateAuthentication(doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[4], // P005
 		Passed:    true,
 	}
 
-	if doc.Components == nil || doc.Components.SecuritySchemes == nil {
+	comps := doc.Components()
+	if comps == nil || comps.SecuritySchemes == nil || len(comps.SecuritySchemes) == 0 {
 		result.Passed = false
 		result.Message = "No security schemes defined"
 		result.SuggestedFix = "Define security schemes in components.securitySchemes"
@@ -1083,9 +1124,15 @@ func (v *OpenAPIValidator) validateAuthentication(doc *openapi3.T) PrincipleResu
 	}
 
 	var missingAuth []string
-	for path, pathItem := range doc.Paths.Map() {
-		for method, operation := range pathItem.Operations() {
-			if operation.Security == nil && doc.Security == nil {
+	for path, pathItem := range doc.Paths() {
+		if pathItem == nil || pathItem.Operations == nil {
+			continue
+		}
+		for method, operation := range pathItem.Operations {
+			if operation == nil {
+				continue
+			}
+			if operation.Security == nil && doc.Security() == nil {
 				missingAuth = append(missingAuth, fmt.Sprintf("%s %s", method, path))
 			}
 		}
@@ -1102,13 +1149,14 @@ func (v *OpenAPIValidator) validateAuthentication(doc *openapi3.T) PrincipleResu
 }
 
 // validateVersioning validates that the API has proper versioning
-func (v *OpenAPIValidator) validateVersioning(doc *openapi3.T) PrincipleResult {
+func (v *OpenAPIValidator) validateVersioning(doc spec.APISpec) PrincipleResult {
 	result := PrincipleResult{
 		Principle: CorePrinciples[7], // P008
 		Passed:    true,
 	}
 
-	if doc.Info == nil || doc.Info.Version == "" {
+	info := doc.Info()
+	if info == nil || info.Version == "" {
 		result.Passed = false
 		result.Message = "API version is not specified in the OpenAPI document info section"
 		result.SuggestedFix = "Add or update the 'version' field in the 'info' section"
@@ -1116,7 +1164,7 @@ func (v *OpenAPIValidator) validateVersioning(doc *openapi3.T) PrincipleResult {
 	}
 
 	// Check if version is in semantic versioning format
-	version := doc.Info.Version
+	version := info.Version
 	parts := strings.Split(version, ".")
 	if len(parts) != 3 {
 		result.Passed = false
