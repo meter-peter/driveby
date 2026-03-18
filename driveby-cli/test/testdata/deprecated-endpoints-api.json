@@ -1,0 +1,48 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Versioned API with Deprecations",
+    "version": "2.1.0",
+    "description": "A well-versioned API demonstrating versioning strategy documentation, deprecation notices, and migration guidance. Version 2.1.0 introduces new endpoints while deprecating legacy ones. Breaking changes from v1: the /legacy endpoint now returns a different schema. For backward compatibility, the old schema is still available via Accept header versioning. Migration guide: see https://example.com/migrate-v1-to-v2 for upgrade instructions."
+  },
+  "paths": {
+    "/items": {
+      "get": {
+        "operationId": "listItems",
+        "summary": "List items (current)",
+        "description": "Returns items in the v2 format.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/legacy/items": {
+      "get": {
+        "operationId": "listItemsLegacy",
+        "summary": "List items (deprecated)",
+        "description": "Returns items in the v1 format. Deprecated since v2.0.0 — use GET /items instead.",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/legacy/search": {
+      "get": {
+        "operationId": "searchLegacy",
+        "summary": "Search (deprecated)",
+        "description": "Legacy search endpoint. Deprecated — use query parameters on GET /items instead.",
+        "deprecated": true,
+        "responses": {
+          "200": {
+            "description": "Search results"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,28 @@
-# DriveBy - Modern API Validation Framework
+# DriveBy - Documentation-Driven Testing (DDT)
 
-DriveBy is a comprehensive API validation framework that helps you validate, test, and monitor your APIs. It supports OpenAPI 3.x specifications and provides extensive validation, testing, and monitoring capabilities.
+DriveBy is a thesis-ready API validation framework implementing **Documentation-Driven Testing (DDT)** — a methodology for automated API quality assurance in the GitOps era. It validates OpenAPI 3.x/Swagger 2.0 specifications and tests live API endpoints.
+
+## Monorepo Structure
+
+```
+driveby-cli/     Go CLI tool — the core validation engine
+apis/            Sample APIs for testing (perfect-api)
+kubernetes/      Helm chart + raw YAML K8s deployment examples
+samples/         Example configs, reports, demo workflows
+thesis/          LaTeX thesis document
+tools/           Python/bash utilities for batch testing
+docs/            CLI usage guides and documentation
+```
+
+## Quick Start
+
+```bash
+make build                # Build the CLI
+make up                   # Start docker-compose (perfect-api)
+make validate             # Run validation against perfect-api
+make test                 # Run unit tests
+make integration-test     # Run integration tests (docker-compose)
+```
 
 ## Features
 

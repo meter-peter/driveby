@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: driveby-github
+  namespace: driveby
+spec:
+  github:
+    driveby-webhook:
+      repositories:
+        - owner: ""  # Set via values
+          names:
+            - ""     # Set via values
+      webhook:
+        endpoint: /github/driveby
+        port: "12000"
+        method: POST
+      events:
+        - pull_request
+        - push
+      apiToken:
+        name: github-token
+        key: token
+      insecure: false
+      active: true
+      contentType: json

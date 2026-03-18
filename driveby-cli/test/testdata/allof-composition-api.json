@@ -1,0 +1,339 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Composition Notification API",
+    "version": "1.0.0",
+    "description": "An API that exercises allOf and oneOf schema composition. Used for testing schema composition handling in validators."
+  },
+  "servers": [
+    {
+      "url": "https://api.notifications.example.com/v1",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "List events",
+        "description": "Returns a list of events. Each event may be one of several types using polymorphic schema composition.",
+        "responses": {
+          "200": {
+            "description": "A list of events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEvent",
+        "summary": "Create an event",
+        "description": "Creates a new event. The request body must match one of the supported event types.",
+        "requestBody": {
+          "description": "Event payload. Must be one of: EmailEvent, SMSEvent, or WebhookEvent.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event was created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid event payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events/{eventId}": {
+      "get": {
+        "operationId": "getEvent",
+        "summary": "Get an event by ID",
+        "description": "Retrieves a single event. The response uses allOf to compose the base entity with audit metadata.",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the event.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event with full audit details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventWithAudit"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseEntity": {
+        "type": "object",
+        "description": "Common fields shared by all persisted entities.",
+        "required": ["id", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique system-generated identifier.",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp when the entity was created.",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuditMetadata": {
+        "type": "object",
+        "description": "Audit trail metadata appended to entities on retrieval.",
+        "properties": {
+          "lastModifiedAt": {
+            "type": "string",
+            "description": "Timestamp of the most recent modification.",
+            "format": "date-time"
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "Username of the last person to modify this entity."
+          },
+          "version": {
+            "type": "integer",
+            "description": "Optimistic concurrency version number."
+          }
+        }
+      },
+      "EventCore": {
+        "type": "object",
+        "description": "Core event fields shared across all event types.",
+        "required": ["type", "recipient", "subject"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Discriminator indicating the event delivery channel.",
+            "enum": ["email", "sms", "webhook"]
+          },
+          "recipient": {
+            "type": "string",
+            "description": "The target address or endpoint for the event."
+          },
+          "subject": {
+            "type": "string",
+            "description": "A brief subject or title for the event."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current delivery status of the event.",
+            "enum": ["pending", "delivered", "failed"]
+          }
+        }
+      },
+      "Event": {
+        "description": "A full event entity combining base entity fields with core event data.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/EventCore"
+          }
+        ]
+      },
+      "EventWithAudit": {
+        "description": "An event entity enriched with audit metadata. Composes three schemas via allOf.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/EventCore"
+          },
+          {
+            "$ref": "#/components/schemas/AuditMetadata"
+          }
+        ]
+      },
+      "EmailEventDetails": {
+        "type": "object",
+        "description": "Additional fields specific to email events.",
+        "required": ["htmlBody"],
+        "properties": {
+          "htmlBody": {
+            "type": "string",
+            "description": "HTML content of the email body."
+          },
+          "cc": {
+            "type": "array",
+            "description": "Carbon-copy recipients.",
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "attachmentCount": {
+            "type": "integer",
+            "description": "Number of file attachments."
+          }
+        }
+      },
+      "SMSEventDetails": {
+        "type": "object",
+        "description": "Additional fields specific to SMS events.",
+        "required": ["messageBody"],
+        "properties": {
+          "messageBody": {
+            "type": "string",
+            "description": "Plain text message content.",
+            "maxLength": 160
+          },
+          "senderNumber": {
+            "type": "string",
+            "description": "The phone number the SMS is sent from.",
+            "pattern": "^\\+[1-9]\\d{1,14}$"
+          }
+        }
+      },
+      "WebhookEventDetails": {
+        "type": "object",
+        "description": "Additional fields specific to webhook events.",
+        "required": ["callbackUrl", "httpMethod"],
+        "properties": {
+          "callbackUrl": {
+            "type": "string",
+            "description": "The URL to deliver the webhook payload to.",
+            "format": "uri"
+          },
+          "httpMethod": {
+            "type": "string",
+            "description": "HTTP method for the webhook delivery.",
+            "enum": ["POST", "PUT"]
+          },
+          "payload": {
+            "type": "object",
+            "description": "Arbitrary JSON payload to deliver.",
+            "additionalProperties": true
+          }
+        }
+      },
+      "CreateEventRequest": {
+        "description": "Polymorphic event creation request. The body must match exactly one of the supported event types — each composed via allOf from the core event schema and type-specific details.",
+        "oneOf": [
+          {
+            "description": "Create an email event.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventCore"
+              },
+              {
+                "$ref": "#/components/schemas/EmailEventDetails"
+              }
+            ]
+          },
+          {
+            "description": "Create an SMS event.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventCore"
+              },
+              {
+                "$ref": "#/components/schemas/SMSEventDetails"
+              }
+            ]
+          },
+          {
+            "description": "Create a webhook event.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventCore"
+              },
+              {
+                "$ref": "#/components/schemas/WebhookEventDetails"
+              }
+            ]
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "email": "#/components/schemas/EmailEventDetails",
+            "sms": "#/components/schemas/SMSEventDetails",
+            "webhook": "#/components/schemas/WebhookEventDetails"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error response.",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "HTTP status code."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error description."
+          }
+        }
+      }
+    }
+  }
+}

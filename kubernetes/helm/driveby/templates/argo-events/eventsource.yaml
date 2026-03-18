@@ -1,0 +1,27 @@
+{{- if .Values.argoEvents.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: driveby-github
+  namespace: {{ .Values.namespace }}
+spec:
+  github:
+    driveby-webhook:
+      repositories:
+        - owner: {{ .Values.github.owner | quote }}
+          names:
+            - {{ .Values.github.repo | quote }}
+      webhook:
+        endpoint: /github/driveby
+        port: {{ .Values.argoEvents.webhook.port | quote }}
+        method: POST
+      events:
+        - pull_request
+        - push
+      apiToken:
+        name: {{ .Values.github.secretName }}
+        key: token
+      insecure: false
+      active: true
+      contentType: json
+{{- end }}

@@ -1,0 +1,332 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Well-Documented Bookstore API",
+    "version": "1.2.0",
+    "description": "A fully documented bookstore API used for testing P002 validation. Every operation, parameter, schema, and field includes descriptions and examples.",
+    "contact": {
+      "name": "Bookstore API Team",
+      "email": "api-team@bookstore.example.com",
+      "url": "https://bookstore.example.com/support"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "termsOfService": "https://bookstore.example.com/terms"
+  },
+  "servers": [
+    {
+      "url": "https://api.bookstore.example.com/v1",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/books": {
+      "get": {
+        "operationId": "listBooks",
+        "summary": "List all books",
+        "description": "Retrieves a paginated list of all books in the catalog. Supports filtering by genre and sorting by title or publication date.",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Filter books by genre. Must match one of the predefined genre values.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "The genre category to filter by.",
+              "example": "science-fiction"
+            },
+            "example": "science-fiction"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of books to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Page size limit.",
+              "example": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of books to skip before starting to return results.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Pagination offset.",
+              "example": 0
+            },
+            "example": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of books was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookList"
+                },
+                "example": {
+                  "books": [
+                    {
+                      "id": "b1a2c3d4",
+                      "title": "Dune",
+                      "author": "Frank Herbert",
+                      "genre": "science-fiction",
+                      "publishedYear": 1965,
+                      "isbn": "978-0-441-17271-9"
+                    }
+                  ],
+                  "total": 1,
+                  "limit": 20,
+                  "offset": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request parameters are invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 400,
+                  "message": "Invalid genre filter value."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 500,
+                  "message": "Internal server error."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBook",
+        "summary": "Add a new book",
+        "description": "Creates a new book entry in the catalog. The ISBN must be unique across all books.",
+        "tags": ["Books"],
+        "requestBody": {
+          "description": "The book data to create. All required fields must be provided.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookInput"
+              },
+              "example": {
+                "title": "Neuromancer",
+                "author": "William Gibson",
+                "genre": "science-fiction",
+                "publishedYear": 1984,
+                "isbn": "978-0-441-56956-4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The book was successfully created and added to the catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                },
+                "example": {
+                  "id": "e5f6a7b8",
+                  "title": "Neuromancer",
+                  "author": "William Gibson",
+                  "genre": "science-fiction",
+                  "publishedYear": 1984,
+                  "isbn": "978-0-441-56956-4"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body is malformed or missing required fields.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 400,
+                  "message": "Field 'title' is required."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A book with the same ISBN already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 409,
+                  "message": "A book with ISBN 978-0-441-56956-4 already exists."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": 500,
+                  "message": "Internal server error."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "description": "A book in the catalog with a system-generated identifier.",
+        "required": ["id", "title", "author", "genre", "publishedYear", "isbn"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique system-generated identifier for the book.",
+            "example": "b1a2c3d4"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the book.",
+            "example": "Dune"
+          },
+          "author": {
+            "type": "string",
+            "description": "The full name of the book's author.",
+            "example": "Frank Herbert"
+          },
+          "genre": {
+            "type": "string",
+            "description": "The genre category of the book.",
+            "example": "science-fiction"
+          },
+          "publishedYear": {
+            "type": "integer",
+            "description": "The year the book was originally published.",
+            "example": 1965
+          },
+          "isbn": {
+            "type": "string",
+            "description": "The International Standard Book Number (ISBN-13 format).",
+            "example": "978-0-441-17271-9"
+          }
+        }
+      },
+      "BookInput": {
+        "type": "object",
+        "description": "Input payload for creating a new book. Does not include the system-generated id.",
+        "required": ["title", "author", "genre", "publishedYear", "isbn"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the book.",
+            "example": "Neuromancer"
+          },
+          "author": {
+            "type": "string",
+            "description": "The full name of the book's author.",
+            "example": "William Gibson"
+          },
+          "genre": {
+            "type": "string",
+            "description": "The genre category of the book.",
+            "example": "science-fiction"
+          },
+          "publishedYear": {
+            "type": "integer",
+            "description": "The year the book was originally published.",
+            "example": 1984
+          },
+          "isbn": {
+            "type": "string",
+            "description": "The International Standard Book Number (ISBN-13 format).",
+            "example": "978-0-441-56956-4"
+          }
+        }
+      },
+      "BookList": {
+        "type": "object",
+        "description": "A paginated list of books with metadata for pagination.",
+        "required": ["books", "total", "limit", "offset"],
+        "properties": {
+          "books": {
+            "type": "array",
+            "description": "The list of books for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Book"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of books matching the query.",
+            "example": 42
+          },
+          "limit": {
+            "type": "integer",
+            "description": "The page size used for this response.",
+            "example": 20
+          },
+          "offset": {
+            "type": "integer",
+            "description": "The offset used for this response.",
+            "example": 0
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error response returned by the API on failure.",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "HTTP status code reflecting the error type.",
+            "example": 400
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable message describing what went wrong.",
+            "example": "Invalid request parameters."
+          }
+        }
+      }
+    }
+  }
+}

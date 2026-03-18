@@ -21,7 +21,8 @@ fi
 
 CSV_FILE="$1"
 REPORT_ROOT="${2:-/tmp/driveby-openapi-batch}"
-DRIVEBY_BIN="${DRIVEBY_BIN:-./driveby}"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+DRIVEBY_BIN="${DRIVEBY_BIN:-$REPO_ROOT/driveby-cli/driveby}"
 
 if [[ ! -f "$CSV_FILE" ]]; then
   echo "Error: CSV file not found: $CSV_FILE" >&2

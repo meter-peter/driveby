@@ -1,0 +1,287 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Strict Schema User API",
+    "version": "2.0.0",
+    "description": "An API with strict schema constraints on every field. Used for testing P004 — schema strictness validation."
+  },
+  "servers": [
+    {
+      "url": "https://api.users.example.com/v2",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List users",
+        "description": "Returns a paginated list of users.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of results per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Filter users by role.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["admin", "editor", "viewer"],
+              "minLength": 1,
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUser",
+        "summary": "Create a user",
+        "description": "Creates a new user account with the provided details.",
+        "requestBody": {
+          "description": "User creation payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user was successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed for the request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A user with the same email already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "A registered user account.",
+        "required": ["id", "username", "email", "role", "age"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "System-generated unique identifier.",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "username": {
+            "type": "string",
+            "description": "The user's chosen display name.",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "email": {
+            "type": "string",
+            "description": "The user's email address.",
+            "format": "email",
+            "minLength": 5,
+            "maxLength": 254
+          },
+          "role": {
+            "type": "string",
+            "description": "The user's access role within the system.",
+            "enum": ["admin", "editor", "viewer"],
+              "minLength": 1,
+              "maxLength": 20
+          },
+          "age": {
+            "type": "integer",
+            "description": "The user's age in years.",
+            "minimum": 13,
+            "maximum": 150
+          },
+          "bio": {
+            "type": "string",
+            "description": "Optional user biography.",
+            "minLength": 0,
+            "maxLength": 500
+          },
+          "score": {
+            "type": "number",
+            "description": "Reputation score based on activity.",
+            "format": "double",
+            "minimum": 0.0,
+            "maximum": 100.0
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp of account creation.",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserInput": {
+        "type": "object",
+        "description": "Payload for creating a new user.",
+        "required": ["username", "email", "role", "age"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Desired display name. Must be alphanumeric with hyphens and underscores.",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "email": {
+            "type": "string",
+            "description": "A valid email address for the new account.",
+            "format": "email",
+            "minLength": 5,
+            "maxLength": 254
+          },
+          "role": {
+            "type": "string",
+            "description": "The role to assign to the new user.",
+            "enum": ["admin", "editor", "viewer"],
+              "minLength": 1,
+              "maxLength": 20
+          },
+          "age": {
+            "type": "integer",
+            "description": "The user's age. Must be at least 13.",
+            "minimum": 13,
+            "maximum": 150
+          },
+          "bio": {
+            "type": "string",
+            "description": "Optional biography text.",
+            "minLength": 0,
+            "maxLength": 500
+          }
+        }
+      },
+      "UserList": {
+        "type": "object",
+        "description": "A paginated response containing users and pagination metadata.",
+        "required": ["users", "total", "page", "pageSize"],
+        "properties": {
+          "users": {
+            "type": "array",
+            "description": "The list of users for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "minItems": 0,
+            "maxItems": 100
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of users matching the query.",
+            "minimum": 0
+          },
+          "page": {
+            "type": "integer",
+            "description": "Current page number.",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Number of results per page.",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error response.",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "HTTP status code.",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message.",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    }
+  }
+}

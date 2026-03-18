@@ -1,2 +1,12 @@
 name,url,host
 petstore,https://petstore3.swagger.io/api/v3/openapi.json,petstore3.swagger.io
+httpbin,https://httpbin.org/spec.json,httpbin.org
+catfact,https://catfact.ninja/docs/api-docs.json,catfact.ninja
+jsonplaceholder,https://jsonplaceholder.typicode.com/openapi.json,jsonplaceholder.typicode.com
+reqres,https://reqres.in/api-docs/openapi.json,reqres.in
+dummyjson,https://dummyjson.com/openapi.json,dummyjson.com
+dog-ceo,https://dog.ceo/api/openapi.json,dog.ceo
+coindesk,https://api.coindesk.com/v1/openapi.json,api.coindesk.com
+agify,https://api.agify.io/openapi.json,api.agify.io
+genderize,https://api.genderize.io/openapi.json,api.genderize.io
+nationalize,https://api.nationalize.io/openapi.json,api.nationalize.io

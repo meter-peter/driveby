@@ -1,0 +1,70 @@
+# DriveBy Helm Chart Values
+
+namespace: driveby
+
+# Domain for ingress
+domain: private.novelcore.org
+
+# Container image
+image:
+  repository: ghcr.io/meter-peter/driveby
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# ArgoCD configuration (existing installation)
+argocd:
+  enabled: true
+  # Do NOT install ArgoCD — it already exists on the cluster
+  # Only create AppProject and Applications
+  project: driveby
+  server: https://argocd.private.novelcore.org
+
+# Argo Workflows
+argoWorkflows:
+  enabled: true
+  namespace: driveby
+
+# Argo Events
+argoEvents:
+  enabled: true
+  webhook:
+    port: 12000
+
+# Crossplane
+crossplane:
+  enabled: false
+  providers:
+    kubernetes:
+      version: "v0.14.0"
+    github:
+      version: "v0.2.0"
+
+# GitOps Promoter
+gitopsPromoter:
+  enabled: false
+  environments:
+    - name: dev
+      branch: environment/dev
+      autoMerge: true
+    - name: staging
+      branch: environment/staging
+      autoMerge: false
+    - name: prod
+      branch: environment/prod
+      autoMerge: false
+
+# GitHub integration
+github:
+  owner: ""
+  repo: ""
+  # Secret name containing GitHub credentials
+  secretName: driveby-github-credentials
+
+# RBAC
+rbac:
+  create: true
+
+# Reports PVC
+reports:
+  storageSize: 1Gi
+  storageClass: ""

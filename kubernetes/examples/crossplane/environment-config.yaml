@@ -1,0 +1,11 @@
+apiVersion: apiextensions.crossplane.io/v1alpha1
+kind: EnvironmentConfig
+metadata:
+  name: driveby-config
+  labels:
+    app: driveby
+    environment: production
+data:
+  namespace: driveby
+  argocdProject: driveby
+  domain: private.novelcore.org

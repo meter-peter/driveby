@@ -1,15 +1,29 @@
 # DriveBy API Validation Framework - Cursor Rules
 
 ## Project Overview
-DriveBy is a production-grade API validation and testing framework written in Go that provides comprehensive validation, functional testing, and load testing capabilities for APIs with OpenAPI/Swagger specifications.
+DriveBy is a thesis-ready API validation framework implementing Documentation-Driven Testing (DDT).
+Monorepo structure — see CLAUDE.md for full architecture details.
 
-## Core Architecture
+## Monorepo Layout
+```
+driveby/
+├── driveby-cli/       # Go CLI (own go.mod: github.com/meter-peter/driveby/driveby-cli)
+│   ├── cmd/driveby/   # Entry point
+│   └── internal/      # cli, spec, loader, engine, principles, testing, types, report, github, logger
+├── apis/              # Sample APIs (perfect-api)
+├── kubernetes/        # Helm chart + raw YAML examples
+├── samples/           # Configs, reports, demo workflows
+├── thesis/            # LaTeX thesis (7 chapters)
+└── tools/             # Python/bash batch testing utilities
+```
 
-### Validation Modes
-- **minimal**: Essential validation only (recommended for testing)
-- **strict**: Comprehensive validation with all documentation requirements
+## Architecture
+- Dependency flow: `types` <- `spec` <- `loader` <- `principles` <- `testing` <- `engine` <- `cli`
+- `spec.APISpec` abstraction is mandatory — no raw `*openapi3.T` in validators
+- Each principle (P001-P008) implements `PrincipleChecker` interface
+- CLI config shared via `config.go` — no duplication
 
-### Validation Principles (P001-P008)
+## Validation Principles (P001-P008)
 - **P001**: OpenAPI Specification Compliance (critical)
 - **P002**: API Documentation Quality (warning)
 - **P003**: Error Handling Standards (warning)
@@ -19,154 +33,15 @@ DriveBy is a production-grade API validation and testing framework written in Go
 - **P007**: Performance Requirements (warning)
 - **P008**: API Versioning Strategy (warning)
 
-### Testing Commands
+## Build & Test
 ```bash
-# Validation only
-./driveby validate-only --openapi <spec> --host <host> --port <port> --protocol <http|https> --validation-mode minimal
-
-# Functional testing only
-./driveby function-only --openapi <spec> --host <host> --port <port> --protocol <http|https> --timeout 30s
-
-# Load testing only
-./driveby load-only --openapi <spec> --host <host> --port <port> --protocol <http|https> --concurrent-users 5 --test-duration 30s --max-latency-p95 1000ms --min-success-rate 0.95
+cd driveby-cli && go build ./cmd/driveby    # Build
+cd driveby-cli && go test ./...              # Test
+cd driveby-cli && go vet ./...               # Lint
+make up                                       # Start docker-compose
+make validate                                 # Run validation
 ```
 
-## Key Insights from Validation Session
-
-### OpenAPI Schema Issues to Avoid
-1. **Optional Parameters**: Use `default` values instead of `None` for optional fields
-2. **Enum Types**: Use string enums with explicit values instead of Optional[Enum]
-3. **Null Types**: Avoid `type: null` in schemas - use proper default values
-4. **Parameter Validation**: All query parameters should have proper constraints and examples
-
-### FastAPI Best Practices for DriveBy
-```python
-# ✅ CORRECT - Use default values instead of Optional
-category: str = Query(
-    default="",
-    title="Filter by Category",
-    description="Filter products by category",
-    example="electronics",
-    enum=["", "electronics", "clothing", "food", "books", "other"]
-)
-
-# ❌ AVOID - Optional types cause schema issues
-category: Optional[ProductCategory] = Query(None, ...)
-
-# ✅ CORRECT - Use default instead of None
-description: str = Field(
-    default="",
-    title="Task Description",
-    description="Detailed description of the task",
-    example="Example description"
-)
-```
-
-### Performance Targets
-- **Success Rate**: Minimum 95% (0.95)
-- **Error Rate**: Maximum 5%
-- **Latency P95**: Configurable (default 500ms)
-- **Concurrent Users**: Configurable (default 10)
-- **Test Duration**: Configurable with units (e.g., 30s)
-
-### Docker Setup for Testing
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  perfect-api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
-    ports:
-      - "8000:8000"
-    command: uvicorn perfect-api:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### Validation Workflow
-1. **Start API Server**: Use Docker Compose for consistent environment
-2. **Run Validation**: Use minimal mode for essential checks
-3. **Functional Testing**: Test actual API endpoints
-4. **Load Testing**: Verify performance under load
-5. **Generate Reports**: Check `/tmp/driveby-reports/` for detailed reports
-
-### Report Generation
-- **JSON Reports**: `/tmp/driveby-reports/validation-report.json`
-- **Markdown Reports**: `/tmp/driveby-reports/validation-report.md`
-- **Load Test Reports**: `/tmp/driveby-reports/load-test-report.json`
-
-### Common Issues and Solutions
-
-#### Schema Validation Errors
-- **Problem**: "unsupported 'type' value 'null'"
-- **Solution**: Replace Optional[Type] with Type and default values
-
-#### Timeout Issues
-- **Problem**: "context deadline exceeded"
-- **Solution**: Increase timeout with `--timeout 30s`
-
-#### Duration Format Errors
-- **Problem**: "missing unit in duration"
-- **Solution**: Always specify units (e.g., `30s`, `1000ms`)
-
-### Testing Strategy
-1. **Use Live OpenAPI Spec**: `http://localhost:8000/openapi.json` instead of static files
-2. **Minimal Mode First**: Start with minimal validation to test core functionality
-3. **Iterative Fixes**: Fix schema issues in the API code, not the OpenAPI spec
-4. **Performance Validation**: Always include load testing for production readiness
-
-### Success Criteria
-- ✅ OpenAPI validation passes (minimal mode)
-- ✅ Functional testing: 90%+ endpoints working
-- ✅ Load testing: All performance targets met
-- ✅ Error rates < 5%
-- ✅ Latency P95 < target threshold
-
-### File Structure
-```
-driveby/
-├── driveby (Go binary)
-├── perfect-api.py (Test API)
-├── docker-compose.yml
-├── Dockerfile.api
-├── openapi.json (generated)
-├── CLI_USAGE.md
-├── README.md
-└── .cursorrules
-```
-
-### Key Commands for Development
-```bash
-# Start API server
-docker-compose up -d
-
-# Test health
-curl http://localhost:8000/test/health
-
-# Run full validation suite
-./driveby validate-only --openapi http://localhost:8000/openapi.json --host localhost --port 8000 --protocol http --validation-mode minimal
-./driveby function-only --openapi http://localhost:8000/openapi.json --host localhost --port 8000 --protocol http --timeout 30s
-./driveby load-only --openapi http://localhost:8000/openapi.json --host localhost --port 8000 --protocol http --concurrent-users 5 --test-duration 30s --max-latency-p95 1000ms --min-success-rate 0.95
-```
-
-## Development Guidelines
-
-### When Adding New Endpoints
-1. Use proper Pydantic models with default values
-2. Avoid Optional types in query parameters
-3. Include comprehensive examples and descriptions
-4. Test with driveby validation before deployment
-
-### When Debugging Validation Issues
-1. Check the generated OpenAPI spec at `/openapi.json`
-2. Look for "null" types in the schema
-3. Verify all parameters have proper constraints
-4. Ensure enum values are properly defined
-
-### Performance Optimization
-1. Use appropriate timeout values
-2. Start with low concurrent users
-3. Monitor error rates during load testing
-4. Adjust performance targets based on requirements
-
-This framework provides enterprise-grade API validation and testing capabilities, ensuring APIs meet production standards before deployment. 
+## Crossplane
+Use context7 MCP tool first for provider docs before web search.
+Reference kubecore-operator at `/home/meter-peter/development/novelcore/kubecore-operator/compositions/`.

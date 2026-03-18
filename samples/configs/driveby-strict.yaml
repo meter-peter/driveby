@@ -1,0 +1,9 @@
+# DriveBy strict configuration
+openapi: "https://example.com/openapi.json"
+host: "api.example.com"
+port: "443"
+protocol: "https"
+validation-mode: "strict"
+report-dir: "/tmp/driveby-reports"
+environment: "production"
+version: "1.0.0"

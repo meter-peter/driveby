@@ -1,0 +1,17 @@
+{{- if .Values.argocd.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .Values.argocd.project }}
+  namespace: argocd
+spec:
+  description: DriveBy API validation platform
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: {{ .Values.namespace }}
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+{{- end }}

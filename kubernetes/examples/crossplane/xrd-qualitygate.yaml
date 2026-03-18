@@ -1,0 +1,54 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xqualitygates.driveby.io
+spec:
+  group: driveby.io
+  names:
+    kind: XQualityGate
+    plural: xqualitygates
+  claimNames:
+    kind: QualityGate
+    plural: qualitygates
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                apiUrl:
+                  type: string
+                  description: Base URL of the API to validate
+                openapiUrl:
+                  type: string
+                  description: URL to the OpenAPI specification
+                validationMode:
+                  type: string
+                  enum: [minimal, strict, test-only]
+                  default: minimal
+                environment:
+                  type: string
+                  default: staging
+                githubOwner:
+                  type: string
+                githubRepo:
+                  type: string
+                githubPrNumber:
+                  type: integer
+              required:
+                - apiUrl
+                - openapiUrl
+            status:
+              type: object
+              properties:
+                validationPassed:
+                  type: boolean
+                lastRunTimestamp:
+                  type: string
+                reportUrl:
+                  type: string

@@ -1,0 +1,16 @@
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: ChangeTransferPolicy
+metadata:
+  name: driveby-ctp
+  namespace: driveby
+spec:
+  repositoryReference:
+    owner: ""
+    name: ""
+    scmProviderRef:
+      name: github-scm-provider
+  proposedBranch: environment/dev
+  activeCommitStatuses:
+    - key: driveby-validation
+  proposedCommitStatuses:
+    - key: driveby-validation

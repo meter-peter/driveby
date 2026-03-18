@@ -1,0 +1,16 @@
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: CommitStatus
+metadata:
+  name: driveby-validation
+  namespace: driveby
+spec:
+  repositoryReference:
+    owner: ""
+    name: ""
+    scmProviderRef:
+      name: github-scm-provider
+  sha: ""
+  name: driveby-validation
+  description: "DriveBy API validation results"
+  phase: pending
+  url: ""

@@ -1,0 +1,569 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Petstore API",
+    "version": "1.0.0",
+    "description": "A simplified but realistic Petstore API. Used as a comprehensive test fixture covering endpoints, errors, security, request/response schemas, and pagination.",
+    "contact": {
+      "name": "Petstore Team",
+      "email": "support@petstore.example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.petstore.example.com/v1",
+      "description": "Production"
+    },
+    {
+      "url": "https://staging-api.petstore.example.com/v1",
+      "description": "Staging"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "operationId": "listPets",
+        "summary": "List all pets",
+        "description": "Returns a paginated list of pets. Supports filtering by species and status.",
+        "tags": ["Pets"],
+        "parameters": [
+          {
+            "name": "species",
+            "in": "query",
+            "description": "Filter by pet species.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["dog", "cat", "bird", "fish", "reptile"]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by adoption status.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["available", "adopted", "pending"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of pets to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of pets to skip for pagination.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of pets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid filter or pagination parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPet",
+        "summary": "Create a pet",
+        "description": "Registers a new pet in the store. Requires admin or staff role.",
+        "tags": ["Pets"],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Pet data for registration.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetInput"
+              },
+              "example": {
+                "name": "Buddy",
+                "species": "dog",
+                "breed": "Golden Retriever",
+                "age": 3,
+                "status": "available",
+                "tags": ["friendly", "trained"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The pet was registered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body is malformed or missing required fields.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pets/{petId}": {
+      "get": {
+        "operationId": "getPet",
+        "summary": "Get a pet by ID",
+        "description": "Retrieves full details for a single pet by its unique identifier.",
+        "tags": ["Pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the pet.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The pet details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No pet found with the given ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePet",
+        "summary": "Update a pet",
+        "description": "Updates an existing pet's details. Replaces the entire resource with the provided data.",
+        "tags": ["Pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the pet to update.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated pet data.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The pet was updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body is malformed or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authentication token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No pet found with the given ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePet",
+        "summary": "Delete a pet",
+        "description": "Removes a pet from the store permanently. This action cannot be undone.",
+        "tags": ["Pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the pet to delete.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The pet was deleted successfully. No content returned."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No pet found with the given ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT bearer token. Obtain via POST /auth/login."
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key for service-to-service authentication."
+      }
+    },
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "description": "A pet registered in the store.",
+        "required": ["id", "name", "species", "status", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the pet."
+          },
+          "name": {
+            "type": "string",
+            "description": "The pet's name.",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Buddy"
+          },
+          "species": {
+            "type": "string",
+            "description": "The species of the pet.",
+            "enum": ["dog", "cat", "bird", "fish", "reptile"]
+          },
+          "breed": {
+            "type": "string",
+            "description": "Breed or variety within the species.",
+            "maxLength": 100,
+            "example": "Golden Retriever"
+          },
+          "age": {
+            "type": "integer",
+            "description": "Age of the pet in years.",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "status": {
+            "type": "string",
+            "description": "Current adoption status.",
+            "enum": ["available", "adopted", "pending"]
+          },
+          "tags": {
+            "type": "array",
+            "description": "Descriptive tags for the pet.",
+            "items": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "maxItems": 10
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the pet was registered."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last update to the pet record."
+          }
+        }
+      },
+      "PetInput": {
+        "type": "object",
+        "description": "Input payload for creating or updating a pet.",
+        "required": ["name", "species", "status"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The pet's name.",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "species": {
+            "type": "string",
+            "description": "The species of the pet.",
+            "enum": ["dog", "cat", "bird", "fish", "reptile"]
+          },
+          "breed": {
+            "type": "string",
+            "description": "Breed or variety.",
+            "maxLength": 100
+          },
+          "age": {
+            "type": "integer",
+            "description": "Age in years.",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "status": {
+            "type": "string",
+            "description": "Adoption status.",
+            "enum": ["available", "adopted", "pending"]
+          },
+          "tags": {
+            "type": "array",
+            "description": "Descriptive tags.",
+            "items": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "maxItems": 10
+          }
+        }
+      },
+      "PetList": {
+        "type": "object",
+        "description": "Paginated list of pets.",
+        "required": ["pets", "total", "limit", "offset"],
+        "properties": {
+          "pets": {
+            "type": "array",
+            "description": "Pets in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of pets matching the query.",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page size used in this response.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Offset used in this response.",
+            "minimum": 0
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error response body.",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "HTTP status code."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message."
+          },
+          "details": {
+            "type": "string",
+            "description": "Optional additional context about the error."
+          }
+        }
+      }
+    }
+  }
+}

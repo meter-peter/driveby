@@ -1,0 +1,277 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Secure Inventory API",
+    "version": "1.0.0",
+    "description": "An API with comprehensive security definitions. Used for testing P005 — security scheme validation. Features both global and operation-level security."
+  },
+  "servers": [
+    {
+      "url": "https://api.inventory.example.com/v1",
+      "description": "Production server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/inventory": {
+      "get": {
+        "operationId": "listInventory",
+        "summary": "List inventory items",
+        "description": "Retrieves the full inventory. Requires bearer token authentication (inherited from global security).",
+        "responses": {
+          "200": {
+            "description": "A list of inventory items.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryItem"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addInventoryItem",
+        "summary": "Add a new inventory item",
+        "description": "Creates a new item in the inventory. Requires both bearer token and API key authentication.",
+        "security": [
+          {
+            "bearerAuth": [],
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The inventory item to add.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The item was added to inventory.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to add inventory items.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/{itemId}": {
+      "get": {
+        "operationId": "getInventoryItem",
+        "summary": "Get an inventory item",
+        "description": "Retrieves a specific inventory item by ID. Supports both bearer token and API key as alternative authentication methods.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the inventory item.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested inventory item.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The inventory item was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT-based bearer token authentication. Obtain a token via the /auth/login endpoint."
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key authentication. Provisioned via the admin dashboard."
+      }
+    },
+    "schemas": {
+      "InventoryItem": {
+        "type": "object",
+        "description": "An item tracked in the inventory system.",
+        "required": ["id", "name", "quantity", "category"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the inventory item."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the item."
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Current stock quantity."
+          },
+          "category": {
+            "type": "string",
+            "description": "Classification category.",
+            "enum": ["electronics", "furniture", "consumables", "raw-materials"]
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Price per unit in USD.",
+            "format": "double"
+          },
+          "lastRestocked": {
+            "type": "string",
+            "description": "Date of the last restock event.",
+            "format": "date"
+          }
+        }
+      },
+      "InventoryItemInput": {
+        "type": "object",
+        "description": "Payload for adding a new inventory item.",
+        "required": ["name", "quantity", "category"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the item."
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Initial stock quantity."
+          },
+          "category": {
+            "type": "string",
+            "description": "Classification category.",
+            "enum": ["electronics", "furniture", "consumables", "raw-materials"]
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Price per unit in USD.",
+            "format": "double"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "description": "Standard error response.",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "HTTP status code."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error description."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# Binaries
+driveby-cli/driveby
+*.exe
+
+# Artifacts
+stdout
+*.log
+logs/
+/tmp/
+
+# Reports (generated)
+samples/reports/*.json
+samples/reports/*.md

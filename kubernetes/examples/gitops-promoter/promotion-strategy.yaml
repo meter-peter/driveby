@@ -1,0 +1,17 @@
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: PromotionStrategy
+metadata:
+  name: driveby-promotion
+  namespace: driveby
+spec:
+  environments:
+    - branch: environment/dev
+      autoMerge: true
+    - branch: environment/staging
+      autoMerge: false
+    - branch: environment/prod
+      autoMerge: false
+  activeCommitStatuses:
+    - key: driveby-validation
+  proposedCommitStatuses:
+    - key: driveby-validation

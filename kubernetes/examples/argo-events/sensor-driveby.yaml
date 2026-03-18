@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: driveby-sensor
+  namespace: driveby
+spec:
+  dependencies:
+    - name: github-pr
+      eventSourceName: driveby-github
+      eventName: driveby-webhook
+      filters:
+        data:
+          - path: body.action
+            type: string
+            value:
+              - opened
+              - synchronize
+  triggers:
+    - template:
+        name: driveby-pipeline
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: driveby-run-
+                namespace: driveby
+              spec:
+                workflowTemplateRef:
+                  name: driveby-full-pipeline
+                arguments:
+                  parameters:
+                    - name: openapi-url
+                    - name: api-host
+                    - name: github-owner
+                    - name: github-repo
+                    - name: github-pr-number
+          parameters:
+            - src:
+                dependencyName: github-pr
+                dataKey: body.pull_request.head.repo.full_name
+              dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: github-pr
+                dataKey: body.number
+              dest: spec.arguments.parameters.4.value
