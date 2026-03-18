@@ -165,6 +165,7 @@ func normalizeParameters(params openapi3.Parameters) []*Parameter {
 			Description: p.Value.Description,
 			Required:    p.Value.Required,
 			Schema:      normalizeSchemaRef(p.Value.Schema),
+			Example:     p.Value.Example,
 		})
 	}
 	return result
@@ -243,6 +244,7 @@ func normalizeSchema(s *openapi3.Schema) *Schema {
 		Enum:        s.Enum,
 		Required:    append([]string{}, s.Required...),
 		Description: s.Description,
+		Nullable:    s.Nullable,
 	}
 
 	if len(s.Properties) > 0 {

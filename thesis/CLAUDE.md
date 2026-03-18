@@ -36,7 +36,7 @@ thesis/
 
 ### Chapter 3 — Methodology: DDT (`03-methodology-ddt.tex`)
 **Expected sections**: DDT Paradigm Overview, The Three Axioms (Completeness, Determinism, Observability), The Eight Principles (P001-P008), Axiom-to-Principle Mapping, Validation Modes
-**Source files to read**: `docs/principles/P001-P008.md` (planned), `docs/ddt-axioms.md` (planned)
+**Source files to read**: `docs/principles/P001-P008.md`, `docs/ddt-axioms.md`
 **Code files to read**:
 - `driveby-cli/internal/principles/checker.go` — PrincipleChecker interface
 - `driveby-cli/internal/principles/p001_compliance.go` through `p008_versioning.go` — each principle's checks
@@ -46,11 +46,11 @@ thesis/
 - Define 3 axioms: Completeness (spec fully describes API), Determinism (same input = same output), Observability (validation results are measurable)
 - Define 8 principles with formal identifiers P001-P008
 - Axiom mapping: Completeness -> P001-P004, Determinism -> P006, Observability -> P005/P007/P008
-- Validation modes: minimal, standard, strict, test-only
+- Validation modes: minimal, strict, test-only, flexible
 
 ### Chapter 4 — System Architecture (`04-architecture.tex`)
 **Expected sections**: Architecture Overview, Dependency Flow, Spec Abstraction Layer, Engine Design, Principle Checker Pattern, Report Generation, CLI Design
-**Source files to read**: `docs/CLI_USAGE.md`, `docs/architecture.md` (planned)
+**Source files to read**: `docs/CLI_USAGE.md`, `docs/architecture.md`
 **Code files to read**:
 - `driveby-cli/internal/spec/spec.go` — APISpec interface
 - `driveby-cli/internal/spec/openapi3.go` — OpenAPI 3.x adapter
@@ -84,7 +84,7 @@ thesis/
 
 ### Chapter 6 — Evaluation (`06-evaluation.tex`)
 **Expected sections**: Evaluation Methodology, Controlled Evaluation (perfect-api), Large-Scale Evaluation (APIs.guru), Results and Analysis, Threats to Validity
-**Source files to read**: `docs/evaluation-methodology.md` (planned)
+**Source files to read**: `docs/evaluation-methodology.md`
 **Code files to read**:
 - `apis/perfect-api/perfect-api.py` — reference API implementation
 - `apis/perfect-api/openapi.json` — reference spec
@@ -108,21 +108,21 @@ thesis/
 
 | Thesis Section | Source Code | Documentation |
 |---------------|-------------|---------------|
-| DDT Axioms | `internal/types/modes.go` | `docs/ddt-axioms.md` (planned) |
-| P001 Compliance | `internal/principles/p001_compliance.go` | `docs/principles/P001.md` (planned) |
-| P002 Documentation | `internal/principles/p002_documentation.go` | `docs/principles/P002.md` (planned) |
-| P003 Errors | `internal/principles/p003_errors.go` | `docs/principles/P003.md` (planned) |
-| P004 Schema | `internal/principles/p004_schema.go` | `docs/principles/P004.md` (planned) |
-| P005 Security | `internal/principles/p005_security.go` | `docs/principles/P005.md` (planned) |
-| P006 Functional | `internal/testing/functional.go` | `docs/principles/P006.md` (planned) |
-| P007 Performance | `internal/testing/performance.go` | `docs/principles/P007.md` (planned) |
-| P008 Versioning | `internal/principles/p008_versioning.go` | `docs/principles/P008.md` (planned) |
-| Spec Abstraction | `internal/spec/spec.go`, `openapi3.go`, `swagger2.go` | `docs/architecture.md` (planned) |
-| Engine Design | `internal/engine/engine.go` | `docs/architecture.md` (planned) |
+| DDT Axioms | `internal/types/modes.go` | `docs/ddt-axioms.md` |
+| P001 Compliance | `internal/principles/p001_compliance.go` | `docs/principles/P001.md` |
+| P002 Documentation | `internal/principles/p002_documentation.go` | `docs/principles/P002.md` |
+| P003 Errors | `internal/principles/p003_errors.go` | `docs/principles/P003.md` |
+| P004 Schema | `internal/principles/p004_schema.go` | `docs/principles/P004.md` |
+| P005 Security | `internal/principles/p005_security.go` | `docs/principles/P005.md` |
+| P006 Functional | `internal/testing/functional.go` | `docs/principles/P006.md` |
+| P007 Performance | `internal/testing/performance.go` | `docs/principles/P007.md` |
+| P008 Versioning | `internal/principles/p008_versioning.go` | `docs/principles/P008.md` |
+| Spec Abstraction | `internal/spec/spec.go`, `openapi3.go`, `swagger2.go` | `docs/architecture.md` |
+| Engine Design | `internal/engine/engine.go` | `docs/architecture.md` |
 | CLI Design | `internal/cli/root.go`, `validate.go`, `config.go` | `docs/CLI_USAGE.md` |
 | Validation Modes | `internal/types/modes.go`, `internal/principles/registry.go` | `docs/MINIMAL_MODE_GUIDE.md` |
 | GitOps Pipeline | `kubernetes/examples/` | `docs/WORKFLOW.md` |
-| Evaluation Data | `tools/`, `apis/perfect-api/` | `docs/evaluation-methodology.md` (planned) |
+| Evaluation Data | `tools/`, `apis/perfect-api/` | `docs/evaluation-methodology.md` |
 | CI/CD Integration | `.github/workflows/ci.yml` | `docs/WORKFLOW.md` |
 
 ## LaTeX Conventions

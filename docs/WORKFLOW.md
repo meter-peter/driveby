@@ -1,28 +1,80 @@
-# Driveby API Validation in Kubernetes Workflows
+# DriveBy End-to-End Workflow
 
-This document describes how to use Driveby for API validation in Kubernetes/Argo workflows.
+This document describes how to use DriveBy for API validation -- from local development through CI/CD pipelines and Kubernetes deployments.
 
-## Environment Variables
+## Workflow Overview
 
-The following environment variables can be used to configure Driveby:
+DriveBy supports three input modes:
+1. **Local file** -- validate a spec from disk (`--openapi ./openapi.json`)
+2. **Remote URL** -- validate a spec hosted anywhere on the internet (`--openapi https://...`)
+3. **Live API** -- combine spec validation with runtime testing against a live endpoint
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `DRIVEBY_API_URL` | Base URL of the API to test | Yes | - |
-| `DRIVEBY_OPENAPI_URL` | URL to the OpenAPI specification | Yes | - |
-| `DRIVEBY_ENVIRONMENT` | Environment name (e.g., "dev", "staging") | No | "default" |
-| `DRIVEBY_VERSION` | API version to validate | No | "1.0.0" |
-| `DRIVEBY_TIMEOUT` | Request timeout duration | No | "30s" |
-| `DRIVEBY_VALIDATION_MODE` | Validation mode ("minimal" or "strict") | No | "minimal" |
-| `DRIVEBY_AUTH_TOKEN` | Authentication token for API access | No | - |
-| `DRIVEBY_MAX_LATENCY_P95` | Maximum allowed 95th percentile latency | No | "500ms" |
-| `DRIVEBY_MIN_SUCCESS_RATE` | Minimum required success rate (0-1) | No | "0.99" |
-| `DRIVEBY_CONCURRENT_USERS` | Number of concurrent users for load testing | No | "10" |
-| `DRIVEBY_TEST_DURATION` | Duration of load tests | No | "5m" |
+```
+┌─────────────┐     ┌──────────────┐     ┌───────────────┐     ┌────────────┐
+│ OpenAPI Spec │────>│ DriveBy CLI  │────>│ Principle     │────>│ JSON + MD  │
+│ (file / URL) │     │ (loader)     │     │ Checkers      │     │ Reports    │
+└─────────────┘     └──────────────┘     │ P001-P008     │     └────────────┘
+                                          └───────────────┘
+```
 
-## Example Argo Workflow
+## Local Development
 
-Here's an example Argo workflow that runs API validation:
+### Validate a local spec (perfect-api)
+```bash
+make up                   # Start docker-compose (perfect-api)
+make validate             # Run validation against perfect-api
+```
+
+### Validate a public API spec by URL
+```bash
+# Swagger Petstore -- the canonical OpenAPI example
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https \
+  --port 443 \
+  --validation-mode strict
+```
+
+DriveBy auto-detects whether `--openapi` points to a file or URL and fetches accordingly. Both OpenAPI 3.x and Swagger 2.0 specs are supported.
+
+### Batch validation against public APIs
+```bash
+# Create a CSV (max 20 entries)
+cat > openapis.csv <<EOF
+name,url,host
+petstore,https://petstore3.swagger.io/api/v3/openapi.json,petstore3.swagger.io
+EOF
+
+# Run batch validation
+tools/run-openapi-batch.sh openapis.csv /tmp/driveby-batch
+```
+
+See `tools/CLAUDE.md` for the full harvest-probe-validate workflow against APIs.guru.
+
+## Validation Modes
+
+### Minimal Mode (default)
+- Runs P001 (OpenAPI Compliance) only
+- Fast CI gate (< 5 seconds)
+- Suitable for first-time evaluation of unknown APIs
+
+### Strict Mode
+- Runs P001-P005, P008 (all static analysis principles)
+- Comprehensive documentation, schema, error handling, security, and versioning checks
+- Suitable for pre-release quality gates and thesis evaluation
+
+### Test-Only Mode
+- Skips static validation entirely
+- Runs runtime tests only (P006 functional, P007 performance when implemented)
+- Fastest execution for pure endpoint testing
+
+### Flexible Mode
+- Same as minimal (P001 only) but allows tests to proceed even with some validation failures
+
+## Kubernetes / Argo Workflow Integration
+
+DriveBy is configured entirely through CLI flags. In Kubernetes, pass flags via container args:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -35,34 +87,26 @@ spec:
   - name: validate-api
     inputs:
       parameters:
-      - name: api-url
-        value: "https://api.example.com"
       - name: openapi-url
         value: "https://api.example.com/openapi.json"
-      - name: environment
-        value: "staging"
-      - name: auth-token
-        valueFrom:
-          secretKeyRef:
-            name: api-credentials
-            key: token
+      - name: host
+        value: "api.example.com"
     container:
       image: your-driveby-image:latest
       command: ["driveby", "validate-only"]
+      args:
+        - "--openapi={{inputs.parameters.openapi-url}}"
+        - "--host={{inputs.parameters.host}}"
+        - "--protocol=https"
+        - "--port=443"
+        - "--validation-mode=strict"
+        - "--report-dir=/tmp/driveby-reports"
       env:
-        - name: DRIVEBY_API_URL
-          value: "{{inputs.parameters.api-url}}"
-        - name: DRIVEBY_OPENAPI_URL
-          value: "{{inputs.parameters.openapi-url}}"
-        - name: DRIVEBY_ENVIRONMENT
-          value: "{{inputs.parameters.environment}}"
         - name: DRIVEBY_AUTH_TOKEN
           valueFrom:
             secretKeyRef:
               name: api-credentials
               key: token
-        - name: DRIVEBY_VALIDATION_MODE
-          value: "strict"
       volumeMounts:
         - name: reports
           mountPath: /tmp/driveby-reports
@@ -72,27 +116,10 @@ spec:
     outputs:
       artifacts:
         - name: validation-report
-          path: /tmp/driveby-reports/validation-report.json
+          path: /tmp/driveby-reports/validation-report-latest.json
 ```
 
-## Validation Modes
-
-### Minimal Mode
-- Runs basic validation principles (P001, P004)
-- Checks OpenAPI specification compliance
-- Validates basic request schemas
-- Suitable for quick validation in CI/CD pipelines
-
-### Strict Mode
-- Runs all validation principles
-- Includes comprehensive documentation checks
-- Validates error handling and authentication
-- Performs detailed schema validation
-- Suitable for thorough API reviews
-
-## Performance Testing
-
-For load testing, use the `load-only` command:
+### Load Testing Workflow
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -106,19 +133,16 @@ spec:
     container:
       image: your-driveby-image:latest
       command: ["driveby", "load-only"]
-      env:
-        - name: DRIVEBY_API_URL
-          value: "https://api.example.com"
-        - name: DRIVEBY_OPENAPI_URL
-          value: "https://api.example.com/openapi.json"
-        - name: DRIVEBY_MAX_LATENCY_P95
-          value: "500ms"
-        - name: DRIVEBY_MIN_SUCCESS_RATE
-          value: "0.99"
-        - name: DRIVEBY_CONCURRENT_USERS
-          value: "10"
-        - name: DRIVEBY_TEST_DURATION
-          value: "5m"
+      args:
+        - "--openapi=https://api.example.com/openapi.json"
+        - "--host=api.example.com"
+        - "--protocol=https"
+        - "--port=443"
+        - "--max-latency-p95=500ms"
+        - "--min-success-rate=0.99"
+        - "--concurrent-users=10"
+        - "--test-duration=5m"
+        - "--report-dir=/tmp/driveby-reports"
       volumeMounts:
         - name: reports
           mountPath: /tmp/driveby-reports
@@ -129,41 +153,59 @@ spec:
 
 ## Validation Report
 
-The validation report is generated in JSON format and includes:
-- Validation results for each principle
-- Performance metrics (if load testing)
-- Summary of passed/failed checks
-- Detailed error messages and suggestions
+Reports are generated in both JSON and Markdown formats. Output directory defaults to `/tmp/driveby-reports/`.
+
+Files generated per run:
+- `validation-report-<timestamp>.json` -- full structured results
+- `validation-report-<timestamp>.md` -- human-readable Markdown
+- `validation-report-latest.json` / `.md` -- symlinks to most recent
 
 Example report structure:
 ```json
 {
+  "status": "failed",
+  "exit_code": 1,
   "version": "1.0.0",
-  "environment": "staging",
-  "timestamp": "2024-03-14T12:00:00Z",
+  "environment": "production",
+  "timestamp": "2026-03-19T00:53:08+02:00",
   "principles": [
     {
-      "id": "P001",
-      "name": "OpenAPI Specification Compliance",
-      "passed": true,
-      "message": "OpenAPI specification is fully compliant"
+      "Principle": { "id": "P001", "name": "OpenAPI Specification Compliance", ... },
+      "Passed": true,
+      "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
+      "Details": { "checks": { ... } }
     }
-  ],
-  "summary": {
-    "total_checks": 8,
-    "passed_checks": 7,
-    "failed_checks": 1,
-    "critical_issues": 0,
-    "warnings": 1
-  }
+  ]
 }
 ```
+
+## Public API Validation Reference
+
+DriveBy can validate any publicly available OpenAPI specification. This is useful for:
+- Benchmarking DDT principles against real-world APIs
+- Thesis evaluation (Chapter 6: Wild Evaluation)
+- Demonstrating the gap between spec compliance and documentation quality
+
+### Petstore API Results (March 2026)
+
+The Swagger Petstore v3 was validated in strict mode as a reference data point:
+
+| Principle | Result | Key Findings |
+|-----------|--------|--------------|
+| P001 OpenAPI Compliance | PASSED | Fully compliant OpenAPI 3.0 |
+| P002 Documentation Quality | FAILED | 44 bodies missing examples, 6 schemas undescribed |
+| P003 Error Handling | FAILED | Zero 5xx responses, 4 endpoints missing 4xx |
+| P004 Schema Definitions | FAILED | No string length constraints, no numeric min/max |
+| P005 Security Standards | FAILED | 10 endpoints unsecured, no global security |
+| P008 Versioning Strategy | FAILED | No versioning strategy or changelog documented |
+
+**Result: 1/6 passed** -- even the canonical OpenAPI reference API fails strict DDT validation.
 
 ## Best Practices
 
 1. **Secrets Management**
    - Store authentication tokens in Kubernetes secrets
-   - Use Argo's secret management features
+   - Use `--auth-token`, `--auth-api-key`, or `--auth-username`/`--auth-password` flags
    - Never hardcode credentials in workflows
 
 2. **Resource Management**
@@ -172,8 +214,9 @@ Example report structure:
    - Use appropriate concurrent user counts
 
 3. **Validation Strategy**
-   - Use minimal mode for CI/CD pipelines
-   - Run strict validation in staging environments
+   - Use minimal mode for CI/CD gates (fast, P001 only)
+   - Run strict mode in staging for full quality assessment
+   - Use batch tools for evaluating third-party API specs before integration
    - Schedule regular load tests during off-peak hours
 
 4. **Report Handling**
@@ -183,24 +226,27 @@ Example report structure:
 
 ## Troubleshooting
 
-Common issues and solutions:
+1. **Remote spec fetch fails**
+   - Verify the spec URL is accessible (try `curl <url>`)
+   - Check for redirects -- DriveBy follows standard HTTP redirects
+   - Ensure the response is valid JSON (YAML support via URL is not yet available)
 
-1. **Authentication Failures**
-   - Verify the auth token is correctly set in secrets
+2. **Authentication Failures**
+   - Verify the auth token via `--auth-token` flag
    - Check token expiration
    - Ensure the token has necessary permissions
 
-2. **Timeout Issues**
-   - Increase `DRIVEBY_TIMEOUT` for slow APIs
+3. **Timeout Issues**
+   - Increase `--timeout` for slow APIs or large specs
    - Check network connectivity
    - Verify API availability
 
-3. **Load Test Failures**
-   - Adjust concurrent users if rate limited
+4. **Load Test Failures**
+   - Adjust `--concurrent-users` if rate limited
    - Verify API can handle the load
    - Check resource limits on the validation pod
 
-4. **OpenAPI Spec Issues**
-   - Verify the spec URL is accessible
-   - Check spec validity
-   - Ensure spec version is supported (3.0.x or 3.1.0) 
+5. **OpenAPI Spec Issues**
+   - Ensure spec version is supported (OpenAPI 3.0.x, 3.1.0, or Swagger 2.0)
+   - Check spec validity with `driveby validate-only --validation-mode minimal`
+   - Use `--log-level debug` for detailed parsing diagnostics

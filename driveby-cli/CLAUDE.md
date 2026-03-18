@@ -18,7 +18,7 @@ No package may import a package to its left. `types` has zero internal dependenc
 | engine | `internal/engine/engine.go` | Orchestrator: loads spec, selects principles by mode, runs checkers, aggregates results |
 | principles | `internal/principles/` | 8 DDT principle checkers (P001-P008), registry, interface definition |
 | spec | `internal/spec/` | `APISpec` interface + adapters for OpenAPI 3.x and Swagger 2.x |
-| loader | `internal/loader/` | Loads OpenAPI specs from URL or file, auto-detects version |
+| loader | `internal/loader/` | Loads OpenAPI specs from local file or remote URL, auto-detects OpenAPI 3.x vs Swagger 2.0 |
 | testing | `internal/testing/` | Runtime testing: `auth.go` (auth probing), `functional.go` (endpoint testing), `performance.go` (load testing) |
 | types | `internal/types/` | Standalone types: `ValidationMode`, `PrincipleResult`, `Report`, error types, metrics, logger config |
 | report | `internal/report/` | Report generation: `generator.go` (orchestrator), `markdown.go` (Markdown renderer) |
@@ -40,13 +40,16 @@ Tests live in `test/`, not alongside source files:
 - `loader_test.go` — Spec loading tests
 - `principles_test.go` — Principle checker unit tests
 - `p002_test.go`, `p003_test.go`, `p004_test.go` — Per-principle tests
-- `testdata/` — Test fixtures (sample OpenAPI specs)
+- `auth_test.go` — Authentication validation tests
+- `functional_helpers_test.go` — Functional testing helper tests
+- `util_test.go` — Utility function tests
+- `testdata/` — Test fixtures (sample OpenAPI specs including `auth-required-api.json`, `nullable-openapi31.json`)
 
 ## Validation Modes
 - **minimal** — P001 (compliance) only; fast CI gate
-- **standard** — P001-P005, P008; full static analysis
-- **strict** — All principles including P006 (functional) and P007 (performance)
-- **test-only** — P006 + P007 only; runtime testing without static checks
+- **strict** — P001-P005, P008; comprehensive static analysis
+- **test-only** — Skips static validation, runs runtime tests only (P006/P007 when implemented)
+- **flexible** — P001 only (same as minimal); allows tests even with some validation failures
 
 ## Thesis Mapping
 - **Chapter 3 (Methodology)**: Principles P001-P008 map directly to `internal/principles/`

@@ -11,6 +11,38 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+# Application definitions (iterable for future APIs)
+apps:
+  - name: perfect-api
+    repo: https://github.com/meter-peter/driveby
+    path: apis/perfect-api
+    port: 8000
+    image:
+      repository: ghcr.io/meter-peter/driveby-perfect-api
+      tag: latest
+    healthCheck:
+      path: /test/health
+    openapi:
+      endpoint: /openapi.json
+
+# Environment definitions
+environments:
+  - name: dev
+    namespace: driveby-dev
+    autoSync: true
+  - name: staging
+    namespace: driveby-staging
+    autoSync: false
+  - name: prod
+    namespace: driveby-prod
+    autoSync: false
+
+# API auth — shared between app containers + workflow steps
+apiAuth:
+  secretName: driveby-api-auth
+  apiKey: "driveby-test-key-2024"
+  apiKeyHeader: "X-API-Key"
+
 # ArgoCD configuration (existing installation)
 argocd:
   enabled: true
@@ -42,23 +74,13 @@ crossplane:
 # GitOps Promoter
 gitopsPromoter:
   enabled: false
-  environments:
-    - name: dev
-      branch: environment/dev
-      autoMerge: true
-    - name: staging
-      branch: environment/staging
-      autoMerge: false
-    - name: prod
-      branch: environment/prod
-      autoMerge: false
 
 # GitHub integration
 github:
-  owner: ""
-  repo: ""
-  # Secret name containing GitHub credentials
+  owner: "meter-peter"
+  repo: "driveby"
   secretName: driveby-github-credentials
+  pat: ""  # Set at install: --set github.pat=ghp_xxx
 
 # RBAC
 rbac:

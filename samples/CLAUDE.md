@@ -31,13 +31,31 @@ Full strict validation -- runs all implemented principles (P001-P005, P008). Int
 ### `workflows/local-demo.sh`
 End-to-end local demonstration:
 1. Starts the perfect-api via Docker
-2. Runs DriveBy CLI in standard mode against it
+2. Runs DriveBy CLI in strict mode against it
 3. Displays the validation report
 4. Cleans up containers
 
 ## Thesis Mapping
 - **Chapter 5 (Workflow)**: The config files demonstrate DDT usage patterns in CI/CD
 - **Chapter 6 (Evaluation)**: The demo workflow is the reproducible evaluation script
+
+## Public API Examples
+
+DriveBy supports validating remote public APIs by URL. Example commands:
+
+```bash
+# Validate Swagger Petstore (strict mode)
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https --port 443 \
+  --validation-mode strict
+
+# Batch validate up to 20 public APIs
+tools/run-openapi-batch.sh openapis.csv /tmp/driveby-batch
+```
+
+See `docs/CLI_USAGE.md` for more examples and `docs/WORKFLOW.md` for the full workflow.
 
 ## Rules
 - Keep configs minimal and well-commented -- they serve as user-facing documentation

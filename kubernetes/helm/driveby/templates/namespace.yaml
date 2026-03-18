@@ -3,5 +3,15 @@ kind: Namespace
 metadata:
   name: {{ .Values.namespace }}
   labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+{{- range .Values.environments }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .namespace }}
+  labels:
     app.kubernetes.io/name: driveby
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: {{ .name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+{{- end }}

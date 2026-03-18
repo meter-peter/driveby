@@ -1,0 +1,257 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: driveby-staging-promotion
+  namespace: driveby
+spec:
+  entrypoint: promotion-pipeline
+  serviceAccountName: driveby
+  onExit: exit-handler
+  arguments:
+    parameters:
+      - name: app-name
+        value: "perfect-api"
+      - name: pr-number
+      - name: head-sha
+      - name: github-owner
+        value: "meter-peter"
+      - name: github-repo
+        value: "perfect-api"
+  templates:
+    # --- Main DAG ---
+    - name: promotion-pipeline
+      dag:
+        tasks:
+          - name: set-pending-status
+            template: github-commit-status
+            arguments:
+              parameters:
+                - name: state
+                  value: "pending"
+                - name: description
+                  value: "DriveBy staging promotion in progress..."
+
+          - name: db-sync
+            template: pg-dump-restore
+            dependencies: [set-pending-status]
+
+          - name: spec-sync-check
+            template: spec-comparison
+            dependencies: [db-sync]
+
+          - name: validate-staging
+            template: driveby-validate
+            dependencies: [spec-sync-check]
+
+          - name: functional-test-staging
+            template: driveby-functional
+            dependencies: [validate-staging]
+
+          - name: report-success
+            template: github-commit-status
+            dependencies: [functional-test-staging]
+            arguments:
+              parameters:
+                - name: state
+                  value: "success"
+                - name: description
+                  value: "DriveBy staging promotion passed"
+
+          - name: comment-pr
+            template: github-pr-comment
+            dependencies: [functional-test-staging]
+
+    # --- Step Templates ---
+
+    # Set GitHub commit status via REST API
+    - name: github-commit-status
+      inputs:
+        parameters:
+          - name: state
+          - name: description
+      container:
+        image: curlimages/curl:latest
+        env:
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-pat
+                key: token
+        command: [sh, -c]
+        args:
+          - |
+            curl -s -X POST \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/{{workflow.parameters.github-owner}}/{{workflow.parameters.github-repo}}/statuses/{{workflow.parameters.head-sha}}" \
+              -d '{
+                "state": "{{inputs.parameters.state}}",
+                "description": "{{inputs.parameters.description}}",
+                "context": "driveby/staging-promotion",
+                "target_url": "https://private.novelcore.org/workflows"
+              }'
+
+    # Scaffolded pg_dump/pg_restore step
+    - name: pg-dump-restore
+      container:
+        image: postgres:16-alpine
+        command: [sh, -c]
+        args:
+          - |
+            echo "=== Database Sync ==="
+            echo "Source: postgres.perfect-api-prod:5432/perfectdb"
+            echo "Target: postgres.perfect-api-staging:5432/perfectdb"
+            echo "Skipping: perfect-api uses in-memory data. Wire when real PG is needed."
+            echo "=== Done ==="
+
+    # Compare prod vs staging OpenAPI specs
+    - name: spec-comparison
+      container:
+        image: curlimages/curl:latest
+        command: [sh, -c]
+        args:
+          - |
+            echo "=== OpenAPI Spec Sync Check ==="
+            PROD_SPEC=$(curl -sf "http://perfect-api.perfect-api-prod:8000/openapi.json" || echo "UNREACHABLE")
+            STAGING_SPEC=$(curl -sf "http://perfect-api.perfect-api-staging:8000/openapi.json" || echo "UNREACHABLE")
+
+            if [ "$PROD_SPEC" = "UNREACHABLE" ] || [ "$STAGING_SPEC" = "UNREACHABLE" ]; then
+              echo "WARNING: Could not reach one or both environments"
+              echo "  Prod: $([ "$PROD_SPEC" = "UNREACHABLE" ] && echo 'unreachable' || echo 'ok')"
+              echo "  Staging: $([ "$STAGING_SPEC" = "UNREACHABLE" ] && echo 'unreachable' || echo 'ok')"
+              echo "Continuing anyway — environments may not be deployed yet."
+              exit 0
+            fi
+
+            if [ "$PROD_SPEC" = "$STAGING_SPEC" ]; then
+              echo "Specs are identical between prod and staging."
+            else
+              echo "WARNING: Specs differ between prod and staging."
+              echo "This is expected during promotion — staging has the updated spec."
+            fi
+            echo "=== Done ==="
+
+    # DriveBy validate-only against staging
+    - name: driveby-validate
+      container:
+        image: ghcr.io/meter-peter/driveby:latest
+        imagePullPolicy: Always
+        env:
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: driveby-api-auth
+                key: api-key
+        command: ["/driveby"]
+        args:
+          - "validate-only"
+          - "--openapi"
+          - "http://perfect-api.perfect-api-staging:8000/openapi.json"
+          - "--host"
+          - "perfect-api.perfect-api-staging"
+          - "--port"
+          - "8000"
+          - "--validation-mode"
+          - "strict"
+          - "--report-dir"
+          - "/tmp/reports"
+
+    # DriveBy functional tests against staging (with auth)
+    - name: driveby-functional
+      container:
+        image: ghcr.io/meter-peter/driveby:latest
+        imagePullPolicy: Always
+        env:
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: driveby-api-auth
+                key: api-key
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-pat
+                key: token
+        command: ["/driveby"]
+        args:
+          - "function-only"
+          - "--openapi"
+          - "http://perfect-api.perfect-api-staging:8000/openapi.json"
+          - "--host"
+          - "perfect-api.perfect-api-staging"
+          - "--port"
+          - "8000"
+          - "--auth-api-key"
+          - "$(API_KEY)"
+          - "--auth-header"
+          - "X-API-Key"
+          - "--report-dir"
+          - "/tmp/reports"
+
+    # Post PR comment with validation results
+    - name: github-pr-comment
+      container:
+        image: ghcr.io/meter-peter/driveby:latest
+        imagePullPolicy: Always
+        env:
+          - name: API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: driveby-api-auth
+                key: api-key
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-pat
+                key: token
+        command: ["/driveby"]
+        args:
+          - "validate-only"
+          - "--openapi"
+          - "http://perfect-api.perfect-api-staging:8000/openapi.json"
+          - "--host"
+          - "perfect-api.perfect-api-staging"
+          - "--port"
+          - "8000"
+          - "--validation-mode"
+          - "strict"
+          - "--github-comment"
+          - "--github-token"
+          - "$(GITHUB_TOKEN)"
+          - "--github-owner"
+          - "{{workflow.parameters.github-owner}}"
+          - "--github-repo"
+          - "{{workflow.parameters.github-repo}}"
+          - "--github-pr"
+          - "{{workflow.parameters.pr-number}}"
+          - "--report-dir"
+          - "/tmp/reports"
+
+    # Exit handler — report failure if workflow failed
+    - name: exit-handler
+      container:
+        image: curlimages/curl:latest
+        env:
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-pat
+                key: token
+        command: [sh, -c]
+        args:
+          - |
+            if [ "{{workflow.status}}" != "Succeeded" ]; then
+              echo "Workflow failed — reporting failure status to GitHub"
+              curl -s -X POST \
+                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/{{workflow.parameters.github-owner}}/{{workflow.parameters.github-repo}}/statuses/{{workflow.parameters.head-sha}}" \
+                -d '{
+                  "state": "failure",
+                  "description": "DriveBy staging promotion failed",
+                  "context": "driveby/staging-promotion",
+                  "target_url": "https://private.novelcore.org/workflows"
+                }'
+            else
+              echo "Workflow succeeded — success status already reported by DAG step."
+            fi

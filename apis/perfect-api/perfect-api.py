@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Path, Query, Body, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, Path, Query, Body, HTTPException, Depends, APIRouter, Security
+from fastapi.security import APIKeyHeader, HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, constr, conint
 from typing import List, Optional, Dict, Any, Union
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -249,6 +250,26 @@ def generate_task_id():
 def get_current_time():
     return datetime.utcnow()
 
+# Authentication middleware
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+bearer_scheme = HTTPBearer(auto_error=False)
+
+async def verify_auth(
+    api_key: str = Security(api_key_header),
+    bearer: HTTPAuthorizationCredentials = Security(bearer_scheme),
+):
+    """Verify that the request has valid authentication (API key or Bearer token)."""
+    if api_key or bearer:
+        return True
+    raise HTTPException(
+        status_code=401,
+        detail={
+            "error": "Authentication required",
+            "code": 401,
+            "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]
+        }
+    )
+
 # Task management routes with comprehensive documentation
 @app.post(
     "/tasks",
@@ -272,6 +293,10 @@ def get_current_time():
             }
         },
         400: CommonErrorResponses.get_400_response(),
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: CommonErrorResponses.get_422_response(),
         500: CommonErrorResponses.get_500_response()
     }
@@ -285,7 +310,8 @@ async def create_task(
             "title": "Sample Task",
             "description": "Example description"
         }
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Create a new task.
@@ -353,6 +379,10 @@ async def create_task(
             }
         },
         400: CommonErrorResponses.get_400_response(),
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: CommonErrorResponses.get_422_response(),
         500: CommonErrorResponses.get_500_response()
     }
@@ -386,7 +416,8 @@ async def get_products(
         title="In Stock Only",
         description="Filter products by stock availability",
         example=True
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Retrieve all products with optional filtering.
@@ -433,6 +464,14 @@ async def get_products(
                 }
             }
         },
+        404: {
+            "description": "Product not found",
+            "content": {"application/json": {"example": {"error": "Product not found", "code": 404}}}
+        },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: {
             "description": "Validation Error",
             "content": {
@@ -464,7 +503,8 @@ async def get_product(
         min_length=36,
         max_length=36,
         pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Retrieve a specific product by its ID.
@@ -509,6 +549,10 @@ async def get_product(
                 }
             }
         },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: {
             "description": "Validation Error",
             "content": {
@@ -540,7 +584,8 @@ async def create_product(
             "in_stock": True,
             "tags": ["wireless", "audio", "bluetooth"]
         }
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Create a new product in the catalog.
@@ -582,6 +627,14 @@ async def create_product(
                     }
                 }
             }
+        },
+        404: {
+            "description": "Product not found",
+            "content": {"application/json": {"example": {"error": "Product not found", "code": 404}}}
+        },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
         },
         422: {
             "description": "Validation Error",
@@ -627,7 +680,8 @@ async def update_product(
             "in_stock": True,
             "tags": ["wireless", "audio", "bluetooth", "noise-cancelling"]
         }
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Update an existing product.
@@ -671,6 +725,10 @@ async def update_product(
                 }
             }
         },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: {
             "description": "Validation Error",
             "content": {
@@ -701,7 +759,8 @@ async def delete_product(
         min_length=36,
         max_length=36,
         pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-    )
+    ),
+    _auth=Depends(verify_auth),
 ):
     """
     Delete a product from the catalog.
@@ -739,10 +798,14 @@ async def delete_product(
                 }
             }
         },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         500: CommonErrorResponses.get_500_response()
     }
 )
-async def list_products_legacy():
+async def list_products_legacy(_auth=Depends(verify_auth)):
     """Legacy product listing endpoint. Use GET /products instead."""
     return [
         {"name": p["name"], "price": p["price"]}
@@ -841,7 +904,7 @@ async def startup_event():
     }
 )
 async def health_check():
-    """Health check endpoint for testing."""
+    """Health check endpoint for testing. No authentication required."""
     return {
         "status": "healthy",
         "version": "1.0.0",
@@ -867,6 +930,10 @@ async def health_check():
                 }
             }
         },
+        401: {
+            "description": "Unauthorized",
+            "content": {"application/json": {"example": {"error": "Authentication required", "code": 401, "details": ["Provide X-API-Key header or Authorization: Bearer <token>"]}}}
+        },
         422: {
             "description": "Validation Error",
             "content": {
@@ -885,7 +952,7 @@ async def health_check():
         }
     }
 )
-async def echo_test(data: Dict[str, Any] = Body(..., example={"message": "Test message", "number": 42, "active": True})):
+async def echo_test(data: Dict[str, Any] = Body(..., example={"message": "Test message", "number": 42, "active": True}), _auth=Depends(verify_auth)):
     """Echo the request body back as a response for testing."""
     return data
 
@@ -974,6 +1041,21 @@ def custom_openapi():
             "Migration guide: see the changelog at /docs/changelog for upgrade instructions between versions.\n"
         )
     
+    # Remap per-operation security names to match our custom scheme names
+    # FastAPI generates APIKeyHeader/HTTPBearer from dependency names,
+    # but we define ApiKeyAuth/BearerAuth in securitySchemes.
+    scheme_remap = {
+        "APIKeyHeader": "ApiKeyAuth",
+        "HTTPBearer": "BearerAuth",
+    }
+    for path_item in openapi_schema.get("paths", {}).values():
+        for operation in path_item.values():
+            if isinstance(operation, dict) and "security" in operation:
+                operation["security"] = [
+                    {scheme_remap.get(k, k): v for k, v in req.items()}
+                    for req in operation["security"]
+                ]
+
     patch_exclusive_min_max(openapi_schema)
     app.openapi_schema = openapi_schema
     return app.openapi_schema

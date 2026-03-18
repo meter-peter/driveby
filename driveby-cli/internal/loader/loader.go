@@ -138,6 +138,8 @@ func (l *Loader) loadFromData(source string, data []byte) error {
 	if ver, ok := raw["openapi"].(string); ok && ver != "" {
 		log.Debugf("[loader] Detected OpenAPI spec (version=%s) for: %s", ver, source)
 
+		// Preprocess OpenAPI 3.1.0 nullable anyOf patterns before kin-openapi loads them.
+		util.PreprocessNullableAnyOf(raw)
 		// Preprocess exclusiveMinimum/exclusiveMaximum for native OpenAPI 3.x specs.
 		util.PreprocessExclusiveMinMax(raw)
 		processed, err := json.Marshal(raw)

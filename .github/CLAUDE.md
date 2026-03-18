@@ -17,7 +17,7 @@ Triggered on push to `main` and on pull requests to `main`.
    - Builds Docker image from `driveby-cli/`
 
 ### `workflows/docker-publish.yml` — Docker Image Publishing
-Publishes the DriveBy Docker image to a container registry on main branch updates.
+Publishes `ghcr.io/meter-peter/driveby:latest` to GHCR on push to main (when `driveby-cli/` changes) or manual dispatch. Injects version/commit/date build args into the multi-stage Dockerfile.
 
 ## Thesis Mapping
 - **Chapter 5 (Workflow)**: CI/CD pipeline is part of the DDT feedback loop

@@ -54,6 +54,46 @@ func TestLoadSwagger2(t *testing.T) {
 	}
 }
 
+func TestLoadNullableOpenAPI31(t *testing.T) {
+	l := loader.NewLoader()
+	err := l.LoadFromFile("testdata/nullable-openapi31.json")
+	if err != nil {
+		t.Fatalf("expected no error loading nullable OpenAPI 3.1.0 spec, got: %v", err)
+	}
+	doc := l.GetDocument()
+	if doc == nil {
+		t.Fatal("expected document to be non-nil")
+	}
+	// Should load despite anyOf with null type
+	paths := doc.Paths()
+	if len(paths) == 0 {
+		t.Fatal("expected at least one path")
+	}
+	if _, ok := paths["/items"]; !ok {
+		t.Error("expected /items path")
+	}
+
+	// Check that schemas loaded correctly
+	comps := doc.Components()
+	if comps == nil {
+		t.Fatal("expected components to be non-nil")
+	}
+	item, ok := comps.Schemas["Item"]
+	if !ok {
+		t.Fatal("expected Item schema in components")
+	}
+	desc, ok := item.Properties["description"]
+	if !ok {
+		t.Fatal("expected description property in Item schema")
+	}
+	if desc.Type != "string" {
+		t.Errorf("expected description type 'string', got %q", desc.Type)
+	}
+	if !desc.Nullable {
+		t.Error("expected description to be nullable after preprocessing")
+	}
+}
+
 func TestLoadInvalidOpenAPI(t *testing.T) {
 	l := loader.NewLoader()
 	err := l.LoadFromFile("testdata/invalid-openapi.json")

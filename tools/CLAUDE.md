@@ -38,6 +38,8 @@ python3 probe-openapi-endpoints.py apis-raw.csv > apis-reachable.csv
 - Batch results feed into the statistical analysis of DDT principle pass/fail rates across public APIs
 
 ## Notes
-- The CSV format used is: `name,spec_url` (header row included)
-- `run-openapi-batch.sh` expects the DriveBy CLI binary at `../driveby-cli/driveby` (or on PATH)
+- The CSV format used is: `name,url,host` (header row included, 3 columns)
+- `run-openapi-batch.sh` expects the DriveBy CLI binary at `../driveby-cli/driveby` (override via `DRIVEBY_BIN` env var)
+- Batch tool is limited to a maximum of 20 entries per run
 - Probing can be slow for large datasets; consider running with parallelism
+- Batch runs default to `minimal` mode; edit the script to change to `strict`

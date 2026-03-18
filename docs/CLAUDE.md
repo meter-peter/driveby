@@ -11,12 +11,13 @@ Central documentation for the DriveBy project. Agents should consult this direct
 | `Thesis.md` | Thesis overview — chapter summaries, writing timeline |
 | `CLI_USAGE.md` | CLI reference — all commands, flags, examples |
 | `MINIMAL_MODE_GUIDE.md` | Guide to minimal validation mode — when and why to use it |
-| `WORKFLOW.md` | End-to-end workflow documentation — from spec to report |
+| `WORKFLOW.md` | End-to-end workflow documentation — local, remote URL, batch, and K8s deployment |
 | `prd-01/` | Initial PRD iteration (historical) |
 
-## Planned Additions
-The following files should be created as the project matures:
-- `principles/` subdirectory with `P001.md` through `P008.md` — per-principle documentation
+## Existing Documentation
+
+The following files are complete and available:
+- `principles/P001.md` through `P008.md` — per-principle documentation (all 8 principles documented)
 - `ddt-axioms.md` — DDT methodology explanation (3 axioms: Completeness, Determinism, Observability)
 - `architecture.md` — System design and dependency flow
 - `evaluation-methodology.md` — Chapter 6 evaluation protocol and metrics
@@ -28,10 +29,10 @@ When writing thesis chapters, consult these docs:
 |---------------|-------------|
 | Ch.1 Introduction | `prd-vision-thesis.md`, `Thesis.md` |
 | Ch.2 Related Work | `prd-vision-thesis.md` (positioning) |
-| Ch.3 Methodology | `principles/P001-P008.md` (planned), `ddt-axioms.md` (planned) |
-| Ch.4 Architecture | `architecture.md` (planned), `CLI_USAGE.md` |
+| Ch.3 Methodology | `principles/P001-P008.md`, `ddt-axioms.md` |
+| Ch.4 Architecture | `architecture.md`, `CLI_USAGE.md` |
 | Ch.5 Workflow | `WORKFLOW.md`, `MINIMAL_MODE_GUIDE.md` |
-| Ch.6 Evaluation | `evaluation-methodology.md` (planned) |
+| Ch.6 Evaluation | `evaluation-methodology.md` |
 | Ch.7 Conclusion | `Thesis.md` |
 
 ## Rules

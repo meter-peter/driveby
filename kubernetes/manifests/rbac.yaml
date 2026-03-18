@@ -1,15 +1,14 @@
-{{- if .Values.rbac.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: driveby
-  namespace: {{ .Values.namespace }}
+  namespace: driveby
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: driveby
-  namespace: {{ .Values.namespace }}
+  namespace: driveby
 rules:
   - apiGroups: ["argoproj.io"]
     resources: ["workflows", "workflowtemplates"]
@@ -28,7 +27,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: driveby
-  namespace: {{ .Values.namespace }}
+  namespace: driveby
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -36,5 +35,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: driveby
-    namespace: {{ .Values.namespace }}
-{{- end }}
+    namespace: driveby

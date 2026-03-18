@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/meter-peter/driveby/driveby-cli/internal/logger"
 	"github.com/spf13/cobra"
@@ -52,7 +53,7 @@ func init() {
 	rootCmd.PersistentFlags().String("openapi", "", "Path or URL to OpenAPI specification (required)")
 	rootCmd.PersistentFlags().String("environment", "production", "Environment name (e.g., production, staging)")
 	rootCmd.PersistentFlags().String("version", "1.0.0", "API version being tested")
-	rootCmd.PersistentFlags().Duration("timeout", 30, "Request timeout in seconds")
+	rootCmd.PersistentFlags().Duration("timeout", 30*time.Second, "Request timeout")
 	rootCmd.PersistentFlags().String("validation-mode", "minimal", "validation mode (strict, minimal)")
 	rootCmd.PersistentFlags().String("report-dir", "/tmp/driveby-reports", "report output directory")
 	rootCmd.PersistentFlags().String("host", "", "Host of the API to test (required)")
@@ -82,11 +83,13 @@ func init() {
 	rootCmd.PersistentFlags().String("github-private-key", "", "GitHub App private key (file path or PEM content)")
 	rootCmd.PersistentFlags().String("github-app-slug", "", "GitHub App slug")
 
-	// Load test specific flags
-	loadOnlyCmd.Flags().Duration("max-latency-p95", 500, "Maximum allowed P95 latency in milliseconds")
-	loadOnlyCmd.Flags().Float64("min-success-rate", 0.99, "Minimum required success rate (0-1)")
-	loadOnlyCmd.Flags().Int("concurrent-users", 10, "Number of concurrent users for load testing")
-	loadOnlyCmd.Flags().Duration("test-duration", 300, "Duration of load test in seconds")
+	// Load/performance test flags (shared by load-only and test-only)
+	for _, cmd := range []*cobra.Command{loadOnlyCmd, testOnlyCmd} {
+		cmd.Flags().Duration("max-latency-p95", 500*time.Millisecond, "Maximum allowed P95 latency")
+		cmd.Flags().Float64("min-success-rate", 0.99, "Minimum required success rate (0-1)")
+		cmd.Flags().Int("concurrent-users", 10, "Number of concurrent users for load testing")
+		cmd.Flags().Duration("test-duration", 5*time.Minute, "Duration of load test")
+	}
 
 	// Bind flags to viper
 	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
@@ -124,11 +127,17 @@ func init() {
 	viper.BindPFlag("github-private-key", rootCmd.PersistentFlags().Lookup("github-private-key"))
 	viper.BindPFlag("github-app-slug", rootCmd.PersistentFlags().Lookup("github-app-slug"))
 
-	// Bind load test flags
+	// Bind load test flags (bind from loadOnlyCmd — testOnlyCmd has same flags)
 	viper.BindPFlag("max-latency-p95", loadOnlyCmd.Flags().Lookup("max-latency-p95"))
 	viper.BindPFlag("min-success-rate", loadOnlyCmd.Flags().Lookup("min-success-rate"))
 	viper.BindPFlag("concurrent-users", loadOnlyCmd.Flags().Lookup("concurrent-users"))
 	viper.BindPFlag("test-duration", loadOnlyCmd.Flags().Lookup("test-duration"))
+
+	// Also bind from testOnlyCmd so test-only picks up CLI values
+	viper.BindPFlag("max-latency-p95", testOnlyCmd.Flags().Lookup("max-latency-p95"))
+	viper.BindPFlag("min-success-rate", testOnlyCmd.Flags().Lookup("min-success-rate"))
+	viper.BindPFlag("concurrent-users", testOnlyCmd.Flags().Lookup("concurrent-users"))
+	viper.BindPFlag("test-duration", testOnlyCmd.Flags().Lookup("test-duration"))
 
 	// Add commands
 	rootCmd.AddCommand(validateOnlyCmd)

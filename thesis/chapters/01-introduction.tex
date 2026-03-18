@@ -1,2 +1,155 @@
 \chapter{Introduction}
-% TODO: Problem statement, motivation, contribution
+\label{ch:introduction}
+
+Modern software systems are built on APIs. They connect microservices, power mobile applications, expose business logic to partners, and increasingly serve as the interface through which autonomous agents interact with the world. Yet the quality assurance practices around these interfaces remain stubbornly manual, disconnected from the declarative pipelines that deploy the very services they test.
+
+This thesis introduces Documentation-Driven Testing (DDT), a methodology that treats the API specification not merely as documentation, but as the single source of truth from which validation rules, test cases, and quality gates are derived automatically. We present the theoretical foundations of DDT, an open-source implementation called DriveBy, and an empirical evaluation demonstrating its effectiveness across both controlled and large-scale settings.
+
+% ============================================================================
+\section{The Cost of Manual Operations}
+\label{sec:cost-manual}
+% ============================================================================
+
+\subsection{The Talent Drain}
+\label{subsec:talent-drain}
+
+Engineering talent is the scarcest resource in software organizations. The 2024 Stack Overflow Developer Survey reports that demand for software engineers continues to outpace supply, with companies competing aggressively for skilled practitioners~\cite{stackoverflow-survey}. These engineers are expensive to recruit, slow to onboard, and quick to leave when the work fails to match their expectations.
+
+Yet a remarkable share of their time goes not to building software, but to verifying it by hand. Manual API testing---clicking through Postman collections, visually inspecting response payloads, updating Confluence pages that no one reads---consumes hours that could be spent on architecture, features, or innovation. The Postman State of the API Report confirms that manual testing remains the dominant API quality assurance practice, with the majority of teams still relying on hand-authored test suites~\cite{postman-state-of-api}.
+
+The consequences compound. Forsgren, Humble, and Kim demonstrate in \textit{Accelerate} that high-performing teams distinguish themselves through automation: automated testing, automated deployment, and automated feedback loops~\cite{accelerate}. Organizations that fail to automate their quality gates systematically underperform on all four key metrics---deployment frequency, lead time, change failure rate, and mean time to recovery.
+
+The implication is clear. Every hour an engineer spends on manual API validation is an hour subtracted from the automation that separates elite teams from struggling ones. The question is not whether to automate API quality assurance, but how.
+
+\subsection{Documentation Drift as a Systemic Failure}
+\label{subsec:doc-drift}
+
+We define \textit{documentation drift} as the progressive divergence between an API's specification and its actual implementation. Drift is not a one-time event but a continuous process: each deployment that modifies behavior without updating the specification widens the gap. Over time, the specification becomes a historical artifact---accurate at some past commit, unreliable at the current one.
+
+The SmartBear State of API Report identifies documentation quality as the single most important factor in API adoption, yet consistently finds that a majority of API specifications are incomplete, outdated, or both~\cite{smartbear-api-report}. This is not surprising. In most organizations, specification updates are a manual step, performed after implementation, enforced by nothing stronger than code review conventions. When deadlines compress, documentation is the first casualty.
+
+Documentation drift is not a symptom of laziness. It is a systemic failure rooted in the separation of two artifacts---the specification and the implementation---that should be governed by a single source of truth. If the specification described the API accurately and completely, and if validation derived from that specification ran on every change, drift would be detected at the point of introduction rather than discovered by a frustrated consumer weeks later.
+
+What if the documentation itself could be the testing infrastructure?
+
+% ============================================================================
+\section{The Shift Toward Declarative Everything}
+\label{sec:declarative-shift}
+% ============================================================================
+
+\subsection{GitOps and the Declarative Promise}
+\label{subsec:gitops}
+
+The past decade witnessed a fundamental shift in how software systems are operated. GitOps, formalized by the CNCF OpenGitOps working group, establishes four principles: declarative desired state, versioned and immutable storage, automated application of state, and continuous reconciliation~\cite{opengitops}. Tools like Argo~CD~\cite{argocd} implement these principles for Kubernetes deployments, ensuring that the state of a cluster converges toward whatever is committed in a Git repository.
+
+The power of GitOps lies in its elimination of imperative drift. An operator does not \textit{do} things to a cluster; an operator \textit{declares} what the cluster should look like, and a reconciliation loop makes it so. This model has proven remarkably effective for infrastructure and application delivery.
+
+Yet API quality assurance has not followed. Deployments are declarative. Infrastructure provisioning is declarative. But the validation of the APIs those systems expose remains imperative: teams write tests by hand, run them in ad-hoc pipelines, and interpret results manually. The irony is striking---declarative systems are tested with imperative processes.
+
+\subsection{Cloud-Native Infrastructure as Code}
+\label{subsec:cloud-native-iac}
+
+The declarative paradigm extends beyond application deployment. Terraform~\cite{terraform} pioneered infrastructure-as-code for cloud resources. Crossplane~\cite{crossplane} pushes this further, turning the Kubernetes API server into a universal control plane that can provision databases, message queues, DNS records, and entire cloud environments through declarative manifests.
+
+The Cloud Native Computing Foundation's annual survey reports accelerating adoption of these tools, with Kubernetes as the dominant orchestration platform and declarative provisioning as the default operational model~\cite{cncf-survey}. The underlying philosophy is consistent: if you can describe it, you can automate it. If you can automate it, you can reconcile it. If you can reconcile it, drift disappears.
+
+This philosophy has transformed infrastructure. It has transformed deployment. It has not yet transformed API quality assurance. The gap is not technological---OpenAPI specifications already describe APIs declaratively. The gap is methodological: no widely adopted framework treats the specification as the source from which validation is derived, executed, and reconciled automatically.
+
+\subsection{The Agentic Development Frontier}
+\label{subsec:agentic-dev}
+
+A parallel development accelerates the urgency. AI-assisted software engineering tools---from code completion systems like GitHub Copilot~\cite{github-copilot-research} to autonomous agents capable of executing multi-step development workflows---are reshaping how software is built. These tools depend on structured, machine-readable inputs. An agent cannot interpret a Confluence page or parse a Slack thread; it requires formal specifications with well-defined semantics.
+
+DDT produces exactly this kind of output. Validation results are structured, machine-readable quality signals tied directly to the specification. A CI pipeline can gate on them. A GitOps reconciliation loop can consume them. An autonomous agent can reason about them. By grounding API quality in the specification rather than in human judgment, DDT aligns naturally with a future in which agents---not only humans---participate in the development lifecycle.
+
+We do not claim that agentic development is mature today. We observe that the trajectory is clear, and that methodologies producing structured, specification-derived quality signals are inherently better positioned for this trajectory than those producing unstructured, human-authored test reports.
+
+% ============================================================================
+\section{Structured Knowledge vs.\ Tribal Knowledge}
+\label{sec:structured-vs-tribal}
+% ============================================================================
+
+\subsection{The API Specification as Structured Knowledge}
+\label{subsec:spec-as-knowledge}
+
+Every software organization accumulates two kinds of knowledge about its APIs. The first is \textit{tribal knowledge}: scattered across Slack messages, meeting notes, onboarding documents, and the memories of senior engineers. Tribal knowledge is rich, nuanced, and almost entirely inaccessible to automation. When the engineer who ``knows how the auth flow works'' leaves the company, that knowledge leaves with them.
+
+The second kind is \textit{structured knowledge}: versioned, diffable, machine-readable, and testable. An OpenAPI specification~\cite{openapi} is the canonical example. It describes endpoints, parameters, request bodies, response schemas, authentication mechanisms, and error codes in a format that both humans and machines can consume. It lives in version control. It can be validated, linted, and compared across versions.
+
+The distinction matters because automation operates on structured knowledge. A GitOps pipeline cannot reconcile tribal knowledge. A validation engine cannot derive test cases from a Slack conversation. The degree to which API quality assurance can be automated is bounded by the degree to which the API contract is captured in structured, machine-readable form.
+
+\subsection{Platform Engineering and Knowledge Codification}
+\label{subsec:platform-knowledge}
+
+The structured-versus-tribal distinction has organizational consequences that extend beyond automation. Nonaka and Takeuchi's theory of organizational knowledge creation~\cite{nonaka-knowledge} distinguishes between \textit{tacit} knowledge (embodied in individual expertise) and \textit{explicit} knowledge (codified in artifacts). The central challenge of knowledge management is \textit{externalization}: converting tacit knowledge into explicit form so that it survives personnel transitions.
+
+In software organizations, this challenge is acute. The CNCF Platforms White Paper~\cite{cncf-platforms} identifies internal developer platforms as the primary mechanism for encoding organizational knowledge into reusable, self-service capabilities. Skelton and Pais formalize this insight in \textit{Team Topologies}~\cite{team-topologies}, arguing that platform teams reduce the cognitive load on stream-aligned teams by abstracting away operational complexity into well-documented, curated interfaces. The platform does not merely provide infrastructure; it codifies the organization's collective expertise into a form that new team members can consume without tribal intermediaries.
+
+API specifications occupy a unique position in this landscape. They are simultaneously a technical contract (consumed by code generators and testing tools), a documentation artifact (consumed by developers during integration), and a knowledge repository (encoding decisions about authentication flows, error semantics, versioning strategy, and data models). When a senior engineer designs an API's error handling to return structured problem details with correlation IDs, that design decision is captured in the specification---but only if the specification is complete enough to include it.
+
+DDT operationalizes this insight. A specification that passes all eight DDT principles is not merely ``valid'' in the schema sense. It is \textit{onboarding-complete}: a new engineer can understand the API's contract, its security model, its error behavior, and its versioning strategy by reading the specification alone. DDT transforms the specification from a passive documentation artifact into an actively validated knowledge base. The validation report identifies precisely where knowledge gaps remain---missing descriptions, undocumented error responses, absent security definitions---converting the diffuse problem of ``incomplete documentation'' into a concrete, actionable checklist.
+
+This framing reveals DDT as a knowledge transfer mechanism disguised as a testing tool. The eight principles do not merely assess technical correctness; they assess whether the specification captures the organizational knowledge that a consumer needs. When the engineer who designed the authentication flow leaves, the knowledge persists---not in a Confluence page that drifts, but in a specification whose completeness is continuously validated.
+
+\subsection{Why Auto-Generated Specifications Matter}
+\label{subsec:autogen-specs}
+
+DDT rests on an assumption of specification completeness: the specification must fully describe the API contract. This assumption is not aspirational---it is increasingly achievable. Modern frameworks such as FastAPI~\cite{fastapi} auto-generate OpenAPI specifications directly from annotated source code. Spring Boot, Express with swagger-jsdoc, and dozens of other frameworks offer similar capabilities. The specification is not a separate artifact that engineers must remember to maintain; it is a byproduct of the implementation itself.
+
+However, auto-generated specifications are structurally correct but semantically incomplete. A framework generates endpoint paths, parameter types, and response status codes, but it cannot generate meaningful descriptions, usage examples, or documentation of business logic constraints. The specification is \textit{valid} in the schema sense but \textit{insufficient} in the documentation sense.
+
+This gap---between structural correctness and semantic completeness---is precisely what DDT detects. The methodology's validation principles assess not only whether the specification parses correctly, but whether it contains the information a consumer needs: descriptions on every operation, examples on every schema, documented error responses, and explicit security definitions. DDT does not replace auto-generation; it audits the output and identifies where human enrichment is still required.
+
+% ============================================================================
+\section{Problem Statement}
+\label{sec:problem-statement}
+% ============================================================================
+
+API quality assurance has not undergone the declarative transformation that has reshaped infrastructure provisioning, application deployment, and continuous delivery. While the rest of the software delivery pipeline converges toward Git-versioned, automatically reconciled desired state, API validation remains a manual, imperative process: teams write tests by hand, maintain them separately from the specification, and run them in pipelines disconnected from the declarative workflows that govern everything else.
+
+The consequences are measurable. Documentation drift accumulates undetected. Quality regressions surface in production rather than in CI. Engineering time flows toward manual verification rather than automation. Existing tools address fragments of the problem---Spectral~\cite{spectral} lints specification style, Schemathesis~\cite{schemathesis} generates property-based tests from schemas, Pact~\cite{pact} validates consumer-provider contracts---but none offers a unified methodology that derives comprehensive validation from the specification alone, grounded in formal principles, and designed for integration into GitOps pipelines.
+
+The opportunity is concrete. OpenAPI specifications already contain the information needed to validate compliance, documentation quality, schema correctness, error handling, security definitions, and versioning strategy. What is missing is not data but methodology: a principled framework that maps specification content to validation rules, executes those rules deterministically, and produces structured, observable results suitable for automated quality gates.
+
+% ============================================================================
+\section{Research Questions}
+\label{sec:research-questions}
+% ============================================================================
+
+This thesis investigates the following research questions:
+
+\begin{description}
+  \item[RQ1:] \textit{Can a methodology grounded in specification completeness, behavioral determinism, and operational observability provide automated API quality assurance comparable to manual approaches?}
+
+  We formalize DDT as three axioms mapped to eight validation principles and evaluate whether the resulting automated checks detect the same categories of defects that manual review identifies. This question is addressed in Chapters~\ref{ch:methodology} and~\ref{ch:evaluation}.
+
+  \item[RQ2:] \textit{To what extent can validation rules, test cases, and quality gates be derived automatically from OpenAPI specifications without manual test authorship?}
+
+  We implement the DriveBy framework, which takes an OpenAPI specification as input and produces a structured validation report as output, with no hand-written test cases required. This question is addressed in Chapters~\ref{ch:architecture} and~\ref{ch:evaluation}.
+
+  \item[RQ3:] \textit{How effectively does specification-driven quality assurance integrate into cloud-native GitOps pipelines as an autonomous quality gate?}
+
+  We deploy DriveBy within a Kubernetes-native pipeline using Argo Events, Argo Workflows, Crossplane, and the GitOps Promoter, demonstrating that DDT validation can serve as a fully automated gate in a declarative delivery workflow. This question is addressed in Chapters~\ref{ch:workflow} and~\ref{ch:evaluation}.
+\end{description}
+
+% ============================================================================
+\section{Thesis Contributions}
+\label{sec:contributions}
+% ============================================================================
+
+This thesis makes three contributions:
+
+\begin{enumerate}
+  \item \textbf{The DDT Methodology.} We define Documentation-Driven Testing as a formal methodology built on three axioms---Completeness, Determinism, and Observability---and eight validation principles (P001--P008) mapped systematically to these axioms. DDT provides a reusable, specification-agnostic framework for deriving API quality gates from documentation artifacts.
+
+  \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements DDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, flexible), and produces structured reports suitable for CI/CD integration.
+
+  \item \textbf{Empirical Evaluation.} We evaluate DDT through two complementary experiments: a controlled evaluation against a reference API designed to achieve full compliance, and a large-scale evaluation against public APIs harvested from the APIs.guru~\cite{apis-guru} directory. Together, these experiments assess both the correctness and the practical utility of specification-derived validation.
+\end{enumerate}
+
+% ============================================================================
+\section{Thesis Structure}
+\label{sec:thesis-structure}
+% ============================================================================
+
+The remainder of this thesis is organized as follows. Chapter~\ref{ch:related-work} surveys related work in API testing, OpenAPI tooling, GitOps, and quality assurance frameworks, positioning DDT within the existing landscape. Chapter~\ref{ch:methodology} presents the DDT methodology in detail, defining the three axioms, eight principles, and the formal mapping between them. Chapter~\ref{ch:architecture} describes the architecture of the DriveBy framework, including the specification abstraction layer, the principle checker pattern, and the validation engine. Chapter~\ref{ch:workflow} demonstrates the end-to-end GitOps integration, showing how DriveBy operates within an event-driven Kubernetes pipeline. Chapter~\ref{ch:evaluation} presents the empirical evaluation, reporting results from both the controlled and large-scale experiments. Chapter~\ref{ch:conclusion} concludes with a summary of contributions, answers to the research questions, and directions for future work.

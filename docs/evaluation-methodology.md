@@ -83,11 +83,30 @@ Run the same specification in all three modes and compare:
 ### Objective
 Assess DDT effectiveness against real-world, uncontrolled API specifications harvested from public registries. This tests generalizability — whether principles designed against a reference API apply to diverse specifications in the wild.
 
+### Reference Data Point: Swagger Petstore v3
+
+Before running the full batch, the canonical Swagger Petstore v3 API was validated as a reference:
+- **Spec URL:** `https://petstore3.swagger.io/api/v3/openapi.json`
+- **Mode:** strict
+- **Date:** 2026-03-19
+- **Result:** 1/6 principles passed (P001 only)
+
+| Principle | Result | Key Finding |
+|-----------|--------|-------------|
+| P001 | PASSED | Fully compliant OpenAPI 3.0 |
+| P002 | FAILED | 44 request/response bodies missing examples, 6 schemas undescribed, 1 parameter undocumented |
+| P003 | FAILED | Zero 5xx error responses across all 19 endpoints, 4 endpoints missing 4xx, no error detail schemas |
+| P004 | FAILED | No string length constraints on any field, no numeric min/max on IDs or quantities |
+| P005 | FAILED | 10 endpoints have no security defined, no global security requirements, API key scheme undescribed |
+| P008 | FAILED | No versioning strategy, changelog, or migration guides documented |
+
+This demonstrates that even the most well-known OpenAPI reference API fails strict DDT validation — validating the thesis claim that documentation quality is systematically neglected.
+
 ### Setup
 - **Source:** APIs.guru registry (https://apis.guru/)
 - **Harvest tool:** `tools/harvest-openapi-apisguru.py` — downloads OpenAPI specs from the registry
 - **Probe tool:** Validates that specs are parseable before batch testing
-- **Batch runner:** `tools/run-openapi-batch.sh` — runs DriveBy against each spec
+- **Batch runner:** `tools/run-openapi-batch.sh` — runs DriveBy against each spec (max 20 per run)
 - **Sample file:** `tests/openapis-sample.csv` — curated list of public API specs
 
 ### Protocol

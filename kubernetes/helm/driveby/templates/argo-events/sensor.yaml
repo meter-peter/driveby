@@ -15,10 +15,11 @@ spec:
             type: string
             value:
               - opened
+              - reopened
               - synchronize
   triggers:
     - template:
-        name: driveby-pipeline
+        name: driveby-staging-promotion
         argoWorkflow:
           operation: submit
           source:
@@ -26,9 +27,34 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: driveby-run-
+                generateName: driveby-staging-promotion-
                 namespace: {{ .Values.namespace }}
               spec:
                 workflowTemplateRef:
-                  name: driveby-full-pipeline
+                  name: driveby-staging-promotion
+                arguments:
+                  parameters:
+                    - name: app-name
+                      value: "perfect-api"
+                    - name: pr-number
+                    - name: head-sha
+                    - name: github-owner
+                    - name: github-repo
+          parameters:
+            - src:
+                dependencyName: github-pr
+                dataKey: body.number
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: github-pr
+                dataKey: body.pull_request.head.sha
+              dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: github-pr
+                dataKey: body.repository.owner.login
+              dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: github-pr
+                dataKey: body.repository.name
+              dest: spec.arguments.parameters.4.value
 {{- end }}

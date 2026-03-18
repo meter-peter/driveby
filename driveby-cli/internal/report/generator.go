@@ -98,20 +98,7 @@ func (g *Generator) SavePerformanceReport(result *types.ValidationReport) error 
 
 // SaveFunctionalTestReport saves a functional test report
 func (g *Generator) SaveFunctionalTestReport(result *types.ValidationReport) error {
-	if len(result.Principles) == 0 {
-		return fmt.Errorf("no functional test results in validation result")
-	}
-
-	var endpointResults []types.EndpointValidation
-	for _, principle := range result.Principles {
-		if principle.Principle.ID == "P006" {
-			if details, ok := principle.Details.([]types.EndpointValidation); ok {
-				endpointResults = details
-				break
-			}
-		}
-	}
-	if endpointResults == nil {
+	if result.TestResults == nil || result.TestResults.Functional == nil {
 		return fmt.Errorf("no functional test results found in validation result")
 	}
 
@@ -120,13 +107,13 @@ func (g *Generator) SaveFunctionalTestReport(result *types.ValidationReport) err
 	}
 
 	jsonPath := filepath.Join(g.outputDir, timestampedName("functional-test-report", ".json"))
-	if err := g.saveJSON(jsonPath, endpointResults); err != nil {
+	if err := g.saveJSON(jsonPath, result.TestResults.Functional); err != nil {
 		return fmt.Errorf("failed to save JSON report: %w", err)
 	}
 	copyFile(jsonPath, filepath.Join(g.outputDir, "functional-test-report-latest.json"))
 
 	mdPath := filepath.Join(g.outputDir, timestampedName("functional-test-report", ".md"))
-	if err := g.saveMarkdown(mdPath, endpointResults); err != nil {
+	if err := g.saveMarkdown(mdPath, result.TestResults.Functional); err != nil {
 		return fmt.Errorf("failed to save Markdown report: %w", err)
 	}
 	copyFile(mdPath, filepath.Join(g.outputDir, "functional-test-report-latest.md"))

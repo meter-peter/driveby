@@ -11,6 +11,10 @@ spec:
   destinations:
     - namespace: {{ .Values.namespace }}
       server: https://kubernetes.default.svc
+    {{- range .Values.environments }}
+    - namespace: {{ .namespace }}
+      server: https://kubernetes.default.svc
+    {{- end }}
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace

@@ -1,2 +1,259 @@
-\chapter{Methodology: DDT}
-% TODO: The DDT paradigm, 3 axioms, P001-P008 principles
+\chapter{Methodology: Documentation-Driven Testing}
+\label{ch:methodology}
+
+This chapter presents Documentation-Driven Testing (DDT) as a formal methodology for automated API quality assurance. We define the three axioms that constitute its theoretical foundation, derive eight validation principles from these axioms, establish the mapping between axioms and principles, and specify four validation modes that govern how principles are applied in practice. The chapter defines \textit{what} DDT validates and \textit{why}; Chapter~\ref{ch:architecture} describes \textit{how} the DriveBy framework implements these definitions.
+
+% ============================================================================
+\section{The DDT Paradigm}
+\label{sec:ddt-paradigm}
+% ============================================================================
+
+Chapter~\ref{ch:related-work} identified three paradigms for API quality assurance: test-first, contract-first, and documentation-driven (Section~\ref{subsec:doc-driven-gap}). DDT formalizes the third paradigm. Where test-first requires engineers to author test cases and contract-first requires consumers to publish expectations, DDT derives all validation from the API specification itself. The specification is simultaneously the documentation, the contract, and the test oracle.
+
+This is not a tooling distinction. It is a methodological one. DDT treats the specification as a \textit{complete} description of the API contract---not a partial sketch to be supplemented by external tests. If the specification is complete, validation rules can be derived from it without human intervention. If validation is deterministic, the same specification and the same API produce the same results regardless of when or where validation runs. If results are observable, they integrate naturally into automated pipelines as structured quality signals.
+
+These three properties---completeness, determinism, and observability---are not aspirational goals. They are axioms: foundational assumptions from which the entire methodology follows. We organize DDT as a two-layer structure. The \textit{axiomatic layer} defines three axioms that any DDT-compliant validation must satisfy. The \textit{principle layer} defines eight concrete validation principles, each grounded in one or more axioms, that specify what the methodology checks and why.
+
+This separation serves two purposes. First, it distinguishes the theoretical foundations (axioms) from their practical realization (principles), allowing the axioms to remain stable even as principles evolve. Second, it provides a principled basis for adding new validation rules: any proposed check must trace back to at least one axiom, ensuring that the methodology grows systematically rather than accumulating ad-hoc heuristics.
+
+% ============================================================================
+\section{The Three Axioms}
+\label{sec:three-axioms}
+% ============================================================================
+
+The three axioms of DDT define the minimal conditions under which specification-driven validation is sound. Each axiom addresses a distinct concern: the sufficiency of the specification as input, the reproducibility of the validation process, and the utility of the validation output.
+
+% ----------------------------------------------------------------------------
+\subsection{Axiom of Completeness}
+\label{subsec:axiom-completeness}
+% ----------------------------------------------------------------------------
+
+\textit{The API specification must fully describe the API contract.}
+
+Completeness requires that the specification contains sufficient information to derive validation rules without external input. This does not mean the specification must encode every implementation detail. It means the specification must document everything a consumer needs to understand, integrate with, and depend on the API: endpoints, parameters, request and response schemas, error responses, security mechanisms, and usage examples.
+
+Completeness is the enabling axiom. Without it, specification-driven validation degenerates into partial checking---the validator can only assess what the specification happens to include, with no way to determine what is missing. Principles P001 through P004 operationalize completeness by verifying structural compliance, documentation quality, error handling coverage, and schema precision.
+
+Completeness admits a dual reading. In the validation sense, it ensures that the specification contains sufficient information to derive validation rules. In the \textit{knowledge transfer} sense, it ensures that the specification contains sufficient information for a new engineer---or an autonomous agent---to understand, integrate with, and depend on the API without consulting tribal sources. These two readings are not independent: the information needed to validate an API contract is precisely the information a consumer needs to use it. A specification that satisfies P001 through P004 is structurally valid, comprehensively documented, transparent about its error behavior, and precise in its schema constraints. It is, by construction, an onboarding-complete artifact~\cite{nonaka-knowledge}. This dual reading connects DDT to the broader platform engineering concern of reducing cognitive load through self-service interfaces~\cite{team-topologies}: the Axiom of Completeness does not merely enable automation---it ensures that the specification functions as codified organizational knowledge that persists independently of the engineers who authored it.
+
+% ----------------------------------------------------------------------------
+\subsection{Axiom of Determinism}
+\label{subsec:axiom-determinism}
+% ----------------------------------------------------------------------------
+
+\textit{Given the same specification and the same API, validation must produce the same results.}
+
+Determinism requires that the validation process is reproducible. The same inputs must yield the same outputs regardless of execution environment, time of day, or operator identity. This axiom eliminates subjectivity: two engineers running validation against the same specification and the same API instance must reach identical conclusions.
+
+Determinism is critical for automation. A quality gate that produces different results on repeated execution cannot serve as a reliable gate. Principle P006 (Functional Testing) operationalizes determinism by defining runtime tests that produce binary pass/fail outcomes from deterministic HTTP interactions derived from the specification.
+
+% ----------------------------------------------------------------------------
+\subsection{Axiom of Observability}
+\label{subsec:axiom-observability}
+% ----------------------------------------------------------------------------
+
+\textit{Validation must produce measurable, actionable results.}
+
+Observability requires that validation output is structured, quantifiable, and suitable for automated consumption. A validation run must produce results that a CI pipeline can gate on, a dashboard can display, and an engineer can act on without interpreting free-text narratives.
+
+This axiom distinguishes DDT from informal quality reviews. A code review may identify documentation gaps, but the review's output is unstructured prose attached to a pull request. DDT produces structured reports with per-principle pass/fail status, severity classifications, specific check results, and suggested remediations. Principles P005 (Security Standards), P007 (Performance Testing), and P008 (API Versioning Strategy) operationalize observability by validating properties---security posture, performance characteristics, and versioning discipline---that are inherently observable and measurable.
+
+Observability also enables longitudinal tracking. Because DDT results are structured and deterministic, organizations can track quality trends across versions, compare scores across APIs, and identify systemic weaknesses that warrant process changes.
+
+% ============================================================================
+\section{The Eight Principles}
+\label{sec:eight-principles}
+% ============================================================================
+
+Each DDT principle defines a specific dimension of API quality, traces its rationale to one or more axioms, classifies its severity, and enumerates the concrete checks it performs. We present the six implemented principles in detail, followed by two planned principles whose theoretical definitions are complete but whose implementations are pending.
+
+% ----------------------------------------------------------------------------
+\subsection{P001: OpenAPI Specification Compliance}
+\label{subsec:p001}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Completeness. \textbf{Severity:} Critical.
+
+P001 validates that the API specification conforms to the OpenAPI standard~\cite{openapi} and is structurally sound. A specification that fails P001 cannot be reliably consumed by code generators, documentation renderers, or downstream validators. P001 is therefore a prerequisite for all other principles.
+
+P001 performs eight checks: (1)~the specification version is present and valid; (2)~required info fields (title, version) exist; (3)~at least one path is defined; (4)~components are structurally valid; (5)~the overall specification structure passes schema validation; (6)~no duplicate \texttt{operationId} values exist across operations; (7)~all HTTP methods are standard (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE); and (8)~null type usage conforms to the specification version (OpenAPI~3.0.x vs.\ 3.1.0 semantics).
+
+P001 runs in every validation mode. A structurally invalid specification cannot be meaningfully assessed by any other principle.
+
+% ----------------------------------------------------------------------------
+\subsection{P002: API Documentation Quality}
+\label{subsec:p002}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Completeness. \textbf{Severity:} Warning.
+
+P002 assesses whether the specification serves as effective documentation for API consumers. A specification can be structurally valid (passing P001) yet practically useless---containing endpoints without descriptions, parameters without explanations, and schemas without examples.
+
+P002 performs ten checks across three scopes. At the \textit{API level}: (1)~the API has a general description; (2)~contact information is provided; (3)~license information is specified. At the \textit{operation level}: (4)~all operations have summaries; (5)~all operations have detailed descriptions; (6)~all operations have unique \texttt{operationId} values; (7)~all parameters have descriptions; (8)~all request and response bodies include examples. At the \textit{schema level}: (9)~all component schemas have descriptions; (10)~all enum values are documented within their schema descriptions.
+
+P002 addresses a gap identified in Chapter~\ref{ch:related-work}: existing linters verify specification \textit{form} but not documentation \textit{substance}. A linter flags a missing description; P002 systematically verifies that every element a consumer interacts with is documented.
+
+% ----------------------------------------------------------------------------
+\subsection{P003: Error Handling Standards}
+\label{subsec:p003}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Completeness. \textbf{Severity:} Warning.
+
+P003 validates that the specification documents error responses comprehensively and consistently. Undocumented error responses are a primary source of integration failures: a consumer encounters an unexpected 403 or 422 response that the specification never mentioned, and must reverse-engineer the error format from raw HTTP responses.
+
+P003 performs six checks: (1)~all operations document at least one 4xx error response; (2)~all operations document at least one 5xx error response; (3)~error responses include descriptive error codes; (4)~error response schemas contain structured fields (message, code, or details); (5)~common error responses are defined as reusable components; and (6)~error response formats are consistent across operations (all errors share the same schema structure).
+
+The consistency check (6) is particularly valuable. APIs that return \texttt{\{``message'': ...\}} for 400 errors but \texttt{\{``error'': ..., ``code'': ...\}} for 500 errors impose unnecessary complexity on consumers. P003 detects this inconsistency and flags it.
+
+% ----------------------------------------------------------------------------
+\subsection{P004: Schema Definitions}
+\label{subsec:p004}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Completeness. \textbf{Severity:} Warning.
+
+P004 validates that request and response schemas are precise, constrained, and complete. A schema that declares a field as type \texttt{string} without length constraints, pattern restrictions, or format specifications provides the consumer with no useful validation guidance. P004 ensures schemas are not merely present but informative.
+
+P004 performs nine checks: (1)~all path parameters have schemas; (2)~all query parameters have schemas; (3)~all request bodies have content schemas; (4)~all schemas specify data types; (5)~all string fields have length constraints (\texttt{minLength}, \texttt{maxLength}) or pattern restrictions; (6)~all numeric fields have range constraints (\texttt{minimum}, \texttt{maximum}); (7)~all required fields listed in \texttt{required} arrays exist in \texttt{properties}; (8)~all enum values are non-null; and (9)~schemas are validated recursively, including nested objects and array items.
+
+The recursive validation (9) distinguishes P004 from shallow schema checks. A top-level object may have a well-defined schema while its nested \texttt{address} field is typed as a bare \texttt{object} with no properties defined. P004 traverses the full schema tree, applying constraint checks at every level. This aligns with the JSON Schema specification's~\cite{json-schema-2020} principle that schemas should be as restrictive as the domain permits.
+
+% ----------------------------------------------------------------------------
+\subsection{P005: Security Standards}
+\label{subsec:p005}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Observability. \textbf{Severity:} Critical.
+
+P005 validates that the specification defines security mechanisms comprehensively and consistently. Security misconfigurations in API specifications---missing authentication requirements, undefined security schemes, inconsistent enforcement---are among the top risks identified by the OWASP API Security project~\cite{owasp-api-security}. A specification that omits security definitions leaves consumers guessing about authentication requirements and leaves automated tools unable to verify security compliance~\cite{api-security-testing}.
+
+P005 performs seven checks: (1)~at least one security scheme is defined in \texttt{components.securitySchemes}; (2)~global security requirements are set at the top level; (3)~all operations are covered by either global or operation-level security; (4)~OAuth2 and OpenID Connect schemes are referenced with scopes in at least one security requirement; (5)~API key schemes include descriptions; (6)~API key schemes specify the \texttt{name} and \texttt{in} fields (header, query, or cookie location); and (7)~all security scheme names referenced in security requirements are defined in components.
+
+Check~(7) addresses a subtle but dangerous inconsistency: a security requirement referencing a scheme name that does not exist in \texttt{components.securitySchemes}. This creates a specification that appears to enforce security but whose enforcement is undefined. P005 detects such phantom references.
+
+% ----------------------------------------------------------------------------
+\subsection{P006: Functional Testing}
+\label{subsec:p006}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Determinism. \textbf{Severity:} Critical. \textbf{Status:} Defined theoretically; implementation as a \texttt{PrincipleChecker} wrapper is pending.
+
+P006 validates that the API's runtime behavior matches the specification. Where P001--P005 and P008 operate on the specification as a static document, P006 requires a live API instance. It derives test cases from the specification---HTTP requests with appropriate parameters, headers, and bodies---and verifies that responses conform to the declared schemas, status codes, and content types.
+
+The DriveBy framework already implements the underlying functional testing logic, including authentication probing and endpoint contract verification (Chapter~\ref{ch:architecture} details the implementation). The pending work is integrating this logic into the unified principle evaluation pipeline so that it contributes to the structured validation report.
+
+P006 operationalizes the Axiom of Determinism: given the same specification and the same API, functional tests must produce the same pass/fail results. This requires that test inputs are derived deterministically from the specification rather than generated randomly (distinguishing DDT's functional testing from property-based approaches like Schemathesis~\cite{schemathesis}).
+
+% ----------------------------------------------------------------------------
+\subsection{P007: Performance Testing}
+\label{subsec:p007}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Observability. \textbf{Severity:} Warning. \textbf{Status:} Defined theoretically; implementation as a \texttt{PrincipleChecker} wrapper is pending.
+
+P007 validates that the API meets performance expectations by measuring response times, throughput, and error rates under load. Like P006, it requires a live API instance.
+
+P007 operationalizes the Axiom of Observability: performance metrics are inherently measurable quantities that produce structured, actionable output. The principle produces latency distributions, throughput measurements, and error rate statistics that can be compared against configurable thresholds and tracked longitudinally across API versions.
+
+The pending work mirrors P006: integrating the existing performance testing logic into the unified principle evaluation pipeline.
+
+% ----------------------------------------------------------------------------
+\subsection{P008: API Versioning Strategy}
+\label{subsec:p008}
+% ----------------------------------------------------------------------------
+
+\textbf{Axiom:} Observability. \textbf{Severity:} Warning.
+
+P008 validates that the API follows a disciplined versioning strategy. APIs evolve; without explicit versioning, deprecation notices, and migration guidance, consumers face silent breaking changes. P008 ensures the specification communicates its version lifecycle clearly, following the Semantic Versioning convention~\cite{semver}.
+
+P008 performs seven checks: (1)~the API version is specified in the info section; (2)~the version follows Semantic Versioning format (MAJOR.MINOR.PATCH); (3)~the versioning strategy is documented in the API description; (4)~deprecated operations include deprecation details in their descriptions; (5)~breaking changes are documented or a changelog is referenced; (6)~version compatibility (backward compatibility) is addressed; and (7)~migration or upgrade guides are referenced.
+
+Checks (3)--(7) are distinctive. Most tools verify that a version string exists (check~1) and optionally that it follows semver (check~2). P008 goes further by requiring that the specification communicates its \textit{versioning practices}: how consumers should handle version transitions, what has changed, and where to find migration guidance. This transforms the version field from a static label into a living contract about the API's evolution.
+
+% ============================================================================
+\section{Axiom-to-Principle Mapping}
+\label{sec:axiom-principle-mapping}
+% ============================================================================
+
+Table~\ref{tab:axiom-principle-mapping} presents the formal mapping between axioms and principles. Each principle traces to exactly one axiom, though the mapping is asymmetric: the Axiom of Completeness grounds four principles while Determinism grounds one.
+
+\begin{table}[htbp]
+\centering
+\caption{Mapping of DDT axioms to validation principles.}
+\label{tab:axiom-principle-mapping}
+\small
+\begin{tabular}{@{}llllc@{}}
+\toprule
+\textbf{Axiom} & \textbf{ID} & \textbf{Principle} & \textbf{Severity} & \textbf{Status} \\
+\midrule
+Completeness  & P001 & OpenAPI Specification Compliance & Critical & Implemented \\
+Completeness  & P002 & API Documentation Quality        & Warning  & Implemented \\
+Completeness  & P003 & Error Handling Standards          & Warning  & Implemented \\
+Completeness  & P004 & Schema Definitions               & Warning  & Implemented \\
+\addlinespace
+Observability & P005 & Security Standards               & Critical & Implemented \\
+\addlinespace
+Determinism   & P006 & Functional Testing               & Critical & Planned     \\
+\addlinespace
+Observability & P007 & Performance Testing              & Warning  & Planned     \\
+Observability & P008 & API Versioning Strategy           & Warning  & Implemented \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The asymmetry is intentional and reflects the methodology's priorities. Completeness dominates because the specification is the sole input to validation---if it is incomplete, the other axioms are undermined. Four principles are needed to cover the four dimensions of specification completeness: structural validity (P001), documentation substance (P002), error coverage (P003), and schema precision (P004).
+
+Determinism grounds only P006 because determinism is a property of the validation \textit{process} rather than the validation \textit{target}. The static principles (P001--P005, P008) are deterministic by construction: they read a specification and produce results without side effects. Determinism becomes a non-trivial requirement only when validation involves runtime interaction with a live system, which is P006's domain.
+
+Observability grounds three principles that validate externally measurable properties: security posture (P005), performance characteristics (P007), and versioning discipline (P008). These properties share a common trait: they produce quantitative, structured signals that automated systems can consume. P005 is classified as critical because security misconfigurations pose immediate risk; P007 and P008 are classified as warnings because they represent quality dimensions that degrade gracefully rather than failing catastrophically.
+
+The severity classification---critical versus warning---governs how validation results translate to quality gate decisions. A critical failure (P001 or P005) blocks promotion in a CI/CD pipeline. A warning (P002, P003, P004, P007, P008) is reported but does not block, allowing teams to adopt DDT incrementally without requiring immediate perfection across all dimensions.
+
+% ============================================================================
+\section{Validation Modes}
+\label{sec:validation-modes}
+% ============================================================================
+
+DDT defines four validation modes that control which principles are evaluated. Modes enable incremental adoption: a team can begin with minimal validation and progressively enable stricter checks as their specification matures.
+
+Table~\ref{tab:validation-modes} presents the mode-to-principle mapping.
+
+\begin{table}[htbp]
+\centering
+\caption{Validation modes and the principles each mode evaluates.}
+\label{tab:validation-modes}
+\small
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+\textbf{Mode} & \textbf{P001} & \textbf{P002} & \textbf{P003} & \textbf{P004} & \textbf{P005} & \textbf{P006} & \textbf{P007} & \textbf{P008} \\
+\midrule
+Minimal   & \cmark & & & & & & & \\
+Strict    & \cmark & \cmark & \cmark & \cmark & \cmark & & & \cmark \\
+Test-only &        &        &        &        &        & \cmark$^*$ & \cmark$^*$ & \\
+Flexible  & \cmark & & & & & & & \\
+\bottomrule
+\end{tabular}
+
+\vspace{2mm}
+\noindent\small{$^*$ P006 and P007 are planned but not yet implemented as principle checkers.}
+\end{table}
+
+\textbf{Minimal mode} evaluates only P001 (OpenAPI Specification Compliance). It serves as a fast quality gate suitable for pull request pipelines where rapid feedback is prioritized over exhaustive validation. A specification that passes minimal mode is structurally valid and safe for code generation, but its documentation quality, error handling, and security definitions are unchecked.
+
+\textbf{Strict mode} evaluates P001 through P005 and P008---all implemented static principles. It provides comprehensive specification quality assessment without requiring a live API instance. Strict mode is appropriate for release pipelines, pre-merge gates, and periodic audits where thorough validation justifies the additional execution time.
+
+\textbf{Test-only mode} skips all static validation and runs only runtime tests (P006 and P007, when implemented). It is designed for scenarios where the specification has already been validated statically and the focus is on verifying that the live API conforms to it. Test-only mode decouples static and runtime validation, allowing them to run in separate pipeline stages or on different schedules.
+
+\textbf{Flexible mode} evaluates P001 only, identical to minimal mode in its static checks, but differs in its failure semantics: flexible mode allows runtime tests to proceed even when static validation produces warnings. This mode supports teams in early adoption, where specifications are still maturing and strict enforcement would block useful runtime testing.
+
+The four modes form a progression. A team might begin with \textit{flexible} mode during initial adoption, move to \textit{minimal} for CI gates as the specification stabilizes, adopt \textit{strict} for release pipelines, and layer in \textit{test-only} for runtime verification once P006 and P007 are available. This incremental path lowers the barrier to adoption while preserving a clear trajectory toward comprehensive validation.
+
+% ============================================================================
+\section{Summary}
+\label{sec:methodology-summary}
+% ============================================================================
+
+This chapter defined DDT as a two-layer methodology. The axiomatic layer establishes three foundational properties---Completeness, Determinism, and Observability---that any specification-driven validation must satisfy. The principle layer derives eight concrete validation dimensions from these axioms, each with a defined severity, a set of enumerated checks, and a clear rationale grounded in the gaps identified in Chapter~\ref{ch:related-work}. Four validation modes govern which principles apply in a given context, enabling incremental adoption without sacrificing methodological coherence.
+
+Chapter~\ref{ch:architecture} describes how the DriveBy framework implements these definitions: the specification abstraction layer that enables version-agnostic validation, the principle checker pattern that encapsulates each principle, and the engine that orchestrates evaluation based on the selected validation mode.

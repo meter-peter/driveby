@@ -1,4 +1,4 @@
-.PHONY: build test vet clean up down validate integration-test docs-check docs-status thesis-status
+.PHONY: build test vet clean up down validate integration-test docs-check docs-status thesis-status regen-openapi
 
 # Top-level orchestration Makefile
 
@@ -33,6 +33,13 @@ integration-test: build up
 	@sleep 3
 	cd driveby-cli && go test -tags integration -count=1 -v ./test/...
 	$(MAKE) down
+
+# Regenerate OpenAPI spec from running perfect-api
+regen-openapi: up
+	@echo "Waiting for API to be ready..."
+	@sleep 3
+	curl -s http://localhost:8000/openapi.json | python3 -m json.tool > apis/perfect-api/openapi.json
+	@echo "OpenAPI spec regenerated at apis/perfect-api/openapi.json"
 
 # Helm targets
 helm-template:

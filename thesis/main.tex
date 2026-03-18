@@ -4,11 +4,27 @@
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{amsmath}
-\usepackage[backend=biber,style=ieee]{biblatex}
+\usepackage{booktabs}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\usepackage[backend=biber,style=numeric]{biblatex}
 \addbibresource{references.bib}
 
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  tabsize=4,
+  captionpos=b,
+  xleftmargin=2em,
+  framexleftmargin=1.5em
+}
+
 \title{Documentation-Driven Testing (DDT): A Paradigm for Automated API Quality Assurance in the GitOps Era}
-\author{Panagiotis Triantafyllis}
+\author{Petros Evangelos Triantafyllis}
 \date{2026}
 
 \begin{document}

@@ -27,6 +27,20 @@ func (g *Generator) saveMarkdown(path string, data interface{}) error {
 		return g.writeLoadTestMarkdown(file, v)
 	case []types.EndpointValidation:
 		return g.writeFunctionalTestMarkdown(file, v)
+	case *types.FunctionalTestResults:
+		// Convert EndpointTestResult back to EndpointValidation for markdown rendering
+		var endpoints []types.EndpointValidation
+		for _, ep := range v.EndpointResults {
+			endpoints = append(endpoints, types.EndpointValidation{
+				Method:       ep.Method,
+				Path:         ep.Path,
+				Status:       string(ep.Status),
+				StatusCode:   ep.StatusCode,
+				ResponseTime: ep.ResponseTime,
+				Errors:       ep.Errors,
+			})
+		}
+		return g.writeFunctionalTestMarkdown(file, endpoints)
 	default:
 		log.Debugf("Returning from saveMarkdown with error: %v", fmt.Errorf("unsupported report type: %T", data))
 		return fmt.Errorf("unsupported report type: %T", data)

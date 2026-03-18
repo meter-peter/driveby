@@ -83,6 +83,7 @@ type Schema struct {
 	AllOf       []*Schema
 	OneOf       []*Schema
 	AnyOf       []*Schema
+	Nullable    bool // True when anyOf includes null type or nullable flag is set
 }
 
 // FlattenAllOf merges allOf schemas into a single schema by combining properties
@@ -105,6 +106,7 @@ func FlattenAllOf(s *Schema) *Schema {
 		Items:       s.Items,
 		OneOf:       s.OneOf,
 		AnyOf:       s.AnyOf,
+		Nullable:    s.Nullable,
 	}
 	if len(s.Properties) > 0 {
 		merged.Properties = make(map[string]*Schema)
@@ -159,6 +161,7 @@ type Parameter struct {
 	Description string
 	Required    bool
 	Schema      *Schema
+	Example     interface{} // From parameter-level examples
 }
 
 // RequestBody is the unified representation of a request payload schema.

@@ -27,8 +27,8 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 | Directory | Purpose | Status | CLAUDE.md |
 |-----------|---------|--------|-----------|
 | `driveby-cli/` | Go CLI tool — the core validation engine | Active development | [`driveby-cli/CLAUDE.md`](driveby-cli/CLAUDE.md) |
-| `apis/` | Sample APIs for testing (perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
-| `kubernetes/` | Helm chart + raw YAML examples for K8s deployment | Scaffolded | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
+| `apis/` | Sample APIs for testing (perfect-api) — source now in [`meter-peter/perfect-api`](https://github.com/meter-peter/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
+| `kubernetes/` | Raw manifests (`manifests/`), Helm chart (`helm/`), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
 | `samples/` | Example configs, reports, demo workflows | Configs complete | [`samples/CLAUDE.md`](samples/CLAUDE.md) |
 | `thesis/` | LaTeX thesis document (7 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
 | `tools/` | Python/bash utilities for batch testing | Complete | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
@@ -55,6 +55,17 @@ cd driveby-cli && go vet ./...               # Lint
 make up                                       # Start docker-compose
 make validate                                 # Run validation against perfect-api
 ```
+
+## Public API Validation
+DriveBy supports validating remote API specs by URL (no local files needed):
+```bash
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io --protocol https --port 443 \
+  --validation-mode strict
+```
+Reference result: Swagger Petstore v3 scores 1/6 in strict mode (only P001 passes).
+See `docs/WORKFLOW.md` for full workflow, `tools/` for batch validation of public APIs.
 
 ## Code Quality Rules
 1. `spec.APISpec` abstraction is mandatory — no raw `*openapi3.T` in principle checkers

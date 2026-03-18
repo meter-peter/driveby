@@ -4,9 +4,16 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o driveby ./cmd/driveby
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_DATE=unknown
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags "-X github.com/meter-peter/driveby/driveby-cli/internal/cli.version=${VERSION} \
+              -X github.com/meter-peter/driveby/driveby-cli/internal/cli.commit=${COMMIT} \
+              -X github.com/meter-peter/driveby/driveby-cli/internal/cli.date=${BUILD_DATE}" \
+    -o driveby ./cmd/driveby
 
 FROM gcr.io/distroless/static
 WORKDIR /
 COPY --from=builder /app/driveby /driveby
-ENTRYPOINT ["/driveby"] 
+ENTRYPOINT ["/driveby"]

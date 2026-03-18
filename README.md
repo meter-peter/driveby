@@ -26,16 +26,16 @@ make integration-test     # Run integration tests (docker-compose)
 
 ## Features
 
-- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0/3.1 standards
+- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0/3.1 and Swagger 2.0 standards
+- **Remote Spec Support**: Validate any public or private API by URL -- no local files required
 - **Functional Testing**: Tests API endpoints for functionality and correctness
 - **Performance Testing**: Load tests APIs with configurable targets
 - **Documentation Validation**: Ensures API documentation is complete and accurate
-- **Auto-fixing**: Automatically fixes common documentation issues (TODO)
 - **Comprehensive Reporting**: Generates detailed reports in JSON and Markdown formats
 - **Authentication Support**: Supports various authentication methods (Bearer tokens, API keys, Basic auth)
 - **GitHub Integration**: Automatically comments on pull requests with validation results
-- **Configurable**: Highly configurable through YAML configuration
-- **Validation Modes**: Supports different validation levels (minimal/strict) for different use cases
+- **Batch Validation**: Validate up to 20 public API specs in a single batch run
+- **Validation Modes**: Supports different validation levels (minimal/strict/test-only) for different use cases
 
 ## Authentication Support
 
@@ -213,6 +213,13 @@ driveby load-only --openapi openapi.json --host localhost --port 8080
 
 # Run functional and performance tests without validation (fastest)
 driveby test-only --openapi openapi.json --host localhost --port 8080
+
+# Validate a public API by URL (no local files needed)
+driveby validate-only \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io \
+  --protocol https --port 443 \
+  --validation-mode strict
 ```
 
 ## Configuration
