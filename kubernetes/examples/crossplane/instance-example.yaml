@@ -1,0 +1,60 @@
+apiVersion: driveby.io/v1alpha1
+kind: XQualityGate
+metadata:
+  name: perfect-api-staging-gate
+  namespace: driveby
+spec:
+  appName: perfect-api
+  projectName: driveby
+  gateName: staging-promotion
+  templateRef:
+    name: driveby-staging-promotion
+  targetCluster:
+    name: private-novelcore
+    providerConfigName: kubernetes-provider
+    baseDomain: private.novelcore.org
+    namespace: driveby
+  repositoryConfig:
+    owner: meter-peter
+    name: perfect-api-gitops
+    fullName: meter-peter/perfect-api-gitops
+  apiConfig:
+    openapiEndpoint: /openapi.json
+    port: 8000
+    serviceName: perfect-api
+    sourceEnvironment:
+      namespace: perfect-api-dev
+    targetEnvironment:
+      namespace: perfect-api-staging
+    authSecretName: driveby-api-auth
+    authKeyHeader: X-API-Key
+  githubConfig:
+    patSecretName: github-pat
+    patSecretKey: token
+  # Optional: override cluster defaults
+  # ingressConfig:
+  #   className: traefik-system
+  #   clusterIssuer: sys-prod-issuer-dns
+  #   annotations:
+  #     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  # eventBusConfig:
+  #   jetstreamVersion: "2.10.14"
+  #   replicas: 3
+  # webhookPort: 12000
+  eventTriggers:
+    - name: pr-validation
+      targetTemplate: promotion-pipeline
+      events: [pull_request]
+      filters:
+        - path: body.action
+          type: string
+          value: [opened, reopened, synchronize]
+      parameterMapping:
+        - from: body.number
+          to: pr-number
+        - from: body.pull_request.head.sha
+          to: head-sha
+        - from: body.repository.owner.login
+          to: github-owner
+        - from: body.repository.name
+          to: github-repo

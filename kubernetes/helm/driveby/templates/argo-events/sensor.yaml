@@ -1,4 +1,4 @@
-{{- if .Values.argoEvents.enabled }}
+{{- if and .Values.argoEvents.enabled (not .Values.crossplane.enabled) }}
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:

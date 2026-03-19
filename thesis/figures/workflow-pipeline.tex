@@ -1,0 +1,71 @@
+% GitOps Event-Driven Pipeline — Chapter 5
+% Shows: Developer PR → GitHub Webhook → Traefik → EventSource → EventBus → Sensor → Workflow → Feedback
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=0.6cm,
+    stage/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=2.2cm,
+        minimum height=0.8cm,
+        font=\scriptsize,
+        align=center
+    },
+    lane label/.style={
+        font=\scriptsize\bfseries,
+        rotate=90,
+        anchor=south,
+        text=#1!70!black
+    },
+    lane bg/.style={
+        fill=#1!5,
+        draw=#1!20,
+        rounded corners=4pt
+    }
+]
+
+% Lane backgrounds
+\begin{scope}[on background layer]
+    \node[lane bg=violet, minimum width=3.2cm, minimum height=3.5cm] at (0.9,0) {};
+    \node[lane bg=blue,   minimum width=2.2cm, minimum height=3.5cm] at (3.5,0) {};
+    \node[lane bg=teal,   minimum width=4.8cm, minimum height=3.5cm] at (6.6,0) {};
+    \node[lane bg=orange, minimum width=4.2cm, minimum height=3.5cm] at (10.8,0) {};
+\end{scope}
+
+% Lane labels (top)
+\node[lane label=violet]  at (-0.4,1.9)  {GitHub};
+\node[lane label=blue]    at (2.5,1.9)   {Ingress};
+\node[lane label=teal]    at (4.3,1.9)   {Argo Events};
+\node[lane label=orange]  at (8.8,1.9)   {Argo Workflows};
+
+% GitHub lane
+\node[stage=violet] (dev)     at (0.2,0.8)  {Developer\\opens PR};
+\node[stage=violet] (webhook) at (0.2,-0.5) {GitHub\\Webhook};
+\draw[->,thick] (dev) -- (webhook);
+
+% Ingress lane
+\node[stage=blue] (traefik) at (3.5,0.1) {Traefik\\Ingress};
+\draw[->,thick] (webhook) -- (traefik);
+
+% Argo Events lane
+\node[stage=teal] (es) at (5.5,0.8)  {EventSource\\(webhook)};
+\node[stage=teal] (eb) at (5.5,-0.5) {EventBus\\(NATS JetStream)};
+\node[stage=teal] (sensor) at (7.8,0.1) {Sensor\\(trigger)};
+\draw[->,thick] (traefik) -- (es);
+\draw[->,thick] (es) -- (eb);
+\draw[->,thick] (eb) -- (sensor);
+
+% Argo Workflows lane
+\node[stage=orange] (wf) at (10,0.8)   {Argo\\Workflow};
+\node[stage=orange] (status) at (10,-0.5) {Commit\\Status};
+\node[stage=orange] (comment) at (11.8,-0.5) {PR\\Comment};
+\draw[->,thick] (sensor) -- (wf);
+\draw[->,thick] (wf) -- (status);
+\draw[->,thick] (wf) -- (comment);
+
+% Feedback loop back to GitHub
+\draw[->,thick,violet!60!black,dashed] (status.south) -- ++(0,-0.6) -| ($(dev.south)+(0.3,-0.6)$) -- ($(dev.south)+(0.3,0)$);
+
+\end{tikzpicture}

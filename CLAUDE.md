@@ -28,7 +28,7 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 |-----------|---------|--------|-----------|
 | `driveby-cli/` | Go CLI tool — the core validation engine | Active development | [`driveby-cli/CLAUDE.md`](driveby-cli/CLAUDE.md) |
 | `apis/` | Sample APIs for testing (perfect-api) — source now in [`meter-peter/perfect-api`](https://github.com/meter-peter/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
-| `kubernetes/` | Raw manifests (`manifests/`), Helm chart (`helm/`), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
+| `kubernetes/` | Helm chart (Crossplane XRDs + compositions), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
 | `samples/` | Example configs, reports, demo workflows | Configs complete | [`samples/CLAUDE.md`](samples/CLAUDE.md) |
 | `thesis/` | LaTeX thesis document (7 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
 | `tools/` | Python/bash utilities for batch testing | Complete | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
@@ -86,6 +86,22 @@ When writing Crossplane resources:
 2. Use `context7 query-docs` for XRD schemas, Composition patterns
 3. Reference kubecore-operator at `/home/meter-peter/development/novelcore/kubecore-operator/compositions/`
 4. Only fall back to web search if context7 lacks the information
+
+## Crossplane Quality Gates (XSDLC)
+- **XQualityGateTemplate** (`driveby.io/v1alpha1`) — declares validation workflow (RBAC + WorkflowTemplate)
+- **XQualityGate** (`driveby.io/v1alpha1`) — declares per-API event pipeline (EventBus + EventSource + Sensor + Ingress)
+- Helm chart installs `provider-kubernetes` + 4 Crossplane functions + XRDs + compositions
+- See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
+
+## Releasing
+
+1. Ensure CI is green on `main`
+2. Tag: `git tag -a v0.3.0 -m "DriveBy v0.3.0: Crossplane quality gates, release automation"`
+3. Push: `git push origin v0.3.0`
+4. The `release.yml` workflow produces:
+   - GitHub Release with 6 platform binaries + SHA256 checksums (via GoReleaser)
+   - Docker images: `ghcr.io/meter-peter/driveby:0.3.0`, `:0.3`, `:latest`
+   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:0.3.0`
 
 ## Target Cluster
 - Cluster: `private.novelcore.org`

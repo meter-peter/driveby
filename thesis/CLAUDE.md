@@ -141,12 +141,14 @@ thesis/
 - All references go in `references.bib` — no inline URLs without BibTeX entries
 
 ## Figure Requirements
-- Architecture diagram: dependency flow (Ch.4)
-- Sequence diagram: validation pipeline end-to-end (Ch.5)
-- Bar chart: per-principle pass rates across APIs.guru dataset (Ch.6)
-- Table: perfect-api validation results (Ch.6)
-- Pipeline diagram: GitOps event-driven workflow (Ch.5)
-- All figures must be vector format (PDF preferred) or high-resolution PNG (300+ DPI)
+- [DONE] Architecture diagram: dependency flow (Ch.4) — `figures/dependency-flow.tex`, `fig:dependency-flow`
+- [DONE] Axiom-to-principle mapping (Ch.3) — `figures/axiom-principle-mapping.tex`, `fig:axiom-mapping`
+- [DONE] Pipeline diagram: GitOps event-driven workflow (Ch.5) — `figures/workflow-pipeline.tex`, `fig:gitops-pipeline`
+- [DONE] Staging promotion DAG (Ch.5) — `figures/staging-promotion-dag.tex`, `fig:staging-dag`
+- [DONE] Evaluation framework (Ch.6) — `figures/evaluation-methodology.tex`, `fig:eval-methodology`
+- Bar chart: per-principle pass rates across APIs.guru dataset (Ch.6) — TODO (requires evaluation data)
+- Table: perfect-api validation results (Ch.6) — TODO (requires evaluation data)
+- All figures are TikZ vector diagrams (inline LaTeX, no external image files needed)
 
 ## Writing Rules
 - Academic tone, third person, present tense for methodology

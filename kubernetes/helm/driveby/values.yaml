@@ -11,32 +11,6 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-# Application definitions (iterable for future APIs)
-apps:
-  - name: perfect-api
-    repo: https://github.com/meter-peter/driveby
-    path: apis/perfect-api
-    port: 8000
-    image:
-      repository: ghcr.io/meter-peter/driveby-perfect-api
-      tag: latest
-    healthCheck:
-      path: /test/health
-    openapi:
-      endpoint: /openapi.json
-
-# Environment definitions
-environments:
-  - name: dev
-    namespace: driveby-dev
-    autoSync: true
-  - name: staging
-    namespace: driveby-staging
-    autoSync: false
-  - name: prod
-    namespace: driveby-prod
-    autoSync: false
-
 # API auth — shared between app containers + workflow steps
 apiAuth:
   secretName: driveby-api-auth
@@ -47,7 +21,7 @@ apiAuth:
 argocd:
   enabled: true
   # Do NOT install ArgoCD — it already exists on the cluster
-  # Only create AppProject and Applications
+  # Only create AppProject
   project: driveby
   server: https://argocd.private.novelcore.org
 
@@ -62,14 +36,73 @@ argoEvents:
   webhook:
     port: 12000
 
-# Crossplane
+# Crossplane — installs provider-kubernetes + functions via Package CRs
+# Crossplane itself must be pre-installed (crossplane-system namespace)
 crossplane:
-  enabled: false
+  enabled: true
   providers:
     kubernetes:
-      version: "v0.14.0"
-    github:
+      package: xpkg.upbound.io/crossplane-contrib/provider-kubernetes
+      version: "v0.14.1"
+  functions:
+    goTemplating:
+      package: xpkg.upbound.io/crossplane-contrib/function-go-templating
+      version: "v0.10.0"
+    autoReady:
+      package: xpkg.upbound.io/crossplane-contrib/function-auto-ready
+      version: "v0.4.0"
+    sequencer:
+      package: xpkg.upbound.io/crossplane-contrib/function-sequencer
       version: "v0.2.0"
+    environmentConfigs:
+      package: xpkg.upbound.io/crossplane-contrib/function-environment-configs
+      version: "v0.3.0"
+  providerConfig:
+    name: kubernetes-provider
+    credentials: InjectedIdentity
+
+# Cluster-wide defaults baked into Crossplane compositions at helm-template time.
+# Override per-cluster via EnvironmentConfigs, or per-CR via XRD spec fields.
+defaults:
+  # URL shown in GitHub commit status (link to Argo Workflows UI)
+  argoWorkflowsUrl: "https://argo.private.novelcore.org/workflows"
+
+  # Ingress configuration for webhook endpoints
+  ingress:
+    className: "traefik-system"
+    clusterIssuer: "sys-prod-issuer-dns"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+
+  # GitHub API base URL (change for GitHub Enterprise Server)
+  github:
+    apiUrl: "https://api.github.com"
+
+  # Secret names used by workflow steps
+  secrets:
+    imagePullSecret: "ghcr-creds"
+    githubPat:
+      name: "github-pat"
+      key: "token"
+    apiAuth:
+      name: "driveby-api-auth"
+      keyField: "api-key"
+    apiKeyHeader: "X-API-Key"
+
+  # Webhook port for Argo Events EventSource
+  webhookPort: 12000
+
+  # Utility container images (pin versions, not :latest)
+  images:
+    curl: "curlimages/curl:8.7.1"
+    postgres: "postgres:16-alpine"
+
+  # JetStream EventBus configuration
+  eventBus:
+    jetstream:
+      version: "2.10.10"
+      replicas: 1
 
 # GitOps Promoter
 gitopsPromoter:
@@ -79,7 +112,7 @@ gitopsPromoter:
 github:
   owner: "meter-peter"
   repo: "driveby"
-  secretName: driveby-github-credentials
+  secretName: github-pat
   pat: ""  # Set at install: --set github.pat=ghp_xxx
 
 # RBAC

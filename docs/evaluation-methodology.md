@@ -4,6 +4,30 @@
 
 This document defines the evaluation protocol for the DriveBy DDT framework, corresponding to Chapter 6 of the thesis. The evaluation demonstrates that Documentation-Driven Testing can automatically assess API quality with measurable accuracy, and compares DDT effort against traditional QA approaches.
 
+## Evaluation Framework
+
+```
+ ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
+ │   CONTROLLED    │   │      WILD       │   │     EFFORT      │
+ │  (perfect-api)  │   │   (APIs.guru)   │   │ (DDT vs Manual) │
+ ├─────────────────┤   ├─────────────────┤   ├─────────────────┤
+ │ 1. Baseline     │   │ 1. Harvest      │   │ 1. Estimate     │
+ │    validation   │   │    specs        │   │    traditional  │
+ │                 │   │                 │   │    effort       │
+ │ 2. Inject       │   │ 2. Batch        │   │                 │
+ │    defects      │   │    validate     │   │ 2. Measure      │
+ │                 │   │                 │   │    DDT effort   │
+ │ 3. Verify       │   │ 3. Statistical  │   │                 │
+ │    detection    │   │    analysis     │   │                 │
+ └────────┬────────┘   └────────┬────────┘   └────────┬────────┘
+          │                     │                      │
+          └─────────────────────┼──────────────────────┘
+                                ▼
+                  ┌──────────────────────────┐
+                  │   Analysis & Results     │
+                  └──────────────────────────┘
+```
+
 ## Evaluation Dimensions
 
 The evaluation addresses three research questions:

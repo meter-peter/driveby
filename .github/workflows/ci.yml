@@ -17,7 +17,9 @@ jobs:
 
       - name: Build
         working-directory: driveby-cli
-        run: go build -ldflags "-X github.com/meter-peter/driveby/driveby-cli/internal/cli.version=${{ github.sha }} -X github.com/meter-peter/driveby/driveby-cli/internal/cli.commit=${{ github.sha }}" ./cmd/driveby
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo dev)
+          go build -ldflags "-X github.com/meter-peter/driveby/driveby-cli/internal/cli.version=${VERSION} -X github.com/meter-peter/driveby/driveby-cli/internal/cli.commit=${{ github.sha }}" ./cmd/driveby
 
       - name: Vet
         working-directory: driveby-cli

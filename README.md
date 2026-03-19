@@ -185,16 +185,28 @@ Note: In minimal mode, the focus is on ensuring that any documented endpoints an
 
 ## Installation
 
+### From GitHub Releases (recommended)
+
+Download a pre-built binary from [GitHub Releases](https://github.com/meter-peter/driveby/releases):
+
 ```bash
-# Clone the repository
+# Linux (amd64)
+curl -sL https://github.com/meter-peter/driveby/releases/latest/download/driveby_$(curl -s https://api.github.com/repos/meter-peter/driveby/releases/latest | grep tag_name | cut -d '"' -f4 | sed 's/v//')_linux_amd64.tar.gz | tar xz
+sudo mv driveby /usr/local/bin/
+```
+
+### From Source
+
+```bash
 git clone https://github.com/meter-peter/driveby.git
-cd driveby
-
-# Build the project
+cd driveby/driveby-cli
 go build -o driveby ./cmd/driveby
+```
 
-# Install globally (optional)
-go install ./cmd/driveby
+### Helm Chart (Kubernetes)
+
+```bash
+helm install driveby oci://ghcr.io/meter-peter/charts/driveby --version 0.3.0
 ```
 
 ## Quick Start
@@ -372,10 +384,10 @@ driveby validate-only \
 DriveBy implements several validation principles (P001-P008):
 
 1. **P001**: OpenAPI Specification Compliance
-2. **P002**: Response Time Performance
+2. **P002**: API Documentation Quality
 3. **P003**: Error Response Documentation
-4. **P004**: Request Validation
-5. **P005**: Authentication Requirements
+4. **P004**: Schema Definitions
+5. **P005**: Security Standards
 6. **P006**: Endpoint Functional Testing
 7. **P007**: API Performance Compliance
 8. **P008**: API Versioning
@@ -390,7 +402,7 @@ DriveBy generates detailed reports in both JSON and Markdown formats, including:
 - Auto-fix attempts and results
 - Summary statistics
 
-Reports are saved in the configured output directory (default: `./reports`).
+Reports are saved in the configured output directory (default: `/tmp/driveby-reports`).
 
 ## Contributing
 

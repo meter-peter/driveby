@@ -1,0 +1,48 @@
+version: 2
+
+project_name: driveby
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: driveby
+    dir: driveby-cli
+    main: ./cmd/driveby
+    binary: driveby
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/meter-peter/driveby/driveby-cli/internal/cli.version={{.Version}}
+      - -X github.com/meter-peter/driveby/driveby-cli/internal/cli.commit={{.Commit}}
+      - -X github.com/meter-peter/driveby/driveby-cli/internal/cli.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"

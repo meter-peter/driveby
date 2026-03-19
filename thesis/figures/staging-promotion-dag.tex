@@ -1,0 +1,85 @@
+% Staging Promotion Workflow DAG — Chapter 5
+% Shows: set-pending → db-sync → spec-check → validate → functional-test → report-success + comment-pr (parallel)
+% Exit handler on failure (dashed)
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=1.1cm,
+    dagstep/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=teal!60!black,
+        fill=teal!10,
+        minimum width=3.5cm,
+        minimum height=0.7cm,
+        font=\small,
+        align=center
+    },
+    dagparallel/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=green!50!black,
+        fill=green!10,
+        minimum width=3cm,
+        minimum height=0.7cm,
+        font=\small,
+        align=center
+    },
+    dagfail/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=red!60!black,
+        fill=red!10,
+        minimum width=3cm,
+        minimum height=0.7cm,
+        font=\small,
+        align=center
+    },
+    dagnumber/.style={
+        circle,
+        draw=teal!50!black,
+        fill=teal!20,
+        minimum size=0.5cm,
+        font=\tiny\bfseries,
+        inner sep=0pt
+    }
+]
+
+% Sequential steps (top to bottom)
+\node[dagstep] (pending)    at (0,0)     {set-pending};
+\node[dagstep] (dbsync)     at (0,-1.3)  {db-sync};
+\node[dagstep] (speccheck)  at (0,-2.6)  {spec-check};
+\node[dagstep] (validate)   at (0,-3.9)  {validate};
+\node[dagstep] (functest)   at (0,-5.2)  {functional-test};
+
+% Parallel fork
+\node[dagparallel] (report)  at (-2,-6.8) {report-success};
+\node[dagparallel] (comment) at (2,-6.8)  {comment-pr};
+
+% Step numbers
+\node[dagnumber] at ($(pending.west)+(-0.5,0)$)   {1};
+\node[dagnumber] at ($(dbsync.west)+(-0.5,0)$)    {2};
+\node[dagnumber] at ($(speccheck.west)+(-0.5,0)$)  {3};
+\node[dagnumber] at ($(validate.west)+(-0.5,0)$)   {4};
+\node[dagnumber] at ($(functest.west)+(-0.5,0)$)   {5};
+\node[dagnumber] at ($(report.west)+(-0.4,0)$)     {6};
+\node[dagnumber] at ($(comment.east)+(0.4,0)$)     {7};
+
+% Sequential arrows
+\draw[->,thick] (pending)   -- (dbsync);
+\draw[->,thick] (dbsync)    -- (speccheck);
+\draw[->,thick] (speccheck) -- (validate);
+\draw[->,thick] (validate)  -- (functest);
+
+% Fork arrows
+\draw[->,thick] (functest.south) -- ++(0,-0.5) -| (report.north);
+\draw[->,thick] (functest.south) -- ++(0,-0.5) -| (comment.north);
+
+% Fork label
+\node[font=\tiny\itshape,teal!60!black] at (0,-5.95) {parallel};
+
+% Exit handler (failure path)
+\node[dagfail] (exithandler) at (4.5,-3.9) {exit-handler\\(report-failure)};
+\draw[->,dashed,red!60!black,thick] (validate.east) -- node[above,font=\tiny,red!60!black] {on failure} (exithandler.west);
+\draw[->,dashed,red!60!black,thick] (functest.east) -- ++(1,0) |- (exithandler.south);
+
+\end{tikzpicture}

@@ -1,0 +1,37 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-go-templating
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.crossplane.functions.goTemplating.package }}:{{ .Values.crossplane.functions.goTemplating.version }}"
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-auto-ready
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.crossplane.functions.autoReady.package }}:{{ .Values.crossplane.functions.autoReady.version }}"
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-sequencer
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.crossplane.functions.sequencer.package }}:{{ .Values.crossplane.functions.sequencer.version }}"
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-environment-configs
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.crossplane.functions.environmentConfigs.package }}:{{ .Values.crossplane.functions.environmentConfigs.version }}"
+{{- end }}

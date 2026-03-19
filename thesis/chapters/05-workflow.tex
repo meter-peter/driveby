@@ -1,3 +1,36 @@
 \chapter{End-to-End Workflow}
 \label{ch:workflow}
-% TODO: GitOps pipeline: Argo Events -> Workflows -> Crossplane -> Promoter
+
+This chapter describes how the DriveBy binary is deployed into Kubernetes-native GitOps pipelines. Section~\ref{sec:event-pipeline} presents the event-driven pipeline that triggers validation from pull request events. Section~\ref{sec:staging-dag} details the seven-step workflow DAG that orchestrates validation, testing, and feedback.
+
+% ============================================================================
+\section{Event-Driven Validation Pipeline}
+\label{sec:event-pipeline}
+% ============================================================================
+
+Figure~\ref{fig:gitops-pipeline} shows the end-to-end pipeline from a developer opening a pull request to validation feedback appearing on the PR.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/workflow-pipeline.tex}%
+}
+\caption{End-to-end GitOps validation pipeline triggered by pull request events. Dashed line indicates feedback loop.}
+\label{fig:gitops-pipeline}
+\end{figure}
+
+% ============================================================================
+\section{Staging Promotion Workflow}
+\label{sec:staging-dag}
+% ============================================================================
+
+The validation workflow is implemented as an Argo Workflows DAG with seven steps. Figure~\ref{fig:staging-dag} shows the task dependencies and the failure exit handler.
+
+\begin{figure}[htbp]
+\centering
+\input{figures/staging-promotion-dag.tex}
+\caption{Staging promotion workflow DAG with seven validation steps. Steps 6 and 7 execute in parallel after step 5. The exit handler (dashed) triggers on any failure.}
+\label{fig:staging-dag}
+\end{figure}
+
+% TODO: Full chapter content covering Crossplane, GitOps Promoter, CI/CD integration

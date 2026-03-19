@@ -1,0 +1,12 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-kubernetes
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.crossplane.providers.kubernetes.package }}:{{ .Values.crossplane.providers.kubernetes.version }}"
+  runtimeConfigRef:
+    name: default
+{{- end }}

@@ -1,0 +1,80 @@
+% Axiom-to-Principle Mapping — Chapter 3
+% Shows: 3 axioms at top, 8 principles below, with governance lines
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    axiom/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!15,
+        minimum width=3.8cm,
+        minimum height=1cm,
+        font=\small\bfseries,
+        align=center
+    },
+    principle/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=gray!70,
+        fill=gray!8,
+        minimum width=1.8cm,
+        minimum height=0.75cm,
+        font=\scriptsize,
+        align=center
+    },
+    governance/.style={
+        ->,
+        thick,
+        #1!50!black
+    }
+]
+
+% Axiom row
+\node[axiom=blue]          (completeness)  at (0,0)    {Completeness};
+\node[axiom=teal]          (determinism)   at (5,0)    {Determinism};
+\node[axiom=orange]        (observability) at (10,0)   {Observability};
+
+% Principle row — Completeness principles
+\node[principle] (p001) at (-1.5,-2.5) {P001\\Compliance};
+\node[principle] (p002) at (0,-2.5)    {P002\\Documentation};
+\node[principle] (p003) at (1.5,-2.5)  {P003\\Errors};
+\node[principle] (p004) at (3,-2.5)    {P004\\Schema};
+
+% Principle row — Determinism principle
+\node[principle] (p006) at (5,-2.5)    {P006\\Functional};
+
+% Principle row — Observability principles
+\node[principle] (p005) at (8.5,-2.5)  {P005\\Security};
+\node[principle] (p007) at (10,-2.5)   {P007\\Performance};
+\node[principle] (p008) at (11.5,-2.5) {P008\\Versioning};
+
+% Governance lines
+\draw[governance=blue]   (completeness.south)  -- (p001.north);
+\draw[governance=blue]   (completeness.south)  -- (p002.north);
+\draw[governance=blue]   (completeness.south)  -- (p003.north);
+\draw[governance=blue]   (completeness.south)  -- (p004.north);
+
+\draw[governance=teal]   (determinism.south)   -- (p006.north);
+
+\draw[governance=orange] (observability.south)  -- (p005.north);
+\draw[governance=orange] (observability.south)  -- (p007.north);
+\draw[governance=orange] (observability.south)  -- (p008.north);
+
+% Severity indicators
+\node[font=\tiny,red!70!black]   at ($(p001.south)+(0,-0.25)$) {Critical};
+\node[font=\tiny,orange!70!black] at ($(p002.south)+(0,-0.25)$) {Warning};
+\node[font=\tiny,orange!70!black] at ($(p003.south)+(0,-0.25)$) {Warning};
+\node[font=\tiny,orange!70!black] at ($(p004.south)+(0,-0.25)$) {Warning};
+\node[font=\tiny,red!70!black]   at ($(p006.south)+(0,-0.25)$) {Critical};
+\node[font=\tiny,red!70!black]   at ($(p005.south)+(0,-0.25)$) {Critical};
+\node[font=\tiny,orange!70!black] at ($(p007.south)+(0,-0.25)$) {Warning};
+\node[font=\tiny,orange!70!black] at ($(p008.south)+(0,-0.25)$) {Warning};
+
+% Grouping brackets via fit
+\begin{scope}[on background layer]
+    \node[draw=blue!30, fill=blue!5, rounded corners=6pt, fit=(p001)(p004), inner sep=5pt] {};
+    \node[draw=teal!30, fill=teal!5, rounded corners=6pt, fit=(p006), inner sep=5pt] {};
+    \node[draw=orange!30, fill=orange!5, rounded corners=6pt, fit=(p005)(p008), inner sep=5pt] {};
+\end{scope}
+
+\end{tikzpicture}

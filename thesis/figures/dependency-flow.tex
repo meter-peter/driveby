@@ -1,0 +1,49 @@
+% Package Dependency Graph — Chapter 4
+% Shows: types <- spec <- loader <- principles <- testing <- engine <- cli
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    >={Stealth[length=3mm]},
+    box/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!15,
+        minimum width=5.5cm,
+        minimum height=0.9cm,
+        font=\small,
+        align=center
+    },
+    layer label/.style={
+        font=\scriptsize\itshape,
+        text=#1!60!black,
+        anchor=west
+    }
+]
+
+% Nodes — bottom to top (import direction is upward)
+\node[box=blue]   (types)      {\texttt{types} \textemdash\ value types, report model, exit codes};
+\node[box=blue]   (spec)       [above=of types] {\texttt{spec} \textemdash\ APISpec interface + version adapters};
+\node[box=green!60!black]  (loader)     [above=of spec] {\texttt{loader} \textemdash\ spec loading, version detection};
+\node[box=green!60!black]  (principles) [above=of loader] {\texttt{principles} \textemdash\ P001--P008 checkers, registry};
+\node[box=green!60!black]  (testing)    [above=of principles] {\texttt{testing} \textemdash\ functional + performance tests};
+\node[box=orange] (engine)     [above=of testing] {\texttt{engine} \textemdash\ orchestrator: load, select, evaluate};
+\node[box=orange] (cli)        [above=of engine] {\texttt{cli} \textemdash\ Cobra commands, flag binding};
+
+% Arrows (import direction: upward)
+\draw[->,thick] (spec)       -- (types);
+\draw[->,thick] (loader)     -- (spec);
+\draw[->,thick] (principles) -- (loader);
+\draw[->,thick] (testing)    -- (principles);
+\draw[->,thick] (engine)     -- (testing);
+\draw[->,thick] (cli)        -- (engine);
+
+% Layer labels on the right
+\node[layer label=blue]          at ($(types.east)+(0.3,0)$)      {Data layer};
+\node[layer label=blue]          at ($(spec.east)+(0.3,0)$)       {Data layer};
+\node[layer label=green!60!black] at ($(loader.east)+(0.3,0)$)     {Validation layer};
+\node[layer label=green!60!black] at ($(principles.east)+(0.3,0)$) {Validation layer};
+\node[layer label=green!60!black] at ($(testing.east)+(0.3,0)$)    {Validation layer};
+\node[layer label=orange]        at ($(engine.east)+(0.3,0)$)     {Interface layer};
+\node[layer label=orange]        at ($(cli.east)+(0.3,0)$)        {Interface layer};
+
+\end{tikzpicture}

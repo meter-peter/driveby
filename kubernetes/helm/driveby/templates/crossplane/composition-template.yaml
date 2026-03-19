@@ -1,0 +1,435 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xqualitygatetemplates.driveby.io
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+    driveby.io/type: qualitygate-template
+spec:
+  compositeTypeRef:
+    apiVersion: driveby.io/v1alpha1
+    kind: XQualityGateTemplate
+  mode: Pipeline
+  pipeline:
+
+  # Step 1: Load EnvironmentConfig
+  - step: load-environment-configs
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Selector
+          selector:
+            matchLabels:
+            - key: driveby.io/type
+              type: Value
+              value: qualitygate-template-config
+            - key: driveby.io/project
+              type: FromCompositeFieldPath
+              valueFromFieldPath: spec.projectName
+            - key: driveby.io/gate
+              type: FromCompositeFieldPath
+              valueFromFieldPath: spec.gateName
+
+  # Step 2: Generate WorkflowTemplate + RBAC via go-templating
+  - step: generate-template-resources
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{`{{- $xr := .observed.composite.resource -}}`}}
+          {{`{{- $spec := $xr.spec -}}`}}
+          {{`{{- $env := .environment -}}`}}
+          {{`{{- $name := $xr.metadata.name -}}`}}
+          {{`{{- $xrNamespace := $xr.metadata.namespace -}}`}}
+
+          {{`{{/* Extract configuration from XR */}}`}}
+          {{`{{- $projectName := $spec.projectName -}}`}}
+          {{`{{- $gateName := $spec.gateName -}}`}}
+          {{`{{- $gateKey := $spec.gateKey | default $gateName -}}`}}
+          {{`{{- $targetCluster := $spec.targetCluster -}}`}}
+          {{`{{- $providerConfigName := $targetCluster.providerConfigName -}}`}}
+          {{`{{- $namespace := $targetCluster.namespace | default "driveby" -}}`}}
+
+          {{`{{/* Validation config with defaults */}}`}}
+          {{`{{- $valConfig := $spec.validationConfig | default dict -}}`}}
+          {{`{{- $drivebyImage := $valConfig.drivebyImage | default "ghcr.io/meter-peter/driveby:latest" -}}`}}
+          {{`{{- $validationMode := $valConfig.validationMode | default "strict" -}}`}}
+          {{`{{- $serviceAccountName := $valConfig.serviceAccountName | default "driveby" -}}`}}
+
+          {{`{{/* Three-tier configurable values: XR spec → EnvironmentConfig → Helm-baked default */}}`}}
+          {{`{{- $secretsConfig := $spec.secretsConfig | default dict -}}`}}
+          {{`{{- $githubCfg := $spec.githubConfig | default dict -}}`}}
+          {{`{{- $imagesCfg := $spec.images | default dict -}}`}}
+
+          {{`{{- $imagePullSecret := $secretsConfig.imagePullSecret | default ($env.imagePullSecret | default `}}"{{ .Values.defaults.secrets.imagePullSecret }}"{{`) -}}`}}
+          {{`{{- $githubPatSecretName := $secretsConfig.githubPatSecretName | default ($env.githubPatSecretName | default `}}"{{ .Values.defaults.secrets.githubPat.name }}"{{`) -}}`}}
+          {{`{{- $githubPatSecretKey := $secretsConfig.githubPatSecretKey | default ($env.githubPatSecretKey | default `}}"{{ .Values.defaults.secrets.githubPat.key }}"{{`) -}}`}}
+          {{`{{- $apiAuthSecretName := $secretsConfig.apiAuthSecretName | default ($env.apiAuthSecretName | default `}}"{{ .Values.defaults.secrets.apiAuth.name }}"{{`) -}}`}}
+          {{`{{- $apiKeyHeader := $secretsConfig.apiKeyHeader | default ($env.apiKeyHeader | default `}}"{{ .Values.defaults.secrets.apiKeyHeader }}"{{`) -}}`}}
+          {{`{{- $githubApiUrl := $githubCfg.apiUrl | default ($env.githubApiUrl | default `}}"{{ .Values.defaults.github.apiUrl }}"{{`) -}}`}}
+          {{`{{- $workflowsUrl := $spec.workflowsUrl | default ($env.workflowsUrl | default `}}"{{ .Values.defaults.argoWorkflowsUrl }}"{{`) -}}`}}
+          {{`{{- $curlImage := $imagesCfg.curl | default ($env.curlImage | default `}}"{{ .Values.defaults.images.curl }}"{{`) -}}`}}
+          {{`{{- $postgresImage := $imagesCfg.postgres | default ($env.postgresImage | default `}}"{{ .Values.defaults.images.postgres }}"{{`) -}}`}}
+
+          {{`{{/* Resource names */}}`}}
+          {{`{{- $workflowTemplateName := printf "%s-%s" $projectName $gateName -}}`}}
+          {{`{{- $saName := $serviceAccountName -}}`}}
+          {{`{{- $roleName := printf "%s-%s" $projectName $gateName -}}`}}
+
+          ---
+          # ServiceAccount with imagePullSecrets
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-serviceaccount
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: serviceaccount
+          spec:
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: {{`{{ $saName }}`}}
+                  namespace: {{`{{ $namespace }}`}}
+                  labels:
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                imagePullSecrets:
+                  - name: {{`{{ $imagePullSecret }}`}}
+
+          ---
+          # Role for workflow execution
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-role
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: role
+          spec:
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: {{`{{ $roleName }}`}}
+                  namespace: {{`{{ $namespace }}`}}
+                  labels:
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                rules:
+                  - apiGroups: ["argoproj.io"]
+                    resources: ["workflows", "workflowtemplates"]
+                    verbs: ["create", "get", "list", "watch", "delete"]
+                  - apiGroups: [""]
+                    resources: ["secrets", "configmaps"]
+                    verbs: ["get", "list"]
+                  - apiGroups: [""]
+                    resources: ["persistentvolumeclaims"]
+                    verbs: ["get", "list", "create"]
+                  - apiGroups: [""]
+                    resources: ["pods", "pods/log"]
+                    verbs: ["get", "list", "watch"]
+
+          ---
+          # RoleBinding
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-rolebinding
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: rolebinding
+          spec:
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: {{`{{ $roleName }}`}}
+                  namespace: {{`{{ $namespace }}`}}
+                  labels:
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: {{`{{ $roleName }}`}}
+                subjects:
+                  - kind: ServiceAccount
+                    name: {{`{{ $saName }}`}}
+                    namespace: {{`{{ $namespace }}`}}
+
+          ---
+          # WorkflowTemplate — inline 7-step staging-promotion DAG
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-workflow-template
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: workflow-template
+          spec:
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: WorkflowTemplate
+                metadata:
+                  name: {{`{{ $workflowTemplateName }}`}}
+                  namespace: {{`{{ $namespace }}`}}
+                  labels:
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                    driveby.io/gate-key: {{`{{ $gateKey | replace "/" "-" | quote }}`}}
+                spec:
+                  entrypoint: promotion-pipeline
+                  serviceAccountName: {{`{{ $saName }}`}}
+                  onExit: exit-handler
+                  arguments:
+                    parameters:
+                      - name: app-name
+                      - name: pr-number
+                      - name: head-sha
+                      - name: github-owner
+                      - name: github-repo
+                      - name: app-port
+                        default: "8000"
+                      - name: source-namespace
+                      - name: target-namespace
+                      - name: service-name
+                      - name: openapi-endpoint
+                        default: "/openapi.json"
+                  templates:
+                    # --- Main DAG ---
+                    - name: promotion-pipeline
+                      dag:
+                        tasks:
+                          - name: set-pending-status
+                            template: github-commit-status
+                            arguments:
+                              parameters:
+                                - name: state
+                                  value: "pending"
+                                - name: description
+                                  value: "Validating dev environment..."
+
+                          - name: wait-for-source-ready
+                            template: health-check-source
+                            dependencies: [set-pending-status]
+
+                          - name: validate-source
+                            template: driveby-validate
+                            dependencies: [wait-for-source-ready]
+
+                          - name: functional-test-source
+                            template: driveby-functional
+                            dependencies: [validate-source]
+
+                          - name: report-success
+                            template: github-commit-status
+                            dependencies: [functional-test-source]
+                            arguments:
+                              parameters:
+                                - name: state
+                                  value: "success"
+                                - name: description
+                                  value: "Dev validation passed, safe to promote"
+
+                          - name: comment-pr
+                            template: github-pr-comment
+                            dependencies: [functional-test-source]
+
+                    # --- Step Templates ---
+
+                    - name: github-commit-status
+                      inputs:
+                        parameters:
+                          - name: state
+                          - name: description
+                      container:
+                        image: {{`{{ $curlImage }}`}}
+                        env:
+                          - name: GITHUB_TOKEN
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubPatSecretName }}`}}
+                                key: {{`{{ $githubPatSecretKey }}`}}
+                        command: [sh, -c]
+                        args:
+                          - |
+                            curl -s -X POST \
+                              -H "Authorization: token ${GITHUB_TOKEN}" \
+                              -H "Accept: application/vnd.github.v3+json" \
+                              "{{`{{ $githubApiUrl }}`}}/repos/{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}/{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}/statuses/{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}" \
+                              -d '{
+                                "state": "{{`{{ "{{" }}inputs.parameters.state{{ "}}" }}`}}",
+                                "description": "{{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}",
+                                "context": "{{`{{ $gateKey }}`}}",
+                                "target_url": "{{`{{ $workflowsUrl }}`}}"
+                              }'
+
+                    - name: health-check-source
+                      container:
+                        image: {{`{{ $curlImage }}`}}
+                        command: [sh, -c]
+                        args:
+                          - |
+                            echo "=== Health-checking source environment ==="
+                            echo "Target: http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                            ATTEMPTS=0
+                            MAX_ATTEMPTS=24
+                            while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+                              ATTEMPTS=$((ATTEMPTS + 1))
+                              HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+                                "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}" 2>/dev/null || echo "000")
+                              if [ "$HTTP_CODE" = "200" ]; then
+                                echo "Source environment is ready (attempt $ATTEMPTS)"
+                                exit 0
+                              fi
+                              echo "Attempt $ATTEMPTS/$MAX_ATTEMPTS — HTTP $HTTP_CODE, retrying in 5s..."
+                              sleep 5
+                            done
+                            echo "ERROR: Source environment not ready after 2 minutes"
+                            exit 1
+
+                    - name: driveby-validate
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                        command: ["/driveby"]
+                        args:
+                          - "validate-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--validation-mode"
+                          - "{{`{{ $validationMode }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+
+                    - name: driveby-functional
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                          - name: GITHUB_TOKEN
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubPatSecretName }}`}}
+                                key: {{`{{ $githubPatSecretKey }}`}}
+                        command: ["/driveby"]
+                        args:
+                          - "function-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--auth-api-key"
+                          - "$(API_KEY)"
+                          - "--auth-api-key-header"
+                          - "{{`{{ $apiKeyHeader }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+
+                    - name: github-pr-comment
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                          - name: GITHUB_TOKEN
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubPatSecretName }}`}}
+                                key: {{`{{ $githubPatSecretKey }}`}}
+                        command: ["/driveby"]
+                        args:
+                          - "validate-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--validation-mode"
+                          - "{{`{{ $validationMode }}`}}"
+                          - "--github-comment"
+                          - "--github-token"
+                          - "$(GITHUB_TOKEN)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--github-pr-number"
+                          - "{{`{{ "{{" }}workflow.parameters.pr-number{{ "}}" }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+
+                    - name: exit-handler
+                      container:
+                        image: {{`{{ $curlImage }}`}}
+                        env:
+                          - name: GITHUB_TOKEN
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubPatSecretName }}`}}
+                                key: {{`{{ $githubPatSecretKey }}`}}
+                        command: [sh, -c]
+                        args:
+                          - |
+                            if [ "{{`{{ "{{" }}workflow.status{{ "}}" }}`}}" != "Succeeded" ]; then
+                              echo "Workflow failed — reporting failure status"
+                              curl -s -X POST \
+                                -H "Authorization: token ${GITHUB_TOKEN}" \
+                                -H "Accept: application/vnd.github.v3+json" \
+                                "{{`{{ $githubApiUrl }}`}}/repos/{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}/{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}/statuses/{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}" \
+                                -d '{
+                                  "state": "failure",
+                                  "description": "Dev validation failed, promotion blocked",
+                                  "context": "{{`{{ $gateKey }}`}}",
+                                  "target_url": "{{`{{ $workflowsUrl }}`}}"
+                                }'
+                            else
+                              echo "Workflow succeeded — success status already reported."
+                            fi
+
+  # Step 3: Auto-ready
+  - step: detect-readiness
+    functionRef:
+      name: function-auto-ready
+{{- end }}

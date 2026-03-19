@@ -60,6 +60,22 @@ This axiom extends DDT beyond functional correctness into operational quality. S
 
 ## Axiom-to-Principle Mapping
 
+```
+  ┌───────────────────┐    ┌──────────────┐    ┌───────────────────┐
+  │   COMPLETENESS    │    │ DETERMINISM  │    │  OBSERVABILITY    │
+  │ "Spec describes   │    │ "Same input  │    │ "Results are      │
+  │  the full API"    │    │  = same out" │    │  measurable"      │
+  └─┬───┬───┬───┬────┘    └──────┬───────┘    └──┬───┬───┬───────┘
+    │   │   │   │                │                │   │   │
+    ▼   ▼   ▼   ▼                ▼                ▼   ▼   ▼
+  P001 P002 P003 P004          P006             P005 P007 P008
+  Comp Doc  Err  Schema        Func             Sec  Perf Vers
+  ━━━━ ──── ──── ────          ━━━━             ━━━━ ──── ────
+  CRIT WARN WARN WARN          CRIT             CRIT WARN WARN
+
+  ━━━━ = Critical severity     ──── = Warning severity
+```
+
 | Axiom | Principles | Coverage Domain |
 |-------|-----------|-----------------|
 | Completeness | P001, P002, P003, P004 | Specification content and structure |

@@ -1,0 +1,158 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xqualitygatetemplates.driveby.io
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  scope: Namespaced
+  group: driveby.io
+  names:
+    kind: XQualityGateTemplate
+    plural: xqualitygatetemplates
+  defaultCompositionRef:
+    name: xqualitygatetemplates.driveby.io
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            required:
+            - projectName
+            - gateName
+            - targetCluster
+            properties:
+              projectName:
+                type: string
+                description: "Project name (e.g., driveby)"
+              gateName:
+                type: string
+                description: "Gate name (e.g., staging-promotion)"
+              gateKey:
+                type: string
+                description: "Commit status context key (defaults to gateName)"
+              targetCluster:
+                type: object
+                description: "Target Kubernetes cluster for deploying workflow resources"
+                required:
+                - name
+                - providerConfigName
+                properties:
+                  name:
+                    type: string
+                    description: "Name of the target cluster"
+                  providerConfigName:
+                    type: string
+                    description: "Crossplane ProviderConfig ref"
+                  namespace:
+                    type: string
+                    description: "Target namespace for workflow resources"
+                    default: "driveby"
+              validationConfig:
+                type: object
+                description: "DriveBy validation configuration"
+                properties:
+                  drivebyImage:
+                    type: string
+                    description: "DriveBy CLI container image"
+                    default: "ghcr.io/meter-peter/driveby:latest"
+                  validationMode:
+                    type: string
+                    description: "Validation mode: minimal, strict, or test-only"
+                    default: "strict"
+                    enum:
+                    - minimal
+                    - strict
+                    - test-only
+                  serviceAccountName:
+                    type: string
+                    description: "ServiceAccount for workflow steps"
+                    default: "driveby"
+              secretsConfig:
+                type: object
+                description: "Override secret names for workflow steps"
+                properties:
+                  imagePullSecret:
+                    type: string
+                  githubPatSecretName:
+                    type: string
+                  githubPatSecretKey:
+                    type: string
+                  apiAuthSecretName:
+                    type: string
+                  apiKeyHeader:
+                    type: string
+              githubConfig:
+                type: object
+                description: "GitHub API configuration"
+                properties:
+                  apiUrl:
+                    type: string
+                    description: "GitHub API URL (default: https://api.github.com)"
+              workflowsUrl:
+                type: string
+                description: "Argo Workflows UI URL for commit status target_url"
+              images:
+                type: object
+                description: "Override utility container images"
+                properties:
+                  curl:
+                    type: string
+                  postgres:
+                    type: string
+          status:
+            type: object
+            properties:
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                    reason:
+                      type: string
+                    message:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+              resources:
+                type: object
+                description: "References to created resources"
+                properties:
+                  workflowTemplate:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+              ready:
+                type: boolean
+                description: "Overall readiness status"
+    additionalPrinterColumns:
+    - name: Project
+      type: string
+      jsonPath: .spec.projectName
+    - name: Gate
+      type: string
+      jsonPath: .spec.gateName
+    - name: Cluster
+      type: string
+      jsonPath: .spec.targetCluster.name
+    - name: Ready
+      type: string
+      jsonPath: .status.conditions[?(@.type=='Ready')].status
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+{{- end }}

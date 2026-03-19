@@ -1,0 +1,11 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: {{ .Values.crossplane.providerConfig.name }}
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  credentials:
+    source: {{ .Values.crossplane.providerConfig.credentials }}
+{{- end }}

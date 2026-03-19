@@ -4,39 +4,35 @@
 
 ```
 kubernetes/
-  manifests/            # Raw YAML for workflow infra (applied directly to cluster)
-    rbac.yaml           # ServiceAccount + Role + RoleBinding for driveby namespace
-    workflow-templates.yaml  # WorkflowTemplates: driveby-validate, driveby-full-pipeline
-    staging-promotion.yaml   # WorkflowTemplate: driveby-staging-promotion (DAG pipeline)
-    eventbus.yaml       # JetStream EventBus (3-replica NATS cluster)
-    eventsource.yaml    # GitHub webhook EventSource for perfect-api PRs
-    sensor.yaml         # Sensor: PR events → driveby-staging-promotion workflow
-    webhook-ingress.yaml # Service + Traefik Ingress for webhook endpoint
   helm/
-    driveby/            # Helm chart (reference templates, not actively deployed)
+    driveby/            # Helm chart — installs full quality gate system
       Chart.yaml
       values.yaml
+      .helmignore
       templates/
+        crossplane/     # Crossplane resources (providers, functions, XRDs, compositions)
+          provider-kubernetes.yaml     # Provider CR
+          functions.yaml               # 4 Function CRs
+          provider-config.yaml         # ProviderConfig (InjectedIdentity)
+          xrd-template.yaml            # XQualityGateTemplate XRD
+          xrd-instance.yaml            # XQualityGate XRD
+          composition-template.yaml    # Template composition (RBAC + WorkflowTemplate)
+          composition-instance.yaml    # Instance composition (EventBus + EventSource + Sensor + Ingress)
+        argo-events/    # Argo Events (non-Crossplane fallback, gated behind !crossplane.enabled)
+        argocd/         # ArgoCD AppProject
+        secrets/        # Secret templates (api-auth, github-pat)
   examples/
     argo-workflows/     # Argo Workflow templates for validation pipelines
     argo-events/        # Argo Events triggers (webhook, git sensor)
-    crossplane/         # Crossplane compositions for infrastructure provisioning
+    crossplane/         # Crossplane XQualityGate examples
+      template-example.yaml      # XQualityGateTemplate CR example
+      instance-example.yaml      # XQualityGate CR example
+      environment-configs.yaml   # Template + Instance EnvironmentConfigs
     gitops-promoter/    # GitOps promotion logic (environment promotion on validation pass)
   README.md
 ```
 
-## Raw Manifests (`manifests/`)
-Production-deployed workflow infrastructure in the `driveby` namespace:
-- **rbac.yaml** — ServiceAccount `driveby`, Role (workflows, secrets, pods access), RoleBinding
-- **workflow-templates.yaml** — Reusable `driveby-validate` and `driveby-full-pipeline` templates
-- **staging-promotion.yaml** — Full DAG pipeline: set-pending → db-sync → spec-check → validate → functional-test → report-success → comment-pr
-- **eventbus.yaml** — JetStream EventBus (`default`), 3-replica NATS cluster for event transport
-- **eventsource.yaml** — GitHub webhook EventSource (`driveby-github`), listens on port 12000 at `/github/driveby` for `pull_request` and `push` events on `meter-peter/perfect-api`
-- **sensor.yaml** — Sensor (`driveby-sensor`), filters PR `opened`/`reopened`/`synchronize` actions and submits `driveby-staging-promotion` workflow with PR number, head SHA, owner, repo as parameters
-- **webhook-ingress.yaml** — ClusterIP Service + Traefik Ingress exposing the EventSource at `https://driveby-webhook.private.novelcore.org`
-
-Apply with: `kubectl apply -f kubernetes/manifests/`
-Apply order: eventbus.yaml first (NATS cluster must be ready before EventSource/Sensor can connect).
+> **Note**: The `manifests/` directory (raw YAML duplicates) was removed in v0.3.0 — all resources are now managed by the Helm chart + Crossplane compositions.
 
 ## Cluster State
 
@@ -80,7 +76,16 @@ GitHub webhook (ID: 601488783) is configured on `meter-peter/perfect-api` to POS
 | `meter-peter/perfect-api-gitops` | Kustomize base + overlays (staging/prod), synced by ArgoCD |
 
 ## Helm Chart (`helm/driveby/`)
-Reference Helm chart with templated versions of the workflow infrastructure. Not actively deployed — the raw manifests in `manifests/` are the source of truth for the cluster.
+Production Helm chart that installs the full DriveBy quality gate system:
+- **Crossplane providers**: `provider-kubernetes` v0.14.1
+- **Crossplane functions**: `function-go-templating`, `function-auto-ready`, `function-sequencer`, `function-environment-configs`
+- **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io` (both namespace-scoped, v1alpha1)
+- **Compositions**: Template (generates RBAC + WorkflowTemplate), Instance (generates EventBus + EventSource + Sensor + Ingress)
+- **ProviderConfig**: `kubernetes-provider` with InjectedIdentity
+- Plus existing: Argo Workflows templates, Argo Events, ArgoCD resources, RBAC, secrets
+
+Install: `helm install driveby ./kubernetes/helm/driveby/ --set crossplane.enabled=true`
+See `docs/deployment-guide.md` for full installation guide.
 
 ## Example Resources (`examples/`)
 
@@ -88,8 +93,18 @@ Reference Helm chart with templated versions of the workflow infrastructure. Not
 |-----------|---------|---------------|
 | `argo-workflows/` | Validation pipeline as Argo Workflow (spec fetch -> validate -> report -> promote) | Ch.5 end-to-end workflow |
 | `argo-events/` | Event triggers: webhook on PR, git sensor on spec changes | Ch.5 event-driven architecture |
-| `crossplane/` | Infrastructure-as-code compositions for API environments | Ch.5 Crossplane integration |
+| `crossplane/` | XQualityGateTemplate + XQualityGate examples, EnvironmentConfigs | Ch.5 Crossplane XSDLC |
 | `gitops-promoter/` | Promotion logic: advance environment on validation pass | Ch.5 feedback loop |
+
+## Configurability Model
+Compositions use a three-tier variable resolution pattern:
+1. **values.yaml** (`defaults.*`) — chart-level defaults, baked at `helm template` time
+2. **EnvironmentConfig** — cluster-level overrides, resolved at Crossplane composition runtime via `.environment.*`
+3. **XRD spec fields** — per-CR overrides, resolved at composition runtime via `$xr.spec.*`
+
+Resolution order in go-templates: `$xr.spec.X | default ($env.Y | default "<helm-baked-default>")`
+
+All previously hardcoded values (ingress class, cert-manager issuer, secret names, container images, webhook ports, GitHub API URL, EventBus config) are now configurable through this model. See `docs/deployment-guide.md` for the full table of configurable knobs.
 
 ## Target Cluster
 - **Cluster**: `private.novelcore.org` (via `access.kubecore.eu`)

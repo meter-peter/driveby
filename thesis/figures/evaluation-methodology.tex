@@ -1,0 +1,74 @@
+% Evaluation Framework — Chapter 6
+% Shows: Three evaluation dimensions converging into Analysis & Results
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=0.9cm,
+    track step/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=3.2cm,
+        minimum height=0.7cm,
+        font=\small,
+        align=center
+    },
+    track title/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!70!black,
+        fill=#1!20,
+        minimum width=3.2cm,
+        minimum height=0.8cm,
+        font=\small\bfseries,
+        align=center
+    },
+    result/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=black!70,
+        fill=black!8,
+        minimum width=10cm,
+        minimum height=0.9cm,
+        font=\small\bfseries,
+        align=center
+    }
+]
+
+% Track 1: Controlled (blue) — left
+\node[track title=blue]  (t1title) at (0,0)      {Controlled\\(perfect-api)};
+\node[track step=blue]   (t1s1)    at (0,-1.2)   {Baseline validation};
+\node[track step=blue]   (t1s2)    at (0,-2.2)   {Defect injection};
+\node[track step=blue]   (t1s3)    at (0,-3.2)   {Detection verification};
+
+\draw[->,thick,blue!50!black] (t1title) -- (t1s1);
+\draw[->,thick,blue!50!black] (t1s1)    -- (t1s2);
+\draw[->,thick,blue!50!black] (t1s2)    -- (t1s3);
+
+% Track 2: Wild (teal) — center
+\node[track title=teal]  (t2title) at (4.5,0)    {Wild\\(APIs.guru)};
+\node[track step=teal]   (t2s1)    at (4.5,-1.2) {Harvest specs};
+\node[track step=teal]   (t2s2)    at (4.5,-2.2) {Batch validate};
+\node[track step=teal]   (t2s3)    at (4.5,-3.2) {Statistical analysis};
+
+\draw[->,thick,teal!50!black] (t2title) -- (t2s1);
+\draw[->,thick,teal!50!black] (t2s1)    -- (t2s2);
+\draw[->,thick,teal!50!black] (t2s2)    -- (t2s3);
+
+% Track 3: Effort (orange) — right
+\node[track title=orange] (t3title) at (9,0)      {Effort Comparison\\(DDT vs Manual)};
+\node[track step=orange]  (t3s1)    at (9,-1.2)   {Estimate traditional effort};
+\node[track step=orange]  (t3s2)    at (9,-2.7)   {Measure DDT effort};
+
+\draw[->,thick,orange!50!black] (t3title) -- (t3s1);
+\draw[->,thick,orange!50!black] (t3s1)    -- (t3s2);
+
+% Convergence node
+\node[result] (analysis) at (4.5,-4.8) {Analysis \& Results};
+
+% Convergence arrows
+\draw[->,thick] (t1s3.south) -- ++(0,-0.5) -| ($(analysis.north)+(-3,0)$);
+\draw[->,thick] (t2s3.south) -- (analysis.north);
+\draw[->,thick] (t3s2.south) -- ++(0,-1.1) -| ($(analysis.north)+(3,0)$);
+
+\end{tikzpicture}

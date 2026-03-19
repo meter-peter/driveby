@@ -13,6 +13,8 @@ Central documentation for the DriveBy project. Agents should consult this direct
 | `MINIMAL_MODE_GUIDE.md` | Guide to minimal validation mode — when and why to use it |
 | `WORKFLOW.md` | End-to-end workflow documentation — local, remote URL, batch, and K8s deployment |
 | `gitops-pipeline.md` | GitOps pipeline — PR webhook → Argo Events → Workflow → validation → PR feedback |
+| `deployment-guide.md` | Full deployment guide — Helm install, secrets, XRDs, verification checklist |
+| `quality-gate-sdlc.md` | Quality gate SDLC architecture — Crossplane XQualityGate, flow diagrams, DDT mapping |
 | `prd-01/` | Initial PRD iteration (historical) |
 
 ## Existing Documentation
@@ -23,6 +25,8 @@ The following files are complete and available:
 - `architecture.md` — System design and dependency flow
 - `gitops-pipeline.md` — Complete GitOps pipeline documentation (webhook → Argo Events → Workflow → PR feedback)
 - `evaluation-methodology.md` — Chapter 6 evaluation protocol and metrics
+- `deployment-guide.md` — Complete Helm chart installation and Crossplane quality gate setup
+- `quality-gate-sdlc.md` — Quality gate SDLC architecture with Crossplane XRDs
 
 ## Thesis Feed Map
 When writing thesis chapters, consult these docs:
@@ -33,9 +37,23 @@ When writing thesis chapters, consult these docs:
 | Ch.2 Related Work | `prd-vision-thesis.md` (positioning) |
 | Ch.3 Methodology | `principles/P001-P008.md`, `ddt-axioms.md` |
 | Ch.4 Architecture | `architecture.md`, `CLI_USAGE.md` |
-| Ch.5 Workflow | `WORKFLOW.md`, `gitops-pipeline.md`, `MINIMAL_MODE_GUIDE.md` |
+| Ch.5 Workflow | `WORKFLOW.md`, `gitops-pipeline.md`, `MINIMAL_MODE_GUIDE.md`, `deployment-guide.md`, `quality-gate-sdlc.md` |
 | Ch.6 Evaluation | `evaluation-methodology.md` |
 | Ch.7 Conclusion | `Thesis.md` |
+
+## Diagram Coverage
+
+| Doc File | Has Diagrams | Type |
+|----------|-------------|------|
+| `architecture.md` | Yes | 3 ASCII diagrams (component, data flow, K8s deployment) |
+| `WORKFLOW.md` | Yes | 2 ASCII diagrams (simple flow + GitOps pipeline) |
+| `gitops-pipeline.md` | Yes | 2 ASCII diagrams (pipeline + DAG) |
+| `quality-gate-sdlc.md` | Yes | 1 ASCII diagram (gate flow) |
+| `deployment-guide.md` | Yes | 3 ASCII diagrams (prerequisites, namespace layout, install order) |
+| `ddt-axioms.md` | Yes | 1 ASCII diagram (axiom-to-principle mapping) |
+| `evaluation-methodology.md` | Yes | 1 ASCII diagram (evaluation framework) |
+| `CLI_USAGE.md` | No | Text-only reference (appropriate) |
+| `MINIMAL_MODE_GUIDE.md` | No | Text-only guide (appropriate) |
 
 ## Rules
 1. **Consult docs/ first** before writing thesis content -- ensure alignment with documented decisions

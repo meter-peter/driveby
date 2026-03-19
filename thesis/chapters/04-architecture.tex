@@ -44,7 +44,14 @@ DriveBy is implemented as a single Go module (\texttt{github.com/meter-peter/dri
 types <- spec <- loader <- principles <- testing <- engine <- cli
 \end{verbatim}
 
-No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles.
+No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualizes this dependency chain.
+
+\begin{figure}[htbp]
+\centering
+\input{figures/dependency-flow.tex}
+\caption{DriveBy package dependency graph. Arrows indicate import direction; color denotes architectural layer.}
+\label{fig:dependency-flow}
+\end{figure}
 
 Table~\ref{tab:package-map} summarizes each package's responsibility and size.
 

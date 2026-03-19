@@ -1,0 +1,30 @@
+apiVersion: driveby.io/v1alpha1
+kind: XQualityGateTemplate
+metadata:
+  name: driveby-staging-promotion
+  namespace: driveby
+spec:
+  projectName: driveby
+  gateName: staging-promotion
+  gateKey: driveby/staging-promotion
+  targetCluster:
+    name: private-novelcore
+    providerConfigName: kubernetes-provider
+    namespace: driveby
+  validationConfig:
+    drivebyImage: ghcr.io/meter-peter/driveby:latest
+    validationMode: strict
+    serviceAccountName: driveby
+  # Optional: override cluster defaults
+  # secretsConfig:
+  #   imagePullSecret: my-registry-creds
+  #   githubPatSecretName: my-github-token
+  #   githubPatSecretKey: token
+  #   apiAuthSecretName: my-api-auth
+  #   apiKeyHeader: X-API-Key
+  # githubConfig:
+  #   apiUrl: https://github.mycompany.com/api/v3
+  # workflowsUrl: https://argo.example.com/workflows
+  # images:
+  #   curl: curlimages/curl:8.7.1
+  #   postgres: postgres:16-alpine

@@ -1,6 +1,16 @@
 apiVersion: v2
 name: driveby
-description: DriveBy — Documentation-Driven Testing platform for Kubernetes
+description: >-
+  DriveBy — Documentation-Driven Testing (DDT) quality gate system for Kubernetes.
+  Installs Crossplane providers, functions, XRDs, and compositions for declarative
+  API quality gates in GitOps pipelines.
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
+keywords:
+  - api-testing
+  - quality-gate
+  - crossplane
+  - gitops
+  - argo-workflows
+  - argo-events
