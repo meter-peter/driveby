@@ -59,11 +59,19 @@ spec:
           {{`{{- $providerConfigName := $targetCluster.providerConfigName -}}`}}
           {{`{{- $namespace := $targetCluster.namespace | default "driveby" -}}`}}
 
-          {{`{{/* Validation config with defaults */}}`}}
+          {{`{{/* Pipeline type and validation config with defaults */}}`}}
+          {{`{{- $pipelineType := $spec.pipelineType | default "validation" -}}`}}
           {{`{{- $valConfig := $spec.validationConfig | default dict -}}`}}
           {{`{{- $drivebyImage := $valConfig.drivebyImage | default "ghcr.io/meter-peter/driveby:latest" -}}`}}
           {{`{{- $validationMode := $valConfig.validationMode | default "strict" -}}`}}
           {{`{{- $serviceAccountName := $valConfig.serviceAccountName | default "driveby" -}}`}}
+
+          {{`{{/* Load test config (used when pipelineType: loadtest) */}}`}}
+          {{`{{- $loadTestConfig := $spec.loadTestConfig | default dict -}}`}}
+          {{`{{- $concurrentUsers := $loadTestConfig.concurrentUsers | default 10 -}}`}}
+          {{`{{- $testDuration := $loadTestConfig.testDuration | default "5m" -}}`}}
+          {{`{{- $maxLatencyP95 := $loadTestConfig.maxLatencyP95 | default "500ms" -}}`}}
+          {{`{{- $minSuccessRate := $loadTestConfig.minSuccessRate | default 0.99 -}}`}}
 
           {{`{{/* Three-tier configurable values: XR spec → EnvironmentConfig → Helm-baked default */}}`}}
           {{`{{- $secretsConfig := $spec.secretsConfig | default dict -}}`}}
@@ -95,6 +103,7 @@ spec:
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: serviceaccount
           spec:
+            deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $providerConfigName }}`}}
             forProvider:
@@ -119,6 +128,7 @@ spec:
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: role
           spec:
+            deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $providerConfigName }}`}}
             forProvider:
@@ -157,6 +167,7 @@ spec:
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: rolebinding
           spec:
+            deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $providerConfigName }}`}}
             forProvider:
@@ -179,7 +190,7 @@ spec:
                     namespace: {{`{{ $namespace }}`}}
 
           ---
-          # WorkflowTemplate — inline 7-step staging-promotion DAG
+          # WorkflowTemplate — inline promotion DAG
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
@@ -187,6 +198,7 @@ spec:
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: workflow-template
           spec:
+            deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $providerConfigName }}`}}
             forProvider:

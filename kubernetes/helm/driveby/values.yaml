@@ -2,9 +2,6 @@
 
 namespace: driveby
 
-# Domain for ingress
-domain: private.novelcore.org
-
 # Container image
 image:
   repository: ghcr.io/meter-peter/driveby
@@ -51,9 +48,6 @@ crossplane:
     autoReady:
       package: xpkg.upbound.io/crossplane-contrib/function-auto-ready
       version: "v0.4.0"
-    sequencer:
-      package: xpkg.upbound.io/crossplane-contrib/function-sequencer
-      version: "v0.2.0"
     environmentConfigs:
       package: xpkg.upbound.io/crossplane-contrib/function-environment-configs
       version: "v0.3.0"
@@ -110,11 +104,6 @@ gitopsPromoter:
     installationID: 0
     privateKey: ""  # Set at install: --set-file gitopsPromoter.githubApp.privateKey=/path/to/key.pem
   branchPattern: "environment"
-
-# GitHub integration
-github:
-  owner: "meter-peter"
-  repo: "driveby"
 
 # RBAC
 rbac:
