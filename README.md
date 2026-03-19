@@ -1,413 +1,292 @@
-# DriveBy - Documentation-Driven Testing (DDT)
+# DriveBy — Documentation-Driven Testing for GitOps
 
-DriveBy is a thesis-ready API validation framework implementing **Documentation-Driven Testing (DDT)** — a methodology for automated API quality assurance in the GitOps era. It validates OpenAPI 3.x/Swagger 2.0 specifications and tests live API endpoints.
-
-## Monorepo Structure
+**Automated API quality gates powered by your OpenAPI spec.** DriveBy validates APIs against 8 documentation-driven principles and blocks promotions when they fail — no manual QA, no broken deployments.
 
 ```
-driveby-cli/     Go CLI tool — the core validation engine
-apis/            Sample APIs for testing (perfect-api)
-kubernetes/      Helm chart + raw YAML K8s deployment examples
-samples/         Example configs, reports, demo workflows
-thesis/          LaTeX thesis document
-tools/           Python/bash utilities for batch testing
-docs/            CLI usage guides and documentation
+Developer opens PR → Webhook → Argo Events → DriveBy validation → Commit status → Merge or block
 ```
 
-## Quick Start
+## Why DriveBy?
 
-```bash
-make build                # Build the CLI
-make up                   # Start docker-compose (perfect-api)
-make validate             # Run validation against perfect-api
-make test                 # Run unit tests
-make integration-test     # Run integration tests (docker-compose)
+Your OpenAPI spec already describes your API contract. DriveBy treats it as the single source of truth and validates your live API against it — automatically, on every PR.
+
+- **Spec-first quality gates** — validates compliance, documentation, schemas, security, error handling, versioning
+- **GitOps-native** — deploys as Crossplane custom resources, triggers via Argo Events webhooks
+- **Declarative** — one YAML per API, one template per project. No scripts, no manual wiring
+- **PR feedback** — commit status + PR comment with full validation report
+
+## How It Works
+
+### The Quality Gate Pipeline
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        GitOps Repository                         │
+│                                                                  │
+│  Developer opens promotion PR (dev → staging)                    │
+│       │                                                          │
+│       ▼                                                          │
+│  GitHub Webhook ──► Argo EventSource ──► Sensor                  │
+│                                            │                     │
+│                                            ▼                     │
+│                                    Argo Workflow DAG              │
+│                              ┌─────────────────────┐             │
+│                              │  set-pending-status  │             │
+│                              │         │            │             │
+│                              │  wait-for-source     │             │
+│                              │         │            │             │
+│                              │  driveby validate    │ ◄── P001-P008
+│                              │         │            │             │
+│                              │  functional-test     │             │
+│                              │        ╱ ╲           │             │
+│                              │  report   comment-pr │             │
+│                              └─────────────────────┘             │
+│                                            │                     │
+│       ┌────────────────────────────────────┘                     │
+│       ▼                                                          │
+│  Commit Status: success/failure                                  │
+│       │                                                          │
+│       ▼                                                          │
+│  ✅ Merge allowed  ──► ArgoCD syncs staging                      │
+│  ❌ PR blocked     ──► Fix and re-push                           │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-## Features
+### Crossplane Quality Gates
 
-- **OpenAPI Validation**: Validates API specifications against OpenAPI 3.0/3.1 and Swagger 2.0 standards
-- **Remote Spec Support**: Validate any public or private API by URL -- no local files required
-- **Functional Testing**: Tests API endpoints for functionality and correctness
-- **Performance Testing**: Load tests APIs with configurable targets
-- **Documentation Validation**: Ensures API documentation is complete and accurate
-- **Comprehensive Reporting**: Generates detailed reports in JSON and Markdown formats
-- **Authentication Support**: Supports various authentication methods (Bearer tokens, API keys, Basic auth)
-- **GitHub Integration**: Automatically comments on pull requests with validation results
-- **Batch Validation**: Validate up to 20 public API specs in a single batch run
-- **Validation Modes**: Supports different validation levels (minimal/strict/test-only) for different use cases
+DriveBy uses **two Crossplane custom resources** to manage the entire pipeline declaratively:
 
-## Authentication Support
-
-DriveBy supports multiple authentication methods for testing protected APIs:
-
-### Bearer Token Authentication
-```bash
-driveby validate-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --auth-token "your-bearer-token" \
-  --auth-token-type "Bearer" \
-  --auth-token-header "Authorization"
+**XQualityGateTemplate** — defines validation workflow for a project (shared):
+```yaml
+apiVersion: driveby.io/v1alpha1
+kind: XQualityGateTemplate
+metadata:
+  name: driveby-staging-promotion
+  namespace: driveby
+spec:
+  projectName: driveby
+  gateName: staging-promotion
+  validationConfig:
+    validationMode: strict
+    openApiEndpoint: /openapi.json
 ```
 
-### API Key Authentication
-```bash
-driveby function-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --auth-api-key "your-api-key" \
-  --auth-api-key-header "X-API-Key"
+Creates: ServiceAccount + RBAC + WorkflowTemplate (7-step DAG)
+
+**XQualityGate** — wires up a specific API to the template (per-API):
+```yaml
+apiVersion: driveby.io/v1alpha1
+kind: XQualityGate
+metadata:
+  name: perfect-api-staging-gate
+  namespace: driveby
+spec:
+  appName: perfect-api
+  gateName: staging-promotion
+  templateRef:
+    name: driveby-staging-promotion
+  repositoryConfig:
+    owner: meter-peter
+    name: perfect-api-gitops
+  apiConfig:
+    serviceName: perfect-api
+    sourceEnvironment:
+      namespace: perfect-api-dev
+    targetEnvironment:
+      namespace: perfect-api-staging
 ```
 
-### Basic Authentication
-```bash
-driveby load-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --auth-username "username" \
-  --auth-password "password"
-```
+Creates: EventBus + EventSource + Sensor + Ingress (TLS webhook endpoint)
 
-**Note**: Only one authentication method can be used at a time. The tool will validate this and provide clear error messages if multiple methods are specified.
+**Add a new API?** Apply one more `XQualityGate` — that's it.
 
-## GitHub Integration
+## DDT Methodology
 
-DriveBy can automatically comment on GitHub pull requests with validation results. It supports both GitHub App authentication (recommended) and personal access tokens.
+DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, eight validation principles:
 
-### GitHub App Authentication (Recommended)
+| Axiom | Principle | What It Checks |
+|-------|-----------|---------------|
+| **Completeness** | P001: OpenAPI Compliance | Spec parses, valid structure |
+| | P002: Documentation Quality | Descriptions, examples, completeness |
+| | P003: Error Handling | Error responses documented (4xx/5xx) |
+| | P004: Schema Definitions | Types, constraints, required fields |
+| **Determinism** | P005: Security Standards | Auth schemes defined and applied |
+| | P006: Functional Testing | Live endpoint responses match spec |
+| **Observability** | P007: Performance Testing | P95 latency, success rate under load |
+| | P008: Versioning Strategy | Version info present and consistent |
 
-For better security and granular permissions, use GitHub App authentication:
+### Validation Modes
 
-```bash
-driveby validate-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --github-comment \
-  --github-app-id 123456 \
-  --github-installation-id 789012 \
-  --github-private-key "-----BEGIN RSA PRIVATE KEY-----\n..." \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
-  --github-pr-number 123
-```
-
-You can also provide the private key from a file:
-
-```bash
-driveby validate-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --github-comment \
-  --github-app-id 123456 \
-  --github-installation-id 789012 \
-  --github-private-key "$(cat /path/to/private-key.pem)" \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
-  --github-pr-number 123
-```
-
-### Personal Access Token Authentication (Legacy)
-
-For backward compatibility, personal access tokens are still supported:
-
-```bash
-driveby validate-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --github-comment \
-  --github-token "your-github-token" \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
-  --github-pr-number 123
-```
-
-The GitHub token can also be provided via the `GITHUB_TOKEN` environment variable:
-
-```bash
-export GITHUB_TOKEN="your-github-token"
-driveby validate-only \
-  --openapi openapi.json \
-  --host api.example.com \
-  --github-comment \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
-  --github-pr-number 123
-```
-
-## Validation Modes
-
-DriveBy supports multiple validation modes to accommodate different use cases:
-
-1. **Test-Only Mode** (new)
-   - Skips all validation completely
-   - Runs only functional and performance tests
-   - Ideal for testing APIs without validation overhead
-   - Fastest execution for pure testing scenarios
-   - Suitable for CI/CD pipelines focused on testing
-   - Command: `driveby test-only`
-
-2. **Minimal Mode** (default)
-   - Focuses on essential validation only
-   - Validates basic OpenAPI structure and compliance
-   - Skips functional testing and performance testing
-   - Faster execution with minimal checks
-   - Suitable for development and basic validation
-   - Validates:
-     - OpenAPI Specification Compliance (P001) - basic structure only
-
-3. **Strict Mode**
-   - Comprehensive validation of all aspects
-   - Validates schema constraints, types, and formats
-   - Requires complete documentation including all standard error codes
-   - Enforces all validation principles
-   - Generates full reports including load testing and functional testing
-   - Suitable for production readiness checks
-   - Validates all principles (P001-P008):
-     - OpenAPI Specification Compliance
-     - API Documentation Completeness
-     - Error Response Documentation
-     - Request Validation
-     - Authentication Requirements
-     - Endpoint Functional Testing
-     - API Performance Compliance
-     - API Versioning
-
-You can set the validation mode through:
-- Command line: `--validation-mode=strict|minimal`
-
-Example usage:
-```bash
-driveby validate-only --validation-mode strict --openapi openapi.json --host localhost
-```
-
-Note: In minimal mode, the focus is on ensuring that any documented endpoints and responses are properly documented, rather than enforcing a complete set of documentation. This makes it ideal for development and test generation scenarios where you want to validate what's present without requiring comprehensive documentation.
+| Mode | Principles | Use Case |
+|------|-----------|----------|
+| `minimal` | P001 | Fast CI gate — basic spec compliance |
+| `strict` | P001-P005, P008 | Production readiness — full static analysis |
+| `test-only` | P006, P007 | Runtime testing only — functional + load |
 
 ## Installation
 
-### From GitHub Releases (recommended)
-
-Download a pre-built binary from [GitHub Releases](https://github.com/meter-peter/driveby/releases):
+### Kubernetes (recommended)
 
 ```bash
-# Linux (amd64)
-curl -sL https://github.com/meter-peter/driveby/releases/latest/download/driveby_$(curl -s https://api.github.com/repos/meter-peter/driveby/releases/latest | grep tag_name | cut -d '"' -f4 | sed 's/v//')_linux_amd64.tar.gz | tar xz
+# 1. Install the Helm chart
+helm install driveby oci://ghcr.io/meter-peter/charts/driveby \
+  --version 0.3.0 \
+  --set crossplane.enabled=true \
+  --set github.pat=ghp_YOUR_TOKEN
+
+# 2. Apply environment configs
+kubectl apply -f kubernetes/examples/crossplane/environment-configs.yaml
+
+# 3. Create quality gate template
+kubectl apply -f kubernetes/examples/crossplane/template-example.yaml
+
+# 4. Create per-API quality gate
+kubectl apply -f kubernetes/examples/crossplane/instance-example.yaml
+
+# 5. Configure GitHub webhook on your gitops repo
+#    URL: https://<app>-<gate>-webhook.<domain>/<app>-<gate>-<trigger>
+```
+
+See [docs/deployment-guide.md](docs/deployment-guide.md) for the full guide with prerequisites, secrets, and verification checklist.
+
+### CLI Binary
+
+```bash
+# From GitHub Releases
+curl -sL https://github.com/meter-peter/driveby/releases/latest/download/driveby_0.3.0_linux_amd64.tar.gz | tar xz
 sudo mv driveby /usr/local/bin/
-```
 
-### From Source
-
-```bash
+# From source
 git clone https://github.com/meter-peter/driveby.git
-cd driveby/driveby-cli
-go build -o driveby ./cmd/driveby
+cd driveby/driveby-cli && go build -o driveby ./cmd/driveby
 ```
 
-### Helm Chart (Kubernetes)
+### Docker
 
 ```bash
-helm install driveby oci://ghcr.io/meter-peter/charts/driveby --version 0.3.0
-```
-
-## Quick Start
-
-Run validation using command-line flags:
-
-```bash
-# Run only documentation validation
-driveby validate-only --openapi openapi.json --host localhost --port 8080
-
-# Run only functional tests
-driveby function-only --openapi openapi.json --host localhost --port 8080
-
-# Run only performance tests
-driveby load-only --openapi openapi.json --host localhost --port 8080
-
-# Run functional and performance tests without validation (fastest)
-driveby test-only --openapi openapi.json --host localhost --port 8080
-
-# Validate a public API by URL (no local files needed)
-driveby validate-only \
+docker run --rm ghcr.io/meter-peter/driveby:0.3.0 validate-only \
   --openapi https://petstore3.swagger.io/api/v3/openapi.json \
-  --host petstore3.swagger.io \
-  --protocol https --port 443 \
+  --host petstore3.swagger.io --protocol https --port 443 \
   --validation-mode strict
 ```
 
-## Configuration
-
-DriveBy is configured entirely through command-line flags. No environment variables or configuration files are required.
-
-### Required Flags
-- **--openapi**: Path or URL to OpenAPI specification (required)
-- **--host**: Host of the API to test (required)
-
-### Optional Flags
-- **--api-url**: Base URL of the API to test (if not provided, will be constructed from protocol, host, and port)
-- **--protocol**: Protocol to use (http or https, default: http)
-- **--port**: Port to use (defaults to 8080 for http, 443 for https)
-- **--environment**: Environment name (default: production)
-- **--version**: API version being tested (default: 1.0.0)
-- **--timeout**: Request timeout in seconds (default: 30)
-- **--validation-mode**: Validation mode (strict, minimal, default: minimal)
-- **--report-dir**: Report output directory (default: /tmp/driveby-reports)
-- **--log-level**: Log level (debug, info, warn, error, fatal, default: info)
-
-### Authentication Flags
-- **--auth-token**: Authentication token (Bearer token)
-- **--auth-token-type**: Token type (default: Bearer)
-- **--auth-token-header**: Header name for token (default: Authorization)
-- **--auth-username**: Username for basic authentication
-- **--auth-password**: Password for basic authentication
-- **--auth-api-key**: API key for authentication
-- **--auth-api-key-header**: Header name for API key (default: X-API-Key)
-
-### GitHub Integration Flags
-- **--github-token**: GitHub token for PR commenting (GITHUB_TOKEN env var) - Legacy
-- **--github-owner**: GitHub repository owner
-- **--github-repo**: GitHub repository name
-- **--github-pr-number**: GitHub PR number for commenting
-- **--github-comment**: Enable GitHub PR commenting
-
-### GitHub App Authentication Flags (Recommended)
-- **--github-app-id**: GitHub App ID
-- **--github-installation-id**: GitHub App Installation ID
-- **--github-private-key**: GitHub App private key (file path or PEM content)
-- **--github-app-slug**: GitHub App slug
-
-### Load Test Specific Flags
-- **--max-latency-p95**: Maximum allowed P95 latency in milliseconds (default: 500)
-- **--min-success-rate**: Minimum required success rate 0-1 (default: 0.99)
-- **--concurrent-users**: Number of concurrent users for load testing (default: 10)
-- **--test-duration**: Duration of load test in seconds (default: 300)
-
----
-
-## Workflow
-
-### Sample Workflow Using Command-Line Flags
-
-1. **Run DriveBy with required flags** (for example, to run only OpenAPI validation):
-
-   ```bash
-   ./driveby validate-only \
-     --openapi https://docs.example.com/openapi.json \
-     --host api.example.com \
-     --protocol https \
-     --port 443 \
-     --environment production \
-     --version 1.0.0 \
-     --timeout 30 \
-     --validation-mode minimal \
-     --auth-token "your-bearer-token"
-   ```
-
-   (You can also run "function-only" or "load-only" commands as needed.)
-
-2. **Review the validation report** (saved in the report directory) to see if your API spec meets the validation criteria.
-
-### Example Scripts
-
-For repeated use, you can create shell scripts:
+## CLI Usage
 
 ```bash
-#!/bin/bash
-# validate-api.sh
+# Validate API documentation (static analysis)
+driveby validate-only --openapi openapi.json --host api.example.com --validation-mode strict
+
+# Functional testing (live endpoint verification)
+driveby function-only --openapi openapi.json --host api.example.com
+
+# Load testing
+driveby load-only --openapi openapi.json --host api.example.com \
+  --concurrent-users 50 --test-duration 300
+
+# Validate a public API by URL
 driveby validate-only \
-  --openapi ./api-spec.yaml \
-  --host localhost \
-  --port 8080 \
-  --environment development \
+  --openapi https://petstore3.swagger.io/api/v3/openapi.json \
+  --host petstore3.swagger.io --protocol https --port 443
+```
+
+### Authentication
+
+```bash
+# Bearer token
+driveby validate-only --openapi spec.json --host api.example.com \
   --auth-token "your-token"
+
+# API key
+driveby validate-only --openapi spec.json --host api.example.com \
+  --auth-api-key "your-key" --auth-api-key-header "X-API-Key"
+
+# Basic auth
+driveby validate-only --openapi spec.json --host api.example.com \
+  --auth-username "user" --auth-password "pass"
 ```
 
-```bash
-#!/bin/bash
-# load-test.sh
-driveby load-only \
-  --openapi ./api-spec.yaml \
-  --host api.example.com \
-  --protocol https \
-  --concurrent-users 50 \
-  --test-duration 600 \
-  --max-latency-p95 1000 \
-  --auth-api-key "your-api-key"
-```
+### GitHub PR Integration
 
 ```bash
-#!/bin/bash
-# test-only.sh
-driveby test-only \
-  --openapi ./api-spec.yaml \
-  --host api.example.com \
-  --protocol https \
-  --concurrent-users 10 \
-  --test-duration 60 \
-  --max-latency-p95 500 \
-  --auth-api-key "your-api-key"
-```
-
-### GitHub Integration Example
-
-```bash
-#!/bin/bash
-# validate-and-comment.sh (with GitHub App)
-driveby validate-only \
-  --openapi ./api-spec.yaml \
-  --host api.example.com \
+driveby validate-only --openapi spec.json --host api.example.com \
   --github-comment \
-  --github-app-id "$GITHUB_APP_ID" \
-  --github-installation-id "$GITHUB_INSTALLATION_ID" \
-  --github-private-key "$GITHUB_PRIVATE_KEY" \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
+  --github-app-id "$APP_ID" \
+  --github-installation-id "$INSTALL_ID" \
+  --github-private-key "$PRIVATE_KEY" \
+  --github-owner "your-org" --github-repo "your-repo" \
   --github-pr-number "$PR_NUMBER"
 ```
 
-```bash
-#!/bin/bash
-# validate-and-comment.sh (with legacy token)
-driveby validate-only \
-  --openapi ./api-spec.yaml \
-  --host api.example.com \
-  --github-comment \
-  --github-token "$GITHUB_TOKEN" \
-  --github-owner "your-org" \
-  --github-repo "your-repo" \
-  --github-pr-number "$PR_NUMBER"
+Full CLI reference: [docs/CLI_USAGE.md](docs/CLI_USAGE.md)
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster                         │
+│                                                              │
+│  ┌──────────────────────────────────────────────────┐       │
+│  │              driveby namespace                    │       │
+│  │                                                   │       │
+│  │  Crossplane XRDs ──► Compositions                 │       │
+│  │       │                    │                       │       │
+│  │       ▼                    ▼                       │       │
+│  │  XQualityGateTemplate  XQualityGate               │       │
+│  │  (RBAC + Workflow)     (Events + Ingress)         │       │
+│  │                             │                      │       │
+│  │  Argo Events: EventBus ◄───┘                      │       │
+│  │       │                                           │       │
+│  │  Webhook ──► Sensor ──► Argo Workflow             │       │
+│  │                              │                     │       │
+│  │                         DriveBy CLI               │       │
+│  │                         (container)               │       │
+│  └──────────────────────────────────────────────────┘       │
+│                                                              │
+│  ┌────────────────┐  ┌────────────────┐  ┌───────────────┐  │
+│  │ app-dev/       │  │ app-staging/   │  │ app-prod/     │  │
+│  │ (autoSync)     │──│ (gate-blocked) │──│ (manual sync) │  │
+│  └────────────────┘  └────────────────┘  └───────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
----
+### Monorepo Structure
 
-## Validation Principles
+```
+driveby-cli/     Go CLI — core validation engine (8 principles, spec abstraction)
+kubernetes/      Helm chart (Crossplane XRDs + compositions, Argo Events/Workflows)
+docs/            Deployment guide, quality gate SDLC, CLI reference
+thesis/          LaTeX diploma thesis
+tools/           Batch validation utilities
+samples/         Example configs and reports
+```
 
-DriveBy implements several validation principles (P001-P008):
+## Configuration Model
 
-1. **P001**: OpenAPI Specification Compliance
-2. **P002**: API Documentation Quality
-3. **P003**: Error Response Documentation
-4. **P004**: Schema Definitions
-5. **P005**: Security Standards
-6. **P006**: Endpoint Functional Testing
-7. **P007**: API Performance Compliance
-8. **P008**: API Versioning
+DriveBy uses a **three-tier configuration** so every value can be overridden without editing chart source:
 
-## Reports
+| Tier | Scope | How to Set |
+|------|-------|-----------|
+| `values.yaml` | Chart-wide defaults | `--set defaults.X=Y` |
+| EnvironmentConfig | Per-cluster overrides | `kubectl apply` Crossplane EnvironmentConfig |
+| XRD spec fields | Per-API overrides | Set directly in XQualityGateTemplate/XQualityGate |
 
-DriveBy generates detailed reports in both JSON and Markdown formats, including:
+Resolution order (highest priority wins): **XRD spec > EnvironmentConfig > values.yaml**
 
-- Validation results for each principle
-- Performance metrics
-- Documentation quality scores
-- Auto-fix attempts and results
-- Summary statistics
+## Documentation
 
-Reports are saved in the configured output directory (default: `/tmp/driveby-reports`).
+| Document | Content |
+|----------|---------|
+| [Deployment Guide](docs/deployment-guide.md) | Full Kubernetes installation, secrets, verification |
+| [Quality Gate SDLC](docs/quality-gate-sdlc.md) | Architecture, Crossplane XRDs, DDT mapping |
+| [GitOps Pipeline](docs/gitops-pipeline.md) | Webhook → Events → Workflow → PR feedback |
+| [CLI Usage](docs/CLI_USAGE.md) | All commands, flags, examples |
+| [DDT Axioms](docs/ddt-axioms.md) | Methodology: Completeness, Determinism, Observability |
+| [Principles P001-P008](docs/principles/) | Per-principle documentation |
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code standards, and how to add a new validation principle.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+MIT — see [LICENSE](LICENSE) for details.
