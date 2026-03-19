@@ -38,66 +38,86 @@ Kubernetes Cluster
 │   ├── Argo Events (EventBus, EventSource, Sensor)
 │   ├── Argo Workflows (WorkflowTemplates, RBAC)
 │   └── Secrets (github-pat, driveby-api-auth)
-├── perfect-api-staging/         ← Staging environment (per-API)
+├── perfect-api-dev/             ← Dev environment (autoSync)
 │   └── API deployment + service
-└── perfect-api-prod/            ← Production environment (per-API)
+├── perfect-api-staging/         ← Staging environment (autoSync)
+│   └── API deployment + service
+└── perfect-api-prod/            ← Production environment (manual sync)
     └── API deployment + service
+```
+
+## Promotion Flow
+
+Quality gates trigger on **promotion PRs in the gitops repo**, validate against the **source environment** (dev), and gate promotion to the **target environment** (staging):
+
+```
+Developer merges to perfect-api (source) → CI builds image → updates gitops/overlays/dev
+    → ArgoCD auto-syncs dev
+    → Developer opens promotion PR on gitops repo (dev → staging)
+    → Webhook triggers quality gate → validates API in dev
+    → Pass → commit status "success" on gitops PR → merge allowed → ArgoCD syncs staging
+    → Fail → commit status "failure" → PR blocked
 ```
 
 ## Install Order
 
 ```
-1. Secrets           ──► GitHub PAT, API auth, registry creds
+1. Pre-install providers ──► provider-kubernetes must be healthy before Helm
        │
-2. Helm Install      ──► Providers, Functions, XRDs, Compositions
+2. Secrets           ──► GitHub PAT, API auth, registry creds
        │
-3. EnvironmentConfigs ──► Cluster-specific settings
+3. Helm Install      ──► Providers, Functions, XRDs, Compositions
        │
-4. XQualityGateTemplate ──► RBAC + WorkflowTemplate
+4. EnvironmentConfigs ──► Cluster-specific settings
        │
-5. XQualityGate      ──► EventBus + EventSource + Sensor + Ingress
+5. XQualityGateTemplate ──► RBAC + WorkflowTemplate
        │
-6. GitHub Webhook    ──► Point repo to Ingress URL
+6. XQualityGate      ──► EventBus + EventSource + Sensor + Ingress
+       │
+7. GitHub Webhook    ──► Point gitops repo to Ingress URL
 ```
 
-## 1. Install the Helm Chart
+## 1. Pre-install Provider
 
-The chart installs Crossplane providers, functions, XRDs, and compositions.
-
-### From OCI Registry (recommended)
+The Helm chart includes the Provider CR, but the ProviderConfig CRD won't exist until the provider is installed and running. Pre-install to avoid CRD chicken-and-egg:
 
 ```bash
-helm install driveby oci://ghcr.io/meter-peter/charts/driveby \
-  --version 0.3.0 \
-  --set github.pat=ghp_YOUR_TOKEN \
-  --set crossplane.enabled=true
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-kubernetes
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v0.14.1
+EOF
+
+kubectl wait --for=condition=Healthy provider/provider-kubernetes --timeout=120s
 ```
 
-### From Local Source
+## 2. Install the Helm Chart
 
 ```bash
-helm install driveby ./kubernetes/helm/driveby/ \
-  --set github.pat=ghp_YOUR_TOKEN \
-  --set crossplane.enabled=true
+helm upgrade --install driveby ./kubernetes/helm/driveby/ \
+  --set crossplane.enabled=true \
+  --set github.pat=$(gh auth token)
 ```
 
 This creates:
-- **Provider**: `provider-kubernetes` (v0.14.1)
-- **Functions**: `function-go-templating`, `function-auto-ready`, `function-sequencer`, `function-environment-configs`
+- **Provider**: `provider-kubernetes` (v0.14.1) — adopted if pre-installed
+- **Functions**: `function-go-templating`, `function-auto-ready`, `function-environment-configs`
 - **ProviderConfig**: `kubernetes-provider` (InjectedIdentity)
 - **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io`
 - **Compositions**: Template and instance compositions
-- **Argo Workflows**: WorkflowTemplates, RBAC
-- **Argo Events**: EventSource, Sensor
+- **RBAC**: ServiceAccount, Role, RoleBinding
 
-Wait for providers and functions to become healthy:
+Wait for functions to become healthy:
 
 ```bash
 kubectl get providers -w
 kubectl get functions -w
 ```
 
-## 2. Create Secrets
+## 3. Create Secrets
 
 ### GitHub PAT (for commit status + PR comments)
 
@@ -128,7 +148,7 @@ kubectl create secret docker-registry ghcr-creds \
   --docker-password=YOUR_TOKEN
 ```
 
-## 3. Apply EnvironmentConfigs
+## 4. Apply EnvironmentConfigs
 
 EnvironmentConfigs provide cluster-specific settings to the compositions:
 
@@ -136,7 +156,7 @@ EnvironmentConfigs provide cluster-specific settings to the compositions:
 kubectl apply -f kubernetes/examples/crossplane/environment-configs.yaml
 ```
 
-## 4. Create XQualityGateTemplate
+## 5. Create XQualityGateTemplate
 
 The template defines the validation workflow (RBAC + WorkflowTemplate):
 
@@ -152,7 +172,7 @@ kubectl get workflowtemplates -n driveby
 kubectl get serviceaccounts -n driveby
 ```
 
-## 5. Create XQualityGate
+## 6. Create XQualityGate
 
 The instance creates the event pipeline (EventBus + EventSource + Sensor + Ingress):
 
@@ -170,24 +190,34 @@ kubectl get sensors -n driveby
 kubectl get ingress -n driveby
 ```
 
-## 6. Configure GitHub Webhook
+## 7. Configure GitHub Webhook
 
-Point your repository's webhook to the Ingress URL:
+Point your **gitops repository's** webhook to the Ingress URL:
 
 - **URL**: `https://<app>-<gate>-webhook.<baseDomain>/<app>-<gate>-<trigger>`
 - **Content type**: `application/json`
 - **Events**: Select the events matching your trigger config (e.g., `pull_request`)
 
 For the default example:
-- URL: `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`
-- Events: Pull requests
+- **Repo**: `meter-peter/perfect-api-gitops`
+- **URL**: `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`
+- **Events**: Pull requests
 
-## 7. Verification Checklist
+```bash
+gh api repos/meter-peter/perfect-api-gitops/hooks \
+  --method POST \
+  -f name=web -F active=true \
+  -f "config[url]=https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation" \
+  -f "config[content_type]=json" \
+  -f "events[]=pull_request"
+```
+
+## 8. Verification Checklist
 
 ```bash
 # Crossplane resources healthy
 kubectl get providers         # provider-kubernetes: Healthy
-kubectl get functions         # All 4 functions: Healthy
+kubectl get functions         # All functions: Healthy
 
 # XRDs registered
 kubectl get xrd               # xqualitygatetemplates.driveby.io, xqualitygates.driveby.io
@@ -237,35 +267,6 @@ DriveBy uses a **three-tier configuration model** so that every hardcoded value 
 | JetStream version | `defaults.eventBus.jetstream.version` | `jetstreamVersion` | `eventBusConfig.jetstreamVersion` |
 | EventBus replicas | `defaults.eventBus.jetstream.replicas` | `eventBusReplicas` | `eventBusConfig.replicas` |
 
-### Example: nginx Ingress (no cert-manager)
-
-```bash
-helm install driveby ./kubernetes/helm/driveby/ \
-  --set github.pat=ghp_xxx \
-  --set defaults.ingress.className=nginx \
-  --set defaults.ingress.clusterIssuer=""
-```
-
-### Example: Traefik with cert-manager
-
-```bash
-helm install driveby ./kubernetes/helm/driveby/ \
-  --set github.pat=ghp_xxx \
-  --set defaults.ingress.className=traefik-system \
-  --set defaults.ingress.clusterIssuer=letsencrypt-prod \
-  --set defaults.ingress.annotations."traefik\.ingress\.kubernetes\.io/router\.entrypoints"=websecure \
-  --set defaults.ingress.annotations."traefik\.ingress\.kubernetes\.io/router\.tls"=true
-```
-
-### Example: Istio (VirtualService via annotations)
-
-```bash
-helm install driveby ./kubernetes/helm/driveby/ \
-  --set github.pat=ghp_xxx \
-  --set defaults.ingress.className=istio \
-  --set defaults.ingress.clusterIssuer=""
-```
-
 ## Customization
 
 ### Validation Mode
@@ -291,22 +292,41 @@ spec:
   gateName: staging-promotion
   templateRef:
     name: driveby-staging-promotion
+  repositoryConfig:
+    owner: meter-peter
+    name: another-api-gitops
+    fullName: meter-peter/another-api-gitops
+  apiConfig:
+    serviceName: another-api
+    sourceEnvironment:
+      namespace: another-api-dev
+    targetEnvironment:
+      namespace: another-api-staging
   # ... rest of config
 ```
 
-### Multiple Gates
+## Troubleshooting
 
-Create different gate types with separate templates:
+### Webhook not received
+1. Check webhook deliveries: `gh api repos/meter-peter/perfect-api-gitops/hooks/<id>/deliveries`
+2. Verify Ingress resolves: `dig perfect-api-staging-promotion-webhook.private.novelcore.org`
+3. Check EventSource pod is running: `kubectl get pods -n driveby -l eventsource-name=perfect-api-staging-promotion-eventsource`
+4. Check EventSource logs: `kubectl logs -n driveby -l eventsource-name=perfect-api-staging-promotion-eventsource`
 
-```yaml
-# Security-focused gate
-apiVersion: driveby.io/v1alpha1
-kind: XQualityGateTemplate
-metadata:
-  name: driveby-security-scan
-spec:
-  projectName: driveby
-  gateName: security-scan
-  validationConfig:
-    validationMode: minimal  # Focus on P005 security
-```
+### EventSource/Sensor crash-looping
+1. Check EventBus is healthy: `kubectl get eventbus -n driveby`
+2. Check for stream creation errors (common: `replicas > 1 not supported` — set `streamConfig.replicas` to match bus replicas)
+3. Verify NATS pods are Running: `kubectl get pods -n driveby | grep eventbus`
+
+### Workflow not triggered
+1. Verify Sensor is subscribed: `kubectl logs -n driveby -l sensor-name=perfect-api-staging-promotion-sensor`
+2. Check the PR action is one of: `opened`, `reopened`, `synchronize`
+3. Verify the EventSource received the webhook
+
+### Workflow fails
+1. Check workflow status: `kubectl get workflows -n driveby`
+2. Get step logs: `kubectl logs -n driveby <pod-name> -c main`
+3. Common failures:
+   - `github-commit-status`: PAT token expired or lacks `repo:status` scope
+   - `driveby-validate`: API not reachable from source namespace
+   - `health-check-source`: Source environment not ready within 2 minutes

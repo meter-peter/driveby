@@ -34,67 +34,92 @@ kubernetes/
 
 > **Note**: The `manifests/` directory (raw YAML duplicates) was removed in v0.3.0 — all resources are now managed by the Helm chart + Crossplane compositions.
 
+## Promotion Flow
+
+Quality gates trigger on **promotion PRs in the gitops repo** (`perfect-api-gitops`), validate against the **source environment** (dev), and gate promotion to the **target environment** (staging):
+
+```
+Developer merges to perfect-api (source) → CI builds image → updates gitops/overlays/dev
+    → ArgoCD auto-syncs dev
+    → Developer opens promotion PR on gitops repo (dev → staging)
+    → Webhook triggers quality gate → validates API in dev
+    → Pass → commit status "success" on gitops PR → merge allowed → ArgoCD syncs staging
+    → Fail → commit status "failure" → PR blocked
+```
+
 ## Cluster State
 
 ### Namespaces
 | Namespace | Purpose | Managed By |
 |-----------|---------|------------|
-| `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors) | Manual kubectl apply |
+| `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors) | Helm chart + Crossplane |
+| `perfect-api-dev` | Dev environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-staging` | Staging environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-prod` | Production environment for perfect-api (manual sync) | ArgoCD |
 
 ### ArgoCD Resources
 | Resource | Namespace | Details |
 |----------|-----------|---------|
-| AppProject `perfect-api` | argocd | Sources: `meter-peter/perfect-api-gitops`, Destinations: staging + prod |
+| AppProject `perfect-api` | argocd | Sources: `meter-peter/perfect-api-gitops`, Destinations: dev + staging + prod |
+| Application `perfect-api-dev` | argocd | Path: `overlays/dev`, autoSync + selfHeal + CreateNamespace |
 | Application `perfect-api-staging` | argocd | Path: `overlays/staging`, autoSync + selfHeal |
 | Application `perfect-api-prod` | argocd | Path: `overlays/prod`, manual sync |
 
-### Argo Events
+### Argo Events (Crossplane-managed)
 | Resource | Name | Namespace | Details |
 |----------|------|-----------|---------|
-| EventBus | `default` | driveby | 3-replica JetStream (NATS v2.10.10) |
-| EventSource | `driveby-github` | driveby | GitHub webhook on port 12000, endpoint `/github/driveby` |
-| Sensor | `driveby-sensor` | driveby | Triggers `driveby-staging-promotion` on PR open/reopen/sync |
-| Ingress | `driveby-webhook` | driveby | `driveby-webhook.private.novelcore.org` → EventSource svc |
+| EventBus | `default` | driveby | 1-replica JetStream (NATS v2.10.10) |
+| EventSource | `perfect-api-staging-promotion-eventsource` | driveby | GitHub webhook on port 12000, endpoint `/perfect-api-staging-promotion-pr-validation` |
+| Sensor | `perfect-api-staging-promotion-sensor` | driveby | Triggers `driveby-staging-promotion` WorkflowTemplate on PR open/reopen/sync |
+| Ingress | `perfect-api-staging-promotion-webhook-ingress` | driveby | `perfect-api-staging-promotion-webhook.private.novelcore.org` → EventSource svc |
 
-GitHub webhook (ID: 601488783) is configured on `meter-peter/perfect-api` to POST `pull_request` events to `https://driveby-webhook.private.novelcore.org/github/driveby`.
+GitHub webhook (ID: 601590418) is configured on `meter-peter/perfect-api-gitops` to POST `pull_request` events to `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`.
 
 ### Secrets
 | Secret | Namespace(s) | Keys |
 |--------|-------------|------|
-| `ghcr-creds` | perfect-api-staging, perfect-api-prod | Docker registry auth for ghcr.io |
-| `api-auth` | perfect-api-staging, perfect-api-prod | `api-key`, `api-key-header` |
+| `ghcr-creds` | perfect-api-dev, perfect-api-staging, perfect-api-prod, driveby | Docker registry auth for ghcr.io |
+| `api-auth` | perfect-api-dev, perfect-api-staging, perfect-api-prod | `api-key`, `api-key-header` |
 | `driveby-api-auth` | driveby | `api-key`, `api-key-header` |
 | `github-pat` | driveby | `token` (GitHub PAT for commit status + PR comments) |
-| `ghcr-creds` | driveby | Docker registry auth for ghcr.io |
 
 ### External Repos
 | Repo | Purpose |
 |------|---------|
 | `meter-peter/perfect-api` | App code (FastAPI), CI builds `ghcr.io/meter-peter/perfect-api:latest` |
-| `meter-peter/perfect-api-gitops` | Kustomize base + overlays (staging/prod), synced by ArgoCD |
+| `meter-peter/perfect-api-gitops` | Kustomize base + overlays (dev/staging/prod), synced by ArgoCD. Webhook triggers quality gate on promotion PRs. |
 
 ## Helm Chart (`helm/driveby/`)
-Production Helm chart that installs the full DriveBy quality gate system:
+Production Helm chart (v0.3.0) that installs the full DriveBy quality gate system:
 - **Crossplane providers**: `provider-kubernetes` v0.14.1
-- **Crossplane functions**: `function-go-templating`, `function-auto-ready`, `function-sequencer`, `function-environment-configs`
-- **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io` (both namespace-scoped, v1alpha1)
+- **Crossplane functions**: `function-go-templating`, `function-auto-ready`, `function-environment-configs` (sequencer removed — not needed for flat resource sets)
+- **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io` (both v1alpha1)
 - **Compositions**: Template (generates RBAC + WorkflowTemplate), Instance (generates EventBus + EventSource + Sensor + Ingress)
 - **ProviderConfig**: `kubernetes-provider` with InjectedIdentity
-- Plus existing: Argo Workflows templates, Argo Events, ArgoCD resources, RBAC, secrets
+- Raw Argo templates gated behind `not .Values.crossplane.enabled` (legacy fallback)
 
-Install: `helm install driveby ./kubernetes/helm/driveby/ --set crossplane.enabled=true`
-See `docs/deployment-guide.md` for full installation guide.
+Install:
+```bash
+# Pre-install provider-kubernetes (CRDs must exist before helm install)
+kubectl apply -f <provider-kubernetes-cr>
+kubectl wait --for=condition=Healthy provider/provider-kubernetes --timeout=120s
+# Then helm install
+helm upgrade --install driveby ./kubernetes/helm/driveby/ \
+  --set crossplane.enabled=true \
+  --set github.pat=$(gh auth token)
+```
 
-## Example Resources (`examples/`)
+## WorkflowTemplate DAG (Promotion Pipeline)
 
-| Directory | Purpose | Thesis Mapping |
-|-----------|---------|---------------|
-| `argo-workflows/` | Validation pipeline as Argo Workflow (spec fetch -> validate -> report -> promote) | Ch.5 end-to-end workflow |
-| `argo-events/` | Event triggers: webhook on PR, git sensor on spec changes | Ch.5 event-driven architecture |
-| `crossplane/` | XQualityGateTemplate + XQualityGate examples, EnvironmentConfigs | Ch.5 Crossplane XSDLC |
-| `gitops-promoter/` | Promotion logic: advance environment on validation pass | Ch.5 feedback loop |
+```
+set-pending-status → wait-for-source-ready → validate-source → functional-test-source
+                                                                      ↓
+                                                            report-success + comment-pr
+```
+
+- Validates against the **source environment** (dev), not staging
+- `wait-for-source-ready`: health-check loop (max 2min) against `http://{service-name}.{source-namespace}:{port}{openapi-endpoint}`
+- Commit status descriptions: "Validating dev environment..." / "Dev validation passed, safe to promote" / "Dev validation failed, promotion blocked"
 
 ## Configurability Model
 Compositions use a three-tier variable resolution pattern:
@@ -104,13 +129,10 @@ Compositions use a three-tier variable resolution pattern:
 
 Resolution order in go-templates: `$xr.spec.X | default ($env.Y | default "<helm-baked-default>")`
 
-All previously hardcoded values (ingress class, cert-manager issuer, secret names, container images, webhook ports, GitHub API URL, EventBus config) are now configurable through this model. See `docs/deployment-guide.md` for the full table of configurable knobs.
-
 ## Target Cluster
 - **Cluster**: `private.novelcore.org` (via `access.kubecore.eu`)
 - **ArgoCD**: Already installed — do NOT reinstall
-- **Strategy**: `driveby` namespace for workflows, `perfect-api-{staging,prod}` for app environments
-- Reference kubecore-operator patterns at `/home/meter-peter/development/novelcore/kubecore-operator/compositions/`
+- **Strategy**: `driveby` namespace for workflows, `perfect-api-{dev,staging,prod}` for app environments
 
 ## Crossplane Workflow
 When writing Crossplane resources:
@@ -118,7 +140,13 @@ When writing Crossplane resources:
 2. Use `context7 query-docs` for XRD schemas, Composition patterns
 3. Only fall back to web search if context7 lacks the information
 
+### Template Escaping
+Argo Workflow parameter references (`{{workflow.parameters.xxx}}`) inside Crossplane go-templates need triple escaping:
+- Helm layer: `{{` `` `{{ "{{" }}workflow.parameters.xxx{{ "}}" }}` `` `}}`
+- Renders in Crossplane go-template as: `{{ "{{" }}workflow.parameters.xxx{{ "}}" }}`
+- Crossplane renders as literal: `{{workflow.parameters.xxx}}` for Argo
+
 ## Thesis Mapping
 - **Chapter 4 (Architecture)**: Namespace separation, ArgoCD AppProject isolation
 - **Chapter 5 (End-to-End Workflow)**: The full GitOps pipeline from event trigger through validation to environment promotion
-- The Argo Workflows + Events + Crossplane + Promoter combination demonstrates DDT in a real GitOps context
+- The Argo Workflows + Events + Crossplane combination demonstrates DDT in a real GitOps context

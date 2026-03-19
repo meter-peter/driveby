@@ -90,7 +90,8 @@ When writing Crossplane resources:
 ## Crossplane Quality Gates (XSDLC)
 - **XQualityGateTemplate** (`driveby.io/v1alpha1`) — declares validation workflow (RBAC + WorkflowTemplate)
 - **XQualityGate** (`driveby.io/v1alpha1`) — declares per-API event pipeline (EventBus + EventSource + Sensor + Ingress)
-- Helm chart installs `provider-kubernetes` + 4 Crossplane functions + XRDs + compositions
+- Helm chart (v0.3.0) installs `provider-kubernetes` + Crossplane functions + XRDs + compositions
+- Quality gates trigger on **promotion PRs in the gitops repo**, validate against the **source env** (dev), and gate promotion to **target env** (staging)
 - See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
 
 ## Releasing
