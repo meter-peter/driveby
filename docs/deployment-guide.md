@@ -28,6 +28,7 @@ Complete guide to installing DriveBy quality gates on a Kubernetes cluster.
 | Argo Events | 1.9+ | Controller running |
 | Traefik | 2.10+ | Ingress controller (`ingressClassName: traefik-system`) |
 | cert-manager | 1.13+ | With a configured ClusterIssuer |
+| GitOps Promoter | 0.1+ | Required; install controller for automated promotion |
 
 ## Namespace Layout
 
@@ -37,7 +38,8 @@ Kubernetes Cluster
 │   ├── Crossplane XRDs + Compositions
 │   ├── Argo Events (EventBus, EventSource, Sensor)
 │   ├── Argo Workflows (WorkflowTemplates, RBAC)
-│   └── Secrets (github-pat, driveby-api-auth)
+│   ├── GitOps Promoter (ScmProvider, GitRepository, PromotionStrategy)
+│   └── Secrets (driveby-api-auth, github-app-credentials)
 ├── perfect-api-dev/             ← Dev environment (autoSync)
 │   └── API deployment + service
 ├── perfect-api-staging/         ← Staging environment (autoSync)
@@ -51,12 +53,13 @@ Kubernetes Cluster
 Quality gates trigger on **promotion PRs in the gitops repo**, validate against the **source environment** (dev), and gate promotion to the **target environment** (staging):
 
 ```
-Developer merges to perfect-api (source) → CI builds image → updates gitops/overlays/dev
-    → ArgoCD auto-syncs dev
-    → Developer opens promotion PR on gitops repo (dev → staging)
-    → Webhook triggers quality gate → validates API in dev
-    → Pass → commit status "success" on gitops PR → merge allowed → ArgoCD syncs staging
-    → Fail → commit status "failure" → PR blocked
+Push to main (DRY branch) → Hydrator builds environment/*-next branches
+    → Promoter auto-PRs environment/dev-next → environment/dev → ArgoCD syncs dev
+    → Promoter auto-PRs environment/staging-next → environment/staging
+    → Webhook triggers DriveBy validation against dev
+    → Workflow creates CommitStatus CRD (phase: success)
+    → Promoter auto-merges → ArgoCD syncs staging
+    → Promoter auto-PRs environment/prod-next → environment/prod (autoMerge: false — manual approval)
 ```
 
 ## Install Order
@@ -64,7 +67,7 @@ Developer merges to perfect-api (source) → CI builds image → updates gitops/
 ```
 1. Pre-install providers ──► provider-kubernetes must be healthy before Helm
        │
-2. Secrets           ──► GitHub PAT, API auth, registry creds
+2. Secrets           ──► GitHub App, API auth, registry creds
        │
 3. Helm Install      ──► Providers, Functions, XRDs, Compositions
        │
@@ -75,6 +78,8 @@ Developer merges to perfect-api (source) → CI builds image → updates gitops/
 6. XQualityGate      ──► EventBus + EventSource + Sensor + Ingress
        │
 7. GitHub Webhook    ──► Point gitops repo to Ingress URL
+       │
+8. GitOps Promoter ──► Install controller + GitHub App secret
 ```
 
 ## 1. Pre-install Provider
@@ -98,8 +103,7 @@ kubectl wait --for=condition=Healthy provider/provider-kubernetes --timeout=120s
 
 ```bash
 helm upgrade --install driveby ./kubernetes/helm/driveby/ \
-  --set crossplane.enabled=true \
-  --set github.pat=$(gh auth token)
+  --set crossplane.enabled=true
 ```
 
 This creates:
@@ -119,14 +123,25 @@ kubectl get functions -w
 
 ## 3. Create Secrets
 
-### GitHub PAT (for commit status + PR comments)
+### GitHub App Credentials (for all GitHub operations)
 
-If not set via `--set github.pat`:
+Required for commit status, PR comments, and GitOps Promoter SCM access:
 
 ```bash
-kubectl create secret generic github-pat \
+kubectl create secret generic github-app-credentials \
   --namespace driveby \
-  --from-literal=token=ghp_YOUR_TOKEN
+  --from-literal=githubAppID=YOUR_APP_ID \
+  --from-literal=githubInstallationID=YOUR_INSTALLATION_ID \
+  --from-file=githubAppPrivateKey=/path/to/private-key.pem
+```
+
+Or via Helm values:
+
+```bash
+helm upgrade --install driveby ./kubernetes/helm/driveby/ \
+  --set gitopsPromoter.githubApp.appID=12345 \
+  --set gitopsPromoter.githubApp.installationID=67890 \
+  --set-file gitopsPromoter.githubApp.privateKey=/path/to/private-key.pem
 ```
 
 ### API Auth (for DriveBy validation)
@@ -190,21 +205,35 @@ kubectl get sensors -n driveby
 kubectl get ingress -n driveby
 ```
 
-## 7. Configure GitHub Webhook
+## 6b. Verify Promoter Resources
 
-Point your **gitops repository's** webhook to the Ingress URL:
+```bash
+kubectl get scmproviders -n driveby                # ScmProvider created
+kubectl get gitrepositories.promoter.argoproj.io -n driveby  # GitRepository created
+kubectl get promotionstrategy -n driveby           # PromotionStrategy created
+kubectl get argocdcommitstatuses -n driveby        # ArgoCDCommitStatus created
+kubectl get changetransferpolicies -n driveby      # Auto-created by PromotionStrategy
+```
 
+## 7. Verify GitHub Webhook (auto-created)
+
+Argo Events will automatically create the **gitops repository webhook** when your `XQualityGate` is reconciled, using the GitHub App credentials (`github-app-credentials`) and the generated EventSource Ingress URL.
+
+Prerequisite: your GitHub App must have permission to manage webhooks (typically `Administration: Read & write` or at least the `Webhooks` permission) on the target repository/org.
+
+Expected webhook URL format:
 - **URL**: `https://<app>-<gate>-webhook.<baseDomain>/<app>-<gate>-<trigger>`
 - **Content type**: `application/json`
 - **Events**: Select the events matching your trigger config (e.g., `pull_request`)
 
 For the default example:
-- **Repo**: `meter-peter/perfect-api-gitops`
+- **Repo**: `novelcore/perfect-api-gitops`
 - **URL**: `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`
 - **Events**: Pull requests
 
+If you need to troubleshoot or manually recreate it:
 ```bash
-gh api repos/meter-peter/perfect-api-gitops/hooks \
+gh api repos/novelcore/perfect-api-gitops/hooks \
   --method POST \
   -f name=web -F active=true \
   -f "config[url]=https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation" \
@@ -233,6 +262,10 @@ kubectl get eventbus -n driveby                # default: Running
 kubectl get eventsources -n driveby            # EventSource: Running
 kubectl get sensors -n driveby                 # Sensor: Running
 kubectl get ingress -n driveby                 # Webhook ingress with TLS
+
+# Promoter resources
+kubectl get scmproviders,gitrepositories.promoter,promotionstrategy -n driveby
+kubectl get changetransferpolicies -n driveby      # Auto-created by PromotionStrategy controller
 ```
 
 ## Configuration Model
@@ -252,8 +285,6 @@ DriveBy uses a **three-tier configuration model** so that every hardcoded value 
 | Knob | values.yaml path | EnvironmentConfig key | XRD field |
 |------|------------------|-----------------------|-----------|
 | Image pull secret | `defaults.secrets.imagePullSecret` | `imagePullSecret` | `secretsConfig.imagePullSecret` |
-| GitHub PAT secret name | `defaults.secrets.githubPat.name` | `githubPatSecretName` | `secretsConfig.githubPatSecretName` |
-| GitHub PAT secret key | `defaults.secrets.githubPat.key` | `githubPatSecretKey` | `secretsConfig.githubPatSecretKey` |
 | API auth secret | `defaults.secrets.apiAuth.name` | `apiAuthSecretName` | `secretsConfig.apiAuthSecretName` |
 | API key header | `defaults.secrets.apiKeyHeader` | `apiKeyHeader` | `secretsConfig.apiKeyHeader` |
 | GitHub API URL | `defaults.github.apiUrl` | `githubApiUrl` | `githubConfig.apiUrl` |
@@ -266,6 +297,9 @@ DriveBy uses a **three-tier configuration model** so that every hardcoded value 
 | Webhook port | `defaults.webhookPort` | `webhookPort` | `webhookPort` |
 | JetStream version | `defaults.eventBus.jetstream.version` | `jetstreamVersion` | `eventBusConfig.jetstreamVersion` |
 | EventBus replicas | `defaults.eventBus.jetstream.replicas` | `eventBusReplicas` | `eventBusConfig.replicas` |
+| GitHub App secret | `gitopsPromoter.githubApp.secretName` | `githubAppSecretName` | `promoterConfig.githubApp.secretName` |
+| GitHub App ID | `gitopsPromoter.githubApp.appID` | `githubAppID` | `promoterConfig.githubApp.appID` |
+| GitHub App Installation ID | `gitopsPromoter.githubApp.installationID` | `githubInstallationID` | `promoterConfig.githubApp.installationID` |
 
 ## Customization
 
@@ -308,7 +342,7 @@ spec:
 ## Troubleshooting
 
 ### Webhook not received
-1. Check webhook deliveries: `gh api repos/meter-peter/perfect-api-gitops/hooks/<id>/deliveries`
+1. Check webhook deliveries: `gh api repos/novelcore/perfect-api-gitops/hooks/<id>/deliveries`
 2. Verify Ingress resolves: `dig perfect-api-staging-promotion-webhook.private.novelcore.org`
 3. Check EventSource pod is running: `kubectl get pods -n driveby -l eventsource-name=perfect-api-staging-promotion-eventsource`
 4. Check EventSource logs: `kubectl logs -n driveby -l eventsource-name=perfect-api-staging-promotion-eventsource`
@@ -327,6 +361,6 @@ spec:
 1. Check workflow status: `kubectl get workflows -n driveby`
 2. Get step logs: `kubectl logs -n driveby <pod-name> -c main`
 3. Common failures:
-   - `github-commit-status`: PAT token expired or lacks `repo:status` scope
+   - `github-commit-status`: GitHub App credentials invalid or missing
    - `driveby-validate`: API not reachable from source namespace
    - `health-check-source`: Source environment not ready within 2 minutes

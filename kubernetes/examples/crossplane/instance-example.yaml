@@ -15,9 +15,9 @@ spec:
     baseDomain: private.novelcore.org
     namespace: driveby
   repositoryConfig:
-    owner: meter-peter
+    owner: novelcore
     name: perfect-api-gitops
-    fullName: meter-peter/perfect-api-gitops
+    fullName: novelcore/perfect-api-gitops
   apiConfig:
     openapiEndpoint: /openapi.json
     port: 8000
@@ -28,9 +28,24 @@ spec:
       namespace: perfect-api-staging
     authSecretName: driveby-api-auth
     authKeyHeader: X-API-Key
-  githubConfig:
-    patSecretName: github-pat
-    patSecretKey: token
+  # GitOps Promoter — automated environment promotion
+  promoterConfig:
+    githubApp:
+      secretName: github-app-credentials
+      appID: 3133001
+      installationID: 117564832
+    environments:
+      - name: dev
+        branch: environment/dev
+        autoMerge: true
+      - name: staging
+        branch: environment/staging
+        autoMerge: true
+        gated: true        # DriveBy validates dev before staging promotes
+      - name: prod
+        branch: environment/prod
+        autoMerge: false   # Manual approval for production
+    commitStatusKey: driveby-staging-promotion
   # Optional: override cluster defaults
   # ingressConfig:
   #   className: traefik-system
@@ -41,6 +56,8 @@ spec:
   #   jetstreamVersion: "2.10.14"
   #   replicas: 3
   # webhookPort: 12000
+  # GitHub webhook is auto-created by Argo Events using the configured GitHub App.
+  # This XQualityGate config only defines which events trigger which workflow.
   eventTriggers:
     - name: pr-validation
       targetTemplate: promotion-pipeline

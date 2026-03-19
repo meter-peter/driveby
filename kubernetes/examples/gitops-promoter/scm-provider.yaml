@@ -1,0 +1,17 @@
+# ScmProvider — generated automatically by XQualityGate composition when promoterConfig.enabled=true
+# This example shows what the composition produces. Do NOT apply manually if using Crossplane.
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: ScmProvider
+metadata:
+  name: perfect-api-github
+  namespace: driveby
+  labels:
+    driveby.io/app: perfect-api
+    driveby.io/project: driveby
+    driveby.io/gate: staging-promotion
+spec:
+  github:
+    domain: github.com
+  secretRef:
+    name: github-app-credentials
+  isApp: true

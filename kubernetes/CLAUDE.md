@@ -17,10 +17,10 @@ kubernetes/
           xrd-template.yaml            # XQualityGateTemplate XRD
           xrd-instance.yaml            # XQualityGate XRD
           composition-template.yaml    # Template composition (RBAC + WorkflowTemplate)
-          composition-instance.yaml    # Instance composition (EventBus + EventSource + Sensor + Ingress)
+          composition-instance.yaml    # Instance composition (EventBus + EventSource + Sensor + Ingress + Promoter)
         argo-events/    # Argo Events (non-Crossplane fallback, gated behind !crossplane.enabled)
         argocd/         # ArgoCD AppProject
-        secrets/        # Secret templates (api-auth, github-pat)
+        secrets/        # Secret templates (api-auth, github-app)
   examples/
     argo-workflows/     # Argo Workflow templates for validation pipelines
     argo-events/        # Argo Events triggers (webhook, git sensor)
@@ -28,7 +28,7 @@ kubernetes/
       template-example.yaml      # XQualityGateTemplate CR example
       instance-example.yaml      # XQualityGate CR example
       environment-configs.yaml   # Template + Instance EnvironmentConfigs
-    gitops-promoter/    # GitOps promotion logic (environment promotion on validation pass)
+    gitops-promoter/    # GitOps Promoter examples (ScmProvider, GitRepository, PromotionStrategy, CommitStatus)
   README.md
 ```
 
@@ -39,12 +39,13 @@ kubernetes/
 Quality gates trigger on **promotion PRs in the gitops repo** (`perfect-api-gitops`), validate against the **source environment** (dev), and gate promotion to the **target environment** (staging):
 
 ```
-Developer merges to perfect-api (source) → CI builds image → updates gitops/overlays/dev
-    → ArgoCD auto-syncs dev
-    → Developer opens promotion PR on gitops repo (dev → staging)
-    → Webhook triggers quality gate → validates API in dev
-    → Pass → commit status "success" on gitops PR → merge allowed → ArgoCD syncs staging
-    → Fail → commit status "failure" → PR blocked
+Push to main (DRY branch) → Hydrator builds environment/*-next branches
+    → Promoter auto-PRs environment/dev-next → environment/dev → ArgoCD syncs dev
+    → Promoter auto-PRs environment/staging-next → environment/staging
+    → Webhook triggers DriveBy validation against dev
+    → Workflow creates CommitStatus CRD (phase: success)
+    → Promoter auto-merges → ArgoCD syncs staging
+    → Promoter auto-PRs environment/prod-next → environment/prod (autoMerge: false — manual approval)
 ```
 
 ## Cluster State
@@ -52,7 +53,7 @@ Developer merges to perfect-api (source) → CI builds image → updates gitops/
 ### Namespaces
 | Namespace | Purpose | Managed By |
 |-----------|---------|------------|
-| `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors) | Helm chart + Crossplane |
+| `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors, Promoter resources) | Helm chart + Crossplane |
 | `perfect-api-dev` | Dev environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-staging` | Staging environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-prod` | Production environment for perfect-api (manual sync) | ArgoCD |
@@ -60,7 +61,7 @@ Developer merges to perfect-api (source) → CI builds image → updates gitops/
 ### ArgoCD Resources
 | Resource | Namespace | Details |
 |----------|-----------|---------|
-| AppProject `perfect-api` | argocd | Sources: `meter-peter/perfect-api-gitops`, Destinations: dev + staging + prod |
+| AppProject `perfect-api` | argocd | Sources: `novelcore/perfect-api-gitops`, Destinations: dev + staging + prod |
 | Application `perfect-api-dev` | argocd | Path: `overlays/dev`, autoSync + selfHeal + CreateNamespace |
 | Application `perfect-api-staging` | argocd | Path: `overlays/staging`, autoSync + selfHeal |
 | Application `perfect-api-prod` | argocd | Path: `overlays/prod`, manual sync |
@@ -73,7 +74,7 @@ Developer merges to perfect-api (source) → CI builds image → updates gitops/
 | Sensor | `perfect-api-staging-promotion-sensor` | driveby | Triggers `driveby-staging-promotion` WorkflowTemplate on PR open/reopen/sync |
 | Ingress | `perfect-api-staging-promotion-webhook-ingress` | driveby | `perfect-api-staging-promotion-webhook.private.novelcore.org` → EventSource svc |
 
-GitHub webhook (ID: 601590418) is configured on `meter-peter/perfect-api-gitops` to POST `pull_request` events to `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`.
+GitHub webhook is auto-provisioned by Argo Events (via the GitHub App) on `novelcore/perfect-api-gitops` to POST `pull_request` events to `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`.
 
 ### Secrets
 | Secret | Namespace(s) | Keys |
@@ -81,20 +82,29 @@ GitHub webhook (ID: 601590418) is configured on `meter-peter/perfect-api-gitops`
 | `ghcr-creds` | perfect-api-dev, perfect-api-staging, perfect-api-prod, driveby | Docker registry auth for ghcr.io |
 | `api-auth` | perfect-api-dev, perfect-api-staging, perfect-api-prod | `api-key`, `api-key-header` |
 | `driveby-api-auth` | driveby | `api-key`, `api-key-header` |
-| `github-pat` | driveby | `token` (GitHub PAT for commit status + PR comments) |
+| `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` (for all GitHub operations: commit status, PR comments, promoter SCM access) |
+
+### GitOps Promoter Resources (Crossplane-managed)
+| Resource | Name | Namespace | Details |
+|----------|------|-----------|---------|
+| ScmProvider | `perfect-api-github` | driveby | GitHub App auth for promoter SCM access |
+| GitRepository | `perfect-api-gitops` | driveby | Points promoter to gitops repo via ScmProvider |
+| PromotionStrategy | `perfect-api-promotion` | driveby | Environment chain: dev → staging → prod, with commit status gates |
+| ArgoCDCommitStatus | `perfect-api-argocd-health` | driveby | Aggregates ArgoCD app health into CommitStatus |
+| ChangeTransferPolicy | (auto-created) | driveby | Auto-created by PromotionStrategy controller per environment |
 
 ### External Repos
 | Repo | Purpose |
 |------|---------|
-| `meter-peter/perfect-api` | App code (FastAPI), CI builds `ghcr.io/meter-peter/perfect-api:latest` |
-| `meter-peter/perfect-api-gitops` | Kustomize base + overlays (dev/staging/prod), synced by ArgoCD. Webhook triggers quality gate on promotion PRs. |
+| `novelcore/perfect-api` | App code (FastAPI), CI builds `ghcr.io/novelcore/perfect-api:latest` |
+| `novelcore/perfect-api-gitops` | Kustomize base + overlays (dev/staging/prod), synced by ArgoCD. Webhook triggers quality gate on promotion PRs. |
 
 ## Helm Chart (`helm/driveby/`)
-Production Helm chart (v0.3.0) that installs the full DriveBy quality gate system:
+Production Helm chart (v0.4.0) that installs the full DriveBy quality gate system:
 - **Crossplane providers**: `provider-kubernetes` v0.14.1
 - **Crossplane functions**: `function-go-templating`, `function-auto-ready`, `function-environment-configs` (sequencer removed — not needed for flat resource sets)
 - **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io` (both v1alpha1)
-- **Compositions**: Template (generates RBAC + WorkflowTemplate), Instance (generates EventBus + EventSource + Sensor + Ingress)
+- **Compositions**: Template (generates RBAC + WorkflowTemplate + CommitStatus steps), Instance (generates EventBus + EventSource + Sensor + Ingress + Promoter resources)
 - **ProviderConfig**: `kubernetes-provider` with InjectedIdentity
 - Raw Argo templates gated behind `not .Values.crossplane.enabled` (legacy fallback)
 
@@ -105,16 +115,17 @@ kubectl apply -f <provider-kubernetes-cr>
 kubectl wait --for=condition=Healthy provider/provider-kubernetes --timeout=120s
 # Then helm install
 helm upgrade --install driveby ./kubernetes/helm/driveby/ \
-  --set crossplane.enabled=true \
-  --set github.pat=$(gh auth token)
+  --set crossplane.enabled=true
 ```
 
 ## WorkflowTemplate DAG (Promotion Pipeline)
 
 ```
-set-pending-status → wait-for-source-ready → validate-source → functional-test-source
-                                                                      ↓
-                                                            report-success + comment-pr
+set-pending-status ──────────────────────┐
+update-commitstatus-pending ────────────┤ (parallel)
+                                        ├─> wait-for-source-ready → validate-source → functional-test-source
+                                        │                                                    ↓
+                                        │                           report-success + comment-pr + update-commitstatus-success
 ```
 
 - Validates against the **source environment** (dev), not staging

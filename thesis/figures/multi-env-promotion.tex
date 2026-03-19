@@ -1,0 +1,59 @@
+% Multi-Environment Promotion — Chapter 6
+% Shows: dev → staging → prod with quality gates between them
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=1.5cm,
+    env/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=3.5cm,
+        minimum height=1.2cm,
+        font=\small\bfseries,
+        align=center
+    },
+    gate/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=red!60!black,
+        fill=red!10,
+        minimum width=2.5cm,
+        minimum height=0.7cm,
+        font=\scriptsize,
+        align=center
+    },
+    policy/.style={
+        font=\tiny\itshape,
+        text=#1!60!black,
+        align=center
+    }
+]
+
+% Environments
+\node[env=blue] (dev) at (0,0) {Development\\(\texttt{dev})};
+\node[env=orange] (staging) at (5.5,0) {Staging\\(\texttt{staging})};
+\node[env=red] (prod) at (11,0) {Production\\(\texttt{prod})};
+
+% Quality gates
+\node[gate] (gate1) at (2.75,0) {DDT Quality\\Gate};
+\node[gate] (gate2) at (8.25,0) {Manual\\Approval};
+
+% Arrows
+\draw[->,thick,blue!50!black] (dev) -- (gate1);
+\draw[->,thick,orange!50!black] (gate1) -- (staging);
+\draw[->,thick,orange!50!black] (staging) -- (gate2);
+\draw[->,thick,red!50!black] (gate2) -- (prod);
+
+% Policies
+\node[policy=blue] at (0,-1.0) {autoMerge: true\\(auto-sync)};
+\node[policy=orange] at (5.5,-1.0) {autoMerge: true\\(gated by DDT)};
+\node[policy=red] at (11,-1.0) {autoMerge: false\\(manual approval)};
+
+% Commit status flow
+\draw[->,dashed,teal!50!black,thick] (gate1.north) -- ++(0,0.8) node[above,font=\tiny,teal!50!black] {CommitStatus: success/failure};
+
+% Promoter label
+\node[font=\scriptsize,text=black!60] at (5.5,1.5) {GitOps Promoter manages promotion PRs};
+
+\end{tikzpicture}

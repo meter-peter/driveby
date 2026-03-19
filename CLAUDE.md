@@ -27,7 +27,7 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 | Directory | Purpose | Status | CLAUDE.md |
 |-----------|---------|--------|-----------|
 | `driveby-cli/` | Go CLI tool — the core validation engine | Active development | [`driveby-cli/CLAUDE.md`](driveby-cli/CLAUDE.md) |
-| `apis/` | Sample APIs for testing (perfect-api) — source now in [`meter-peter/perfect-api`](https://github.com/meter-peter/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
+| `apis/` | Sample APIs for testing (perfect-api) — source now in [`novelcore/perfect-api`](https://github.com/novelcore/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
 | `kubernetes/` | Helm chart (Crossplane XRDs + compositions), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
 | `samples/` | Example configs, reports, demo workflows | Configs complete | [`samples/CLAUDE.md`](samples/CLAUDE.md) |
 | `thesis/` | LaTeX thesis document (7 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
@@ -88,21 +88,22 @@ When writing Crossplane resources:
 4. Only fall back to web search if context7 lacks the information
 
 ## Crossplane Quality Gates (XSDLC)
-- **XQualityGateTemplate** (`driveby.io/v1alpha1`) — declares validation workflow (RBAC + WorkflowTemplate)
-- **XQualityGate** (`driveby.io/v1alpha1`) — declares per-API event pipeline (EventBus + EventSource + Sensor + Ingress)
-- Helm chart (v0.3.0) installs `provider-kubernetes` + Crossplane functions + XRDs + compositions
+- **XQualityGateTemplate** (`driveby.io/v1alpha1`) — declares validation workflow (RBAC + WorkflowTemplate + CommitStatus steps)
+- **XQualityGate** (`driveby.io/v1alpha1`) — declares per-API event pipeline (EventBus + EventSource + Sensor + Ingress) + promoter resources (ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus)
+- Helm chart (v0.4.0) installs `provider-kubernetes` + Crossplane functions + XRDs + compositions
 - Quality gates trigger on **promotion PRs in the gitops repo**, validate against the **source env** (dev), and gate promotion to **target env** (staging)
+- **GitOps Promoter integration**: auto-provisions ScmProvider, GitRepository, PromotionStrategy, and CommitStatus CRD workflow steps for fully automated environment promotion
 - See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
 
 ## Releasing
 
 1. Ensure CI is green on `main`
-2. Tag: `git tag -a v0.3.0 -m "DriveBy v0.3.0: Crossplane quality gates, release automation"`
-3. Push: `git push origin v0.3.0`
+2. Tag: `git tag -a v0.4.0 -m "DriveBy v0.4.0: automated promotion pipeline"`
+3. Push: `git push origin v0.4.0`
 4. The `release.yml` workflow produces:
    - GitHub Release with 6 platform binaries + SHA256 checksums (via GoReleaser)
-   - Docker images: `ghcr.io/meter-peter/driveby:0.3.0`, `:0.3`, `:latest`
-   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:0.3.0`
+   - Docker images: `ghcr.io/meter-peter/driveby:0.4.0`, `:0.4`, `:latest`
+   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:0.4.0`
 
 ## Target Cluster
 - Cluster: `private.novelcore.org`

@@ -1,0 +1,68 @@
+% Release Pipeline — Chapter 6
+% Shows: Tag push → test gate → goreleaser + docker + helm (parallel fan-out)
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=0.9cm,
+    stage/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=3cm,
+        minimum height=0.8cm,
+        font=\small,
+        align=center
+    },
+    gate/.style={
+        diamond,
+        draw=red!60!black,
+        fill=red!10,
+        minimum width=1.5cm,
+        minimum height=1cm,
+        font=\small,
+        align=center,
+        inner sep=1pt
+    },
+    artifact/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!50!black,
+        fill=#1!8,
+        minimum width=2.8cm,
+        minimum height=0.6cm,
+        font=\scriptsize,
+        align=center
+    }
+]
+
+% Trigger
+\node[stage=violet] (tag) at (0,0) {Tag Push\\(\texttt{v*})};
+
+% Test gate
+\node[gate] (test) at (3,0) {test};
+\draw[->,thick] (tag) -- (test);
+
+% Fan-out (three parallel jobs)
+\node[stage=blue] (goreleaser) at (7,1.5) {GoReleaser};
+\node[stage=teal] (docker) at (7,0) {Docker Build};
+\node[stage=orange] (helm) at (7,-1.5) {Helm Package};
+
+\draw[->,thick] (test) -- ++(1.5,0) |- (goreleaser);
+\draw[->,thick] (test) -- (docker);
+\draw[->,thick] (test) -- ++(1.5,0) |- (helm);
+
+% Fan-out label
+\node[font=\tiny\itshape,text=black!50] at (5,0.8) {parallel};
+
+% Artifacts
+\node[artifact=blue] (bins) at (11,2.0) {6 platform binaries\\+ SHA256 checksums};
+\node[artifact=blue] (release) at (11,1.0) {GitHub Release};
+\node[artifact=teal] (image) at (11,0) {ghcr.io/.../driveby\\:0.4.0, :0.4, :latest};
+\node[artifact=orange] (chart) at (11,-1.5) {oci://ghcr.io/.../\\charts/driveby:0.4.0};
+
+\draw[->,thick,blue!50!black] (goreleaser) -- (bins);
+\draw[->,thick,blue!50!black] (goreleaser) -- (release);
+\draw[->,thick,teal!50!black] (docker) -- (image);
+\draw[->,thick,orange!50!black] (helm) -- (chart);
+
+\end{tikzpicture}

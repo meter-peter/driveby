@@ -71,14 +71,15 @@ spec:
           {{`{{- $imagesCfg := $spec.images | default dict -}}`}}
 
           {{`{{- $imagePullSecret := $secretsConfig.imagePullSecret | default ($env.imagePullSecret | default `}}"{{ .Values.defaults.secrets.imagePullSecret }}"{{`) -}}`}}
-          {{`{{- $githubPatSecretName := $secretsConfig.githubPatSecretName | default ($env.githubPatSecretName | default `}}"{{ .Values.defaults.secrets.githubPat.name }}"{{`) -}}`}}
-          {{`{{- $githubPatSecretKey := $secretsConfig.githubPatSecretKey | default ($env.githubPatSecretKey | default `}}"{{ .Values.defaults.secrets.githubPat.key }}"{{`) -}}`}}
           {{`{{- $apiAuthSecretName := $secretsConfig.apiAuthSecretName | default ($env.apiAuthSecretName | default `}}"{{ .Values.defaults.secrets.apiAuth.name }}"{{`) -}}`}}
           {{`{{- $apiKeyHeader := $secretsConfig.apiKeyHeader | default ($env.apiKeyHeader | default `}}"{{ .Values.defaults.secrets.apiKeyHeader }}"{{`) -}}`}}
-          {{`{{- $githubApiUrl := $githubCfg.apiUrl | default ($env.githubApiUrl | default `}}"{{ .Values.defaults.github.apiUrl }}"{{`) -}}`}}
           {{`{{- $workflowsUrl := $spec.workflowsUrl | default ($env.workflowsUrl | default `}}"{{ .Values.defaults.argoWorkflowsUrl }}"{{`) -}}`}}
           {{`{{- $curlImage := $imagesCfg.curl | default ($env.curlImage | default `}}"{{ .Values.defaults.images.curl }}"{{`) -}}`}}
           {{`{{- $postgresImage := $imagesCfg.postgres | default ($env.postgresImage | default `}}"{{ .Values.defaults.images.postgres }}"{{`) -}}`}}
+
+          {{`{{/* GitHub App auth — unified for all GitHub operations */}}`}}
+          {{`{{- $githubAppCfg := $spec.githubAppConfig | default dict -}}`}}
+          {{`{{- $githubAppSecretName := $githubAppCfg.secretName | default ($env.githubAppSecretName | default `}}"{{ .Values.gitopsPromoter.githubApp.secretName }}"{{`) -}}`}}
 
           {{`{{/* Resource names */}}`}}
           {{`{{- $workflowTemplateName := printf "%s-%s" $projectName $gateName -}}`}}
@@ -143,6 +144,9 @@ spec:
                   - apiGroups: [""]
                     resources: ["pods", "pods/log"]
                     verbs: ["get", "list", "watch"]
+                  - apiGroups: ["promoter.argoproj.io"]
+                    resources: ["commitstatuses"]
+                    verbs: ["create", "get", "update", "patch"]
 
           ---
           # RoleBinding
@@ -228,6 +232,15 @@ spec:
                                 - name: description
                                   value: "Validating dev environment..."
 
+                          - name: update-commitstatus-pending
+                            template: update-commitstatus
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "pending"
+                                - name: description
+                                  value: "Validating dev environment..."
+
                           - name: wait-for-source-ready
                             template: health-check-source
                             dependencies: [set-pending-status]
@@ -254,6 +267,16 @@ spec:
                             template: github-pr-comment
                             dependencies: [functional-test-source]
 
+                          - name: update-commitstatus-success
+                            template: update-commitstatus
+                            dependencies: [functional-test-source]
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "success"
+                                - name: description
+                                  value: "Dev validation passed, safe to promote"
+
                     # --- Step Templates ---
 
                     - name: github-commit-status
@@ -262,26 +285,47 @@ spec:
                           - name: state
                           - name: description
                       container:
-                        image: {{`{{ $curlImage }}`}}
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
                         env:
-                          - name: GITHUB_TOKEN
+                          - name: GITHUB_APP_ID
                             valueFrom:
                               secretKeyRef:
-                                name: {{`{{ $githubPatSecretName }}`}}
-                                key: {{`{{ $githubPatSecretKey }}`}}
-                        command: [sh, -c]
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
+                        command: ["/driveby"]
                         args:
-                          - |
-                            curl -s -X POST \
-                              -H "Authorization: token ${GITHUB_TOKEN}" \
-                              -H "Accept: application/vnd.github.v3+json" \
-                              "{{`{{ $githubApiUrl }}`}}/repos/{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}/{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}/statuses/{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}" \
-                              -d '{
-                                "state": "{{`{{ "{{" }}inputs.parameters.state{{ "}}" }}`}}",
-                                "description": "{{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}",
-                                "context": "{{`{{ $gateKey }}`}}",
-                                "target_url": "{{`{{ $workflowsUrl }}`}}"
-                              }'
+                          - "github-status"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--sha"
+                          - "{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}"
+                          - "--state"
+                          - "{{`{{ "{{" }}inputs.parameters.state{{ "}}" }}`}}"
+                          - "--description"
+                          - "{{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}"
+                          - "--context"
+                          - "{{`{{ $gateKey }}`}}"
+                          - "--target-url"
+                          - "{{`{{ $workflowsUrl }}`}}"
 
                     - name: health-check-source
                       container:
@@ -341,11 +385,6 @@ spec:
                               secretKeyRef:
                                 name: {{`{{ $apiAuthSecretName }}`}}
                                 key: api-key
-                          - name: GITHUB_TOKEN
-                            valueFrom:
-                              secretKeyRef:
-                                name: {{`{{ $githubPatSecretName }}`}}
-                                key: {{`{{ $githubPatSecretKey }}`}}
                         command: ["/driveby"]
                         args:
                           - "function-only"
@@ -372,11 +411,21 @@ spec:
                               secretKeyRef:
                                 name: {{`{{ $apiAuthSecretName }}`}}
                                 key: api-key
-                          - name: GITHUB_TOKEN
+                          - name: GITHUB_APP_ID
                             valueFrom:
                               secretKeyRef:
-                                name: {{`{{ $githubPatSecretName }}`}}
-                                key: {{`{{ $githubPatSecretKey }}`}}
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
                         command: ["/driveby"]
                         args:
                           - "validate-only"
@@ -389,8 +438,12 @@ spec:
                           - "--validation-mode"
                           - "{{`{{ $validationMode }}`}}"
                           - "--github-comment"
-                          - "--github-token"
-                          - "$(GITHUB_TOKEN)"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
                           - "--github-owner"
                           - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
                           - "--github-repo"
@@ -401,32 +454,90 @@ spec:
                           - "/tmp/reports"
 
                     - name: exit-handler
+                      dag:
+                        tasks:
+                          - name: report-failure-github
+                            when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
+                            template: exit-handler-github
+                          - name: update-commitstatus-failure
+                            when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
+                            template: update-commitstatus
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "failure"
+                                - name: description
+                                  value: "Dev validation failed, promotion blocked"
+
+                    - name: exit-handler-github
                       container:
-                        image: {{`{{ $curlImage }}`}}
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
                         env:
-                          - name: GITHUB_TOKEN
+                          - name: GITHUB_APP_ID
                             valueFrom:
                               secretKeyRef:
-                                name: {{`{{ $githubPatSecretName }}`}}
-                                key: {{`{{ $githubPatSecretKey }}`}}
-                        command: [sh, -c]
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
+                        command: ["/driveby"]
                         args:
-                          - |
-                            if [ "{{`{{ "{{" }}workflow.status{{ "}}" }}`}}" != "Succeeded" ]; then
-                              echo "Workflow failed — reporting failure status"
-                              curl -s -X POST \
-                                -H "Authorization: token ${GITHUB_TOKEN}" \
-                                -H "Accept: application/vnd.github.v3+json" \
-                                "{{`{{ $githubApiUrl }}`}}/repos/{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}/{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}/statuses/{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}" \
-                                -d '{
-                                  "state": "failure",
-                                  "description": "Dev validation failed, promotion blocked",
-                                  "context": "{{`{{ $gateKey }}`}}",
-                                  "target_url": "{{`{{ $workflowsUrl }}`}}"
-                                }'
-                            else
-                              echo "Workflow succeeded — success status already reported."
-                            fi
+                          - "github-status"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--sha"
+                          - "{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}"
+                          - "--state"
+                          - "failure"
+                          - "--description"
+                          - "Dev validation failed, promotion blocked"
+                          - "--context"
+                          - "{{`{{ $gateKey }}`}}"
+                          - "--target-url"
+                          - "{{`{{ $workflowsUrl }}`}}"
+
+                    - name: update-commitstatus
+                      inputs:
+                        parameters:
+                          - name: phase
+                          - name: description
+                      resource:
+                        action: apply
+                        manifest: |
+                          apiVersion: promoter.argoproj.io/v1alpha1
+                          kind: CommitStatus
+                          metadata:
+                            name: {{`{{ $gateKey | replace "/" "-" }}`}}-{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}
+                            namespace: {{`{{ $namespace }}`}}
+                            labels:
+                              promoter.argoproj.io/commit-status: {{`{{ $gateKey | replace "/" "-" }}`}}
+                              driveby.io/project: {{`{{ $projectName }}`}}
+                              driveby.io/gate: {{`{{ $gateName }}`}}
+                          spec:
+                            gitRepositoryRef:
+                              name: {{`{{ "{{" }}workflow.parameters.app-name{{ "}}" }}`}}-gitops
+                            sha: {{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}
+                            name: {{`{{ $gateKey | replace "/" "-" }}`}}
+                            description: {{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}
+                            phase: {{`{{ "{{" }}inputs.parameters.phase{{ "}}" }}`}}
+                            url: {{`{{ $workflowsUrl }}`}}
 
   # Step 3: Auto-ready
   - step: detect-readiness

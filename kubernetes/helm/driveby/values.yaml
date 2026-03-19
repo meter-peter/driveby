@@ -82,9 +82,6 @@ defaults:
   # Secret names used by workflow steps
   secrets:
     imagePullSecret: "ghcr-creds"
-    githubPat:
-      name: "github-pat"
-      key: "token"
     apiAuth:
       name: "driveby-api-auth"
       keyField: "api-key"
@@ -104,16 +101,20 @@ defaults:
       version: "2.10.10"
       replicas: 1
 
-# GitOps Promoter
+# GitOps Promoter — auto-promotion pipeline via gitops-promoter controller
 gitopsPromoter:
-  enabled: false
+  enabled: true
+  githubApp:
+    secretName: "github-app-credentials"
+    appID: 0
+    installationID: 0
+    privateKey: ""  # Set at install: --set-file gitopsPromoter.githubApp.privateKey=/path/to/key.pem
+  branchPattern: "environment"
 
 # GitHub integration
 github:
   owner: "meter-peter"
   repo: "driveby"
-  secretName: github-pat
-  pat: ""  # Set at install: --set github.pat=ghp_xxx
 
 # RBAC
 rbac:

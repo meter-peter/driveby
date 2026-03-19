@@ -1,7 +1,7 @@
 \chapter{Related Work}
 \label{ch:related-work}
 
-This chapter surveys the landscape of API quality assurance, examining the tools, methodologies, and paradigms that inform Documentation-Driven Testing. We organize the discussion into four domains---API testing foundations, the OpenAPI ecosystem, GitOps and continuous delivery, and infrastructure-as-code---before synthesizing the identified gaps into a unified argument for DDT's contribution.
+This chapter surveys the landscape of API quality assurance, examining the tools, methodologies, and paradigms that inform Documentation-Driven Testing. We organize the discussion into five domains---API testing foundations, the OpenAPI ecosystem, GitOps and continuous delivery, infrastructure-as-code, and AI-assisted software engineering---before synthesizing the identified gaps into a unified argument for DDT's contribution.
 
 % ============================================================================
 \section{API Testing: Foundations and Taxonomy}
@@ -109,6 +109,20 @@ The DORA research program~\cite{dora-metrics}, building on the work of Forsgren,
 
 Yet API-specific quality gates remain the exception rather than the norm. SmartBear's State of API Report consistently finds that API testing is the least automated aspect of the development lifecycle~\cite{smartbear-api-report}. Teams that automate unit testing, code analysis, and infrastructure provisioning still test their APIs manually. The tooling exists---linters, fuzzers, contract testers---but no unified methodology prescribes how to combine them into a comprehensive, automated quality gate that fits naturally into a GitOps workflow.
 
+\subsection{Release Engineering and Artifact Automation}
+\label{subsec:release-engineering}
+
+Modern release engineering extends beyond testing into artifact production. GoReleaser~\cite{goreleaser} automates the production of multi-platform binaries, checksums, and GitHub Releases from a single tag push. OCI-compliant registries~\cite{helm-oci} serve not only container images but also Helm charts, enabling \texttt{helm install} directly from OCI artifacts stored alongside the application images they describe. Docker Buildx~\cite{docker-buildx} extends Docker builds to multi-platform images, ensuring that a single build pipeline produces artifacts for both amd64 and arm64 architectures.
+
+These tools represent the final link in the automation chain: from commit to validated, multi-platform, registry-hosted artifact with zero manual intervention. DDT's quality gate operates within this chain---validation results gate promotion, and promotion triggers release automation. Chapter~\ref{ch:workflow} describes how DriveBy's own CI/CD pipelines compose these tools into a fully automated release process.
+
+\subsection{Environment Promotion and Progressive Delivery}
+\label{subsec:env-promotion}
+
+GitOps pipelines typically manage multiple environments---development, staging, and production---with promotion gates between them. The GitOps Promoter~\cite{gitops-promoter} automates this promotion by watching for commit status signals and merging promotion pull requests when all gates pass. This model inverts the traditional deployment pipeline: instead of a CI server pushing artifacts through environments, a reconciliation agent in each environment pulls changes when quality signals indicate readiness.
+
+Progressive delivery patterns extend this model with canary releases, blue-green deployments, and feature flags, gradually shifting traffic to validated versions. The key insight shared by progressive delivery and DDT is that promotion decisions should be automated, evidence-based, and reversible. DDT provides the evidence (structured validation results as commit status signals); the GitOps Promoter provides the automation (merge on success, block on failure); and the GitOps model provides reversibility (rollback by reverting a Git commit).
+
 % ============================================================================
 \section{Infrastructure as Code and the Declarative Paradigm}
 \label{sec:iac-declarative}
@@ -168,6 +182,21 @@ DDT addresses this by ensuring that the specification meets a minimum knowledge 
 This positions DDT as a platform capability: a quality gate that platform teams deploy to ensure that all APIs within the organization meet the documentation standard required for self-service consumption. The validation report identifies precisely where specifications fall short, enabling targeted remediation rather than blanket documentation mandates.
 
 Platform consumers increasingly include not only human developers but also AI agents that integrate services on behalf of development teams~\cite{autonomous-agents-survey}. An agent integrating with an API has strictly less tolerance for ambiguity than a human: it cannot infer intent from endpoint naming, it cannot ask a colleague what the undocumented 422 response means, and it cannot improvise authentication from incomplete security definitions. DDT's completeness principles---P001 through P004---ensure that the specification is unambiguous and self-contained enough for machine interpretation, making DDT-validated specifications agent-ready platform artifacts. As autonomous agents become routine platform consumers, the quality bar that DDT enforces transitions from a documentation best practice to a functional prerequisite for agent-driven integration.
+
+% ============================================================================
+\section{AI-Assisted Software Engineering}
+\label{sec:ai-assisted-se}
+% ============================================================================
+
+The emergence of AI-assisted software engineering tools introduces a qualitatively new class of consumer for structured API quality signals. We distinguish three levels of AI assistance in software development.
+
+\textbf{Code completion.} GitHub Copilot and similar tools predict the next lines of code from context. Peng et al.\ demonstrate measurable productivity gains from code completion~\cite{github-copilot-research}, but these tools operate at the syntactic level: they do not reason about API contracts, quality signals, or deployment pipelines. They are consumers of documentation (as context) but not consumers of structured validation output.
+
+\textbf{Autonomous coding agents.} SWE-agent~\cite{swe-agent} and Devin~\cite{devin-cognition} represent a step beyond completion. These systems accept a task description, explore a codebase, formulate a plan, implement changes across multiple files, and submit the result for review. Wang et al.\ provide a comprehensive survey of such autonomous agents, cataloguing their architectures, tool-use patterns, and current limitations~\cite{autonomous-agents-survey}. These agents require structured, machine-readable inputs---they cannot parse Slack conversations or infer intent from naming conventions.
+
+\textbf{Agentic development workflows.} A further development is the emergence of structured knowledge protocols that bridge human intent and agent execution. The CLAUDE.md convention---a hierarchical system of project-level and directory-level instruction files---provides agents with persistent, versioned context about project structure, coding conventions, and architectural decisions. Unlike READMEs (written for humans) or configuration files (written for specific tools), CLAUDE.md files are written for agents: machine-first documentation that enables cross-session continuity and principled delegation of development tasks.
+
+DDT's structured output is naturally positioned for this ecosystem. A validation report with per-principle pass/fail status, specific check failures, and suggested remediations is an instruction set that an autonomous agent can parse, reason about, and act on. The convergence of specification-driven validation (DDT) and agent-driven development suggests a feedback loop in which agents validate, diagnose, remediate, and re-validate API specifications autonomously. Chapter~\ref{ch:ai-development} explores this convergence in detail, drawing on the experience of using AI-assisted development throughout the construction of this system and this thesis.
 
 % ============================================================================
 \section{Synthesis and Research Gap}

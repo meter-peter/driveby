@@ -13,17 +13,15 @@ data:
   domain: private.novelcore.org
   # Secret names
   imagePullSecret: ghcr-creds
-  githubPatSecretName: github-pat
-  githubPatSecretKey: token
   apiAuthSecretName: driveby-api-auth
   apiKeyHeader: X-API-Key
-  # GitHub API
-  githubApiUrl: https://api.github.com
   # Argo Workflows UI URL for commit status links
   workflowsUrl: https://argo.private.novelcore.org/workflows
   # Utility container images
   curlImage: curlimages/curl:8.7.1
   postgresImage: postgres:16-alpine
+  # GitHub App credentials secret
+  githubAppSecretName: github-app-credentials
 ---
 # Instance EnvironmentConfig — per-app config for quality gate instances
 # These values override Helm-baked defaults and can be further overridden per-CR via XRD spec fields.
@@ -45,3 +43,7 @@ data:
   # JetStream EventBus
   jetstreamVersion: "2.10.10"
   eventBusReplicas: "1"
+  # GitHub App credentials secret
+  githubAppSecretName: github-app-credentials
+  githubAppID: "0"
+  githubInstallationID: "0"

@@ -7,7 +7,7 @@ stdout
 *.log
 logs/
 /tmp/
-
+*.pem
 # Reports (generated)
 samples/reports/*.json
 samples/reports/*.md

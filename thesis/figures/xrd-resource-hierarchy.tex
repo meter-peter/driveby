@@ -1,0 +1,85 @@
+% XRD Resource Hierarchy — Chapter 5
+% Shows: What each XRD generates (Template vs Instance)
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=0.7cm,
+    xrd/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=#1!70!black,
+        fill=#1!15,
+        minimum width=4cm,
+        minimum height=0.9cm,
+        font=\small\bfseries,
+        align=center
+    },
+    resource/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!50!black,
+        fill=#1!8,
+        minimum width=3.2cm,
+        minimum height=0.6cm,
+        font=\scriptsize,
+        align=center
+    },
+    group/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!30,
+        fill=#1!3,
+        inner sep=8pt
+    }
+]
+
+% XQualityGateTemplate (left)
+\node[xrd=teal] (template) at (0,0) {XQualityGateTemplate\\(shared, 1 per gate)};
+
+\begin{scope}[on background layer]
+    \node[group=teal, fit={($(template.south west)+(-0.3,-5.3)$) ($(template.south east)+(0.3,-0.3)$)}] (tgrp) {};
+\end{scope}
+
+\node[resource=teal] (sa) at (0,-1.3) {ServiceAccount};
+\node[resource=teal] (role) at (0,-2.2) {Role (Argo RBAC)};
+\node[resource=teal] (rb) at (0,-3.1) {RoleBinding};
+\node[resource=teal] (wft) at (0,-4.0) {WorkflowTemplate\\(7-step DAG)};
+
+\draw[->,thick,teal!50!black] (template) -- (sa);
+\draw[->,thick,teal!50!black] (sa) -- (role);
+\draw[->,thick,teal!50!black] (role) -- (rb);
+\draw[->,thick,teal!50!black] (rb) -- (wft);
+
+% XQualityGate (right)
+\node[xrd=orange] (instance) at (6.5,0) {XQualityGate\\(per-API, N per gate)};
+
+\begin{scope}[on background layer]
+    \node[group=orange, fit={($(instance.south west)+(-0.3,-7.7)$) ($(instance.south east)+(0.3,-0.3)$)}] (igrp) {};
+\end{scope}
+
+\node[resource=orange] (eb) at (6.5,-1.3) {EventBus (JetStream)};
+\node[resource=orange] (es) at (6.5,-2.2) {EventSource (webhook)};
+\node[resource=orange] (sensor) at (6.5,-3.1) {Sensor (PR filter)};
+\node[resource=orange] (svc) at (6.5,-4.0) {Service};
+\node[resource=orange] (ing) at (6.5,-4.9) {Ingress (TLS)};
+
+% Promoter resources (optional)
+\node[resource=violet] (scm) at (6.5,-6.0) {ScmProvider};
+\node[resource=violet] (gitrepo) at (6.5,-6.9) {GitRepository};
+\node[resource=violet] (promstrat) at (6.5,-7.8) {PromotionStrategy};
+
+\draw[->,thick,orange!50!black] (instance) -- (eb);
+\draw[->,thick,orange!50!black] (eb) -- (es);
+\draw[->,thick,orange!50!black] (es) -- (sensor);
+\draw[->,thick,orange!50!black] (sensor) -- (svc);
+\draw[->,thick,orange!50!black] (svc) -- (ing);
+\draw[->,thick,dashed,violet!50!black] (ing) -- node[right,font=\tiny\itshape,violet!60!black] {if promoter} (scm);
+\draw[->,thick,dashed,violet!50!black] (scm) -- (gitrepo);
+\draw[->,thick,dashed,violet!50!black] (gitrepo) -- (promstrat);
+
+% Relationship arrow
+\draw[->,thick,dashed,gray] (instance.west) -- node[above,font=\tiny,gray] {templateRef} (template.east);
+
+% Legend
+\node[font=\tiny\itshape,text=violet!60!black] at (6.5,-8.6) {(GitOps Promoter resources, optional)};
+
+\end{tikzpicture}

@@ -7,14 +7,14 @@ How DriveBy implements documentation-driven quality gates using Crossplane and A
 A **quality gate** is an automated checkpoint in the SDLC that validates software against defined criteria before allowing progression. In DriveBy, quality gates enforce DDT principles against API specifications at deployment boundaries.
 
 ```
-Developer → PR → Webhook → EventSource → Sensor → Workflow → Commit Status → Merge/Block
+Developer → PR → Webhook → EventSource → Sensor → Workflow → Commit Status → CommitStatus CRD → Promoter Auto-Merge → ArgoCD Sync
 ```
 
 ## End-to-End Flow
 
 ### 1. Pull Request Created
 
-A developer opens a PR against the API repository (e.g., `meter-peter/perfect-api`).
+A developer opens a PR against the API repository (e.g., `novelcore/perfect-api`).
 
 ### 2. GitHub Webhook
 
@@ -60,18 +60,69 @@ The workflow reports a GitHub commit status:
 
 ### 7. GitOps Promoter Integration
 
-The commit status serves as a gate signal for the GitOps Promoter's `PromotionStrategy`:
+The commit status and CommitStatus CRD serve as gate signals for the GitOps Promoter. The XQualityGate composition generates:
+
+```yaml
+# ScmProvider — GitHub App auth
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: ScmProvider
+metadata:
+  name: perfect-api-github
+spec:
+  github:
+    domain: github.com
+  secretRef:
+    name: github-app-credentials
+  isApp: true
+---
+# GitRepository — repo reference
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: GitRepository
+metadata:
+  name: perfect-api-gitops
+spec:
+  owner: novelcore
+  name: perfect-api-gitops
+  scmProviderRef:
+    name: perfect-api-github
+---
+# PromotionStrategy — environment chain with commit status gates
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: PromotionStrategy
+metadata:
+  name: perfect-api-promotion
+spec:
+  gitRepositoryRef:
+    name: perfect-api-gitops
+  activeCommitStatuses:
+    - key: driveby-staging-promotion
+  proposedCommitStatuses:
+    - key: driveby-staging-promotion
+  environments:
+    - branch: environment/dev
+      autoMerge: true
+    - branch: environment/staging
+      autoMerge: true
+    - branch: environment/prod
+      autoMerge: false
+```
+
+The workflow also creates CommitStatus CRDs via the `update-commitstatus` step template:
 
 ```yaml
 apiVersion: promoter.argoproj.io/v1alpha1
-kind: PromotionStrategy
+kind: CommitStatus
+metadata:
+  name: driveby-staging-promotion-<head-sha>
+  labels:
+    promoter.argoproj.io/commit-status-key: driveby-staging-promotion
 spec:
-  environments:
-    - branch: env/staging
-      activeCommitStatuses:
-        - key: driveby/staging-promotion
-    - branch: env/prod
-      # Only promote to prod after staging gate passes
+  gitRepositoryRef:
+    name: perfect-api-gitops
+  sha: <head-sha>
+  name: driveby/staging-promotion
+  phase: success  # or pending/failure
+  description: "Dev validation passed, safe to promote"
 ```
 
 ## Crossplane XQualityGate: Declarative Approach
@@ -90,7 +141,7 @@ One template serves multiple API instances.
 
 Declares **which API to validate** and **how to trigger it**:
 - EventBus for event transport
-- EventSource for GitHub webhooks
+- EventSource for GitHub webhooks (webhook auto-provisioned by Argo Events via GitHub App)
 - Sensor for event filtering and workflow triggering
 - Ingress for webhook endpoint exposure
 
@@ -110,7 +161,11 @@ XQualityGate (1 per API)
 ├── EventSource (GitHub webhook)
 ├── Sensor (event → workflow trigger)
 ├── Service (webhook endpoint)
-└── Ingress (TLS termination)
+├── Ingress (TLS termination)
+├── ScmProvider (GitHub App auth)
+├── GitRepository (gitops repo ref)
+├── PromotionStrategy (env chain + gates)
+└── ArgoCDCommitStatus (ArgoCD health)
 ```
 
 ## Mapping to DDT Axioms

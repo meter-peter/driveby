@@ -127,18 +127,13 @@ spec:
                     type: string
                     description: "Auth header name"
                     default: "X-API-Key"
-              githubConfig:
+              githubAppConfig:
                 type: object
-                description: "GitHub PAT authentication configuration"
+                description: "GitHub App authentication configuration"
                 properties:
-                  patSecretName:
+                  secretName:
                     type: string
-                    description: "PAT secret name"
-                    default: "github-pat"
-                  patSecretKey:
-                    type: string
-                    description: "PAT secret key"
-                    default: "token"
+                    description: "Secret containing GitHub App credentials"
               ingressConfig:
                 type: object
                 description: "Ingress configuration for webhook endpoint"
@@ -171,6 +166,57 @@ spec:
               webhookPort:
                 type: integer
                 description: "Port for webhook EventSource endpoint"
+              deleteHookOnFinish:
+                type: boolean
+                description: "If true, delete the GitHub webhook that Argo Events creates when this XQualityGate/EventSource is removed"
+                default: true
+              promoterConfig:
+                type: object
+                description: "GitOps Promoter configuration for automated environment promotion"
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                    description: "GitOps Promoter resources (ScmProvider, GitRepository, PromotionStrategy) — always enabled"
+                  githubApp:
+                    type: object
+                    description: "GitHub App credentials for promoter SCM access"
+                    properties:
+                      secretName:
+                        type: string
+                        description: "Secret containing GitHub App credentials"
+                      appID:
+                        type: integer
+                        description: "GitHub App ID"
+                      installationID:
+                        type: integer
+                        description: "GitHub App Installation ID"
+                  environments:
+                    type: array
+                    description: "Ordered list of promotion environments"
+                    items:
+                      type: object
+                      required:
+                      - name
+                      - branch
+                      properties:
+                        name:
+                          type: string
+                          description: "Environment name (e.g., dev, staging, prod)"
+                        branch:
+                          type: string
+                          description: "Git branch for this environment (e.g., environment/dev)"
+                        autoMerge:
+                          type: boolean
+                          default: true
+                          description: "Auto-merge promotion PRs when commit status passes"
+                        gated:
+                          type: boolean
+                          default: false
+                          description: "Apply DriveBy commit status gate to this environment's promotions"
+                  commitStatusKey:
+                    type: string
+                    description: "Key for DriveBy CommitStatus (defaults to gateName sanitized)"
               eventTriggers:
                 type: array
                 description: "Event trigger configurations"

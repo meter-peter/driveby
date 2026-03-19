@@ -55,6 +55,11 @@ The Cloud Native Computing Foundation's annual survey reports accelerating adopt
 
 This philosophy has transformed infrastructure. It has transformed deployment. It has not yet transformed API quality assurance. The gap is not technological---OpenAPI specifications already describe APIs declaratively. The gap is methodological: no widely adopted framework treats the specification as the source from which validation is derived, executed, and reconciled automatically.
 
+\subsection{A Technology Showcase}
+\label{subsec:technology-showcase}
+
+Beyond its methodological contribution, this thesis serves as a reference implementation of how contemporary software is built, automated, and delivered. The system described in subsequent chapters integrates Kubernetes-native automation through Crossplane custom resource definitions, event-driven orchestration through Argo Events and Argo Workflows, multi-environment promotion through the GitOps Promoter, three CI/CD pipelines producing multi-platform binaries, OCI container images, and Helm charts, and AI-assisted development through agentic workflows with structured knowledge protocols. These technologies are not ancillary to the DDT contribution---they are the medium through which DDT becomes operational. A methodology that cannot be deployed declaratively, triggered automatically, and promoted through environment gates remains an academic exercise. By demonstrating DDT within a production-grade cloud-native stack deployed on a live Kubernetes cluster, this thesis shows not only \textit{what} DDT is, but \textit{how} modern software is built, tested, and delivered in the GitOps era.
+
 \subsection{The Agentic Development Frontier}
 \label{subsec:agentic-dev}
 
@@ -139,12 +144,14 @@ This thesis investigates the following research questions:
 \label{sec:contributions}
 % ============================================================================
 
-This thesis makes three contributions:
+This thesis makes four contributions:
 
 \begin{enumerate}
   \item \textbf{The DDT Methodology.} We define Documentation-Driven Testing as a formal methodology built on three axioms---Completeness, Determinism, and Observability---and eight validation principles (P001--P008) mapped systematically to these axioms. DDT provides a reusable, specification-agnostic framework for deriving API quality gates from documentation artifacts.
 
   \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements DDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, flexible), and produces structured reports suitable for CI/CD integration.
+
+  \item \textbf{Cloud-Native Quality Gate Infrastructure.} We design and deploy a Kubernetes-native quality gate system using Crossplane custom resource definitions (XRDs), Argo Events for event-driven triggering, Argo Workflows for orchestrated validation pipelines, and the GitOps Promoter for automated multi-environment promotion. This infrastructure demonstrates that DDT validation integrates natively into declarative, reconciliation-based delivery workflows---closing the gap between API quality assurance and modern GitOps practice.
 
   \item \textbf{Empirical Evaluation.} We evaluate DDT through two complementary experiments: a controlled evaluation against a reference API designed to achieve full compliance, and a large-scale evaluation against public APIs harvested from the APIs.guru~\cite{apis-guru} directory. Together, these experiments assess both the correctness and the practical utility of specification-derived validation.
 \end{enumerate}
@@ -154,4 +161,4 @@ This thesis makes three contributions:
 \label{sec:thesis-structure}
 % ============================================================================
 
-The remainder of this thesis is organized as follows. Chapter~\ref{ch:related-work} surveys related work in API testing, OpenAPI tooling, GitOps, and quality assurance frameworks, positioning DDT within the existing landscape. Chapter~\ref{ch:methodology} presents the DDT methodology in detail, defining the three axioms, eight principles, and the formal mapping between them. Chapter~\ref{ch:architecture} describes the architecture of the DriveBy framework, including the specification abstraction layer, the principle checker pattern, and the validation engine. Chapter~\ref{ch:workflow} demonstrates the end-to-end GitOps integration, showing how DriveBy operates within an event-driven Kubernetes pipeline. Chapter~\ref{ch:evaluation} presents the empirical evaluation, reporting results from both the controlled and large-scale experiments. Chapter~\ref{ch:conclusion} concludes with a summary of contributions, answers to the research questions, and directions for future work.
+The remainder of this thesis is organized as follows. Chapter~\ref{ch:related-work} surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning DDT within the existing landscape. Chapter~\ref{ch:methodology} presents the DDT methodology, defining the three axioms, eight validation principles, and the formal mapping between them. Chapter~\ref{ch:architecture} describes the CLI architecture of the DriveBy framework, including the specification abstraction layer, the principle checker pattern, and the validation engine. Chapter~\ref{ch:kubernetes} presents the Kubernetes architecture: the Crossplane XRD design, composition pipelines, Argo Events infrastructure, and the Argo Workflows validation DAG that together form the cloud-native quality gate system. Chapter~\ref{ch:workflow} describes the GitOps pipeline and CI/CD integration, covering the promotion-driven quality gate flow, the GitOps Promoter's multi-environment model, and the three CI/CD pipelines that build, test, and release DriveBy itself. Chapter~\ref{ch:evaluation} presents the empirical evaluation across three tracks: controlled validation against a reference API, large-scale validation against public APIs, and effort comparison against traditional QA approaches. Chapter~\ref{ch:ai-development} examines AI-assisted development as both a tool used to build this system and a capability that DDT's structured output enables, including the CLAUDE.md protocol and the DDT-agent feedback loop. Chapter~\ref{ch:discussion} discusses the results, revisits the research questions with evidence from the evaluation, and reflects on the thesis as a showcase of modern cloud-native technologies. Chapter~\ref{ch:conclusion} concludes with a summary of contributions, limitations, and directions for future work.

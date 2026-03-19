@@ -244,7 +244,7 @@ The production deployment runs on `private.novelcore.org` with three layers:
 - `rbac.yaml` — ServiceAccount, Role, RoleBinding
 - `workflow-templates.yaml` — Reusable validation templates
 
-**ArgoCD** manages the application environments (`perfect-api-staging` with autoSync, `perfect-api-prod` with manual sync) from the `meter-peter/perfect-api-gitops` repo.
+**ArgoCD** manages the application environments (`perfect-api-staging` with autoSync, `perfect-api-prod` with manual sync) from the `novelcore/perfect-api-gitops` repo.
 
 See [gitops-pipeline.md](gitops-pipeline.md) for the full pipeline walkthrough.
 

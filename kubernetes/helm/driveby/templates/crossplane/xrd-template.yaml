@@ -80,24 +80,28 @@ spec:
                 properties:
                   imagePullSecret:
                     type: string
-                  githubPatSecretName:
-                    type: string
-                  githubPatSecretKey:
-                    type: string
                   apiAuthSecretName:
                     type: string
                   apiKeyHeader:
                     type: string
-              githubConfig:
+              githubAppConfig:
                 type: object
-                description: "GitHub API configuration"
+                description: "GitHub App credentials for all GitHub operations"
                 properties:
-                  apiUrl:
+                  secretName:
                     type: string
-                    description: "GitHub API URL (default: https://api.github.com)"
+                    description: "Secret containing GitHub App credentials"
               workflowsUrl:
                 type: string
                 description: "Argo Workflows UI URL for commit status target_url"
+              promoterConfig:
+                type: object
+                description: "GitOps Promoter integration for CommitStatus CRD generation"
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                    description: "CommitStatus CRD steps in workflow DAG (always enabled)"
               images:
                 type: object
                 description: "Override utility container images"

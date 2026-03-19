@@ -144,4 +144,5 @@ func init() {
 	rootCmd.AddCommand(functionOnlyCmd)
 	rootCmd.AddCommand(loadOnlyCmd)
 	rootCmd.AddCommand(testOnlyCmd)
+	rootCmd.AddCommand(githubStatusCmd)
 }

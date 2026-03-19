@@ -15,15 +15,14 @@ spec:
     drivebyImage: ghcr.io/meter-peter/driveby:latest
     validationMode: strict
     serviceAccountName: driveby
+  # Optional: override GitHub App secret name (default: github-app-credentials)
+  # githubAppConfig:
+  #   secretName: my-github-app-secret
   # Optional: override cluster defaults
   # secretsConfig:
   #   imagePullSecret: my-registry-creds
-  #   githubPatSecretName: my-github-token
-  #   githubPatSecretKey: token
   #   apiAuthSecretName: my-api-auth
   #   apiKeyHeader: X-API-Key
-  # githubConfig:
-  #   apiUrl: https://github.mycompany.com/api/v3
   # workflowsUrl: https://argo.example.com/workflows
   # images:
   #   curl: curlimages/curl:8.7.1

@@ -1,9 +1,9 @@
-\chapter{System Architecture}
+\chapter{CLI Architecture}
 \label{ch:architecture}
 
-Chapter~\ref{ch:methodology} defined Documentation-Driven Testing as a two-layer methodology: three axioms and eight validation principles. This chapter describes how the DriveBy framework implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
+Chapter~\ref{ch:methodology} defined Documentation-Driven Testing as a two-layer methodology: three axioms and eight validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
 
-The chapter covers the DriveBy binary itself---its internal packages, interfaces, and data structures. Deployment into Kubernetes and GitOps pipelines is deferred to Chapter~\ref{ch:workflow}.
+The scope of this chapter is the DriveBy binary itself---its internal packages, interfaces, and data structures. The Kubernetes infrastructure that hosts DriveBy as a quality gate is presented in Chapter~\ref{ch:kubernetes}, and the GitOps pipelines that trigger and consume its output are described in Chapter~\ref{ch:workflow}.
 
 % ============================================================================
 \section{Architecture Overview}
@@ -530,9 +530,7 @@ The test inputs are derived deterministically from the specification---parameter
 \label{subsec:performance-testing}
 % ----------------------------------------------------------------------------
 
-The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from all non-destructive endpoints (excluding DELETE and PATCH), runs a configurable attack (rate, duration, concurrent users), and collects latency percentiles (P50, P95, P99), throughput (requests per second), and error rates.
-
-The results are compared against user-defined performance targets. If P95 latency exceeds the threshold or the success rate falls below the minimum, the principle is marked as failed with specific diagnostic messages. This threshold-based approach produces binary pass/fail outcomes suitable for CI/CD quality gates, satisfying the Axiom of Observability.
+The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from non-destructive endpoints, runs a configurable attack (rate, duration, concurrent users), and collects latency percentiles and throughput metrics. Results are compared against user-defined thresholds, producing binary pass/fail outcomes suitable for CI/CD quality gates. The \texttt{PrincipleChecker} wrapper for P007 that integrates these results into the unified validation report is pending.
 
 % ============================================================================
 \section{Report Generation}
@@ -624,13 +622,7 @@ Command handlers return errors via Cobra's \texttt{RunE} convention rather than 
 \label{subsec:cicd-integration}
 % ----------------------------------------------------------------------------
 
-DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocation. Three properties make this practical:
-
-\textbf{Zero configuration defaults.} Minimal mode with default timeouts requires only a specification path and a base URL. A pipeline step can begin with \texttt{driveby validate-only --openapi spec.json --api-url http://localhost:8080} and progressively add strictness.
-
-\textbf{Stdout/stderr separation.} The JSON report on stdout can be piped to \texttt{jq} for field extraction, stored as a build artifact, or forwarded to a quality dashboard. Logs on stderr provide debugging context without polluting the report stream.
-
-\textbf{GitHub integration.} The \texttt{--github-comment} flag, combined with repository and PR number flags, enables DriveBy to post validation results as PR comments. This supports both personal access tokens and GitHub App authentication (via \texttt{--github-app-id} and \texttt{--github-private-key}), making DriveBy suitable for both individual and organizational CI configurations.
+DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocation. Three properties make this practical: (1)~\textit{zero configuration defaults}---minimal mode with default timeouts requires only a specification path and a base URL; (2)~\textit{stdout/stderr separation}---the JSON report on stdout can be piped to \texttt{jq} or consumed by downstream stages without parsing logs; and (3)~\textit{GitHub integration}---the \texttt{--github-comment} flag enables DriveBy to post validation results as PR comments using either personal access tokens or GitHub App authentication. Chapter~\ref{ch:workflow} describes the full CI/CD pipelines that exercise these integration points.
 
 % ============================================================================
 \section{Summary}
@@ -641,4 +633,4 @@ This chapter described the architecture of the DriveBy framework across nine int
 
 The runtime testing subsystem (Section~\ref{sec:runtime-testing}) extends validation beyond static analysis to live API verification, deriving test cases deterministically from the specification. The report generator (Section~\ref{sec:report-generation}) produces JSON and Markdown outputs suitable for both machine consumption and human review. The CLI (Section~\ref{sec:cli}) exposes all capabilities through a four-command interface with structured exit codes designed for CI/CD integration.
 
-Chapter~\ref{ch:workflow} describes how this binary is deployed into Kubernetes-native GitOps pipelines, using Argo Events for event-driven triggering, Argo Workflows for orchestration, and GitOps Promoter for environment promotion based on validation results.
+Chapter~\ref{ch:kubernetes} describes the Kubernetes infrastructure that hosts DriveBy as a quality gate---Crossplane XRDs, Argo Events, and Argo Workflows---while Chapter~\ref{ch:workflow} describes the GitOps pipelines that trigger validation and promote environments based on its results.

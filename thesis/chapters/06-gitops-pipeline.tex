@@ -1,0 +1,231 @@
+\chapter{GitOps Pipeline and CI/CD}
+\label{ch:workflow}
+
+Chapter~\ref{ch:kubernetes} described the Kubernetes infrastructure---Crossplane XRDs, Argo Events, Argo Workflows---that implements the quality gate system. This chapter describes how that infrastructure operates within the broader GitOps pipeline: the promotion-driven quality gate flow, the event-driven validation pipeline end-to-end, the GitOps Promoter's multi-environment model, and the three CI/CD pipelines that build, test, and release the DriveBy system itself.
+
+The chapter addresses Research Question~3 (RQ3): \textit{How effectively does specification-driven quality assurance integrate into cloud-native GitOps pipelines as an autonomous quality gate?} The answer is demonstrated through a production deployment on the \texttt{private.novelcore.org} cluster, where DriveBy validates a reference API across three environments.
+
+% ============================================================================
+\section{Promotion-Driven Quality Gate}
+\label{sec:promotion-driven-gate}
+% ============================================================================
+
+The quality gate operates on a key insight: \textit{validate the source environment, not the target}. When a developer merges code into the application repository, the CI pipeline builds and deploys the new version to the development environment. ArgoCD~\cite{argocd} synchronizes the development environment automatically. The GitOps Promoter detects the successful synchronization and creates a promotion pull request proposing to update the staging environment's manifest to the new version.
+
+This promotion PR triggers the quality gate. The GitHub webhook fires, the EventSource receives the event, the Sensor filters for PR actions, and the Workflow executes validation against the \textit{development} environment---the environment where the new code is already running. The validation results determine whether the promotion PR is approved (merged) or blocked (left open with a failure status).
+
+This inversion is deliberate. Validating the source environment ensures that quality is assessed against the actual deployment rather than a hypothetical future state. If the API in development passes strict DDT validation, the same code deployed to staging will behave identically (assuming equivalent infrastructure). The alternative---validating the target environment after promotion---would detect problems only after the potentially breaking change has already been deployed, violating the shift-left principle~\cite{shift-left}.
+
+Figure~\ref{fig:gitops-pipeline} shows the end-to-end pipeline from developer pull request to validation feedback.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/workflow-pipeline.tex}%
+}
+\caption{End-to-end GitOps validation pipeline. A developer opens a promotion PR; the webhook triggers Argo Events, which submits an Argo Workflow. Validation results are posted back as commit status and PR comment (dashed feedback loop).}
+\label{fig:gitops-pipeline}
+\end{figure}
+
+% ============================================================================
+\section{Event-Driven Validation Pipeline}
+\label{sec:event-pipeline-detail}
+% ============================================================================
+
+The event-driven pipeline transforms an external webhook into a structured validation workflow through five stages: ingress, event capture, event filtering, workflow submission, and feedback reporting. This section traces a single validation trigger through the entire pipeline.
+
+% ----------------------------------------------------------------------------
+\subsection{Webhook Delivery and Ingress}
+\label{subsec:webhook-delivery}
+% ----------------------------------------------------------------------------
+
+The pipeline begins when GitHub delivers a webhook to the Ingress endpoint. The webhook URL follows the pattern:
+
+\begin{verbatim}
+https://{app}-{gate}-webhook.{domain}/{trigger-endpoint}
+\end{verbatim}
+
+For the reference deployment, this resolves to \texttt{https://perfect-api-staging-promotion-webhook.private.novelcore.org/ perfect-api-staging-promotion-pr-validation}. The Traefik Ingress controller terminates TLS (using a certificate issued by cert-manager), routes the request to the EventSource Service, and delivers the payload to the webhook listener on port~12000.
+
+% ----------------------------------------------------------------------------
+\subsection{Event Processing}
+\label{subsec:event-processing}
+% ----------------------------------------------------------------------------
+
+The EventSource receives the webhook payload and publishes it to the EventBus (NATS JetStream). The Sensor subscribes to the EventBus and evaluates the event against its configured filters. For promotion PR validation, the Sensor checks that the event type is \texttt{pull\_request} and the action is one of \texttt{opened}, \texttt{reopened}, or \texttt{synchronize}. Events that do not match---such as PR label changes, review requests, or comment events---are silently discarded.
+
+For matching events, the Sensor extracts ten parameters from the webhook payload using JSONPath expressions (detailed in Table~\ref{tab:sensor-params} of Chapter~\ref{ch:kubernetes}) and constructs a workflow submission request. The submission references the WorkflowTemplate defined by the \texttt{XQualityGateTemplate} and passes the extracted parameters as workflow arguments.
+
+% ----------------------------------------------------------------------------
+\subsection{Latency Analysis}
+\label{subsec:latency}
+% ----------------------------------------------------------------------------
+
+The end-to-end latency from webhook delivery to workflow completion depends on three factors: event processing overhead (typically under 2~seconds for EventSource $\rightarrow$ EventBus $\rightarrow$ Sensor $\rightarrow$ workflow submission), source readiness wait (0--120~seconds, depending on whether the deployment is already healthy), and validation execution time (10--60~seconds, depending on specification size and validation mode). In practice, a typical validation cycle for the reference API completes in under 90~seconds from PR creation to commit status posted.
+
+% ============================================================================
+\section{Multi-Environment Promotion}
+\label{sec:multi-env-promotion}
+% ============================================================================
+
+The GitOps Promoter~\cite{gitops-promoter} automates environment promotion by watching for commit status signals and managing promotion pull requests. Figure~\ref{fig:multi-env-promotion} shows the three-environment model.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/multi-env-promotion.tex}%
+}
+\caption{Multi-environment promotion model. Development auto-syncs; staging promotion is gated by DDT validation (commit status); production requires manual approval.}
+\label{fig:multi-env-promotion}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{PromotionStrategy}
+\label{subsec:promotion-strategy}
+% ----------------------------------------------------------------------------
+
+The PromotionStrategy custom resource defines the environment chain and the commit status keys that gate each transition. For the reference deployment, the strategy specifies three environments:
+
+\begin{enumerate}
+    \item \textbf{Development} (\texttt{dev} branch, \texttt{autoMerge: true}). Changes from the hydrator are automatically merged. No quality gate---development is the environment where new code lands first.
+    \item \textbf{Staging} (\texttt{staging} branch, \texttt{autoMerge: true}). Promotion from development to staging is gated by the \texttt{driveby/staging-promotion} commit status. The Promoter creates a promotion PR, waits for the commit status to report success, and merges automatically. If the commit status reports failure, the PR remains open and promotion is blocked.
+    \item \textbf{Production} (\texttt{prod} branch, \texttt{autoMerge: false}). Promotion from staging to production requires manual approval. A human reviewer must merge the promotion PR, providing a final checkpoint before production deployment.
+\end{enumerate}
+
+This three-tier model balances automation with safety. Development and staging promotions are fully automated (with DDT gating the staging transition); production promotion retains human oversight. Teams can adjust the \texttt{autoMerge} setting per environment to match their risk tolerance.
+
+% ----------------------------------------------------------------------------
+\subsection{CommitStatus as Quality Signal}
+\label{subsec:commit-status-signal}
+% ----------------------------------------------------------------------------
+
+The integration between DriveBy and the GitOps Promoter is mediated by two commit status mechanisms:
+
+\textbf{GitHub commit status.} The workflow's set-pending and report-success steps post commit status updates to the PR's head SHA via the GitHub API. The context key \texttt{driveby/staging-promotion} is watched by the PromotionStrategy as the gate signal. This mechanism works for any GitHub-based workflow and does not require the GitOps Promoter.
+
+\textbf{CommitStatus CRD.} When the GitOps Promoter is enabled, the workflow additionally creates a CommitStatus custom resource in the \texttt{driveby} namespace. The CommitStatus transitions through three phases: \texttt{pending} (set at workflow start), \texttt{success} (set after validation passes), or \texttt{failure} (set by the exit handler). The Promoter controller watches this resource and uses its phase to determine whether to merge the promotion PR. This CRD-based mechanism provides a Kubernetes-native alternative to the GitHub API and enables the Promoter to function even in environments where direct GitHub API access is restricted.
+
+% ----------------------------------------------------------------------------
+\subsection{ChangeTransferPolicy}
+\label{subsec:change-transfer-policy}
+% ----------------------------------------------------------------------------
+
+The ChangeTransferPolicy defines how changes flow between environments at the Git level. For each environment, the policy maps a \textit{proposed} branch (e.g., \texttt{staging-next}) to an \textit{active} branch (e.g., \texttt{staging}). The Promoter creates pull requests from the proposed branch to the active branch and merges them when commit status gates pass. This branch-based model integrates naturally with Git-based review workflows: promotion PRs appear in the repository's PR list, carry commit status checks, and leave an auditable merge history.
+
+% ============================================================================
+\section{CI/CD of DriveBy Itself}
+\label{sec:cicd-driveby}
+% ============================================================================
+
+DriveBy's own development is governed by three GitHub Actions~\cite{github-actions} workflows that implement continuous integration, continuous delivery, and release automation. These pipelines demonstrate that the project practices what it preaches: automated quality gates at every stage of the delivery lifecycle.
+
+% ----------------------------------------------------------------------------
+\subsection{Continuous Integration}
+\label{subsec:ci-pipeline}
+% ----------------------------------------------------------------------------
+
+The \texttt{ci.yml} workflow triggers on every push to \texttt{main} and every pull request. It runs a single \texttt{build-and-test} job on Ubuntu with Go~1.21 that executes four steps:
+
+\begin{enumerate}
+    \item \textbf{Build}: Compiles the DriveBy binary with version and commit SHA injected via \texttt{ldflags}.
+    \item \textbf{Static analysis}: Runs \texttt{go vet} to detect common Go errors.
+    \item \textbf{Test}: Executes the test suite from \texttt{driveby-cli/test/} with coverage profiling (\texttt{-coverprofile=coverage.out}).
+    \item \textbf{Documentation check}: Runs \texttt{tools/check-docs.sh} to verify that all documented components exist and all source files have corresponding documentation entries.
+\end{enumerate}
+
+The documentation check is a meta-validation step: it ensures that the CLAUDE.md files and documentation artifacts remain synchronized with the codebase. This check embodies a DDT-adjacent principle---documentation completeness should be verified automatically, not assumed.
+
+On pull requests, the workflow uploads the coverage artifact for review. On pushes to \texttt{main}, a subsequent \texttt{docker} job builds the container image (without pushing) to verify the Docker build remains functional.
+
+% ----------------------------------------------------------------------------
+\subsection{Docker Image Publishing}
+\label{subsec:docker-publish}
+% ----------------------------------------------------------------------------
+
+The \texttt{docker-publish.yml} workflow publishes container images to the GitHub Container Registry (GHCR) on pushes to \texttt{main} when files in \texttt{driveby-cli/} change. It uses Docker Buildx~\cite{docker-buildx} for multi-platform builds, injecting three build arguments:
+
+\begin{itemize}
+    \item \texttt{VERSION}: The current Git tag or \texttt{dev} for unreleased commits.
+    \item \texttt{COMMIT}: The short Git SHA.
+    \item \texttt{BUILD\_DATE}: The ISO-8601 build timestamp.
+\end{itemize}
+
+Images are tagged with \texttt{latest} and the short commit SHA. Layer caching via GitHub Actions Cache reduces build times for incremental changes. The resulting image at \texttt{ghcr.io/meter-peter/driveby} is the same image used by the Argo Workflows validation pipeline.
+
+% ----------------------------------------------------------------------------
+\subsection{Release Pipeline}
+\label{subsec:release-pipeline}
+% ----------------------------------------------------------------------------
+
+The \texttt{release.yml} workflow triggers on semantic version tag pushes (\texttt{v*}) and orchestrates the full release process. Figure~\ref{fig:release-pipeline} shows the pipeline structure.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/release-pipeline.tex}%
+}
+\caption{Release pipeline triggered by a version tag push. After the test gate passes, three parallel jobs produce platform binaries, Docker images, and a Helm chart.}
+\label{fig:release-pipeline}
+\end{figure}
+
+The pipeline runs four jobs:
+
+\textbf{Test gate.} Re-runs \texttt{go vet} and the test suite. All subsequent jobs depend on this gate---no artifacts are produced if tests fail.
+
+\textbf{GoReleaser.} Uses GoReleaser~\cite{goreleaser}~v2 to produce cross-compiled binaries for six platforms: Linux, macOS, and Windows on both amd64 and arm64 architectures. GoReleaser generates SHA256 checksums for each binary and creates a GitHub Release with the binaries, checksums, and an auto-generated changelog attached. The release changelog summarizes commits since the previous tag.
+
+\textbf{Docker.} Builds and pushes the container image with three semver-derived tags: the full version (\texttt{0.4.0}), the major.minor (\texttt{0.4}), and \texttt{latest}. This tagging strategy enables consumers to pin to a specific patch version, track a minor version, or always use the latest release.
+
+\textbf{Helm.} Packages the Helm chart from \texttt{kubernetes/helm/driveby/} and pushes it to the OCI registry at \texttt{oci://ghcr.io/meter-peter/charts/driveby}. The chart version matches the release tag, ensuring that the chart, container image, and CLI binary are version-aligned.
+
+The three artifact-producing jobs run in parallel after the test gate, minimizing release time. A typical release completes in under five minutes from tag push to all artifacts published.
+
+% ============================================================================
+\section{Operational Deployment}
+\label{sec:operational-deployment}
+% ============================================================================
+
+The quality gate system is deployed on \texttt{private.novelcore.org}, a Kubernetes cluster managed by Kubecore with ArgoCD~\cite{argocd}, Crossplane~\cite{crossplane}, Argo Events~\cite{argo-events}, Argo Workflows~\cite{argo-workflows}, Traefik, and cert-manager pre-installed.
+
+% ----------------------------------------------------------------------------
+\subsection{Prerequisites}
+\label{subsec:prerequisites}
+% ----------------------------------------------------------------------------
+
+The deployment assumes six cluster components:
+
+\begin{enumerate}
+    \item \textbf{Crossplane} (v1.14+) with the \texttt{provider-kubernetes} provider for managing in-cluster resources.
+    \item \textbf{ArgoCD} (v2.8+) for GitOps-based application deployment across dev, staging, and prod namespaces.
+    \item \textbf{Argo Workflows} (v3.5+) for container-native workflow execution.
+    \item \textbf{Argo Events} (v1.9+) for event-driven workflow triggering.
+    \item \textbf{Traefik} (v2.10+) as the Ingress controller for routing webhook traffic.
+    \item \textbf{cert-manager} (v1.13+) for automated TLS certificate provisioning.
+\end{enumerate}
+
+These components are managed independently of the DriveBy installation and are assumed to be healthy. The DriveBy Helm chart creates resources that reference these components (Ingress resources reference the Traefik ingress class, certificate annotations reference the cert-manager issuer) but does not install them.
+
+% ----------------------------------------------------------------------------
+\subsection{Verification}
+\label{subsec:verification}
+% ----------------------------------------------------------------------------
+
+After deployment, the operator verifies the system through four checks:
+
+\begin{enumerate}
+    \item \textbf{Crossplane readiness}: \texttt{kubectl get composite} confirms that XQualityGateTemplate and XQualityGate resources report \texttt{READY=True}.
+    \item \textbf{Argo Events health}: \texttt{kubectl get eventbus,eventsource,sensor -n driveby} confirms all three resources are in a ready state.
+    \item \textbf{Webhook connectivity}: A test webhook payload sent to the Ingress endpoint returns a 200 response.
+    \item \textbf{End-to-end validation}: Opening a test PR on the monitored repository triggers a workflow run. The operator watches \texttt{kubectl get workflows -n driveby} for workflow completion and verifies that commit status and PR comments appear on the test PR.
+\end{enumerate}
+
+% ============================================================================
+\section{Summary}
+\label{sec:pipeline-summary}
+% ============================================================================
+
+This chapter described the operational GitOps pipeline that connects DriveBy's validation capabilities to the software delivery lifecycle. The promotion-driven quality gate (Section~\ref{sec:promotion-driven-gate}) validates the source environment before allowing promotion, implementing the shift-left principle at the deployment boundary. The event-driven pipeline (Section~\ref{sec:event-pipeline-detail}) transforms GitHub webhooks into structured validation workflows with sub-90-second latency. The multi-environment promotion model (Section~\ref{sec:multi-env-promotion}) automates the dev $\rightarrow$ staging transition through DDT-gated commit status signals while retaining manual approval for production.
+
+The CI/CD pipelines for DriveBy itself (Section~\ref{sec:cicd-driveby}) demonstrate end-to-end release automation: from test gate through parallel artifact production (binaries, images, Helm chart) to registry publication. Together, these pipelines show that DDT validation integrates naturally into modern GitOps workflows---not as an afterthought bolted onto an existing pipeline, but as a first-class quality gate in a declarative, event-driven delivery system.
+
+Chapter~\ref{ch:evaluation} evaluates this system empirically, measuring DDT's effectiveness across controlled and large-scale settings.

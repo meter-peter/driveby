@@ -1,16 +1,19 @@
+# ChangeTransferPolicy — auto-created by the promoter controller from PromotionStrategy
+# This example shows the expected output. Do NOT create manually.
 apiVersion: promoter.argoproj.io/v1alpha1
 kind: ChangeTransferPolicy
 metadata:
-  name: driveby-ctp
+  name: perfect-api-promotion-environment-dev
   namespace: driveby
 spec:
   repositoryReference:
-    owner: ""
-    name: ""
+    owner: novelcore
+    name: perfect-api-gitops
     scmProviderRef:
-      name: github-scm-provider
-  proposedBranch: environment/dev
+      name: perfect-api-github
+  proposedBranch: environment/dev-next
+  activeBranch: environment/dev
   activeCommitStatuses:
-    - key: driveby-validation
+    - key: driveby-staging-promotion
   proposedCommitStatuses:
-    - key: driveby-validation
+    - key: driveby-staging-promotion

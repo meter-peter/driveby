@@ -1,16 +1,19 @@
+# CommitStatus — created by the Argo Workflow update-commitstatus step
+# This example shows what the workflow produces. Do NOT create manually.
 apiVersion: promoter.argoproj.io/v1alpha1
 kind: CommitStatus
 metadata:
-  name: driveby-validation
+  name: driveby-staging-promotion-abc1234
   namespace: driveby
+  labels:
+    promoter.argoproj.io/commit-status: driveby-staging-promotion
+    driveby.io/project: driveby
+    driveby.io/gate: staging-promotion
 spec:
-  repositoryReference:
-    owner: ""
-    name: ""
-    scmProviderRef:
-      name: github-scm-provider
-  sha: ""
-  name: driveby-validation
-  description: "DriveBy API validation results"
-  phase: pending
-  url: ""
+  gitRepositoryRef:
+    name: perfect-api-gitops
+  sha: abc1234def5678  # Actual commit SHA from workflow parameter
+  name: driveby-staging-promotion
+  description: "Dev validation passed, safe to promote"
+  phase: success
+  url: https://argo.private.novelcore.org/workflows

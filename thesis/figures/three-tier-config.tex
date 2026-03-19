@@ -1,0 +1,58 @@
+% Three-Tier Configuration Resolution — Chapter 5
+% Shows: Helm defaults → EnvironmentConfig → XRD spec (with override arrows)
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=1.2cm,
+    tier/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=4.5cm,
+        minimum height=1.2cm,
+        font=\small,
+        align=center
+    },
+    desc/.style={
+        font=\scriptsize,
+        text=#1!70!black,
+        align=left
+    },
+    result/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=black!60,
+        fill=black!8,
+        minimum width=4.5cm,
+        minimum height=0.8cm,
+        font=\small\bfseries,
+        align=center
+    },
+    override/.style={
+        ->,
+        thick,
+        #1!50!black
+    }
+]
+
+% Three tiers (top to bottom = lowest to highest priority)
+\node[tier=blue] (helm) at (0,0) {\textbf{Tier 1: Helm Values}\\(values.yaml)};
+\node[desc=blue] at (5.5,0) {Chart-wide defaults:\\domain, image, secrets, ports};
+
+\node[tier=teal] (envconfig) at (0,-2.2) {\textbf{Tier 2: EnvironmentConfig}\\(Crossplane)};
+\node[desc=teal] at (5.5,-2.2) {Cluster-level overrides:\\namespace, ingress class, issuer};
+
+\node[tier=orange] (xrd) at (0,-4.4) {\textbf{Tier 3: XRD Spec}\\(per-resource)};
+\node[desc=orange] at (5.5,-4.4) {Instance-level overrides:\\app name, API config, events};
+
+\node[result] (resolved) at (0,-6.2) {Resolved Configuration};
+
+% Override arrows (each tier overrides the previous)
+\draw[override=blue] (helm) -- node[left,font=\scriptsize] {defaults} (envconfig);
+\draw[override=teal] (envconfig) -- node[left,font=\scriptsize] {overrides} (xrd);
+\draw[override=orange] (xrd) -- node[left,font=\scriptsize] {overrides} (resolved);
+
+% Priority label
+\node[font=\tiny\itshape,rotate=90,text=black!50] at (-3.2,-3.1) {increasing priority $\longrightarrow$};
+
+\end{tikzpicture}

@@ -175,7 +175,7 @@ PR on perfect-api  ──>  GitHub webhook  ──>  EventSource  ──>  Senso
 
 ### How it works
 
-1. A developer opens (or updates) a PR on `meter-peter/perfect-api`
+1. A developer opens (or updates) a PR on `novelcore/perfect-api`
 2. GitHub sends a `pull_request` webhook to `https://driveby-webhook.private.novelcore.org/github/driveby`
 3. The Argo Events **EventSource** receives it, publishes to the JetStream **EventBus**
 4. The **Sensor** filters for `opened`/`reopened`/`synchronize` actions
@@ -194,7 +194,7 @@ kubectl get eventbus,eventsource,sensor -n driveby
 kubectl get pods -n driveby | grep -E 'eventbus|eventsource|sensor'
 
 # Check webhook exists
-gh api repos/meter-peter/perfect-api/hooks
+gh api repos/novelcore/perfect-api/hooks
 
 # Watch for triggered workflows
 kubectl get workflows -n driveby --watch

@@ -1,0 +1,16 @@
+# GitRepository — generated automatically by XQualityGate composition when promoterConfig.enabled=true
+# This example shows what the composition produces. Do NOT apply manually if using Crossplane.
+apiVersion: promoter.argoproj.io/v1alpha1
+kind: GitRepository
+metadata:
+  name: perfect-api-gitops
+  namespace: driveby
+  labels:
+    driveby.io/app: perfect-api
+    driveby.io/project: driveby
+    driveby.io/gate: staging-promotion
+spec:
+  owner: novelcore
+  name: perfect-api-gitops
+  scmProviderRef:
+    name: perfect-api-github

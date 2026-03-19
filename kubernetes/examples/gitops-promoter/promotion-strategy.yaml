@@ -1,17 +1,25 @@
+# PromotionStrategy — generated automatically by XQualityGate composition when promoterConfig.enabled=true
+# This example shows what the composition produces. Do NOT apply manually if using Crossplane.
 apiVersion: promoter.argoproj.io/v1alpha1
 kind: PromotionStrategy
 metadata:
-  name: driveby-promotion
+  name: perfect-api-promotion
   namespace: driveby
+  labels:
+    driveby.io/app: perfect-api
+    driveby.io/project: driveby
+    driveby.io/gate: staging-promotion
 spec:
+  gitRepositoryRef:
+    name: perfect-api-gitops
+  activeCommitStatuses:
+    - key: driveby-staging-promotion
+  proposedCommitStatuses:
+    - key: driveby-staging-promotion
   environments:
     - branch: environment/dev
       autoMerge: true
     - branch: environment/staging
-      autoMerge: false
+      autoMerge: true
     - branch: environment/prod
       autoMerge: false
-  activeCommitStatuses:
-    - key: driveby-validation
-  proposedCommitStatuses:
-    - key: driveby-validation

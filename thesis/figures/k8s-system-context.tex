@@ -1,0 +1,82 @@
+% Kubernetes System Context — Chapter 5
+% Shows: Cluster components and namespace layout
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=0.8cm,
+    ns/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!10,
+        minimum width=3cm,
+        minimum height=0.7cm,
+        font=\small,
+        align=center
+    },
+    component/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!50!black,
+        fill=#1!8,
+        minimum width=2.6cm,
+        minimum height=0.6cm,
+        font=\scriptsize,
+        align=center
+    },
+    cluster/.style={
+        rectangle,
+        rounded corners=6pt,
+        draw=black!50,
+        fill=black!3,
+        minimum width=14cm,
+        minimum height=6.5cm
+    },
+    clabel/.style={
+        font=\small\bfseries,
+        text=black!70
+    }
+]
+
+% Cluster boundary
+\node[cluster] (cluster) at (6.5,-2.8) {};
+\node[clabel] at (6.5,0.5) {Kubernetes Cluster: private.novelcore.org};
+
+% Control Plane namespace (left column)
+\node[ns=teal] (driveby-ns) at (2.5,-0.3) {\textbf{driveby}};
+\node[component=teal] (xrds) at (1.2,-1.3) {Crossplane\\XRDs};
+\node[component=teal] (argo-events) at (3.8,-1.3) {Argo Events\\(EventBus)};
+\node[component=teal] (workflows) at (1.2,-2.3) {Argo Workflows\\(Templates)};
+\node[component=teal] (promoter) at (3.8,-2.3) {GitOps\\Promoter};
+
+\draw[->,thick,teal!50!black] (driveby-ns) -- (xrds);
+\draw[->,thick,teal!50!black] (driveby-ns) -- (argo-events);
+\draw[->,thick,teal!50!black] (driveby-ns) -- (workflows);
+\draw[->,thick,teal!50!black] (driveby-ns) -- (promoter);
+
+% Application namespaces (right column)
+\node[ns=blue] (dev-ns) at (7.5,-0.3) {perfect-api-dev};
+\node[ns=orange] (staging-ns) at (10.5,-0.3) {perfect-api-staging};
+\node[ns=red] (prod-ns) at (10.5,-1.5) {perfect-api-prod};
+
+\node[component=blue] (dev-app) at (7.5,-1.3) {API + DB\\(auto-sync)};
+\node[component=orange] (stg-app) at (10.5,-2.5) {API + DB\\(gated)};
+\node[component=red] (prod-app) at (10.5,-3.7) {API + DB\\(manual)};
+
+\draw[->,thick,blue!50!black] (dev-ns) -- (dev-app);
+\draw[->,thick,orange!50!black] (staging-ns) -- (stg-app);
+\draw[->,thick,red!50!black] (prod-ns) -- (prod-app);
+
+% Shared infrastructure (bottom)
+\node[component=violet] (argocd) at (2.5,-3.7) {ArgoCD};
+\node[component=violet] (crossplane) at (2.5,-4.7) {Crossplane\\(provider-k8s)};
+\node[component=violet] (traefik) at (5.5,-3.7) {Traefik\\Ingress};
+\node[component=violet] (cert-mgr) at (5.5,-4.7) {cert-manager};
+
+% Promotion arrows
+\draw[->,thick,dashed,green!50!black] (dev-app.east) -- node[above,font=\tiny,green!50!black] {promote} (stg-app.west);
+\draw[->,thick,dashed,green!50!black] (stg-app.south) -- node[right,font=\tiny,green!50!black] {promote} (prod-app.north);
+
+% Validation arrow
+\draw[->,thick,dashed,teal!50!black] (workflows.south) -- ++(0,-0.5) -| node[below,font=\tiny,teal!50!black,pos=0.25] {validate} (dev-app.south);
+
+\end{tikzpicture}

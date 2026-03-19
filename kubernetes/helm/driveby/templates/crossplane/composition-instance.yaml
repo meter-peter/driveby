@@ -60,11 +60,6 @@ spec:
           {{`{{- $appNamespace := $targetCluster.namespace | default $appName -}}`}}
           {{`{{- $repoConfig := $spec.repositoryConfig -}}`}}
 
-          {{`{{/* GitHub PAT config */}}`}}
-          {{`{{- $githubConfig := $spec.githubConfig | default dict -}}`}}
-          {{`{{- $patSecretName := $githubConfig.patSecretName | default "github-pat" -}}`}}
-          {{`{{- $patSecretKey := $githubConfig.patSecretKey | default "token" -}}`}}
-
           {{`{{/* API config and promotion model */}}`}}
           {{`{{- $apiConfig := $spec.apiConfig | default dict -}}`}}
           {{`{{- $serviceName := $apiConfig.serviceName | default $appName -}}`}}
@@ -84,6 +79,15 @@ spec:
           {{`{{- $jetstreamVersion := $eventBusConfig.jetstreamVersion | default ($env.jetstreamVersion | default `}}"{{ .Values.defaults.eventBus.jetstream.version }}"{{`) -}}`}}
           {{`{{- $eventBusReplicas := $eventBusConfig.replicas | default ($env.eventBusReplicas | default `}}{{ .Values.defaults.eventBus.jetstream.replicas }}{{`) -}}`}}
           {{`{{- $appPort := $apiConfig.port | default 8000 -}}`}}
+
+          {{`{{/* GitOps Promoter config */}}`}}
+          {{`{{- $promoterConfig := $spec.promoterConfig | default dict -}}`}}
+          {{`{{- $commitStatusKey := $promoterConfig.commitStatusKey | default ($gateName | replace "/" "-") -}}`}}
+          {{`{{- $promoterGithubApp := $promoterConfig.githubApp | default dict -}}`}}
+          {{`{{- $githubAppSecretName := $promoterGithubApp.secretName | default ($env.githubAppSecretName | default `}}"{{ .Values.gitopsPromoter.githubApp.secretName }}"{{`) -}}`}}
+          {{`{{- $githubAppID := $promoterGithubApp.appID | default ($env.githubAppID | default `}}{{ .Values.gitopsPromoter.githubApp.appID }}{{`) -}}`}}
+          {{`{{- $githubInstallationID := $promoterGithubApp.installationID | default ($env.githubInstallationID | default `}}{{ .Values.gitopsPromoter.githubApp.installationID }}{{`) -}}`}}
+          {{`{{- $promoterEnvironments := $promoterConfig.environments | default list -}}`}}
 
           {{`{{/* Event triggers */}}`}}
           {{`{{- $triggers := $spec.eventTriggers | default list -}}`}}
@@ -129,7 +133,7 @@ spec:
 
           {{`{{- if $hasTriggers }}`}}
           ---
-          # EventSource — GitHub webhook with PAT auth
+          # EventSource — GitHub webhook receiver
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
@@ -163,16 +167,21 @@ spec:
                         endpoint: /{{`{{ $appName }}`}}-{{`{{ $gateName }}`}}-{{`{{ $trigger.name }}`}}
                         port: {{`{{ $webhookPort | quote }}`}}
                         method: POST
+                        url: https://{{`{{ $webhookHost }}`}}
+                      githubApp:
+                        privateKey:
+                          name: {{`{{ $githubAppSecretName }}`}}
+                          key: githubAppPrivateKey
+                        appID: {{`{{ $githubAppID }}`}}
+                        installationID: {{`{{ $githubInstallationID }}`}}
                       events:
                       {{`{{- range $event := $trigger.events }}`}}
                         - {{`{{ $event | quote }}`}}
                       {{`{{- end }}`}}
-                      apiToken:
-                        name: {{`{{ $patSecretName }}`}}
-                        key: {{`{{ $patSecretKey }}`}}
-                      insecure: false
                       active: true
                       contentType: json
+                      insecure: false
+                      deleteHookOnFinish: {{`{{ $spec.deleteHookOnFinish | default true }}`}}
                     {{`{{- end }}`}}
 
           ---
@@ -352,6 +361,135 @@ spec:
                             port:
                               number: {{`{{ $webhookPort }}`}}
           {{`{{- end }}`}}
+
+          ---
+          # ScmProvider — GitHub App authentication for promoter
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-scmprovider
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: scmprovider
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: ScmProvider
+                metadata:
+                  name: {{`{{ $appName }}`}}-github
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  github:
+                    appID: {{`{{ $githubAppID }}`}}
+                    installationID: {{`{{ $githubInstallationID }}`}}
+                  secretRef:
+                    name: {{`{{ $githubAppSecretName }}`}}
+                  isApp: true
+
+          ---
+          # GitRepository — promoter repo reference via ScmProvider
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-gitrepository
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: gitrepository
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: GitRepository
+                metadata:
+                  name: {{`{{ $appName }}`}}-gitops
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  github:
+                    owner: {{`{{ $repoConfig.owner }}`}}
+                    name: {{`{{ $repoConfig.name }}`}}
+                  scmProviderRef:
+                    name: {{`{{ $appName }}`}}-github
+
+          ---
+          # PromotionStrategy — defines environment chain + commit status gates
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-promotionstrategy
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: promotionstrategy
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: PromotionStrategy
+                metadata:
+                  name: {{`{{ $appName }}`}}-promotion
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  gitRepositoryRef:
+                    name: {{`{{ $appName }}`}}-gitops
+                  environments:
+                  {{`{{- range $envEntry := $promoterEnvironments }}`}}
+                    - branch: {{`{{ $envEntry.branch }}`}}
+                      autoMerge: {{`{{ hasKey $envEntry "autoMerge" | ternary $envEntry.autoMerge true }}`}}
+                      {{`{{- if $envEntry.gated }}`}}
+                      activeCommitStatuses:
+                        - key: {{`{{ $commitStatusKey }}`}}
+                      proposedCommitStatuses:
+                        - key: {{`{{ $commitStatusKey }}`}}
+                      {{`{{- end }}`}}
+                  {{`{{- end }}`}}
+
+          ---
+          # ArgoCDCommitStatus — aggregates ArgoCD app health into CommitStatus
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $name }}`}}-argocd-commitstatus
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: argocd-commitstatus
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: ArgoCDCommitStatus
+                metadata:
+                  name: {{`{{ $appName }}`}}-argocd-health
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/project: {{`{{ $projectName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  applicationSelector:
+                    matchLabels:
+                      driveby.io/app: {{`{{ $appName }}`}}
+                  promotionStrategyRef:
+                    name: {{`{{ $appName }}`}}-promotion
 
   # Step 3: Auto-ready
   - step: detect-readiness
