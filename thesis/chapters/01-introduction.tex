@@ -91,6 +91,8 @@ DDT operationalizes this insight. A specification that passes all eight DDT prin
 
 This framing reveals DDT as a knowledge transfer mechanism disguised as a testing tool. The eight principles do not merely assess technical correctness; they assess whether the specification captures the organizational knowledge that a consumer needs. When the engineer who designed the authentication flow leaves, the knowledge persists---not in a Confluence page that drifts, but in a specification whose completeness is continuously validated.
 
+The same completeness that enables human onboarding enables a qualitatively different kind of consumer: autonomous engineering agents. Tribal knowledge is inaccessible to new hires; it is \textit{entirely} inaccessible to software agents, which cannot ask clarifying questions in Slack or infer intent from naming conventions. An agent that consumes a DDT-validated specification receives a machine-readable contract with documented endpoints, error semantics, security requirements, and schema constraints---exactly the structured input that agent architectures require to reason about API interactions~\cite{swe-agent}. DDT does not predict when autonomous agents will routinely maintain and consume APIs. It ensures that the knowledge substrate is machine-readable \textit{today}, so that it is agent-ready when the tooling matures.
+
 \subsection{Why Auto-Generated Specifications Matter}
 \label{subsec:autogen-specs}
 

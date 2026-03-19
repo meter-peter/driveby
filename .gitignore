@@ -11,3 +11,16 @@ logs/
 # Reports (generated)
 samples/reports/*.json
 samples/reports/*.md
+
+# LaTeX build artifacts
+thesis/**/*.aux
+thesis/**/*.bbl
+thesis/**/*.bcf
+thesis/**/*.blg
+thesis/**/*.out
+thesis/**/*.run.xml
+thesis/**/*.toc
+thesis/**/*.pdf
+
+# Claude Code
+.claude/

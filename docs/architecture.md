@@ -201,10 +201,52 @@ make validate  # Runs driveby against perfect-api
 ```
 
 ### Kubernetes (Production)
-- Helm chart in `kubernetes/helm/driveby/`
-- Raw YAML examples in `kubernetes/raw/`
-- Designed for CronJob-based periodic validation or CI/CD job integration
-- ArgoCD-compatible: GitOps deployment via Application manifest
+
+The production deployment runs on `private.novelcore.org` with three layers:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  GitHub                                                     │
+│  ┌──────────────┐   webhook    ┌──────────────────────┐    │
+│  │ perfect-api   │────────────>│ perfect-api-gitops    │    │
+│  │ (app code)    │             │ (Kustomize overlays)  │    │
+│  └──────────────┘             └──────────────────────┘    │
+└────────────────────────────────────────────────────────────┘
+         |                                |
+         | webhook                        | GitOps sync
+         v                                v
+┌────────────────────────────────────────────────────────────┐
+│  Kubernetes Cluster                                         │
+│                                                             │
+│  driveby namespace:                                         │
+│    EventBus (NATS) ─> EventSource ─> Sensor ─> Workflow    │
+│    WorkflowTemplates, RBAC, Secrets                        │
+│                                                             │
+│  perfect-api-staging:          perfect-api-prod:            │
+│    Deployment (autoSync)         Deployment (manual sync)   │
+│    ┌─────────────────┐          ┌─────────────────┐        │
+│    │ perfect-api:8080 │          │ perfect-api:8080 │        │
+│    └─────────────────┘          └─────────────────┘        │
+│                                                             │
+│  argocd namespace:                                          │
+│    AppProject, Applications                                 │
+└────────────────────────────────────────────────────────────┘
+```
+
+**Event-driven trigger chain:** GitHub webhook → Traefik Ingress → Argo Events EventSource → JetStream EventBus → Sensor → Argo Workflow → DriveBy validation → commit status + PR comment.
+
+**Key manifests** (all in `kubernetes/manifests/`, applied via `kubectl apply`):
+- `eventbus.yaml` — 3-replica JetStream NATS cluster
+- `eventsource.yaml` — GitHub webhook listener
+- `sensor.yaml` — PR event filter and workflow trigger
+- `webhook-ingress.yaml` — Service + Traefik Ingress
+- `staging-promotion.yaml` — 7-step DAG workflow template
+- `rbac.yaml` — ServiceAccount, Role, RoleBinding
+- `workflow-templates.yaml` — Reusable validation templates
+
+**ArgoCD** manages the application environments (`perfect-api-staging` with autoSync, `perfect-api-prod` with manual sync) from the `meter-peter/perfect-api-gitops` repo.
+
+See [gitops-pipeline.md](gitops-pipeline.md) for the full pipeline walkthrough.
 
 ## Source References
 

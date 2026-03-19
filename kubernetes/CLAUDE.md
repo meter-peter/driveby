@@ -8,6 +8,10 @@ kubernetes/
     rbac.yaml           # ServiceAccount + Role + RoleBinding for driveby namespace
     workflow-templates.yaml  # WorkflowTemplates: driveby-validate, driveby-full-pipeline
     staging-promotion.yaml   # WorkflowTemplate: driveby-staging-promotion (DAG pipeline)
+    eventbus.yaml       # JetStream EventBus (3-replica NATS cluster)
+    eventsource.yaml    # GitHub webhook EventSource for perfect-api PRs
+    sensor.yaml         # Sensor: PR events → driveby-staging-promotion workflow
+    webhook-ingress.yaml # Service + Traefik Ingress for webhook endpoint
   helm/
     driveby/            # Helm chart (reference templates, not actively deployed)
       Chart.yaml
@@ -26,8 +30,13 @@ Production-deployed workflow infrastructure in the `driveby` namespace:
 - **rbac.yaml** — ServiceAccount `driveby`, Role (workflows, secrets, pods access), RoleBinding
 - **workflow-templates.yaml** — Reusable `driveby-validate` and `driveby-full-pipeline` templates
 - **staging-promotion.yaml** — Full DAG pipeline: set-pending → db-sync → spec-check → validate → functional-test → report-success → comment-pr
+- **eventbus.yaml** — JetStream EventBus (`default`), 3-replica NATS cluster for event transport
+- **eventsource.yaml** — GitHub webhook EventSource (`driveby-github`), listens on port 12000 at `/github/driveby` for `pull_request` and `push` events on `meter-peter/perfect-api`
+- **sensor.yaml** — Sensor (`driveby-sensor`), filters PR `opened`/`reopened`/`synchronize` actions and submits `driveby-staging-promotion` workflow with PR number, head SHA, owner, repo as parameters
+- **webhook-ingress.yaml** — ClusterIP Service + Traefik Ingress exposing the EventSource at `https://driveby-webhook.private.novelcore.org`
 
 Apply with: `kubectl apply -f kubernetes/manifests/`
+Apply order: eventbus.yaml first (NATS cluster must be ready before EventSource/Sensor can connect).
 
 ## Cluster State
 
@@ -44,6 +53,16 @@ Apply with: `kubectl apply -f kubernetes/manifests/`
 | AppProject `perfect-api` | argocd | Sources: `meter-peter/perfect-api-gitops`, Destinations: staging + prod |
 | Application `perfect-api-staging` | argocd | Path: `overlays/staging`, autoSync + selfHeal |
 | Application `perfect-api-prod` | argocd | Path: `overlays/prod`, manual sync |
+
+### Argo Events
+| Resource | Name | Namespace | Details |
+|----------|------|-----------|---------|
+| EventBus | `default` | driveby | 3-replica JetStream (NATS v2.10.10) |
+| EventSource | `driveby-github` | driveby | GitHub webhook on port 12000, endpoint `/github/driveby` |
+| Sensor | `driveby-sensor` | driveby | Triggers `driveby-staging-promotion` on PR open/reopen/sync |
+| Ingress | `driveby-webhook` | driveby | `driveby-webhook.private.novelcore.org` → EventSource svc |
+
+GitHub webhook (ID: 601488783) is configured on `meter-peter/perfect-api` to POST `pull_request` events to `https://driveby-webhook.private.novelcore.org/github/driveby`.
 
 ### Secrets
 | Secret | Namespace(s) | Keys |

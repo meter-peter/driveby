@@ -47,6 +47,8 @@ Determinism requires that the validation process is reproducible. The same input
 
 Determinism is critical for automation. A quality gate that produces different results on repeated execution cannot serve as a reliable gate. Principle P006 (Functional Testing) operationalizes determinism by defining runtime tests that produce binary pass/fail outcomes from deterministic HTTP interactions derived from the specification.
 
+Determinism is especially critical when the consumer of validation results is an autonomous agent rather than a human. An agent that receives different results on repeated runs of the same specification against the same API cannot distinguish genuine regressions from noise, and therefore cannot be trusted for autonomous corrective action~\cite{swe-agent}. The Axiom of Determinism ensures that agents can treat DDT output as a stable signal on which to base automated remediation decisions.
+
 % ----------------------------------------------------------------------------
 \subsection{Axiom of Observability}
 \label{subsec:axiom-observability}
@@ -57,6 +59,8 @@ Determinism is critical for automation. A quality gate that produces different r
 Observability requires that validation output is structured, quantifiable, and suitable for automated consumption. A validation run must produce results that a CI pipeline can gate on, a dashboard can display, and an engineer can act on without interpreting free-text narratives.
 
 This axiom distinguishes DDT from informal quality reviews. A code review may identify documentation gaps, but the review's output is unstructured prose attached to a pull request. DDT produces structured reports with per-principle pass/fail status, severity classifications, specific check results, and suggested remediations. Principles P005 (Security Standards), P007 (Performance Testing), and P008 (API Versioning Strategy) operationalize observability by validating properties---security posture, performance characteristics, and versioning discipline---that are inherently observable and measurable.
+
+The phrase ``automated consumption'' is deliberately broad. It encompasses CI/CD pipelines that gate on exit codes, dashboards that visualize quality trends, \textit{and} autonomous engineering agents that parse validation reports and generate remediation code~\cite{swe-agent, devin-cognition}. Structured, machine-readable output is the prerequisite for any automated actor---whether it is a shell script checking an exit code or an AI agent reasoning about which principle failed and why. By requiring observability at the axiomatic level, DDT ensures that its output is consumable by the full spectrum of automated actors, including those that do not yet exist.
 
 Observability also enables longitudinal tracking. Because DDT results are structured and deterministic, organizations can track quality trends across versions, compare scores across APIs, and identify systemic weaknesses that warrant process changes.
 

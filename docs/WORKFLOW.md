@@ -92,7 +92,7 @@ spec:
       - name: host
         value: "api.example.com"
     container:
-      image: your-driveby-image:latest
+      image: ghcr.io/meter-peter/driveby:latest
       command: ["driveby", "validate-only"]
       args:
         - "--openapi={{inputs.parameters.openapi-url}}"
@@ -131,7 +131,7 @@ spec:
   templates:
   - name: load-test
     container:
-      image: your-driveby-image:latest
+      image: ghcr.io/meter-peter/driveby:latest
       command: ["driveby", "load-only"]
       args:
         - "--openapi=https://api.example.com/openapi.json"
@@ -150,6 +150,57 @@ spec:
       - name: reports
         emptyDir: {}
 ```
+
+## Automated GitOps Pipeline (Argo Events)
+
+The production deployment uses Argo Events to automatically trigger validation when a PR is opened on the `perfect-api` repository. This is the primary workflow for the thesis demonstration.
+
+```
+PR on perfect-api  ──>  GitHub webhook  ──>  EventSource  ──>  Sensor  ──>  Workflow
+                                                                              |
+                                                   ┌──────────────────────────┘
+                                                   v
+                                          set-pending-status
+                                                   |
+                                               db-sync
+                                                   |
+                                           spec-sync-check
+                                                   |
+                                          validate-staging
+                                                   |
+                                          functional-test
+                                                   |
+                                     report-success + comment-pr
+```
+
+### How it works
+
+1. A developer opens (or updates) a PR on `meter-peter/perfect-api`
+2. GitHub sends a `pull_request` webhook to `https://driveby-webhook.private.novelcore.org/github/driveby`
+3. The Argo Events **EventSource** receives it, publishes to the JetStream **EventBus**
+4. The **Sensor** filters for `opened`/`reopened`/`synchronize` actions
+5. The Sensor submits a `driveby-staging-promotion` Argo **Workflow** with PR metadata
+6. The workflow DAG runs: pending status, DB sync, spec check, validation, functional test
+7. On success: commit status set to `success`, validation report posted as PR comment
+8. On failure: commit status set to `failure`, exit handler reports the error
+
+### Verify the pipeline
+
+```bash
+# Check Argo Events resources
+kubectl get eventbus,eventsource,sensor -n driveby
+
+# Check pods are running
+kubectl get pods -n driveby | grep -E 'eventbus|eventsource|sensor'
+
+# Check webhook exists
+gh api repos/meter-peter/perfect-api/hooks
+
+# Watch for triggered workflows
+kubectl get workflows -n driveby --watch
+```
+
+For full details, see [gitops-pipeline.md](gitops-pipeline.md).
 
 ## Validation Report
 
