@@ -13,14 +13,15 @@ Central documentation for the DriveBy project. Agents should consult this direct
 | `MINIMAL_MODE_GUIDE.md` | Guide to minimal validation mode — when and why to use it |
 | `WORKFLOW.md` | End-to-end workflow documentation — local, remote URL, batch, and K8s deployment |
 | `gitops-pipeline.md` | GitOps pipeline — PR webhook → Argo Events → Workflow → validation → PR feedback |
+| `responsibility-matrix.md` | Responsibility matrix — what DriveBy owns vs. what clients own |
 | `deployment-guide.md` | Full deployment guide — Helm install, secrets, XRDs, verification checklist |
-| `quality-gate-sdlc.md` | Quality gate SDLC architecture — Crossplane XQualityGate, flow diagrams, DDT mapping |
+| `quality-gate-sdlc.md` | Quality gate SDLC architecture — Crossplane XSDLC, flow diagrams, DDT mapping |
 | `prd-01/` | Initial PRD iteration (historical) |
 
 ## Existing Documentation
 
 The following files are complete and available:
-- `principles/P001.md` through `P008.md` — per-principle documentation (all 8 principles documented)
+- `principles/P001.md` through `P009.md` — per-principle documentation (all 9 principles documented)
 - `ddt-axioms.md` — DDT methodology explanation (3 axioms: Completeness, Determinism, Observability)
 - `architecture.md` — System design and dependency flow
 - `gitops-pipeline.md` — Complete GitOps pipeline documentation (webhook → Argo Events → Workflow → PR feedback)
@@ -35,10 +36,10 @@ When writing thesis chapters, consult these docs:
 |---------------|-------------|
 | Ch.1 Introduction | `prd-vision-thesis.md`, `Thesis.md` |
 | Ch.2 Related Work | `prd-vision-thesis.md` (positioning) |
-| Ch.3 Methodology | `principles/P001-P008.md`, `ddt-axioms.md` |
-| Ch.4 Architecture | `architecture.md`, `CLI_USAGE.md` |
-| Ch.5 Workflow | `WORKFLOW.md`, `gitops-pipeline.md`, `MINIMAL_MODE_GUIDE.md`, `deployment-guide.md`, `quality-gate-sdlc.md` |
-| Ch.6 Evaluation | `evaluation-methodology.md` |
+| Ch.3 Methodology | `principles/P001-P009.md`, `ddt-axioms.md` |
+| Ch.4 CLI Architecture | `architecture.md`, `CLI_USAGE.md` |
+| Ch.5 Kubernetes Architecture | `deployment-guide.md`, `quality-gate-sdlc.md`, `responsibility-matrix.md` |
+| Ch.6 GitOps Pipeline | `gitops-pipeline.md`, `evaluation-methodology.md` |
 | Ch.7 Conclusion | `Thesis.md` |
 
 ## Diagram Coverage

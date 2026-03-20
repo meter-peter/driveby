@@ -54,7 +54,7 @@ func init() {
 	rootCmd.PersistentFlags().String("environment", "production", "Environment name (e.g., production, staging)")
 	rootCmd.PersistentFlags().String("version", "1.0.0", "API version being tested")
 	rootCmd.PersistentFlags().Duration("timeout", 30*time.Second, "Request timeout")
-	rootCmd.PersistentFlags().String("validation-mode", "minimal", "validation mode (strict, minimal)")
+	rootCmd.PersistentFlags().String("validation-mode", "minimal", "validation mode (strict, minimal, test-ready)")
 	rootCmd.PersistentFlags().String("report-dir", "/tmp/driveby-reports", "report output directory")
 	rootCmd.PersistentFlags().String("host", "", "Host of the API to test (required)")
 
@@ -145,4 +145,5 @@ func init() {
 	rootCmd.AddCommand(loadOnlyCmd)
 	rootCmd.AddCommand(testOnlyCmd)
 	rootCmd.AddCommand(githubStatusCmd)
+	rootCmd.AddCommand(githubCommentCmd)
 }

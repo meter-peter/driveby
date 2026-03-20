@@ -1,0 +1,90 @@
+% Single-Repo Branch Flow — Chapter 6, Section 6.3.3
+% Branch topology: main → manual deploy → env-next → promoter PRs → env → ArgoCD
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    branch/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=3.2cm,
+        minimum height=0.7cm,
+        font=\scriptsize,
+        align=center
+    },
+    action/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=gray!50,
+        fill=gray!5,
+        minimum width=2.8cm,
+        minimum height=0.5cm,
+        font=\tiny,
+        align=center
+    },
+    boundary/.style={
+        dashed,
+        thick,
+        #1!60!black
+    }
+]
+
+% Main branch (top)
+\node[branch=violet] (main) at (5,0) {\textbf{main}\\(src/ + manifests/)};
+
+% BYOCI boundary
+\draw[boundary=red!70!black] (-0.5,-0.7) -- (10.5,-0.7);
+\node[font=\tiny\bfseries,text=red!60!black,anchor=east] at (10.5,-0.5) {Developer's CI ends here};
+\node[font=\tiny\bfseries,text=teal!60!black,anchor=east] at (10.5,-0.9) {XSDLC delivery begins here};
+
+% Manual deploy action (targets ONE env at a time)
+\node[action, minimum width=4cm] (deploy) at (5,-1.5) {driveby-deploy.yml\\(workflow\_dispatch)};
+\draw[->,thick,violet!50!black] (main) -- (deploy);
+
+% env-next branches — deploy targets one at a time (dashed lines for non-selected)
+\node[branch=blue] (devnext)     at (0,-2.8) {environment/\\dev-next};
+\node[branch=blue] (stagingnext) at (5,-2.8) {environment/\\staging-next};
+\node[branch=blue] (prodnext)    at (10,-2.8) {environment/\\prod-next};
+
+\draw[->,thick,blue!50!black] (deploy.south) -- ++(0,-0.3) -| (devnext.north);
+\draw[->,thick,blue!50!black,dashed] (deploy.south) -- (stagingnext.north);
+\draw[->,thick,blue!50!black,dashed] (deploy.south) -- ++(0,-0.3) -| (prodnext.north);
+
+% Label showing it's one-at-a-time
+\node[font=\tiny,text=blue!60!black,anchor=west] at (6.8,-2.1) {one env per trigger};
+
+% Promoter PRs
+\node[action] (pr1) at (0,-3.8) {auto-merge (no gate)};
+\node[action] (pr2) at (5,-3.8) {Promoter PR};
+\node[action] (pr3) at (10,-3.8) {Promoter PR};
+
+\draw[->,thick,blue!40!black] (devnext) -- (pr1);
+\draw[->,thick,blue!40!black] (stagingnext) -- (pr2);
+\draw[->,thick,blue!40!black] (prodnext) -- (pr3);
+
+% Quality gates
+\node[branch=orange, minimum width=2cm] (gate1) at (5,-4.7) {DDT Gate};
+\node[branch=orange, minimum width=2cm] (gate2) at (10,-4.7) {Load Gate};
+
+\draw[->,thick,orange!50!black] (pr2) -- (gate1);
+\draw[->,thick,orange!50!black] (pr3) -- (gate2);
+
+% Active branches
+\node[branch=teal] (dev)     at (0,-5.6) {environment/\\dev};
+\node[branch=teal] (staging) at (5,-5.6) {environment/\\staging};
+\node[branch=teal] (prod)    at (10,-5.6) {environment/\\prod};
+
+\draw[->,thick,teal!50!black] (pr1) -- (dev);
+\draw[->,thick,teal!50!black] (gate1) -- (staging);
+\draw[->,thick,teal!50!black] (gate2) -- (prod);
+
+% ArgoCD sync
+\node[branch=green!60!black] (argodev) at (0,-6.8) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argostg) at (5,-6.8) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black, draw=red!60!black, fill=red!8] (argoprod) at (10,-6.8) {ArgoCD sync\\(manual)};
+
+\draw[->,thick,green!40!black] (dev) -- (argodev);
+\draw[->,thick,green!40!black] (staging) -- (argostg);
+\draw[->,thick,red!40!black] (prod) -- (argoprod);
+
+\end{tikzpicture}

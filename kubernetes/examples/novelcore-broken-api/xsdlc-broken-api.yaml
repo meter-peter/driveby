@@ -1,0 +1,28 @@
+apiVersion: driveby.io/v1alpha1
+kind: XSDLC
+metadata:
+  name: broken-api
+  namespace: driveby
+spec:
+  repository:
+    owner: novelcore
+    name: broken-api
+    defaultBranch: main
+    manifestsPath: manifests
+
+  apiConfig:
+    port: 8000
+    openapiEndpoint: /openapi.json
+
+  validationDefaults:
+    validationMode: minimal
+
+  environments:
+    - name: dev
+    - name: staging
+      gate:
+        checks:
+          - type: validate-only
+            validationConfig:
+              validationMode: minimal
+          - type: functional-test

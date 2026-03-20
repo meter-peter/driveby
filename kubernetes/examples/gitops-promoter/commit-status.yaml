@@ -11,7 +11,7 @@ metadata:
     driveby.io/gate: staging-promotion
 spec:
   gitRepositoryRef:
-    name: perfect-api-gitops
+    name: perfect-api
   sha: abc1234def5678  # Actual commit SHA from workflow parameter
   name: driveby-staging-promotion
   description: "Dev validation passed, safe to promote"

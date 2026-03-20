@@ -1,0 +1,98 @@
+% Provider Architecture — Chapter 5, Section 5.3.4
+% Shows: XSDLC CR → Composition → provider-kubernetes + provider-upjet-github
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    node distance=1cm,
+    comp/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=violet!70!black,
+        fill=violet!15,
+        minimum width=4.5cm,
+        minimum height=1cm,
+        font=\small\bfseries,
+        align=center
+    },
+    provider/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=4.2cm,
+        minimum height=0.9cm,
+        font=\small,
+        align=center
+    },
+    resource/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!40!black,
+        fill=#1!6,
+        minimum width=3.4cm,
+        minimum height=0.6cm,
+        font=\scriptsize,
+        align=center
+    },
+    group/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!30,
+        fill=#1!3,
+        inner sep=8pt
+    },
+    grouplabel/.style={
+        font=\scriptsize\bfseries,
+        text=#1!70!black
+    }
+]
+
+% Top: XSDLC CR
+\node[comp] (xsdlc) at (4.5,0) {XSDLC CR\\(driveby.io/v1alpha1)};
+
+% Middle: Composition + functions
+\node[comp, draw=teal!70!black, fill=teal!12] (composition) at (4.5,-1.8) {Composition Pipeline\\go-templating $\rightarrow$ auto-ready};
+
+\draw[->,thick,violet!60!black] (xsdlc) -- node[right,font=\scriptsize] {spec} (composition);
+
+% Left branch: provider-kubernetes
+\node[provider=blue] (pk) at (1.2,-3.6) {\textbf{provider-kubernetes}\\v0.14.1};
+\node[grouplabel=blue] at (1.2,-4.5) {In-Cluster Resources};
+
+\node[resource=blue] (sa)     at (1.2,-5.2) {ServiceAccount, RBAC};
+\node[resource=blue] (events) at (1.2,-5.9) {EventBus, EventSource, Sensor};
+\node[resource=blue] (wf)     at (1.2,-6.6) {WorkflowTemplate, Ingress};
+\node[resource=blue] (promo)  at (1.2,-7.3) {PromotionStrategy, ArgoCD Apps};
+
+% Right branch: provider-upjet-github
+\node[provider=orange] (pg) at (7.8,-3.6) {\textbf{provider-upjet-github}\\v0.18.0};
+\node[grouplabel=orange] at (7.8,-4.5) {GitHub API Resources};
+
+\node[resource=orange] (branches) at (7.8,-5.2) {Branch (env + env-next)};
+\node[resource=orange] (files)    at (7.8,-5.9) {RepositoryFile (workflows)};
+\node[resource=orange] (protect)  at (7.8,-6.6) {BranchProtection};
+
+% Arrows from composition to providers
+\draw[->,thick,blue!50!black] (composition.south) -- ++(0,-0.4) -| (pk.north);
+\draw[->,thick,orange!50!black] (composition.south) -- ++(0,-0.4) -| (pg.north);
+
+% Provider to resources
+\draw[->,thick,blue!40!black] (pk) -- (sa);
+\draw[->,thick,blue!40!black] (sa) -- (events);
+\draw[->,thick,blue!40!black] (events) -- (wf);
+\draw[->,thick,blue!40!black] (wf) -- (promo);
+
+\draw[->,thick,orange!40!black] (pg) -- (branches);
+\draw[->,thick,orange!40!black] (branches) -- (files);
+\draw[->,thick,orange!40!black] (files) -- (protect);
+
+% Background groups
+\begin{scope}[on background layer]
+    \node[group=blue, fit={($(sa.north west)+(-0.3,0.3)$) ($(promo.south east)+(0.3,-0.3)$)}] {};
+    \node[group=orange, fit={($(branches.north west)+(-0.3,0.3)$) ($(protect.south east)+(0.3,-0.3)$)}] {};
+\end{scope}
+
+% Control plane labels
+\node[font=\tiny\itshape,text=blue!60!black] at (1.2,-8.0) {Kubernetes control plane};
+\node[font=\tiny\itshape,text=orange!60!black] at (7.8,-7.3) {GitHub control plane};
+
+\end{tikzpicture}

@@ -1,0 +1,1291 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xsdlcs.driveby.io
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+    driveby.io/type: sdlc
+spec:
+  compositeTypeRef:
+    apiVersion: driveby.io/v1alpha1
+    kind: XSDLC
+  mode: Pipeline
+  pipeline:
+
+  # Step 1: Generate all resources via go-templating
+  - step: generate-sdlc-resources
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{`{{- $xr := .observed.composite.resource -}}`}}
+          {{`{{- $spec := $xr.spec -}}`}}
+          {{`{{- $appName := $xr.metadata.name -}}`}}
+          {{`{{- $xrName := $xr.metadata.name -}}`}}
+          {{`{{- $xrNamespace := $xr.metadata.namespace | default "driveby" -}}`}}
+
+          {{`{{/* Global config from Helm values (baked at template time) */}}`}}
+          {{`{{- $providerConfigName := `}}"{{ .Values.crossplane.providerConfig.name }}"{{` -}}`}}
+          {{`{{- $baseDomain := `}}"{{ .Values.defaults.ingress.baseDomain | default "private.novelcore.org" }}"{{` -}}`}}
+          {{`{{- $appNamespace := `}}"{{ .Values.namespace | default "driveby" }}"{{` -}}`}}
+          {{`{{- $webhookPort := `}}{{ .Values.defaults.webhookPort }}{{` -}}`}}
+          {{`{{- $ingressClassName := `}}"{{ .Values.defaults.ingress.className }}"{{` -}}`}}
+          {{`{{- $clusterIssuer := `}}"{{ .Values.defaults.ingress.clusterIssuer }}"{{` -}}`}}
+          {{`{{- $jetstreamVersion := `}}"{{ .Values.defaults.eventBus.jetstream.version }}"{{` -}}`}}
+          {{`{{- $eventBusReplicas := `}}{{ .Values.defaults.eventBus.jetstream.replicas }}{{` -}}`}}
+          {{`{{- $imagePullSecret := `}}"{{ .Values.defaults.secrets.imagePullSecret }}"{{` -}}`}}
+          {{`{{- $apiAuthSecretName := `}}"{{ .Values.defaults.secrets.apiAuth.name }}"{{` -}}`}}
+          {{`{{- $apiKeyHeader := `}}"{{ .Values.defaults.secrets.apiKeyHeader }}"{{` -}}`}}
+          {{`{{- $workflowsUrl := `}}"{{ .Values.defaults.argoWorkflowsUrl }}"{{` -}}`}}
+          {{`{{- $curlImage := `}}"{{ .Values.defaults.images.curl }}"{{` -}}`}}
+          {{`{{- $githubAppSecretName := `}}"{{ .Values.gitopsPromoter.githubApp.secretName }}"{{` -}}`}}
+          {{`{{- $githubAppID := `}}{{ .Values.gitopsPromoter.githubApp.appID }}{{` -}}`}}
+          {{`{{- $githubInstallationID := `}}{{ .Values.gitopsPromoter.githubApp.installationID }}{{` -}}`}}
+          {{`{{- $argocdProject := `}}"{{ .Values.argocd.project | default "driveby" }}"{{` -}}`}}
+          {{`{{- $argocdAppNamespace := `}}"{{ .Values.argocd.namespace | default "argocd" }}"{{` -}}`}}
+          {{- if .Values.githubProvider.enabled }}
+          {{`{{- $githubProviderConfigName := `}}"{{ .Values.githubProvider.providerConfigName }}"{{` -}}`}}
+          {{- end }}
+
+          {{`{{/* Repository config */}}`}}
+          {{`{{- $repoOwner := $spec.repository.owner -}}`}}
+          {{`{{- $repoName := $spec.repository.name -}}`}}
+          {{`{{- $repoDefaultBranch := $spec.repository.defaultBranch | default "main" -}}`}}
+          {{`{{- $repoFullName := printf "%s/%s" $repoOwner $repoName -}}`}}
+          {{`{{- $manifestsPath := $spec.repository.manifestsPath | default "manifests" -}}`}}
+
+          {{`{{/* API config with defaults */}}`}}
+          {{`{{- $apiConfig := $spec.apiConfig | default dict -}}`}}
+          {{`{{- $serviceName := $apiConfig.serviceName | default $appName -}}`}}
+          {{`{{- $appPort := $apiConfig.port | default 8000 -}}`}}
+          {{`{{- $openapiEndpoint := $apiConfig.openapiEndpoint | default "/openapi.json" -}}`}}
+
+          {{`{{/* Validation defaults */}}`}}
+          {{`{{- $valDefaults := $spec.validationDefaults | default dict -}}`}}
+          {{`{{- $defaultDrivebyImage := $valDefaults.drivebyImage | default "ghcr.io/meter-peter/driveby:latest" -}}`}}
+          {{`{{- $defaultValidationMode := $valDefaults.validationMode | default "strict" -}}`}}
+
+          {{`{{/* Environments */}}`}}
+          {{`{{- $envs := $spec.environments -}}`}}
+          {{`{{- $triggerName := "pr-trigger" -}}`}}
+
+          ---
+          # ServiceAccount with imagePullSecrets (app-level, shared -- Orphan so other XSDLCs survive)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-serviceaccount
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: serviceaccount
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: ServiceAccount
+                metadata:
+                  name: driveby
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                imagePullSecrets:
+                  - name: {{`{{ $imagePullSecret }}`}}
+
+          ---
+          # EventBus -- JetStream for event transport (app-level, shared -- Orphan so other XSDLCs survive)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-eventbus
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: eventbus
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: EventBus
+                metadata:
+                  name: default
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                spec:
+                  jetstream:
+                    version: {{`{{ $jetstreamVersion | quote }}`}}
+                    replicas: {{`{{ $eventBusReplicas }}`}}
+                    streamConfig: |
+                      replicas: {{`{{ $eventBusReplicas }}`}}
+
+          ---
+          # ScmProvider -- GitHub App authentication for promoter (app-level, once)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-scmprovider
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: scmprovider
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: ScmProvider
+                metadata:
+                  name: {{`{{ $appName }}`}}-github
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                spec:
+                  github:
+                    appID: {{`{{ $githubAppID }}`}}
+                    installationID: {{`{{ $githubInstallationID }}`}}
+                  secretRef:
+                    name: {{`{{ $githubAppSecretName }}`}}
+                  isApp: true
+
+          ---
+          # GitRepository -- promoter repo reference (app-level, once)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-gitrepository
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: gitrepository
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: GitRepository
+                metadata:
+                  name: {{`{{ $appName }}`}}-gitops
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                spec:
+                  github:
+                    owner: {{`{{ $repoOwner }}`}}
+                    name: {{`{{ $repoName }}`}}
+                  scmProviderRef:
+                    name: {{`{{ $appName }}`}}-github
+
+          ---
+          # PromotionStrategy -- built from full environments array (app-level, once)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-promotionstrategy
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: promotionstrategy
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: PromotionStrategy
+                metadata:
+                  name: {{`{{ $appName }}`}}-promotion
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                spec:
+                  gitRepositoryRef:
+                    name: {{`{{ $appName }}`}}-gitops
+                  environments:
+                  {{`{{- range $idx, $env := $envs }}`}}
+                  {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) }}`}}
+                  {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
+                    - branch: {{`{{ $branch }}`}}
+                      autoMerge: {{`{{ $autoMerge }}`}}
+                      {{`{{- if $env.gate }}`}}
+                      {{`{{- $commitStatusKey := "" }}`}}
+                      {{`{{- if $env.gate.commitStatusKey }}`}}
+                      {{`{{- $commitStatusKey = $env.gate.commitStatusKey }}`}}
+                      {{`{{- else }}`}}
+                      {{`{{- $commitStatusKey = printf "%s-gate" $env.name }}`}}
+                      {{`{{- end }}`}}
+                      activeCommitStatuses:
+                        - key: {{`{{ $commitStatusKey }}`}}
+                      proposedCommitStatuses:
+                        - key: {{`{{ $commitStatusKey }}`}}
+                      {{`{{- end }}`}}
+                  {{`{{- end }}`}}
+
+          ---
+          # ArgoCDCommitStatus -- aggregates ArgoCD app health (app-level, once)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-argocd-commitstatus
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: argocd-commitstatus
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: promoter.argoproj.io/v1alpha1
+                kind: ArgoCDCommitStatus
+                metadata:
+                  name: {{`{{ $appName }}`}}-argocd-health
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                spec:
+                  applicationSelector:
+                    matchLabels:
+                      driveby.io/app: {{`{{ $appName }}`}}
+                  promotionStrategyRef:
+                    name: {{`{{ $appName }}`}}-promotion
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Environment branches — 2 per env (env + env-next)            */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{- if .Values.githubProvider.enabled }}
+          {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) -}}`}}
+          {{`{{- $idxStr := printf "%d" $idx }}`}}
+          ---
+          # Branch: {{`{{ $branch }}`}} (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: Branch
+          metadata:
+            name: {{`{{ $xrName }}`}}-branch-{{`{{ $env.name }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: branch-{{`{{ $env.name }}`}}
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $repoName }}`}}
+              branch: {{`{{ $branch }}`}}
+              sourceBranch: {{`{{ $repoDefaultBranch }}`}}
+
+          ---
+          # Branch: {{`{{ $branch }}`}}-next (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: Branch
+          metadata:
+            name: {{`{{ $xrName }}`}}-branch-{{`{{ $env.name }}`}}-next
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: branch-{{`{{ $env.name }}`}}-next
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $repoName }}`}}
+              branch: {{`{{ $branch }}`}}-next
+              sourceBranch: {{`{{ $repoDefaultBranch }}`}}
+
+          {{`{{- end }}`}}
+          {{- end }}
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Repo workflow — driveby-deploy (v2.1.0 BYOCI showcase)         */}}`}}
+          {{`{{/* This workflow demonstrates the BYOCI (Bring Your Own CI)       */}}`}}
+          {{`{{/* model: the developer's own CI builds the image, then this      */}}`}}
+          {{`{{/* workflow deploys manifests + image tag to an environment.       */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{- if .Values.githubProvider.enabled }}
+          ---
+          # RepositoryFile: driveby-deploy.yml
+          # BYOCI showcase: developer's CI builds the image, this workflow deploys it
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: RepositoryFile
+          metadata:
+            name: {{`{{ $xrName }}`}}-workflow-deploy
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: workflow-deploy
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $repoName }}`}}
+              branch: {{`{{ $repoDefaultBranch }}`}}
+              file: .github/workflows/driveby-deploy.yml
+              commitMessage: "chore: add driveby-deploy workflow [driveby-managed]"
+              overwriteOnCreate: true
+              content: |
+                name: DriveBy Deploy
+                on:
+                  workflow_dispatch:
+                    inputs:
+                      source_branch:
+                        description: 'Branch to deploy from'
+                        required: true
+                        default: '{{`{{ $repoDefaultBranch }}`}}'
+                        type: string
+                      environment:
+                        description: 'Target environment'
+                        required: true
+                        type: choice
+                        options:
+                {{`{{- range $idx, $env := $envs }}`}}
+                          - {{`{{ $env.name }}`}}
+                {{`{{- end }}`}}
+                      image_tag:
+                        description: 'Container image tag to deploy'
+                        required: true
+                        default: 'latest'
+                        type: string
+                concurrency:
+                  group: deploy-${{`{{ "{{ inputs.environment }}" }}`}}
+                  cancel-in-progress: false
+                permissions:
+                  contents: write
+                jobs:
+                  deploy:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v4
+                        with:
+                          ref: ${{`{{ "{{ inputs.source_branch }}" }}`}}
+                          fetch-depth: 0
+                      - name: Deploy to environment
+                        run: |
+                          ENV_BRANCH="environment/${{`{{ "{{ inputs.environment }}" }}`}}-next"
+                          git config user.name "driveby-bot"
+                          git config user.email "driveby-bot@users.noreply.github.com"
+                          # Fetch the env-next branch (create orphan if first deploy)
+                          if git fetch origin "$ENV_BRANCH" 2>/dev/null; then
+                            git checkout "$ENV_BRANCH"
+                          else
+                            git checkout --orphan "$ENV_BRANCH"
+                            git rm -rf . 2>/dev/null || true
+                          fi
+                          # Clean — env branches contain ONLY manifests
+                          git rm -rf . 2>/dev/null || true
+                          # Copy manifests from source branch, flatten to branch root
+                          git checkout ${{`{{ "{{ inputs.source_branch }}" }}`}} -- {{`{{ $manifestsPath }}`}}/
+                          mv {{`{{ $manifestsPath }}`}}/* . 2>/dev/null || true
+                          rm -rf {{`{{ $manifestsPath }}`}}/
+                          # Stamp image tag
+                          sed -i "s|image: .*|image: ghcr.io/{{`{{ $repoOwner }}`}}/{{`{{ $repoName }}`}}:${{`{{ "{{ inputs.image_tag }}" }}`}}|" deployment.yaml
+                          git add -A
+                          git diff --cached --quiet || git commit -m "deploy: ${{`{{ "{{ inputs.source_branch }}" }}`}} → ${{`{{ "{{ inputs.environment }}" }}`}} ({{`{{ $repoName }}`}}:${{`{{ "{{ inputs.image_tag }}" }}`}})"
+                          git push origin "$ENV_BRANCH"
+          {{- end }}
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Per-environment: ArgoCD Applications (always generated)       */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) }}`}}
+          {{`{{- $envNamespace := $env.namespaceOverride | default (printf "%s-%s" $appName $env.name) }}`}}
+          {{`{{- $idxStr := printf "%d" $idx }}`}}
+          {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
+          {{`{{- $argocdAppName := printf "%s-%s" $appName $env.name }}`}}
+          {{`{{- $argocdRepoUrl := printf "https://github.com/%s/%s.git" $repoOwner $repoName }}`}}
+          ---
+          # ArgoCD Application (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-argocd-app-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: argocd-app-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Application
+                metadata:
+                  name: {{`{{ $argocdAppName }}`}}
+                  namespace: {{`{{ $argocdAppNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/environment: {{`{{ $env.name | quote }}`}}
+                  finalizers:
+                    - resources-finalizer.argocd.argoproj.io
+                spec:
+                  project: {{`{{ $argocdProject }}`}}
+                  source:
+                    repoURL: {{`{{ $argocdRepoUrl }}`}}
+                    targetRevision: {{`{{ $branch }}`}}
+                    path: "."
+                  destination:
+                    server: https://kubernetes.default.svc
+                    namespace: {{`{{ $envNamespace }}`}}
+                  syncPolicy:
+                    {{`{{- if $autoMerge }}`}}
+                    automated:
+                      selfHeal: true
+                      prune: true
+                    {{`{{- end }}`}}
+                    syncOptions:
+                      - CreateNamespace=true
+          {{`{{- end }}`}}
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Per-gate resources: range over environments with gate field   */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{`{{- $prevEnvName := "" -}}`}}
+          {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) -}}`}}
+          {{`{{- $envNamespace := $env.namespaceOverride | default (printf "%s-%s" $appName $env.name) -}}`}}
+          {{`{{- $idxStr := printf "%d" $idx -}}`}}
+          {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true -}}`}}
+
+          {{`{{- if $env.gate -}}`}}
+
+          {{`{{/* Checks array — gate.checks[] (v2.0.0) */}}`}}
+          {{`{{- $checks := $env.gate.checks | default list -}}`}}
+
+          {{`{{/* Commit status key */}}`}}
+          {{`{{- $commitStatusKey := "" -}}`}}
+          {{`{{- if $env.gate.commitStatusKey -}}`}}
+          {{`{{- $commitStatusKey = $env.gate.commitStatusKey -}}`}}
+          {{`{{- else -}}`}}
+          {{`{{- $commitStatusKey = printf "%s-gate" $env.name -}}`}}
+          {{`{{- end -}}`}}
+
+          {{`{{- $sourceNs := "" -}}`}}
+          {{`{{- if $env.gate.sourceNamespaceOverride -}}`}}
+          {{`{{- $sourceNs = $env.gate.sourceNamespaceOverride -}}`}}
+          {{`{{- else if $prevEnvName -}}`}}
+          {{`{{- $sourceNs = printf "%s-%s" $appName $prevEnvName -}}`}}
+          {{`{{- else -}}`}}
+          {{`{{- $sourceNs = printf "%s-%s" $appName $env.name -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $targetNs := $envNamespace -}}`}}
+
+          {{`{{/* Gate naming */}}`}}
+          {{`{{- $gateName := printf "%s-gate" $env.name -}}`}}
+          {{`{{- $drivebyImage := $defaultDrivebyImage -}}`}}
+
+          {{`{{/* Determine which step templates are needed */}}`}}
+          {{`{{- $templateFlags := dict "needsFunctional" false "needsLoadtest" false -}}`}}
+          {{`{{- range $check := $checks -}}`}}
+          {{`{{-   if eq $check.type "functional-test" }}{{ $_ := set $templateFlags "needsFunctional" true }}{{ end -}}`}}
+          {{`{{-   if eq $check.type "load-test" }}{{ $_ := set $templateFlags "needsLoadtest" true }}{{ end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $needsFunctional := get $templateFlags "needsFunctional" -}}`}}
+          {{`{{- $needsLoadtest := get $templateFlags "needsLoadtest" -}}`}}
+
+          {{`{{/* Resource names */}}`}}
+          {{`{{- $workflowTemplateName := printf "%s-%s" $appName $gateName -}}`}}
+          {{`{{- $eventSourceName := printf "%s-%s-eventsource" $appName $gateName -}}`}}
+          {{`{{- $sensorName := printf "%s-%s-sensor" $appName $gateName -}}`}}
+          {{`{{- $ingressName := printf "%s-%s-webhook-ingress" $appName $gateName -}}`}}
+          {{`{{- $webhookHost := printf "%s-%s-webhook.%s" $appName $gateName $baseDomain -}}`}}
+          {{`{{- $roleName := printf "%s-%s" $appName $gateName -}}`}}
+          {{`{{- $resourcePrefix := printf "%s-%s" $appName $gateName -}}`}}
+
+          ---
+          # Role for workflow execution (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-role-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: role-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: {{`{{ $roleName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                rules:
+                  - apiGroups: ["argoproj.io"]
+                    resources: ["workflows", "workflowtemplates"]
+                    verbs: ["create", "get", "list", "watch", "delete"]
+                  - apiGroups: [""]
+                    resources: ["secrets", "configmaps"]
+                    verbs: ["get", "list"]
+                  - apiGroups: [""]
+                    resources: ["persistentvolumeclaims"]
+                    verbs: ["get", "list", "create"]
+                  - apiGroups: [""]
+                    resources: ["pods", "pods/log"]
+                    verbs: ["get", "list", "watch"]
+                  - apiGroups: ["promoter.argoproj.io"]
+                    resources: ["commitstatuses"]
+                    verbs: ["create", "get", "update", "patch"]
+
+          ---
+          # RoleBinding (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-rolebinding-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: rolebinding-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: RoleBinding
+                metadata:
+                  name: {{`{{ $roleName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                roleRef:
+                  apiGroup: rbac.authorization.k8s.io
+                  kind: Role
+                  name: {{`{{ $roleName }}`}}
+                subjects:
+                  - kind: ServiceAccount
+                    name: driveby
+                    namespace: {{`{{ $appNamespace }}`}}
+
+          ---
+          # WorkflowTemplate -- promotion DAG (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-workflow-template-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: workflow-template-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: WorkflowTemplate
+                metadata:
+                  name: {{`{{ $workflowTemplateName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  entrypoint: promotion-pipeline
+                  serviceAccountName: driveby
+                  onExit: exit-handler
+                  volumeClaimTemplates:
+                    - metadata:
+                        name: reports
+                      spec:
+                        accessModes: ["ReadWriteOnce"]
+                        resources:
+                          requests:
+                            storage: 64Mi
+                  arguments:
+                    parameters:
+                      - name: app-name
+                      - name: pr-number
+                      - name: head-sha
+                      - name: github-owner
+                      - name: github-repo
+                      - name: app-port
+                        default: "{{`{{ $appPort }}`}}"
+                      - name: source-namespace
+                        default: "{{`{{ $sourceNs }}`}}"
+                      - name: target-namespace
+                        default: "{{`{{ $targetNs }}`}}"
+                      - name: service-name
+                        default: "{{`{{ $serviceName }}`}}"
+                      - name: openapi-endpoint
+                        default: "{{`{{ $openapiEndpoint }}`}}"
+                  templates:
+                    # --- Main DAG (dynamic checks) ---
+                    - name: promotion-pipeline
+                      dag:
+                        tasks:
+                          - name: set-pending-status
+                            template: github-commit-status
+                            arguments:
+                              parameters:
+                                - name: state
+                                  value: "pending"
+                                - name: description
+                                  value: "Running quality checks for {{`{{ $env.name }}`}} environment..."
+
+                          - name: update-commitstatus-pending
+                            template: update-commitstatus
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "pending"
+                                - name: description
+                                  value: "Running quality checks for {{`{{ $env.name }}`}} environment..."
+
+                          - name: wait-for-source-ready
+                            template: health-check-source
+                            dependencies: [set-pending-status]
+
+                          {{`{{- $state := dict "prevStep" "wait-for-source-ready" -}}`}}
+                          {{`{{- range $checkIdx, $check := $checks }}`}}
+                          {{`{{- $stepName := printf "check-%d-%s" $checkIdx $check.type -}}`}}
+                          {{`{{- $templateName := "" -}}`}}
+                          {{`{{- if eq $check.type "validate-only" }}{{ $templateName = "driveby-validate" }}{{ end -}}`}}
+                          {{`{{- if eq $check.type "functional-test" }}{{ $templateName = "driveby-functional" }}{{ end -}}`}}
+                          {{`{{- if eq $check.type "load-test" }}{{ $templateName = "driveby-loadtest" }}{{ end }}`}}
+                          - name: {{`{{ $stepName }}`}}
+                            template: {{`{{ $templateName }}`}}
+                            dependencies: [{{`{{ get $state "prevStep" }}`}}]
+                            {{`{{- if eq $check.type "validate-only" }}`}}
+                            {{`{{- $checkValConfig := $check.validationConfig | default dict -}}`}}
+                            {{`{{- $checkValMode := $checkValConfig.validationMode | default $defaultValidationMode }}`}}
+                            arguments:
+                              parameters:
+                                - name: validation-mode
+                                  value: "{{`{{ $checkValMode }}`}}"
+                            {{`{{- else if eq $check.type "load-test" }}`}}
+                            {{`{{- $checkLtConfig := $check.loadTestConfig | default dict }}`}}
+                            arguments:
+                              parameters:
+                                - name: concurrent-users
+                                  value: "{{`{{ $checkLtConfig.concurrentUsers | default 10 }}`}}"
+                                - name: test-duration
+                                  value: "{{`{{ $checkLtConfig.testDuration | default "5m" }}`}}"
+                                - name: max-latency-p95
+                                  value: "{{`{{ $checkLtConfig.maxLatencyP95 | default "500ms" }}`}}"
+                                - name: min-success-rate
+                                  value: "{{`{{ $checkLtConfig.minSuccessRate | default 0.99 }}`}}"
+                            {{`{{- end }}`}}
+                          {{`{{- $_ := set $state "prevStep" $stepName -}}`}}
+                          {{`{{- end }}`}}
+
+                          - name: report-success
+                            template: github-commit-status
+                            dependencies: [{{`{{ get $state "prevStep" }}`}}]
+                            arguments:
+                              parameters:
+                                - name: state
+                                  value: "success"
+                                - name: description
+                                  value: "All checks passed, safe to promote to {{`{{ $env.name }}`}}"
+
+                          - name: comment-pr
+                            template: github-pr-comment
+                            dependencies: [{{`{{ get $state "prevStep" }}`}}]
+
+                          - name: update-commitstatus-success
+                            template: update-commitstatus
+                            dependencies: [{{`{{ get $state "prevStep" }}`}}]
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "success"
+                                - name: description
+                                  value: "All checks passed, safe to promote to {{`{{ $env.name }}`}}"
+
+                    # --- Step Templates ---
+
+                    - name: github-commit-status
+                      inputs:
+                        parameters:
+                          - name: state
+                          - name: description
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: GITHUB_APP_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
+                        command: ["/driveby"]
+                        args:
+                          - "github-status"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--sha"
+                          - "{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}"
+                          - "--state"
+                          - "{{`{{ "{{" }}inputs.parameters.state{{ "}}" }}`}}"
+                          - "--description"
+                          - "{{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}"
+                          - "--context"
+                          - "{{`{{ $commitStatusKey }}`}}"
+                          - "--target-url"
+                          - "{{`{{ $workflowsUrl }}`}}"
+
+                    - name: health-check-source
+                      container:
+                        image: {{`{{ $curlImage }}`}}
+                        command: [sh, -c]
+                        args:
+                          - |
+                            echo "=== Health-checking source environment ==="
+                            echo "Target: http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                            ATTEMPTS=0
+                            MAX_ATTEMPTS=24
+                            while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+                              ATTEMPTS=$((ATTEMPTS + 1))
+                              HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+                                "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}" 2>/dev/null || echo "000")
+                              if [ "$HTTP_CODE" = "200" ]; then
+                                echo "Source environment is ready (attempt $ATTEMPTS)"
+                                exit 0
+                              fi
+                              echo "Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s..."
+                              sleep 5
+                            done
+                            echo "ERROR: Source environment not ready after 2 minutes"
+                            exit 1
+
+                    - name: driveby-validate
+                      inputs:
+                        parameters:
+                          - name: validation-mode
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                        command: ["/driveby"]
+                        args:
+                          - "validate-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--validation-mode"
+                          - "{{`{{ "{{" }}inputs.parameters.validation-mode{{ "}}" }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+                        volumeMounts:
+                          - name: reports
+                            mountPath: /tmp/reports
+
+                    {{`{{- if $needsLoadtest }}`}}
+                    - name: driveby-loadtest
+                      inputs:
+                        parameters:
+                          - name: concurrent-users
+                          - name: test-duration
+                          - name: max-latency-p95
+                          - name: min-success-rate
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                        command: ["/driveby"]
+                        args:
+                          - "load-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--auth-api-key"
+                          - "$(API_KEY)"
+                          - "--auth-api-key-header"
+                          - "{{`{{ $apiKeyHeader }}`}}"
+                          - "--concurrent-users"
+                          - "{{`{{ "{{" }}inputs.parameters.concurrent-users{{ "}}" }}`}}"
+                          - "--test-duration"
+                          - "{{`{{ "{{" }}inputs.parameters.test-duration{{ "}}" }}`}}"
+                          - "--max-latency-p95"
+                          - "{{`{{ "{{" }}inputs.parameters.max-latency-p95{{ "}}" }}`}}"
+                          - "--min-success-rate"
+                          - "{{`{{ "{{" }}inputs.parameters.min-success-rate{{ "}}" }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+                        volumeMounts:
+                          - name: reports
+                            mountPath: /tmp/reports
+                    {{`{{- end }}`}}
+
+                    {{`{{- if $needsFunctional }}`}}
+                    - name: driveby-functional
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $apiAuthSecretName }}`}}
+                                key: api-key
+                        command: ["/driveby"]
+                        args:
+                          - "function-only"
+                          - "--openapi"
+                          - "http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
+                          - "--host"
+                          - "{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}"
+                          - "--port"
+                          - "{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}"
+                          - "--auth-api-key"
+                          - "$(API_KEY)"
+                          - "--auth-api-key-header"
+                          - "{{`{{ $apiKeyHeader }}`}}"
+                          - "--report-dir"
+                          - "/tmp/reports"
+                        volumeMounts:
+                          - name: reports
+                            mountPath: /tmp/reports
+                    {{`{{- end }}`}}
+
+                    - name: github-pr-comment
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: GITHUB_APP_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
+                        command: ["/driveby"]
+                        args:
+                          - "github-comment"
+                          - "--report-dir"
+                          - "/tmp/reports"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--github-pr-number"
+                          - "{{`{{ "{{" }}workflow.parameters.pr-number{{ "}}" }}`}}"
+                        volumeMounts:
+                          - name: reports
+                            mountPath: /tmp/reports
+
+                    - name: exit-handler
+                      dag:
+                        tasks:
+                          - name: report-failure-github
+                            when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
+                            template: exit-handler-github
+                          - name: update-commitstatus-failure
+                            when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
+                            template: update-commitstatus
+                            arguments:
+                              parameters:
+                                - name: phase
+                                  value: "failure"
+                                - name: description
+                                  value: "Quality checks failed, promotion to {{`{{ $env.name }}`}} blocked"
+
+                    - name: exit-handler-github
+                      container:
+                        image: {{`{{ $drivebyImage }}`}}
+                        imagePullPolicy: Always
+                        env:
+                          - name: GITHUB_APP_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppID
+                          - name: GITHUB_INSTALLATION_ID
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubInstallationID
+                          - name: GITHUB_PRIVATE_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: {{`{{ $githubAppSecretName }}`}}
+                                key: githubAppPrivateKey
+                        command: ["/driveby"]
+                        args:
+                          - "github-status"
+                          - "--github-app-id"
+                          - "$(GITHUB_APP_ID)"
+                          - "--github-installation-id"
+                          - "$(GITHUB_INSTALLATION_ID)"
+                          - "--github-private-key"
+                          - "$(GITHUB_PRIVATE_KEY)"
+                          - "--github-owner"
+                          - "{{`{{ "{{" }}workflow.parameters.github-owner{{ "}}" }}`}}"
+                          - "--github-repo"
+                          - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
+                          - "--sha"
+                          - "{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}"
+                          - "--state"
+                          - "failure"
+                          - "--description"
+                          - "Quality checks failed, promotion to {{`{{ $env.name }}`}} blocked"
+                          - "--context"
+                          - "{{`{{ $commitStatusKey }}`}}"
+                          - "--target-url"
+                          - "{{`{{ $workflowsUrl }}`}}"
+
+                    - name: update-commitstatus
+                      inputs:
+                        parameters:
+                          - name: phase
+                          - name: description
+                      resource:
+                        action: apply
+                        manifest: |
+                          apiVersion: promoter.argoproj.io/v1alpha1
+                          kind: CommitStatus
+                          metadata:
+                            name: {{`{{ $commitStatusKey }}`}}-{{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}
+                            namespace: {{`{{ $appNamespace }}`}}
+                            labels:
+                              promoter.argoproj.io/commit-status: {{`{{ $commitStatusKey }}`}}
+                              driveby.io/app: {{`{{ $appName }}`}}
+                              driveby.io/gate: {{`{{ $gateName }}`}}
+                          spec:
+                            gitRepositoryRef:
+                              name: {{`{{ "{{" }}workflow.parameters.app-name{{ "}}" }}`}}-gitops
+                            sha: {{`{{ "{{" }}workflow.parameters.head-sha{{ "}}" }}`}}
+                            name: {{`{{ $commitStatusKey }}`}}
+                            description: {{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}
+                            phase: {{`{{ "{{" }}inputs.parameters.phase{{ "}}" }}`}}
+                            url: {{`{{ $workflowsUrl }}`}}
+
+          ---
+          # EventSource -- GitHub webhook receiver (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-eventsource-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: eventsource-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: EventSource
+                metadata:
+                  name: {{`{{ $eventSourceName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  github:
+                    {{`{{ $triggerName }}`}}:
+                      repositories:
+                      - owner: {{`{{ $repoOwner }}`}}
+                        names:
+                        - {{`{{ $repoName }}`}}
+                      webhook:
+                        endpoint: /{{`{{ $appName }}`}}-{{`{{ $gateName }}`}}-{{`{{ $triggerName }}`}}
+                        port: {{`{{ $webhookPort | quote }}`}}
+                        method: POST
+                        url: https://{{`{{ $webhookHost }}`}}
+                      githubApp:
+                        privateKey:
+                          name: {{`{{ $githubAppSecretName }}`}}
+                          key: githubAppPrivateKey
+                        appID: {{`{{ $githubAppID }}`}}
+                        installationID: {{`{{ $githubInstallationID }}`}}
+                      events:
+                        - "pull_request"
+                      active: true
+                      contentType: json
+                      insecure: false
+                      deleteHookOnFinish: true
+
+          ---
+          # Sensor -- PR event filters, triggers workflow (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-sensor-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: sensor-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Sensor
+                metadata:
+                  name: {{`{{ $sensorName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  dependencies:
+                  - name: {{`{{ $triggerName }}`}}-dep
+                    eventSourceName: {{`{{ $eventSourceName }}`}}
+                    eventName: {{`{{ $triggerName }}`}}
+                    filters:
+                      data:
+                      - path: body.action
+                        type: string
+                        value:
+                          - "opened"
+                          - "reopened"
+                          - "synchronize"
+                      - path: body.pull_request.base.ref
+                        type: string
+                        value:
+                          - {{`{{ $branch | quote }}`}}
+
+                  triggers:
+                  - template:
+                      name: {{`{{ $triggerName }}`}}-workflow-trigger
+                      argoWorkflow:
+                        operation: submit
+                        source:
+                          resource:
+                            apiVersion: argoproj.io/v1alpha1
+                            kind: Workflow
+                            metadata:
+                              generateName: {{`{{ $resourcePrefix }}`}}-pipeline-
+                              namespace: {{`{{ $appNamespace }}`}}
+                              labels:
+                                driveby.io/app: {{`{{ $appName | quote }}`}}
+                                driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                                driveby.io/trigger: {{`{{ $triggerName | quote }}`}}
+                            spec:
+                              workflowTemplateRef:
+                                name: {{`{{ $workflowTemplateName }}`}}
+                              arguments:
+                                parameters:
+                                - name: pr-number
+                                - name: head-sha
+                                - name: github-owner
+                                - name: github-repo
+                                - name: app-name
+                                  value: "{{`{{ $appName }}`}}"
+                                - name: app-port
+                                  value: "{{`{{ $appPort }}`}}"
+                                - name: source-namespace
+                                  value: "{{`{{ $sourceNs }}`}}"
+                                - name: target-namespace
+                                  value: "{{`{{ $targetNs }}`}}"
+                                - name: service-name
+                                  value: "{{`{{ $serviceName }}`}}"
+                                - name: openapi-endpoint
+                                  value: "{{`{{ $openapiEndpoint }}`}}"
+                        parameters:
+                        - src:
+                            dependencyName: {{`{{ $triggerName }}`}}-dep
+                            dataKey: body.number
+                          dest: spec.arguments.parameters.0.value
+                        - src:
+                            dependencyName: {{`{{ $triggerName }}`}}-dep
+                            dataKey: body.pull_request.head.sha
+                          dest: spec.arguments.parameters.1.value
+                        - src:
+                            dependencyName: {{`{{ $triggerName }}`}}-dep
+                            dataKey: body.repository.owner.login
+                          dest: spec.arguments.parameters.2.value
+                        - src:
+                            dependencyName: {{`{{ $triggerName }}`}}-dep
+                            dataKey: body.repository.name
+                          dest: spec.arguments.parameters.3.value
+
+          ---
+          # Service for EventSource webhook endpoint (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-eventsource-svc-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: eventsource-svc-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: {{`{{ $eventSourceName }}`}}-svc
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                spec:
+                  selector:
+                    controller: eventsource-controller
+                    eventsource-name: {{`{{ $eventSourceName }}`}}
+                  ports:
+                    - port: {{`{{ $webhookPort }}`}}
+                      targetPort: {{`{{ $webhookPort }}`}}
+                      protocol: TCP
+
+          ---
+          # Ingress -- webhook endpoint (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-ingress-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: ingress-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            forProvider:
+              manifest:
+                apiVersion: networking.k8s.io/v1
+                kind: Ingress
+                metadata:
+                  name: {{`{{ $ingressName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/gate: {{`{{ $gateName | quote }}`}}
+                  annotations:
+                    {{`{{- if $clusterIssuer }}`}}
+                    cert-manager.io/cluster-issuer: {{`{{ $clusterIssuer | quote }}`}}
+                    {{`{{- end }}`}}
+                    {{- range $k, $v := .Values.defaults.ingress.annotations }}
+                    {{ $k }}: {{ $v | quote }}
+                    {{- end }}
+                spec:
+                  ingressClassName: {{`{{ $ingressClassName }}`}}
+                  tls:
+                  - hosts:
+                    - {{`{{ $webhookHost | quote }}`}}
+                    secretName: {{`{{ printf "%s-%s-webhook-tls" $appName $gateName | quote }}`}}
+                  rules:
+                  - host: {{`{{ $webhookHost | quote }}`}}
+                    http:
+                      paths:
+                      - path: /
+                        pathType: Prefix
+                        backend:
+                          service:
+                            name: {{`{{ $eventSourceName }}`}}-svc
+                            port:
+                              number: {{`{{ $webhookPort }}`}}
+
+          {{- if .Values.githubProvider.enabled }}
+          ---
+          # BranchProtection -- required status check for gate (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: BranchProtection
+          metadata:
+            name: {{`{{ $xrName }}`}}-branch-protection-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: branch-protection-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repositoryId: {{`{{ $repoName }}`}}
+              pattern: {{`{{ $branch }}`}}
+              enforceAdmins: true
+              requiredStatusChecks:
+                - strict: true
+                  contexts:
+                    - {{`{{ $commitStatusKey }}`}}
+              {{`{{- if not $autoMerge }}`}}
+              requiredPullRequestReviews:
+                - requiredApprovingReviewCount: 1
+                  dismissStaleReviews: true
+              {{`{{- end }}`}}
+              restrictPushes:
+                - blocksCreations: false
+          {{- end }}
+
+          {{`{{ end }}`}}
+          {{`{{ $prevEnvName = $env.name }}`}}
+          {{`{{ end }}`}}
+
+          {{- if .Values.githubProvider.enabled }}
+          ---
+          # BranchProtection -- protect *-next branches (allow automation push, block force-push)
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: BranchProtection
+          metadata:
+            name: {{`{{ $xrName }}`}}-next-branches-protection
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: next-branches-protection
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repositoryId: {{`{{ $repoName }}`}}
+              pattern: "environment/*-next"
+              allowsForcePushes: false
+              allowsDeletions: false
+          {{- end }}
+
+  # Step 2: Auto-ready
+  - step: detect-readiness
+    functionRef:
+      name: function-auto-ready
+{{- end }}

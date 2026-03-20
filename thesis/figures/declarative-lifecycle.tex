@@ -1,0 +1,74 @@
+% Declarative Lifecycle — Chapter 5, Section 5.4.5
+% Horizontal timeline: Day 0 → Day 1 → Day 2 → Day N with reconciliation loops
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    day/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=2.8cm,
+        minimum height=1cm,
+        font=\small\bfseries,
+        align=center
+    },
+    detail/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=#1!40,
+        fill=#1!5,
+        minimum width=2.8cm,
+        font=\scriptsize,
+        align=center,
+        text width=2.6cm
+    },
+    loop/.style={
+        ->,
+        thick,
+        #1!40!black,
+        dashed
+    }
+]
+
+% Timeline arrow
+\draw[->,ultra thick,gray!40] (-1,0) -- (14.5,0);
+\node[font=\scriptsize\itshape,text=gray] at (14.5,-0.3) {time};
+
+% Day 0
+\node[day=blue] (d0) at (0.5,1.2) {Day 0\\Install};
+\node[detail=blue] (d0d) at (0.5,-1.2) {Helm chart\\XRD + Composition\\ProviderConfig\\Functions};
+\draw[->,thick,blue!40!black] (d0) -- (d0d);
+
+% Day 1
+\node[day=teal] (d1) at (4.2,1.2) {Day 1\\Create};
+\node[detail=teal] (d1d) at (4.2,-1.2) {Apply XSDLC CR\\$\sim$34 children\\generated\\READY=True};
+\draw[->,thick,teal!40!black] (d1) -- (d1d);
+
+% Reconciliation loop under Day 1
+\draw[loop=teal] (d1d.south) -- ++(0,-0.5) -- ++(1.2,0) -- ++(0,1.6) -- ++(-1.2,0);
+\node[font=\tiny\itshape,text=teal!60!black] at (5.5,-2.0) {reconcile};
+
+% Day 2
+\node[day=orange] (d2) at (7.9,1.2) {Day 2\\Operate};
+\node[detail=orange] (d2d) at (7.9,-1.2) {Drift detection\\Self-healing\\Deleted Sensor\\$\rightarrow$ re-created};
+\draw[->,thick,orange!40!black] (d2) -- (d2d);
+
+% Reconciliation loop under Day 2
+\draw[loop=orange] (d2d.south) -- ++(0,-0.5) -- ++(1.2,0) -- ++(0,1.6) -- ++(-1.2,0);
+\node[font=\tiny\itshape,text=orange!60!black] at (9.2,-2.0) {reconcile};
+
+% Day N
+\node[day=red!70!black] (dn) at (11.6,1.2) {Day N\\Update / Delete};
+\node[detail=red!70!black] (dnd) at (11.6,-1.2) {Update spec\\$\rightarrow$ reconcile delta\\Delete CR\\$\rightarrow$ cascade};
+\draw[->,thick,red!40!black] (dn) -- (dnd);
+
+% Timeline connections
+\draw[->,thick,gray!50] (d0) -- (d1);
+\draw[->,thick,gray!50] (d1) -- (d2);
+\draw[->,thick,gray!50] (d2) -- (dn);
+
+% Annotations
+\node[font=\tiny\itshape,text=blue!50!black] at (0.5,-2.5) {No XSDLC instances};
+\node[font=\tiny\itshape,text=teal!50!black] at (4.2,-2.5) {Platform accepts CRs};
+
+\end{tikzpicture}

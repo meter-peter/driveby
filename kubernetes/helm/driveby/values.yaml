@@ -48,15 +48,12 @@ crossplane:
     autoReady:
       package: xpkg.upbound.io/crossplane-contrib/function-auto-ready
       version: "v0.4.0"
-    environmentConfigs:
-      package: xpkg.upbound.io/crossplane-contrib/function-environment-configs
-      version: "v0.3.0"
   providerConfig:
     name: kubernetes-provider
     credentials: InjectedIdentity
 
 # Cluster-wide defaults baked into Crossplane compositions at helm-template time.
-# Override per-cluster via EnvironmentConfigs, or per-CR via XRD spec fields.
+# Override per-CR via XRD spec fields. No EnvironmentConfig layer — 2-tier only.
 defaults:
   # URL shown in GitHub commit status (link to Argo Workflows UI)
   argoWorkflowsUrl: "https://argo.private.novelcore.org/workflows"
@@ -65,6 +62,7 @@ defaults:
   ingress:
     className: "traefik-system"
     clusterIssuer: "sys-prod-issuer-dns"
+    baseDomain: "private.novelcore.org"
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
@@ -100,10 +98,34 @@ gitopsPromoter:
   enabled: true
   githubApp:
     secretName: "github-app-credentials"
-    appID: 0
-    installationID: 0
+    appID: 3133001
+    installationID: 117564832
     privateKey: ""  # Set at install: --set-file gitopsPromoter.githubApp.privateKey=/path/to/key.pem
   branchPattern: "environment"
+
+# XSDLC v2.0.0 — single-repo delivery pipeline
+# No gitopsPat needed: developer's repo is the only repo.
+# XSDLC owns delivery (propagation, promotion, quality gates), not CI.
+
+# GitHub Provider — for managing branch protection rules via Crossplane
+githubProvider:
+  enabled: true
+  provider:
+    package: xpkg.upbound.io/crossplane-contrib/provider-upjet-github
+    version: "v0.18.0"
+  providerConfigName: "github-provider"
+  secretName: "github-provider-token"     # Secret with JSON credentials: {"token":"...","owner":"..."}
+  secretKey: "credentials"
+  token: ""   # If set, creates the github-provider-token secret automatically
+  owner: ""   # GitHub org/user for branch protection
+
+# Optional secrets — reduce manual kubectl create secret steps
+secrets:
+  ghcr:
+    enabled: false      # Set to true to create ghcr-creds secret in driveby namespace
+    registry: ghcr.io
+    username: ""        # GitHub username or org
+    token: ""           # GitHub PAT or GITHUB_TOKEN with packages:read
 
 # RBAC
 rbac:

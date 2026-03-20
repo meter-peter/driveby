@@ -10,7 +10,7 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 2. **Determinism** — Same specification + same API = same validation results
 3. **Observability** — Validation produces measurable, actionable results
 
-### Eight Principles
+### Nine Principles
 | ID | Principle | Axiom | Status |
 |----|-----------|-------|--------|
 | P001 | OpenAPI Compliance | Completeness | Complete |
@@ -21,6 +21,7 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 | P006 | Functional Testing | Determinism | Not yet implemented (PrincipleChecker wrapper) |
 | P007 | Performance Testing | Observability | Not yet implemented (PrincipleChecker wrapper) |
 | P008 | Versioning Strategy | Observability | Complete |
+| P009 | Test Readiness | Determinism | Complete |
 
 ## Monorepo Structure
 
@@ -44,8 +45,8 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 - Module: `github.com/meter-peter/driveby/driveby-cli`
 - Dependency flow: `types` <- `spec` <- `loader` <- `principles` <- `testing` <- `engine` <- `cli`
 - The `spec.APISpec` abstraction is **mandatory** — no raw `*openapi3.T` in validators
-- 8 validation principles (P001-P008), each in its own file implementing `PrincipleChecker`
-- Engine orchestrates principle checking based on validation mode (minimal/strict/test-only)
+- 9 validation principles (P001-P009), each in its own file implementing `PrincipleChecker`
+- Engine orchestrates principle checking based on validation mode (minimal/strict/test-ready/test-only)
 
 ## Build & Test
 ```bash
@@ -88,22 +89,30 @@ When writing Crossplane resources:
 4. Only fall back to web search if context7 lacks the information
 
 ## Crossplane Quality Gates (XSDLC)
-- **XQualityGateTemplate** (`driveby.io/v1alpha1`) — declares validation workflow (RBAC + WorkflowTemplate + CommitStatus steps)
-- **XQualityGate** (`driveby.io/v1alpha1`) — declares per-API event pipeline (EventBus + EventSource + Sensor + Ingress) + promoter resources (ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus)
-- Helm chart (v0.4.0) installs `provider-kubernetes` + Crossplane functions + XRDs + compositions
-- Quality gates trigger on **promotion PRs in the gitops repo**, validate against the **source env** (dev), and gate promotion to **target env** (staging)
-- **GitOps Promoter integration**: auto-provisions ScmProvider, GitRepository, PromotionStrategy, and CommitStatus CRD workflow steps for fully automated environment promotion
+- **XSDLC** (`driveby.io/v1alpha1`) — fully turnkey GitOps delivery pipeline. One CR provisions branches, workflows, ArgoCD apps, promoter, and quality gates
+- A single XSDLC CR generates: ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection rules, GitHub Actions workflows, ActionsSecrets, ActionsVariables
+- **Multi-check gates**: Each gate defines an ordered `checks` array — each check becomes a DAG step
+- **Check types**: `validate-only` (static validation), `functional-test` (P006), `load-test` (k6 load testing)
+- **`loadTestConfig`**: configures load testing parameters — `concurrentUsers`, `testDuration`, `maxLatencyP95`, `minSuccessRate`
+- Helm chart (v2.1.0) installs `provider-kubernetes` + Crossplane functions + XRD + composition
+- **Single-repo model**: XSDLC is a delivery pipeline, not a CI system. One GitOps repo contains both the manifests and the XSDLC CR. Engineers own per-env manifests under `manifestsPath` directories. XSDLC only manages **promotion** and **quality gates**.
+- **ArgoCD Application generation**: Always generated for every environment. `autoMerge: false` → manual sync, otherwise automated sync.
+- **Simplified UX**: ~35 lines of YAML per app. Only `repository` and `environments` required. All cluster config from `values.yaml`. No EnvironmentConfigs.
+- **Two-tier config**: `values.yaml` defaults → XRD spec overrides (EnvironmentConfig layer removed)
+- **`manifestsPath`**: Path within the repo where per-environment manifests live. XSDLC reads this to locate the correct directory for each environment.
+- **Generated workflow**: `driveby-deploy.yml` in the single repo — BYOCI showcase: developer's CI builds the image, this workflow deploys manifests + image tag to a chosen environment
+- **Branch protection**: When `githubProvider.enabled`, XSDLC auto-provisions GitHub BranchProtection rules per gated environment + `*-next` branch protection
 - See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
 
 ## Releasing
 
 1. Ensure CI is green on `main`
-2. Tag: `git tag -a v0.4.0 -m "DriveBy v0.4.0: automated promotion pipeline"`
-3. Push: `git push origin v0.4.0`
+2. Tag: `git tag -a v2.0.0 -m "DriveBy v2.0.0: single-repo delivery pipeline"`
+3. Push: `git push origin v2.0.0`
 4. The `release.yml` workflow produces:
    - GitHub Release with 6 platform binaries + SHA256 checksums (via GoReleaser)
-   - Docker images: `ghcr.io/meter-peter/driveby:0.4.0`, `:0.4`, `:latest`
-   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:0.4.0`
+   - Docker images: `ghcr.io/meter-peter/driveby:2.0.0`, `:2.0`, `:latest`
+   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:2.0.0`
 
 ## Target Cluster
 - Cluster: `private.novelcore.org`

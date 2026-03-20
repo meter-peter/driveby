@@ -8,7 +8,7 @@ metadata:
 spec:
   repositoryReference:
     owner: novelcore
-    name: perfect-api-gitops
+    name: perfect-api
     scmProviderRef:
       name: perfect-api-github
   proposedBranch: environment/dev-next

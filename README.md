@@ -1,6 +1,6 @@
 # DriveBy — Documentation-Driven Testing for GitOps
 
-**Automated API quality gates powered by your OpenAPI spec.** DriveBy validates APIs against 8 documentation-driven principles and blocks promotions when they fail — no manual QA, no broken deployments.
+**Automated API quality gates powered by your OpenAPI spec.** DriveBy validates APIs against 9 documentation-driven principles and blocks promotions when they fail — no manual QA, no broken deployments.
 
 ```
 Developer opens PR → Webhook → Argo Events → DriveBy validation → Commit status → Merge or block
@@ -35,7 +35,7 @@ Your OpenAPI spec already describes your API contract. DriveBy treats it as the 
 │                              │         │            │             │
 │                              │  wait-for-source     │             │
 │                              │         │            │             │
-│                              │  driveby validate    │ ◄── P001-P008
+│                              │  driveby validate    │ ◄── P001-P009
 │                              │         │            │             │
 │                              │  functional-test     │             │
 │                              │        ╱ ╲           │             │
@@ -54,55 +54,50 @@ Your OpenAPI spec already describes your API contract. DriveBy treats it as the 
 
 ### Crossplane Quality Gates
 
-DriveBy uses **two Crossplane custom resources** to manage the entire pipeline declaratively:
+DriveBy uses **a single Crossplane custom resource (XSDLC)** to manage the entire promotion pipeline declaratively:
 
-**XQualityGateTemplate** — defines validation workflow for a project (shared):
 ```yaml
 apiVersion: driveby.io/v1alpha1
-kind: XQualityGateTemplate
+kind: XSDLC
 metadata:
-  name: driveby-staging-promotion
+  name: perfect-api
   namespace: driveby
 spec:
-  projectName: driveby
-  gateName: staging-promotion
-  validationConfig:
-    validationMode: strict
-    openApiEndpoint: /openapi.json
+  repository:
+    owner: novelcore
+    name: perfect-api
+    manifestsPath: manifests
+  environments:
+    - name: dev
+    - name: staging
+      gate:
+        checks:
+          - type: validate-only
+            validationConfig:
+              validationMode: test-ready
+          - type: functional-test
+    - name: prod
+      autoMerge: false
+      gate:
+        checks:
+          - type: validate-only
+          - type: load-test
+            loadTestConfig:
+              concurrentUsers: 50
+              testDuration: "2m"
+              maxLatencyP95: "200ms"
+              minSuccessRate: 0.995
 ```
 
-Creates: ServiceAccount + RBAC + WorkflowTemplate (7-step DAG)
+Only two required fields: `repository` and `environments` (minimum 2). Each environment can optionally define a `gate` with an ordered `checks` array — each check becomes a DAG step in the validation workflow.
 
-**XQualityGate** — wires up a specific API to the template (per-API):
-```yaml
-apiVersion: driveby.io/v1alpha1
-kind: XQualityGate
-metadata:
-  name: perfect-api-staging-gate
-  namespace: driveby
-spec:
-  appName: perfect-api
-  gateName: staging-promotion
-  templateRef:
-    name: driveby-staging-promotion
-  repositoryConfig:
-    owner: meter-peter
-    name: perfect-api-gitops
-  apiConfig:
-    serviceName: perfect-api
-    sourceEnvironment:
-      namespace: perfect-api-dev
-    targetEnvironment:
-      namespace: perfect-api-staging
-```
+Creates: ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection, deploy workflow
 
-Creates: EventBus + EventSource + Sensor + Ingress (TLS webhook endpoint)
-
-**Add a new API?** Apply one more `XQualityGate` — that's it.
+**Add a new API?** Apply one more `XSDLC` — that's it.
 
 ## DDT Methodology
 
-DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, eight validation principles:
+DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, nine validation principles:
 
 | Axiom | Principle | What It Checks |
 |-------|-----------|---------------|
@@ -110,9 +105,10 @@ DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, eigh
 | | P002: Documentation Quality | Descriptions, examples, completeness |
 | | P003: Error Handling | Error responses documented (4xx/5xx) |
 | | P004: Schema Definitions | Types, constraints, required fields |
-| **Determinism** | P005: Security Standards | Auth schemes defined and applied |
-| | P006: Functional Testing | Live endpoint responses match spec |
-| **Observability** | P007: Performance Testing | P95 latency, success rate under load |
+| **Determinism** | P006: Functional Testing | Live endpoint responses match spec |
+| | P009: Test Readiness | Spec ready for meaningful functional testing |
+| **Observability** | P005: Security Standards | Auth schemes defined and applied |
+| | P007: Performance Testing | P95 latency, success rate under load |
 | | P008: Versioning Strategy | Version info present and consistent |
 
 ### Validation Modes
@@ -121,6 +117,7 @@ DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, eigh
 |------|-----------|----------|
 | `minimal` | P001 | Fast CI gate — basic spec compliance |
 | `strict` | P001-P005, P008 | Production readiness — full static analysis |
+| `test-ready` | P001, P004, P009 | Pre-flight check for meaningful testing |
 | `test-only` | P006, P007 | Runtime testing only — functional + load |
 
 ## Installation
@@ -130,21 +127,14 @@ DriveBy implements **Documentation-Driven Testing (DDT)** — three axioms, eigh
 ```bash
 # 1. Install the Helm chart
 helm install driveby oci://ghcr.io/meter-peter/charts/driveby \
-  --version 0.3.0 \
-  --set crossplane.enabled=true \
-  --set github.pat=ghp_YOUR_TOKEN
+  --version 2.0.0 \
+  --set crossplane.enabled=true
 
-# 2. Apply environment configs
-kubectl apply -f kubernetes/examples/crossplane/environment-configs.yaml
+# 2. Apply an XSDLC CR for your API
+kubectl apply -f kubernetes/examples/novelcore-perfect-api/xsdlc-perfect-api.yaml
 
-# 3. Create quality gate template
-kubectl apply -f kubernetes/examples/crossplane/template-example.yaml
-
-# 4. Create per-API quality gate
-kubectl apply -f kubernetes/examples/crossplane/instance-example.yaml
-
-# 5. Configure GitHub webhook on your gitops repo
-#    URL: https://<app>-<gate>-webhook.<domain>/<app>-<gate>-<trigger>
+# 3. Configure GitHub webhook on your gitops repo
+#    URL: https://<app>-webhook.<domain>/<app>-<trigger>
 ```
 
 See [docs/deployment-guide.md](docs/deployment-guide.md) for the full guide with prerequisites, secrets, and verification checklist.
@@ -153,7 +143,7 @@ See [docs/deployment-guide.md](docs/deployment-guide.md) for the full guide with
 
 ```bash
 # From GitHub Releases
-curl -sL https://github.com/meter-peter/driveby/releases/latest/download/driveby_0.3.0_linux_amd64.tar.gz | tar xz
+curl -sL https://github.com/meter-peter/driveby/releases/latest/download/driveby_latest_linux_amd64.tar.gz | tar xz
 sudo mv driveby /usr/local/bin/
 
 # From source
@@ -164,7 +154,7 @@ cd driveby/driveby-cli && go build -o driveby ./cmd/driveby
 ### Docker
 
 ```bash
-docker run --rm ghcr.io/meter-peter/driveby:0.3.0 validate-only \
+docker run --rm ghcr.io/meter-peter/driveby:latest validate-only \
   --openapi https://petstore3.swagger.io/api/v3/openapi.json \
   --host petstore3.swagger.io --protocol https --port 443 \
   --validation-mode strict
@@ -228,11 +218,11 @@ Full CLI reference: [docs/CLI_USAGE.md](docs/CLI_USAGE.md)
 │  ┌──────────────────────────────────────────────────┐       │
 │  │              driveby namespace                    │       │
 │  │                                                   │       │
-│  │  Crossplane XRDs ──► Compositions                 │       │
+│  │  Crossplane XRD ──► Composition                    │       │
 │  │       │                    │                       │       │
 │  │       ▼                    ▼                       │       │
-│  │  XQualityGateTemplate  XQualityGate               │       │
-│  │  (RBAC + Workflow)     (Events + Ingress)         │       │
+│  │  XSDLC (single CR per API)                        │       │
+│  │  (RBAC + Workflows + Events + Ingress + Promoter) │       │
 │  │                             │                      │       │
 │  │  Argo Events: EventBus ◄───┘                      │       │
 │  │       │                                           │       │
@@ -252,7 +242,7 @@ Full CLI reference: [docs/CLI_USAGE.md](docs/CLI_USAGE.md)
 ### Monorepo Structure
 
 ```
-driveby-cli/     Go CLI — core validation engine (8 principles, spec abstraction)
+driveby-cli/     Go CLI — core validation engine (9 principles, spec abstraction)
 kubernetes/      Helm chart (Crossplane XRDs + compositions, Argo Events/Workflows)
 docs/            Deployment guide, quality gate SDLC, CLI reference
 thesis/          LaTeX diploma thesis
@@ -262,15 +252,14 @@ samples/         Example configs and reports
 
 ## Configuration Model
 
-DriveBy uses a **three-tier configuration** so every value can be overridden without editing chart source:
+DriveBy uses a **two-tier configuration** so every value can be overridden without editing chart source:
 
 | Tier | Scope | How to Set |
 |------|-------|-----------|
 | `values.yaml` | Chart-wide defaults | `--set defaults.X=Y` |
-| EnvironmentConfig | Per-cluster overrides | `kubectl apply` Crossplane EnvironmentConfig |
-| XRD spec fields | Per-API overrides | Set directly in XQualityGateTemplate/XQualityGate |
+| XRD spec fields | Per-CR overrides in XSDLC | Set directly in XSDLC spec |
 
-Resolution order (highest priority wins): **XRD spec > EnvironmentConfig > values.yaml**
+Resolution order (highest priority wins): **XRD spec > values.yaml**
 
 ## Documentation
 
@@ -281,7 +270,7 @@ Resolution order (highest priority wins): **XRD spec > EnvironmentConfig > value
 | [GitOps Pipeline](docs/gitops-pipeline.md) | Webhook → Events → Workflow → PR feedback |
 | [CLI Usage](docs/CLI_USAGE.md) | All commands, flags, examples |
 | [DDT Axioms](docs/ddt-axioms.md) | Methodology: Completeness, Determinism, Observability |
-| [Principles P001-P008](docs/principles/) | Per-principle documentation |
+| [Principles P001-P009](docs/principles/) | Per-principle documentation |
 
 ## Contributing
 

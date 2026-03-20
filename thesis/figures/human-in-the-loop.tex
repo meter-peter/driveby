@@ -1,0 +1,77 @@
+% Human-in-the-Loop — Chapter 6, Section 6.5.2
+% Pipeline with green (automated) and amber (human) steps for staging vs prod
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    auto step/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=green!60!black,
+        fill=green!10,
+        minimum width=2cm,
+        minimum height=0.7cm,
+        font=\scriptsize,
+        align=center
+    },
+    human step/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=orange!70!black,
+        fill=orange!15,
+        minimum width=2cm,
+        minimum height=0.7cm,
+        font=\scriptsize,
+        align=center
+    },
+    lane label/.style={
+        font=\small\bfseries,
+        text=#1!70!black,
+        anchor=east
+    }
+]
+
+% Lane labels
+\node[lane label=teal] at (-0.3,1.5) {Staging};
+\node[lane label=violet] at (-0.3,-1.5) {Production};
+
+% Staging lane (mostly automated)
+\node[human step] (s1) at (1.5,1.5) {Code\\Author};
+\node[auto step]  (s2) at (3.8,1.5) {Propagate};
+\node[auto step]  (s3) at (6.1,1.5) {DDT Gate};
+\node[auto step]  (s4) at (8.4,1.5) {Auto-merge};
+\node[auto step]  (s5) at (10.7,1.5) {ArgoCD\\Sync};
+
+\draw[->,thick] (s1) -- (s2);
+\draw[->,thick] (s2) -- (s3);
+\draw[->,thick] (s3) -- (s4);
+\draw[->,thick] (s4) -- (s5);
+
+% Production lane (human checkpoints)
+\node[human step] (p1) at (1.5,-1.5) {Code\\Author};
+\node[auto step]  (p2) at (3.8,-1.5) {Propagate};
+\node[auto step]  (p3) at (6.1,-1.5) {Load Gate};
+\node[human step] (p4) at (8.4,-1.5) {Manual\\Approve};
+\node[human step] (p5) at (10.7,-1.5) {Manual\\Sync};
+
+\draw[->,thick] (p1) -- (p2);
+\draw[->,thick] (p2) -- (p3);
+\draw[->,thick] (p3) -- (p4);
+\draw[->,thick] (p4) -- (p5);
+
+% Lane backgrounds
+\begin{scope}[on background layer]
+    \node[rectangle, rounded corners=4pt, fill=teal!5, draw=teal!20,
+          fit={($(s1.north west)+(-0.2,0.3)$) ($(s5.south east)+(0.2,-0.3)$)}] {};
+    \node[rectangle, rounded corners=4pt, fill=violet!5, draw=violet!20,
+          fit={($(p1.north west)+(-0.2,0.3)$) ($(p5.south east)+(0.2,-0.3)$)}] {};
+\end{scope}
+
+% Legend
+\node[auto step, minimum width=1.5cm] (leg1) at (3.5,-3.2) {Automated};
+\node[human step, minimum width=1.5cm] (leg2) at (6.5,-3.2) {Human};
+\node[font=\scriptsize] at (4.95,-3.2) {=};
+
+% Annotation arrows for key decisions
+\node[font=\tiny\itshape,text=green!50!black] at (8.4,0.6) {autoMerge: true};
+\node[font=\tiny\itshape,text=orange!50!black] at (8.4,-0.6) {autoMerge: false};
+
+\end{tikzpicture}

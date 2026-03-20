@@ -15,14 +15,10 @@ Implementation of the DDT methodology targets the following operational outcomes
 Zero-Overhead Maintenance: Quality gates update automatically as the OpenAPI spec evolves.
 2. Platform Architecture Shift: From Kubebuilder to Pure Crossplane
 The platform has transitioned from legacy imperative Go-based operators to a "Pure Crossplane" architecture. This model uses CompositeResourceDefinitions (XRDs) and Compositions to manage the SDLC through a tool-centric, declarative approach.
-2.1 Core Composite Entities
-XSDLC (Orchestrator): Manages the environment lifecycle and promotion logic. It leverages PromotionStrategy and ChangeTransferPolicy to coordinate state transitions across Dev, Stage, and Prod.
-XQualityGate (Execution Engine): Encapsulates the DriveBy engine to enforce quality principles. It translates OpenAPI requirements into functional and performance tests within the cluster.
+2.1 Core Composite Entity
+XSDLC (Pipeline Orchestrator): A single Crossplane XRD (`driveby.io/v1alpha1`) that defines the full delivery pipeline — environments, quality gates, promoter resources, ArgoCD applications, GitHub workflows, and branch protection. One CR (~35 lines YAML) generates ~34 Kubernetes resources. The environment chain is fully dynamic (minimum 2 environments, no maximum). XSDLC follows a Bring-Your-Own-CI (BYOCI) model: it is a delivery pipeline, not a CI system.
 2.2 Technical "Wiring" and Logic
-The relationship between these entities is managed via Crossplane EnvironmentConfigs and metadata-based selection:
-Context Injection: KubeOrg (the top-level XRD) creates ProviderConfigs and org-wide EnvironmentConfigs (containing Org Name, AWS Account IDs, etc.).
-Resource Selection: XQualityGate claims select these configs using labels (e.g., kubecore.io/kubeorg=<name>).
-Ownership: Child Crossplane resources reference parent KubeCore resources via standard Kubernetes ownerReferences, ensuring cascading cleanup and state consistency.
+The relationship between XSDLC and the generated resources is managed through Crossplane compositions. The XSDLC CR declares the desired pipeline state; the composition generates all required Kubernetes resources (RBAC, workflows, event routing, promotion strategy).
 2.3 Architectural Model Comparison
 Feature
 Legacy Kubebuilder Operator
@@ -41,7 +37,7 @@ Hardcoded controller logic
 Managed via Crossplane Providers (AWS, GitHub)
 3. Technical Requirements: The DriveBy CLI Engine
 The DriveBy CLI is the execution core. It mandates explicit flag-based configuration to ensure portability and reproducible behavior across local, CI, and cluster environments.
-3.1 Validation Principles (P001–P008)
+3.1 Validation Principles (P001–P009)
 The engine must enforce the following principles, executing specific checks derived from the validation-report.md:
 P001: OpenAPI Specification Compliance (Critical)
 Checks: Validates OpenAPI 3.0.x/3.1.0 versioning, presence of required info fields (title, version), resolvable references, and absence of duplicate operationIds.
@@ -59,6 +55,8 @@ P007: API Performance Compliance
 Checks: Validates response times against SLOs defined in x-performance OpenAPI extensions.
 P008: API Versioning Strategy (Warning)
 Checks: Enforces semantic versioning (SemVer), documentation of breaking changes, and presence of deprecation notices.
+P009: Test Readiness (Warning)
+Checks: Validates that the specification provides sufficient testable data — typed schemas with constraints, request/response examples, and documented parameters — to enable meaningful functional testing (P006).
 3.2 Validation Modes
 Mode
 Purpose
@@ -66,16 +64,20 @@ Principals Covered
 Requirement: Execution Speed
 test-only
 Pure functional/load testing
-None (Skips all validation)
+P006, P007 (Skips all static validation)
 < 60s
 minimal
 Essential Dev validation
-P001, P004 (Basic)
+P001
 < 20s
 strict
 Production readiness
-All (P001-P008)
+P001-P005, P008
 < 5m
+test-ready
+Pre-flight for functional testing
+P001, P004, P009
+< 30s
 3.3 CLI Interface and Requirements
 The CLI must support the following interface. If required flags are missing or conflicting auth methods are provided, the CLI must exit with Exit Code 3 (Invalid Arguments).
 Mandatory Flags:
@@ -95,13 +97,14 @@ GitHub and Security Flags:
 --github-token: (Legacy PAT - Prohibited in Prod)
 4. GitOps Promotion and Lifecycle Management
 Promotion is managed as a series of Git operations governed by the PromotionStrategy and ChangeTransferPolicy CRDs.
-4.1 Tool-Only GitOps Lifecycle
-Source (GitHub): Developer pushes code or OpenAPI spec changes to a feature branch.
-Build/Push: CI builds images and updates the GitOps repository manifests.
-Promotion (Git Ops): ChangeTransferPolicy detects a commit in a "proposed" branch and opens a PR against the "live" branch.
-Sync (Argo CD): Argo CD detects the commit/PR and syncs manifests (XRDs/XRs) to the cluster.
-Reconcile (Crossplane): Crossplane materializes infrastructure and triggers the XQualityGate validation.
-Feedback: Status flows back via Kubernetes conditions and GitHub PR comments.
+4.1 Bring-Your-Own-CI (BYOCI) GitOps Lifecycle
+XSDLC is a delivery pipeline, not a CI system. The developer's own CI (GitHub Actions, GitLab CI, Jenkins, etc.) handles building, testing, and updating manifests. XSDLC owns only promotion and quality gates.
+Source (GitHub): Developer pushes code to main. Their CI builds the container image and updates the image tag in manifests/deployment.yaml.
+Deployment: The developer triggers the auto-generated driveby-deploy.yml workflow (manual dispatch) to deploy manifests from the chosen source branch to a specific environment/*-next branch.
+Promotion (GitOps Promoter): ChangeTransferPolicy detects a commit in a "-next" branch and opens a PR against the corresponding environment branch.
+Quality Gate: The PR triggers a webhook → Argo Events → Argo Workflow → DriveBy validation against the source environment. The workflow creates a CommitStatus CRD.
+Sync (Argo CD): On successful promotion (auto-merge or manual approval), Argo CD detects the commit on the environment branch and syncs manifests to the cluster.
+Feedback: Status flows back via GitHub commit status, PR comments, and CommitStatus CRDs.
 4.2 Gating Mechanisms
 CommitStatus resources act as the primary truth for promotion. Key gates include:
 ArgoCD Health: Monitors application sync state.
@@ -249,14 +252,14 @@ Authentication flags: Supports --auth-token (Bearer), --auth-api-key, and --auth
 To securely post validation feedback directly to developers, DriveBy integrates with GitHub. While legacy Personal Access Tokens (--github-token) are supported, GitHub App Authentication is highly recommended for granular, repository-specific security
 . When executing in a workflow, DriveBy uses the --github-app-id, --github-installation-id, and --github-private-key flags (along with --github-owner, --github-repo, and --github-pr-number) to autonomously post comprehensive Markdown validation reports directly to the Pull Request
 .
-4.3 The Three Execution Modes
-To balance the need for rigorous production checks against the need for rapid CI/CD feedback, DriveBy offers three validation modes
+4.3 The Four Execution Modes
+To balance the need for rigorous production checks against the need for rapid feedback, DriveBy offers four validation modes
 :
 Test-Only Mode (--validation-mode=test-only):
-Behavior: Skips all static OpenAPI validation entirely to run pure functional and performance tests
+Behavior: Skips all static OpenAPI validation entirely to run pure functional (P006) and performance (P007) tests
 .
 Performance: Executes in ~30-60 seconds, utilizing minimal CPU and memory
-. Ideal for rapid CI/CD pipelines where the spec is already trusted
+. Ideal for pipelines where the spec is already trusted
 .
 Minimal Mode (Default, --validation-mode=minimal):
 Behavior: Focuses on essential structural validation. It runs basic OpenAPI specification compliance (P001) but skips deep schema validation, functional, and performance testing
@@ -264,28 +267,35 @@ Behavior: Focuses on essential structural validation. It runs basic OpenAPI spec
 Performance: Fastest static execution at ~10-20 seconds with low CPU/memory usage, perfect for development environments
 .
 Strict Mode (--validation-mode=strict):
-Behavior: The ultimate quality gate. It enforces all validation principles comprehensively (P001-P008), enforcing schema constraints, documentation completeness, and generating synthetic load testing
+Behavior: The production quality gate. It enforces all static validation principles (P001-P005, P008), enforcing schema constraints, documentation completeness, and security standards
 .
-Performance: Executes in ~2-5 minutes requiring high CPU/memory, designed specifically for production-readiness checks
+Performance: Executes in ~2-5 minutes, designed for production-readiness checks
 .
-4.4 The Validation Principles (P001 - P008)
-When running in strict mode, DriveBy enforces eight specific principles
+Test-Ready Mode (--validation-mode=test-ready):
+Behavior: Pre-flight check that validates the specification provides sufficient data for meaningful functional testing. Runs P001, P004, and P009 (Test Readiness)
+.
+Performance: Executes in ~10-30 seconds. Use as a gate before functional-test checks to catch under-documented specs early
+.
+4.4 The Validation Principles (P001 - P009)
+DriveBy enforces nine validation principles, each mapped to a DDT axiom
 :
-P001 (Specification Compliance): Ensures the spec strictly follows OpenAPI 3.0.x/3.1.0 standards, checking that paths are defined, HTTP methods are valid, and components are resolvable
+P001 (Specification Compliance — Completeness): Ensures the spec strictly follows OpenAPI 3.0.x/3.1.0 standards, checking that paths are defined, HTTP methods are valid, and components are resolvable
 .
-P002 (Documentation Quality): Mandates that all operations have clear summaries, and all request/response bodies have concrete examples
+P002 (Documentation Quality — Completeness): Mandates that all operations have clear summaries, and all request/response bodies have concrete examples
 .
-P003 (Error Handling Standards): Requires explicit documentation of 4xx and 5xx error responses, enforcing consistent error details schemas
+P003 (Error Handling Standards — Completeness): Requires explicit documentation of 4xx and 5xx error responses, enforcing consistent error details schemas
 .
-P004 (Request Schema Definitions): Validates rigorous data constraints. String fields must have length constraints, numeric fields require min/max values, and required fields must be explicitly marked
+P004 (Request Schema Definitions — Completeness): Validates rigorous data constraints. String fields must have length constraints, numeric fields require min/max values, and required fields must be explicitly marked
 .
-P005 (Security Standards): Ensures global and operation-level security schemes (e.g., OAuth2, API Keys) are properly defined
+P005 (Security Standards — Observability): Ensures global and operation-level security schemes (e.g., OAuth2, API Keys) are properly defined
 .
-P006 (Functional Testing): Automatically extracts examples from the OpenAPI spec to verify that the live API behaves exactly as documented
+P006 (Functional Testing — Determinism): Automatically extracts examples from the OpenAPI spec to verify that the live API behaves exactly as documented
 .
-P007 (Performance Compliance): Executes load tests against the live API, driven by CLI flags like --max-latency-p95 (default 500ms), --min-success-rate (default 0.99), and --concurrent-users
+P007 (Performance Compliance — Observability): Executes load tests against the live API, driven by CLI flags like --max-latency-p95 (default 500ms), --min-success-rate (default 0.99), and --concurrent-users
 .
-P008 (Versioning Strategy): Ensures the API declares semantic versions, deprecation notices, and breaking changes
+P008 (Versioning Strategy — Observability): Ensures the API declares semantic versions, deprecation notices, and breaking changes
+.
+P009 (Test Readiness — Determinism): Validates that the specification provides sufficient testable data — typed schemas, examples, and documented parameters — to enable meaningful functional testing (P006)
 .
 4.5 Execution and Exit Codes
 DriveBy's deterministic design outputs strict exit codes for CI/CD interpretation
@@ -300,29 +310,39 @@ DriveBy's deterministic design outputs strict exit codes for CI/CD interpretatio
 .
 
 --------------------------------------------------------------------------------
-PART 5: The End-to-End "Zero-Touch" Workflow
-When these tools are combined, they create an autonomous, closed-loop GitOps lifecycle where documentation dictates reality. Here is the step-by-step flow of a code change:
-The Commit: A developer pushes a code change to a feature branch. A GitHub Action builds the container image and updates the manifest in the environments/dev directory of the GitOps repository
+PART 5: The End-to-End "Zero-Touch" Workflow (BYOCI Model)
+When these tools are combined, they create an autonomous, closed-loop GitOps lifecycle where documentation dictates reality. XSDLC follows a strict Bring-Your-Own-CI (BYOCI) model: it is a delivery pipeline, not a CI system. The developer's own CI handles building and updating manifests. XSDLC owns only promotion, quality gates, and environment sync.
+
+Here is the step-by-step flow of a code change:
+The Commit: A developer pushes a code change to main. Their own CI pipeline (GitHub Actions, GitLab CI, Jenkins, etc.) builds the container image and updates the image tag in manifests/deployment.yaml on the main branch
 .
-Continuous Delivery (Argo CD): Argo CD detects the commit in the dev directory, marks the Application as OutOfSync, and autonomously syncs the new deployment to the live Dev Kubernetes cluster
+Manual Deploy: The developer triggers the auto-generated driveby-deploy.yml workflow (workflow_dispatch), selecting the source branch, target environment, and image tag. The workflow copies the manifests directory to the target environment/*-next branch and stamps the image tag
 .
-The Promotion Trigger (GitOps Promoter): GitOps Promoter observes the new commit running successfully in dev. Following the PromotionStrategy, its ChangeTransferPolicy autonomously opens a Pull Request against the environments/stage branch
+Dev Promotion (No Gate): GitOps Promoter auto-PRs environment/dev-next → environment/dev. With no gate on dev, the PR is auto-merged. Argo CD detects the commit on environment/dev, marks the Application as OutOfSync, and syncs the deployment to the Dev cluster
+.
+The Promotion Trigger (GitOps Promoter): GitOps Promoter observes the new commit in dev-next and autonomously opens a Pull Request from environment/staging-next to environment/staging
 .
 The Quality Gate (DriveBy via Argo Workflows):
-The creation of the PR triggers a GitHub webhook that launches an Argo Workflow
+The creation of the PR triggers a GitHub webhook to the cluster-side EventSource
 .
-The workflow spins up the DriveBy CLI in --validation-mode=strict, pointing it at the newly deployed Dev endpoint and the OpenAPI spec
+The Sensor filters the event and submits an Argo Workflow based on the gate's checks array. Each check becomes a sequential DAG step
 .
-DriveBy executes the P001-P008 checks. It extracts examples for functional testing and generates synthetic load to verify the --max-latency-p95 SLOs
+For example, a staging gate with validate-only + functional-test runs: set-pending → health-check → check-0-validate-only → check-1-functional-test → report-success
+.
+DriveBy validates against the source environment (dev), not the target (staging)
 .
 Feedback & Enforcement:
 If the developer forgot to document a 500 Internal Server Error schema, DriveBy fails (Exit Code 1)
 .
-DriveBy securely authenticates via its GitHub App credentials and posts a detailed, categorized Markdown validation report directly to the PR
+The Argo Workflow posts a detailed Markdown validation report as a PR comment and sets the GitHub commit status to failure
 .
-The Argo Workflow updates the GitOps Promoter CommitStatus CRD to phase: failure
+The workflow creates a CommitStatus CRD with phase: failure
 .
-Because the status failed, GitOps Promoter strictly blocks the merge to staging.
-Resolution: The developer adds the missing error schema to the OpenAPI document and pushes the fix. DriveBy re-runs, exits with 0 (Success), the CommitStatus turns green, and GitOps Promoter autonomously merges the PR to stage
+Because the CommitStatus failed, GitOps Promoter strictly blocks the merge to staging.
+Resolution: The developer adds the missing error schema to the OpenAPI document and pushes the fix to main. They re-trigger the driveby-deploy workflow targeting staging, the deploy updates staging-next, Promoter updates the PR, DriveBy re-runs, exits with 0 (Success), the CommitStatus turns green, and GitOps Promoter autonomously merges the PR to staging
 . Argo CD immediately syncs the staging cluster
+.
+Production (Manual Approval): The same flow repeats for prod, but with autoMerge: false — the CommitStatus turns green but a human must approve the merge
+.
+The environment chain is fully dynamic — developers can define any number of environments (minimum 2) with any combination of gates. A 4-environment setup (dev → qa → staging → prod) works identically, with each gated environment getting its own webhook, workflow, and branch protection
 .

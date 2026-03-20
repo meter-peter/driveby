@@ -6,6 +6,89 @@ Chapter~\ref{ch:architecture} described the DriveBy CLI as a standalone validati
 The architecture draws on four technologies: Crossplane~\cite{crossplane} for declarative resource provisioning, Argo Events~\cite{argo-events} for event-driven triggering, Argo Workflows~\cite{argo-workflows} for container-native pipeline orchestration, and the GitOps Promoter~\cite{gitops-promoter} for automated environment promotion. Each technology addresses a distinct concern in the quality gate lifecycle, and together they realize the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation} of Chapter~\ref{ch:related-work}.
 
 % ============================================================================
+\section{From CLI Tool to Custom Resource}
+\label{sec:cli-to-cr-evolution}
+% ============================================================================
+
+The progression from Chapter~\ref{ch:architecture} to this chapter reflects a fundamental shift in how validation integrates into modern software delivery. Understanding this shift requires tracing the architectural evolution through five stages, each subsuming the previous while adding a new capability.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 1: Shell Script}
+\label{subsec:stage-shell}
+% ----------------------------------------------------------------------------
+
+The earliest form of API validation is a shell pipeline: \texttt{curl} fetches the specification, \texttt{jq} extracts fields, and conditional logic checks for missing descriptions or undocumented error codes. This approach is immediate and requires no tooling beyond a POSIX shell. However, it lacks structure (checks are ad-hoc string matches), reusability (each API requires a custom script), and determinism (different developers write different checks with different thresholds). Shell scripts cannot produce structured reports, cannot be composed into pipelines, and cannot participate in automated decision-making.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 2: Go CLI}
+\label{subsec:stage-cli}
+% ----------------------------------------------------------------------------
+
+The DriveBy CLI (Chapter~\ref{ch:architecture}) addresses these limitations by introducing typed principles, a version-agnostic spec abstraction (\texttt{APISpec}), a deterministic validation engine, and structured JSON reporting. The DDT methodology defines nine principles (P001--P009); the CLI implements seven as \texttt{PrincipleChecker} instances (P001--P005, P008, P009), with P006 (functional testing) and P007 (performance testing) handled by dedicated test runners (Section~\ref{subsec:gate-types}). The same principle set runs on every specification, producing comparable, machine-readable results. The CLI is a self-contained binary with zero runtime dependencies---it can validate any reachable OpenAPI specification from any machine.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 3: Container Image}
+\label{subsec:stage-container}
+% ----------------------------------------------------------------------------
+
+Packaging the CLI as an OCI container image (\texttt{ghcr.io/meter-peter/driveby}) adds portability across execution environments. The same binary that runs on a developer's laptop runs inside any container runtime---Docker, containerd, CRI-O---without dependency management. The container image is the unit of deployment for all subsequent stages: workflow steps, CI jobs, and Crossplane-managed workflows all reference the same image.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 4: Argo Workflow Step}
+\label{subsec:stage-workflow}
+% ----------------------------------------------------------------------------
+
+Embedding the container image as a step in an Argo Workflows DAG adds event-driven execution, dependency ordering, artifact persistence, and exit handling. The CLI becomes one step in a larger pipeline that includes health checking, commit status posting, and PR commenting. Argo Events triggers the workflow from GitHub webhooks; the workflow orchestrates the validation and posts results back to the Git control plane. This stage transforms the CLI from a manual tool into an automated quality gate.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 5: Crossplane Custom Resource}
+\label{subsec:stage-cr}
+% ----------------------------------------------------------------------------
+
+The final stage---the \texttt{XSDLC} custom resource described in Section~\ref{sec:xrd-design}---declares the entire pipeline as a single Kubernetes resource. One CR (\(\sim\)25 lines of YAML) generates all workflow templates, event sources, sensors, ingress routes, RBAC rules, promotion strategies, branch structures, and ArgoCD applications. The operator does not configure individual components; they declare the desired end state, and Crossplane's reconciliation loop provisions everything.
+
+The key insight is that each stage \textit{subsumes} the previous. The CR still runs the same CLI binary, inside the same container image, as a step in the same Argo Workflows DAG. Nothing is discarded; each layer adds a new capability (portability, automation, declarative management) while preserving the core validation logic. This subsumption property means that the CLI's design decisions---the \texttt{APISpec} abstraction, the principle checker interface, the separation of concerns (Section~\ref{subsec:design-goals})---are not retrofits but foundational choices that enabled the entire progression.
+
+% ----------------------------------------------------------------------------
+\subsection{Limitations Driving the Transition}
+\label{subsec:limitations-transition}
+% ----------------------------------------------------------------------------
+
+The standalone CLI (Stage 2), however well-designed, cannot satisfy the operational demands of continuous delivery at scale. Three limitations motivate the transition to Kubernetes-native infrastructure.
+
+First, \textit{execution must be automated}. A CLI that a developer runs manually is useful for debugging but cannot serve as a quality gate. Quality gates must fire on every relevant event---a promotion pull request, a scheduled regression, a new deployment---without human intervention. This requires an event-driven execution model that the CLI alone cannot provide.
+
+Second, \textit{configuration must be declarative}. When validation is imperative (``run this command with these flags''), the configuration lives in scripts, CI pipelines, or developer knowledge. When validation is declarative (``this API must pass strict DDT validation before promotion to staging''), the configuration is a versioned, reconcilable Kubernetes resource. The declarative model enables drift detection, audit trails, and self-healing---properties that imperative scripts lack.
+
+Third, \textit{results must drive automated decisions}. The CLI produces a JSON report and an exit code. These outputs are sufficient for a human reviewer but insufficient for a GitOps reconciliation loop. The promotion system requires structured commit statuses, webhook callbacks, and status conditions---signals that integrate with the Kubernetes and Git control planes rather than relying on stdout parsing.
+
+These three limitations map directly to three abstraction layers. The CLI (Chapter~\ref{ch:architecture}) provides the \textit{validation logic}---the principle checkers, the spec abstraction, the report generator. The Kubernetes infrastructure (this chapter) provides the \textit{execution and provisioning layer}---Crossplane XRDs declare what gates exist, Argo Events trigger them, Argo Workflows orchestrate them. The GitOps pipeline (Chapter~\ref{ch:workflow}) provides the \textit{decision layer}---commit statuses gate promotion, the GitOps Promoter advances environments, ArgoCD reconciles the desired state.
+
+Table~\ref{tab:cli-to-cr-progression} summarizes this progression.
+
+\begin{table}[htbp]
+\centering
+\caption{Evolution from CLI tool to Kubernetes custom resource.}
+\label{tab:cli-to-cr-progression}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Aspect} & \textbf{CLI (Ch.~\ref{ch:architecture})} & \textbf{Kubernetes (Ch.~\ref{ch:kubernetes})} & \textbf{GitOps (Ch.~\ref{ch:workflow})} \\
+\midrule
+Execution     & Manual invocation      & Event-driven workflows   & Promotion-triggered \\
+Configuration & CLI flags, env vars    & XRD spec fields, Helm values & Git-versioned manifests \\
+Output        & JSON to stdout         & Workflow artifacts        & Commit statuses \\
+State         & Transient (process)    & Pod lifecycle             & Reconciled desired state \\
+Promotion     & Human decision         & Sensor-triggered          & Automated (commit status) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The critical enabler of this progression is the CLI's architecture itself. The \texttt{types} package (zero internal dependencies) and the \texttt{spec.APISpec} interface (version-agnostic) make the validation logic portable across execution environments. The same principle checkers that run in a developer's terminal run inside an Argo Workflow container---the only difference is how the binary is invoked and where the results are consumed. The CLI was not retrofitted for Kubernetes integration; its separation of concerns (Section~\ref{subsec:design-goals}) was designed to support multiple deployment models from the outset.
+
+The remainder of this chapter describes the Kubernetes-native layer: the controller pattern that underpins all operations (Section~\ref{sec:controller-pattern}), how Crossplane XRDs declare quality gates as custom resources (Section~\ref{sec:xrd-design}), the declarative lifecycle from installation through continuous operation (Section~\ref{sec:lifecycle-management}), and how Argo Events and Workflows execute validation pipelines (Sections~\ref{sec:argo-events-arch} and~\ref{sec:argo-workflows-dag}).
+
+% ============================================================================
 \section{Architecture Overview}
 \label{sec:k8s-overview}
 % ============================================================================
@@ -24,109 +107,279 @@ The Kubernetes architecture is shaped by four design goals:
 
     \item \textbf{Multi-environment awareness.} The system validates against a source environment (typically development) and gates promotion to a target environment (typically staging or production). This inversion---validating the source, not the target---ensures that quality is assessed before deployment, not after.
 
-    \item \textbf{Progressive configurability.} Sensible defaults enable a minimal-configuration deployment. Every default can be overridden at three levels: chart-wide (Helm values), cluster-wide (Crossplane EnvironmentConfigs), and per-resource (XRD spec fields).
+    \item \textbf{Progressive configurability.} Sensible defaults enable a minimal-configuration deployment. Every default can be overridden at two levels: chart-wide (Helm values) and per-resource (XRD spec fields).
 
-    \item \textbf{Platform inheritance.} The system assumes the existence of shared platform capabilities---ArgoCD, Crossplane, Argo Events, Argo Workflows, Traefik, cert-manager---and references them rather than installing them. A quality gate custom resource is analogous to an object instantiation in an object-oriented language: \texttt{XQualityGate} is a high-level declaration (the ``constructor call'') that inherits all platform capabilities through references to pre-existing infrastructure (the ``class hierarchy''). The application developer never configures TLS certificates, ingress controllers, or event buses directly; these are managed by the platform team and inherited by every resource that references them. This pattern---declaring what you need, not how to provision it---is the Kubernetes realization of the platform engineering model described in Section~\ref{subsec:platform-engineering} of Chapter~\ref{ch:related-work}.
+    \item \textbf{Platform inheritance.} The system assumes the existence of shared platform capabilities---ArgoCD, Crossplane, Argo Events, Argo Workflows, Traefik, cert-manager---and references them rather than installing them. The application developer never configures TLS certificates, ingress controllers, or event buses directly; these are managed by the platform team and inherited by every \texttt{XSDLC} resource that references them.
 \end{enumerate}
 
+
+% ============================================================================
+\section{The Kubernetes Controller Pattern}
+\label{sec:controller-pattern}
+% ============================================================================
+
+Before describing the specific resources that constitute the DriveBy quality gate system, it is necessary to formalize the operational model that governs them. Every resource described in this chapter---from the \texttt{XSDLC} custom resource to individual Sensors and WorkflowTemplates---is managed by a Kubernetes controller that continuously reconciles declared state against observed reality. This section describes the controller pattern, its consistency guarantees, and how Crossplane extends it to serve as a universal control plane.
+
 % ----------------------------------------------------------------------------
-\subsection{System Context}
-\label{subsec:system-context}
+\subsection{The Reconciliation Loop}
+\label{subsec:reconciliation-loop}
 % ----------------------------------------------------------------------------
 
-Figure~\ref{fig:k8s-system-context} shows the system context. The target cluster (\texttt{private.novelcore.org}) hosts both the DriveBy control plane and the application environments. The control plane namespace (\texttt{driveby}) contains all Crossplane-managed resources, Argo Events infrastructure, and workflow templates. Application namespaces follow a naming convention---\texttt{\{app\}-dev}, \texttt{\{app\}-staging}, \texttt{\{app\}-prod}---with each environment managed as a separate ArgoCD Application.
+A Kubernetes controller implements a three-phase cycle: \textit{observe}, \textit{diff}, and \textit{act}~\cite{k8s-controllers}. In the observe phase, the controller reads the current state of the resources it manages---both the desired state declared in the resource's \texttt{spec} and the actual state reported in its \texttt{status} or observed from the cluster. In the diff phase, the controller computes the difference between the desired and actual states. In the act phase, the controller takes corrective action to drive the actual state toward the desired state: creating missing resources, updating drifted configurations, or deleting obsolete objects.
 
-\begin{figure}[htbp]
-\centering
-\resizebox{\textwidth}{!}{%
-\input{figures/k8s-system-context.tex}%
-}
-\caption{System context showing the DriveBy control plane namespace, application environment namespaces, and shared infrastructure components. Dashed arrows indicate promotion flow and validation direction.}
-\label{fig:k8s-system-context}
-\end{figure}
+This cycle is \textit{level-triggered}, not \textit{edge-triggered}~\cite{k8s-up-and-running}. An edge-triggered system reacts to \textit{events}---it must observe every state change as it happens, and if it misses one (due to a crash, network partition, or restart), the missed event is lost. A level-triggered system reacts to \textit{state}---it periodically re-evaluates the current condition and takes action based on what it observes, regardless of how the system arrived at that state. If a controller crashes and restarts, it re-reads the current state and reconciles from scratch. No events are lost because no events need to be recorded; the state itself is the complete input.
 
-The namespace layout enforces isolation. The \texttt{driveby} namespace owns the quality gate infrastructure: Crossplane XRDs and compositions, Argo Events resources (EventBus, EventSource, Sensor), workflow templates, and GitOps Promoter resources. Application namespaces own the API deployments and their databases. Validation workflows run in the \texttt{driveby} namespace but reach into application namespaces to access API endpoints, ensuring that the quality gate infrastructure does not require elevated permissions in application namespaces.
+The practical consequence is robustness. A Kubernetes controller can be killed, restarted, scaled horizontally, or temporarily disconnected without losing track of what it manages. When it resumes, it observes the current state and acts accordingly. This property is fundamental to the self-healing guarantees described in Section~\ref{subsec:self-healing}.
 
-Shared infrastructure---ArgoCD, Crossplane with \texttt{provider-kubernetes}~v0.14.1, Traefik for ingress, and cert-manager for TLS---is pre-installed and managed by the platform team. The DriveBy Helm chart does not install these prerequisites; it \textit{references} them. An Ingress resource references the Traefik ingress class. A certificate annotation references the cert-manager issuer. An EventBus references the NATS JetStream substrate. None of these references are static configuration that a developer writes by hand---they are inherited capabilities provided by the platform, analogous to how an object in an object-oriented program inherits methods from its superclass without reimplementing them. This thesis, by design, shows only the ``application layer'' of an internal developer platform: the small, declarative surface that an API team interacts with. Everything beneath---the ingress routing, the certificate lifecycle, the event transport, the Git reconciliation---is the platform's responsibility, inherited through Kubernetes resource references.
+% ----------------------------------------------------------------------------
+\subsection{Eventual Consistency and Self-Healing}
+\label{subsec:self-healing}
+% ----------------------------------------------------------------------------
+
+Kubernetes does not guarantee immediate consistency. When a user creates an \texttt{XSDLC} resource, the system does not synchronously provision all child resources before returning. Instead, it accepts the declaration and returns immediately. The composition controller observes the new resource on its next reconciliation cycle, computes the desired children, and begins provisioning them. Each child resource is itself subject to its own controller's reconciliation loop. The system \textit{converges} toward the desired state over multiple reconciliation cycles, with each cycle reducing the gap between declared and actual state.
+
+This eventual consistency model enables self-healing. If an operator manually deletes a Sensor resource that was generated by the \texttt{XSDLC} composition, the composition controller detects the missing child on its next reconciliation pass and re-creates it. No human intervention is required; no alert needs to fire; the system simply converges back to the declared state. The same mechanism handles configuration drift: if someone modifies a generated WorkflowTemplate, the composition controller detects the discrepancy and overwrites the manual change with the correct generated configuration.
+
+This property connects directly to the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation} of Chapter~\ref{ch:related-work}. The \texttt{XSDLC} spec is the ontological artifact---the explicit specification of what should exist. The Crossplane composition controller is the reconciliation agent. The act of re-creating deleted resources or reverting drifted configurations is the correction mechanism. The three components of ontological state reconciliation are instantiated concretely in the Kubernetes controller model.
+
+% ----------------------------------------------------------------------------
+\subsection{Crossplane as Universal Control Plane}
+\label{subsec:crossplane-control-plane}
+% ----------------------------------------------------------------------------
+
+Crossplane~\cite{crossplane} extends the Kubernetes controller pattern by allowing custom resources to declare not just in-cluster objects but any resource reachable through a provider API. A standard Kubernetes controller manages Pods, Services, and ConfigMaps. A Crossplane-managed composition can manage those same resources \textit{plus} cloud databases, DNS records, GitHub branches, and any other resource for which a Crossplane provider exists~\cite{crossplane-compositions}.
+
+The \texttt{XSDLC} composition leverages this extension to manage resources across two control planes simultaneously. In-cluster resources (ServiceAccount, EventBus, WorkflowTemplate, ArgoCD Application) are provisioned through \texttt{provider-kubernetes}. GitHub resources (Branch, RepositoryFile, BranchProtection) are provisioned through \texttt{provider-upjet-github}. From the operator's perspective, this distinction is invisible: one \texttt{XSDLC} custom resource declares the entire pipeline, and the composition delegates each child resource to the appropriate provider.
+
+Crossplane compositions function as \textit{meta-controllers}. A standard controller watches one resource type and reconciles its state directly. A Crossplane composition watches a composite resource (the XRD) and generates \textit{desired state for other controllers}. The composition's \texttt{function-go-templating} step renders the desired children; \texttt{function-auto-ready} aggregates their readiness. Each generated child is then reconciled by its own provider controller. This two-level reconciliation---composition generates desired children, providers reconcile each child against its target system---is what enables a single 25-line YAML declaration to produce and maintain a pipeline of approximately 34 managed resources.
+
+% ----------------------------------------------------------------------------
+\subsection{Provider Architecture}
+\label{subsec:provider-architecture}
+% ----------------------------------------------------------------------------
+
+The \texttt{XSDLC} composition delegates resource management to two Crossplane providers:
+
+\textbf{\texttt{provider-kubernetes}} (v0.14.1) manages all in-cluster resources. It uses \texttt{InjectedIdentity} for authentication, meaning it inherits the permissions of the Crossplane pod's service account. Every in-cluster resource generated by the composition---ServiceAccount, EventBus, Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress, PromotionStrategy, GitRepository, ScmProvider, ArgoCDCommitStatus, and ArgoCD Application---is wrapped in a \texttt{provider-kubernetes} \texttt{Object} resource. The provider reconciles each \texttt{Object} by applying the embedded manifest to the cluster.
+
+\textbf{\texttt{provider-upjet-github}} (v0.18.0) manages GitHub API resources. It authenticates via a GitHub personal access token stored in a Kubernetes secret. The provider exposes GitHub resources as Kubernetes custom resources: \texttt{Branch}, \texttt{RepositoryFile}, and \texttt{BranchProtection}. The composition generates these resources to provision environment branches, commit delivery workflows to the application repository, and enforce branch protection rules.
+
+The single-composition, dual-provider model means that the operator interacts with one Kubernetes API (\texttt{driveby.io/v1alpha1 XSDLC}) while the system manages resources across two distinct control planes---the Kubernetes cluster and the GitHub API---from a single custom resource declaration.
 
 % ============================================================================
 \section{Crossplane XRD Design}
 \label{sec:xrd-design}
 % ============================================================================
 
-The quality gate infrastructure is provisioned through two Crossplane Composite Resource Definitions (XRDs): \texttt{XQualityGateTemplate} for shared resources and \texttt{XQualityGate} for per-API resources. This two-XRD model separates concerns that change at different rates.
+The quality gate infrastructure is provisioned through a single Crossplane Composite Resource Definition (XRD): \texttt{XSDLC} (API group \texttt{driveby.io/v1alpha1}). This single-CR model replaces an earlier two-XRD design that separated shared and per-API resources into distinct custom resources. The consolidation into a single XRD reduces the operator's cognitive load and deployment surface: one custom resource defines the entire SDLC pipeline for an application.
 
 % ----------------------------------------------------------------------------
-\subsection{XQualityGateTemplate: Shared Infrastructure}
-\label{subsec:xrd-template}
+\subsection{XSDLC: Single-CR Pipeline Definition}
+\label{subsec:xrd-xsdlc}
 % ----------------------------------------------------------------------------
 
-The \texttt{XQualityGateTemplate} (API group \texttt{driveby.io/v1alpha1}) declares the validation workflow shared across all APIs monitored by a given quality gate. A single template instance generates four Kubernetes resources:
+The \texttt{XSDLC} XRD requires only two fields: \texttt{repository} (the GitOps repository owner and name) and \texttt{environments} (the ordered list of environments in the promotion chain). From these two inputs, the composition generates all resources needed for the full software delivery lifecycle pipeline.
+
+A single \texttt{XSDLC} custom resource generates two categories of resources. \textit{App-level shared resources} are created once per CR:
 
 \begin{enumerate}
     \item A \textbf{ServiceAccount} with image pull credentials for accessing the DriveBy container image from the GitHub Container Registry.
-    \item A \textbf{Role} granting permissions to create and manage Argo Workflows, read secrets and configmaps, manage persistent volume claims, and---when the GitOps Promoter is enabled---create and update CommitStatus custom resources.
-    \item A \textbf{RoleBinding} associating the service account with the role.
-    \item A \textbf{WorkflowTemplate} containing the seven-step validation DAG described in Section~\ref{sec:argo-workflows-dag}.
+    \item An \textbf{EventBus} backed by NATS JetStream~\cite{nats-jetstream} for reliable event delivery between EventSources and Sensors.
+    \item A \textbf{ScmProvider} authenticating to GitHub via a GitHub App.
+    \item A \textbf{GitRepository} pointing to the GitOps repository.
+    \item A \textbf{PromotionStrategy} defining the environment chain with per-environment auto-merge policies and commit status gates.
+    \item An \textbf{ArgoCDCommitStatus} resource for each environment transition that has a quality gate.
 \end{enumerate}
 
-The template's spec accepts configuration for the project name, gate name, target cluster, validation mode (minimal, strict, or test-only), secret references, and optional GitOps Promoter integration. These values are resolved through the three-tier configuration model described in Section~\ref{sec:three-tier-config} and injected into the generated resources via go-templating.
-
-Listing~\ref{lst:template-cr} shows a representative \texttt{XQualityGateTemplate} instance.
-
-\begin{lstlisting}[caption={XQualityGateTemplate custom resource.},label={lst:template-cr}]
-apiVersion: driveby.io/v1alpha1
-kind: XQualityGateTemplate
-metadata:
-  name: driveby-staging-promotion
-spec:
-  projectName: driveby
-  gateName: staging-promotion
-  gateKey: driveby/staging-promotion
-  validationConfig:
-    validationMode: strict
-  promoterConfig:
-    enabled: true
-\end{lstlisting}
-
-From this declaration, Crossplane generates the RBAC resources and a WorkflowTemplate with all seven validation steps, parameter definitions, and exit handlers. The operator writes six lines of meaningful configuration; the composition generates several hundred lines of Kubernetes manifests.
-
-% ----------------------------------------------------------------------------
-\subsection{XQualityGate: Per-API Event Pipeline}
-\label{subsec:xrd-instance}
-% ----------------------------------------------------------------------------
-
-The \texttt{XQualityGate} (API group \texttt{driveby.io/v1alpha1}) declares the event-driven pipeline for a specific API. Each instance references a template (via \texttt{templateRef}) and generates the resources needed to receive events, filter them, and submit workflow runs. A single instance generates up to eight resources:
+\textit{Per-gate resources} are created for each environment that defines a \texttt{gate}:
 
 \begin{enumerate}
-    \item An \textbf{EventBus} backed by NATS JetStream~\cite{nats-jetstream} for reliable event delivery between EventSource and Sensor.
+    \item A \textbf{Role} granting permissions to create and manage Argo Workflows, read secrets and configmaps, manage persistent volume claims, and create and update CommitStatus custom resources.
+    \item A \textbf{RoleBinding} associating the service account with the role.
+    \item A \textbf{WorkflowTemplate} containing the validation DAG described in Section~\ref{sec:argo-workflows-dag}.
     \item An \textbf{EventSource} configured as a webhook listener on a configurable port (default: 12000).
     \item A \textbf{Sensor} that filters events (e.g., only \texttt{pull\_request} events with actions \texttt{opened}, \texttt{reopened}, or \texttt{synchronize}) and submits workflow runs with extracted parameters.
     \item A \textbf{Service} exposing the EventSource webhook.
     \item An \textbf{Ingress} with TLS termination (via cert-manager) routing external webhook traffic to the EventSource service.
 \end{enumerate}
 
-When the GitOps Promoter is enabled, three additional resources are generated:
+% ----------------------------------------------------------------------------
+\subsection{Multi-Check Gate Model}
+\label{subsec:multi-check-gates}
+\label{subsec:gate-types}
+% ----------------------------------------------------------------------------
 
-\begin{enumerate}
-    \setcounter{enumi}{5}
-    \item A \textbf{ScmProvider} authenticating to GitHub via a GitHub App.
-    \item A \textbf{GitRepository} pointing to the GitOps repository.
-    \item A \textbf{PromotionStrategy} defining the environment chain (e.g., dev $\rightarrow$ staging $\rightarrow$ prod) with per-environment auto-merge policies and commit status gates.
-\end{enumerate}
+Quality gates in the \texttt{XSDLC} model are composed from an ordered \texttt{checks[]} array. Each check becomes a sequential step in the Argo Workflows DAG, enabling gates that combine multiple validation concerns in a single promotion decision. Three check types are supported, each mapping to a distinct DDT concern:
 
-Figure~\ref{fig:xrd-resource-hierarchy} visualizes the resource hierarchy generated by each XRD.
+\begin{itemize}
+    \item \textbf{\texttt{validate-only}} --- runs the DriveBy CLI in static validation mode, evaluating the specification-level principles (P001--P005, P008, P009 in strict mode; a subset in minimal mode). Accepts an optional \texttt{validationConfig.validationMode} override.
+    \item \textbf{\texttt{functional-test}} --- runs the DriveBy CLI in \texttt{function-only} mode, executing P006 functional tests against the live API in the source environment. Validates runtime behavioral conformance: correct response schemas, proper error codes, authenticated endpoint behavior.
+    \item \textbf{\texttt{load-test}} --- runs k6-based load testing (P007) with configurable parameters: \texttt{concurrentUsers} (default: 10), \texttt{testDuration} (default: \texttt{5m}), \texttt{maxLatencyP95} (default: \texttt{500ms}), and \texttt{minSuccessRate} (default: 0.99).
+\end{itemize}
+
+The composition generates DAG steps with deterministic naming: \texttt{check-0-validate-only}, \texttt{check-1-functional-test}, and so on. Each step depends on the previous, forming a sequential chain. This ordering ensures that cheaper checks (static validation) run before expensive checks (load testing), failing fast when possible.
+
+Different environment transitions compose different subsets. For the staging gate:
+
+\begin{verbatim}
+gate:
+  checks:
+    - type: validate-only
+    - type: functional-test
+\end{verbatim}
+
+For the production gate:
+
+\begin{verbatim}
+gate:
+  checks:
+    - type: validate-only
+    - type: load-test
+      loadTestConfig:
+        concurrentUsers: 50
+        testDuration: "10m"
+        maxLatencyP95: "200ms"
+\end{verbatim}
+
+% ----------------------------------------------------------------------------
+\subsection{Minimal Configuration}
+\label{subsec:minimal-config}
+% ----------------------------------------------------------------------------
+
+Listing~\ref{lst:xsdlc-cr} shows a representative \texttt{XSDLC} instance. The entire SDLC pipeline for the \texttt{perfect-api} application---three environments, a validation gate for staging promotion, and a load test gate for production promotion---is defined in approximately 25 lines of YAML.
+
+\begin{lstlisting}[caption={XSDLC custom resource defining a three-environment pipeline with quality gates.},label={lst:xsdlc-cr}]
+apiVersion: driveby.io/v1alpha1
+kind: XSDLC
+metadata:
+  name: perfect-api
+  namespace: driveby
+spec:
+  repository:
+    owner: novelcore
+    name: perfect-api
+    manifestsPath: manifests
+  environments:
+    - name: dev
+    - name: staging
+      gate:
+        checks:
+          - type: validate-only
+          - type: functional-test
+    - name: prod
+      autoMerge: false
+      gate:
+        checks:
+          - type: validate-only
+          - type: load-test
+\end{lstlisting}
+
+From this declaration, Crossplane generates the shared resources (ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus) and the per-gate resources (RBAC, WorkflowTemplate, EventSource, Sensor, Service, Ingress) for each gated environment. The operator writes approximately 15 lines of meaningful configuration; the composition generates several hundred lines of Kubernetes manifests. All cluster-specific configuration---domain, image references, secret names, ingress class, certificate issuer---is inherited from Helm values, following the two-tier configuration model described in Section~\ref{sec:two-tier-config}.
+
+Figure~\ref{fig:xrd-resource-hierarchy} visualizes the resource hierarchy generated by the \texttt{XSDLC} XRD.
 
 \begin{figure}[htbp]
 \centering
 \input{figures/xrd-resource-hierarchy.tex}
-\caption{Resources generated by each XRD. The template produces shared RBAC and workflow infrastructure; the instance produces per-API event routing and optional GitOps Promoter resources. The \texttt{templateRef} link connects instances to their shared template.}
+\caption{Resources generated by the \texttt{XSDLC} XRD. App-level shared resources (ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy) are created once per CR. Per-gate resources (RBAC, WorkflowTemplate, EventSource, Sensor, Service, Ingress) are created for each environment that defines a quality gate.}
 \label{fig:xrd-resource-hierarchy}
 \end{figure}
 
-The two-XRD model enables a one-to-many relationship: a single \texttt{XQualityGateTemplate} defines the validation pipeline once, and multiple \texttt{XQualityGate} instances---one per API---share that pipeline while maintaining independent event sources, sensors, and ingress routes. Adding a new API to the quality gate requires creating one \texttt{XQualityGate} custom resource; the shared template needs no modification.
+The single-CR model eliminates the template-instance indirection of the earlier two-XRD design. Rather than creating a template and then instantiating it per API, the operator declares the full pipeline in one resource. The composition handles the separation of shared and per-gate concerns internally. Adding a new API to the quality gate system requires creating one \texttt{XSDLC} custom resource; no other resources need to be created or modified.
 
-The analogy to object-oriented programming is direct. The \texttt{XQualityGateTemplate} is a class definition: it encapsulates the validation behavior (WorkflowTemplate), the permissions model (RBAC), and the execution identity (ServiceAccount). The \texttt{XQualityGate} is an object instantiation: it provides instance-specific state (which API, which events, which namespaces) while inheriting all behavior from the template via \texttt{templateRef}. The platform infrastructure beneath both---Crossplane, Argo Events, cert-manager, Traefik---is the runtime: it provides the capabilities that make instantiation possible but is never configured by the application developer. Writing \texttt{kind: XQualityGate} is the Kubernetes equivalent of \texttt{Dog d = new Dog()}: a single declaration that activates an entire inheritance hierarchy of platform capabilities.
+% ============================================================================
+\section{Declarative Lifecycle Management}
+\label{sec:lifecycle-management}
+% ============================================================================
+
+The controller pattern and provider architecture described in Sections~\ref{sec:controller-pattern} and~\ref{subsec:provider-architecture} provide the theoretical and mechanical foundations. This section describes how these foundations manifest in the operational lifecycle of the quality gate system---from platform installation through pipeline creation, continuous operation, and eventual decommissioning.
+
+% ----------------------------------------------------------------------------
+\subsection{Day 0: Platform Installation}
+\label{subsec:day0}
+% ----------------------------------------------------------------------------
+
+The Helm chart installs the \textit{platform layer}: the XRD definition, the composition template, the ProviderConfig for \texttt{provider-kubernetes}, the ProviderConfig for \texttt{provider-upjet-github}, and the Crossplane functions (\texttt{function-go-templating}, \texttt{function-auto-ready}). At this point, no \texttt{XSDLC} instances exist. The platform is ready to accept declarations but has not yet provisioned any quality gate infrastructure.
+
+This separation between platform installation and pipeline creation is deliberate. The platform team installs the Helm chart once per cluster. Application teams create \texttt{XSDLC} custom resources independently, without requiring platform team involvement for each new API. The platform provides the \textit{capability}; individual CRs exercise it.
+
+% ----------------------------------------------------------------------------
+\subsection{Day 1: Pipeline Creation}
+\label{subsec:day1}
+% ----------------------------------------------------------------------------
+
+When an operator applies an \texttt{XSDLC} custom resource, the Crossplane composition controller detects the new resource on its next reconciliation cycle and begins generating child resources. For the reference deployment (\texttt{perfect-api} with three environments and two quality gates), the composition generates approximately 34 child resources: ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, three ArgoCD Applications, six Branches, two RepositoryFiles, and the per-gate resources (Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress) for each gated environment.
+
+Each child resource is itself subject to its provider's reconciliation loop. The \texttt{provider-kubernetes} controller applies each in-cluster manifest; the \texttt{provider-upjet-github} controller creates GitHub branches and commits workflow files. The \texttt{function-auto-ready} function monitors all children and marks the \texttt{XSDLC} composite as \texttt{READY=True} only when every child has reached its own ready state.
+
+Figure~\ref{fig:crossplane-reconciliation-loop} illustrates this reconciliation cycle.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.85\textwidth}{!}{%
+\input{figures/crossplane-reconciliation-loop.tex}%
+}
+\caption{Crossplane reconciliation loop. The XSDLC spec feeds the composition, which renders desired children. Providers reconcile each child against its target system. Status feedback flows back through \texttt{function-auto-ready} to mark the composite as ready.}
+\label{fig:crossplane-reconciliation-loop}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{Day 2: Continuous Reconciliation}
+\label{subsec:day2}
+% ----------------------------------------------------------------------------
+
+Once the pipeline is created, the controller pattern ensures continuous reconciliation. Two scenarios illustrate this property.
+
+\textbf{Drift detection.} If an operator or automated process modifies a Crossplane-managed resource---for example, changing the Sensor's filter configuration---the composition controller detects the discrepancy on its next reconciliation pass and overwrites the change with the correct generated configuration. The \texttt{XSDLC} spec is the single source of truth; any deviation from the generated state is treated as drift and corrected.
+
+\textbf{Self-healing.} If a managed resource is deleted---for example, \texttt{kubectl delete sensor perfect-api-staging-gate-sensor}---the composition controller detects the missing child and re-creates it. The provider reconciles the re-created resource against the cluster, and the pipeline returns to its declared state without human intervention.
+
+The composition uses two deletion policies to distinguish shared and per-pipeline resources. \textit{Shared resources} (ServiceAccount, EventBus) use \texttt{deletionPolicy: Orphan}. If the \texttt{XSDLC} CR is deleted, these resources are left in place because other \texttt{XSDLC} instances in the same namespace may depend on them. \textit{Per-pipeline resources} (ScmProvider, GitRepository, PromotionStrategy, WorkflowTemplate, EventSource, Sensor, and all per-gate resources) use \texttt{deletionPolicy: Delete}. When the \texttt{XSDLC} CR is deleted, these resources are cascade-deleted because they are specific to the pipeline being decommissioned. Similarly, GitHub \texttt{Branch} resources use \texttt{deletionPolicy: Orphan} to preserve branch history even when the pipeline is removed.
+
+% ----------------------------------------------------------------------------
+\subsection{Day N: Updates and Deletion}
+\label{subsec:day-n}
+% ----------------------------------------------------------------------------
+
+\textbf{Updates.} Modifying the \texttt{XSDLC} spec triggers a reconciliation delta. Adding a new environment generates the new ArgoCD Application, branches, and (if gated) per-gate resources. Removing an environment deletes the corresponding children. Changing a gate's check types regenerates the WorkflowTemplate with the updated DAG. The composition is \textit{idempotent}: applying the same spec twice produces no changes; applying a modified spec produces exactly the changes needed to reach the new desired state.
+
+\textbf{Deletion.} Deleting the \texttt{XSDLC} CR triggers cascade deletion for all children with \texttt{deletionPolicy: Delete}. Resources with \texttt{deletionPolicy: Orphan} (ServiceAccount, EventBus, Branches) remain. This selective cascade ensures that shared infrastructure survives individual pipeline removal while pipeline-specific resources are cleaned up.
+
+% ----------------------------------------------------------------------------
+\subsection{Status Reporting}
+\label{subsec:status-reporting}
+% ----------------------------------------------------------------------------
+
+The \texttt{XSDLC} XRD defines a structured \texttt{status} section that reports the pipeline's operational state. The status fields include:
+
+\begin{itemize}
+    \item \texttt{ready} (boolean): overall readiness, set by \texttt{function-auto-ready} when all children are healthy.
+    \item \texttt{environmentCount} (integer): number of environments in the promotion chain.
+    \item \texttt{gateCount} (integer): number of environments with quality gates.
+    \item \texttt{gates[]} (array): per-gate status including environment name, gate type, commit status key, webhook URL, and readiness.
+    \item \texttt{promotionStrategy} (object): name and readiness of the generated PromotionStrategy.
+    \item \texttt{conditions[]} (array): standard Kubernetes conditions (Ready, Synced) with timestamps and messages.
+\end{itemize}
+
+The XRD defines \texttt{additionalPrinterColumns} so that \texttt{kubectl get xsdlcs} displays a summary view:
+
+\begin{verbatim}
+NAME          APP          ENVIRONMENTS   GATES   READY   AGE
+perfect-api   perfect-api  3              2       True    4d
+\end{verbatim}
+
+This status reporting applies the Observability axiom to the infrastructure itself. Just as DDT's validation report makes API quality observable, the \texttt{XSDLC} status makes pipeline health observable. An operator can determine at a glance whether the quality gate system is functioning correctly, without inspecting individual children.
+
+Figure~\ref{fig:declarative-lifecycle} summarizes the lifecycle stages.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/declarative-lifecycle.tex}%
+}
+\caption{Declarative lifecycle management. Day~0 installs the platform; Day~1 creates the pipeline from a single CR; Day~2 and beyond provide continuous reconciliation with drift detection and self-healing; Day~N supports updates and clean deletion.}
+\label{fig:declarative-lifecycle}
+\end{figure}
 
 % ============================================================================
 \section{Composition Pipeline}
@@ -138,16 +391,14 @@ The analogy to object-oriented programming is direct. The \texttt{XQualityGateTe
 \label{subsec:pipeline-mode}
 % ----------------------------------------------------------------------------
 
-Both XRDs use Crossplane's pipeline-mode compositions, which process the composite resource through a sequence of functions rather than relying on the legacy patch-and-transform approach. The composition pipeline for each XRD follows the same four-step pattern:
+The \texttt{XSDLC} XRD uses Crossplane's pipeline-mode composition, which processes the composite resource through a sequence of functions rather than relying on the legacy patch-and-transform approach. The composition pipeline follows a two-step pattern:
 
 \begin{enumerate}
-    \item \textbf{function-environment-configs}: Injects cluster-level configuration from Crossplane EnvironmentConfig resources into the composition context. This is the second tier of the three-tier configuration model.
-    \item \textbf{function-go-templating}: Renders Kubernetes manifests from Go templates, with access to the XRD spec, EnvironmentConfig data, and Helm-injected defaults.
+    \item \textbf{function-go-templating}: Renders Kubernetes manifests from Go templates, with access to the XRD spec and Helm-injected defaults. This function performs the bulk of the work: it iterates over the environments list, generates shared resources once and per-gate resources for each gated environment, resolves the two-tier configuration precedence, and handles the template escaping required when generating Argo Workflows templates that themselves contain Go template syntax.
     \item \textbf{function-auto-ready}: Automatically marks the composite resource as ready when all composed resources reach their ready state.
-    \item \textbf{function-sequencer}: Controls the order in which composed resources are created, preventing race conditions (e.g., ensuring the EventBus exists before the Sensor that depends on it).
 \end{enumerate}
 
-The go-templating function performs the bulk of the work. It evaluates conditional blocks (e.g., generating GitOps Promoter resources only when \texttt{promoterConfig.enabled} is true), resolves the three-tier configuration precedence, and handles the template escaping required when generating Argo Workflows templates that themselves contain Go template syntax.
+The go-templating function evaluates the \texttt{checks[]} array per gate, generating the appropriate step templates (\texttt{driveby-validate}, \texttt{driveby-functional}, \texttt{driveby-loadtest}) based on each check's type. It resolves configuration values from either the XRD spec or Helm defaults and produces the complete set of Kubernetes manifests from a single template.
 
 % ----------------------------------------------------------------------------
 \subsection{Template Escaping}
@@ -162,48 +413,83 @@ The solution uses a double-escaping convention. Argo template expressions within
 {{ "{{" }}workflow.parameters.app-name{{ "}}" }}
 \end{verbatim}
 
-The outer Go template evaluates \texttt{\{\{"{{"\}\}} to produce the literal string \texttt{\{\{}, and similarly for the closing braces. The resulting manifest contains the intended Argo expression \texttt{\{\{workflow.parameters.app-name\}\}} verbatim. This escaping is applied consistently across all workflow step definitions in the template composition.
+The outer Go template evaluates \verb|{{"{{" }}| to produce the literal string \verb|{{|, and similarly for the closing braces. The resulting manifest contains the intended Argo expression \verb|{{workflow.parameters.app-name}}| verbatim. This escaping is applied consistently across all workflow step definitions in the template composition.
+
+% ----------------------------------------------------------------------------
+\subsection{Generated GitHub Resources}
+\label{subsec:generated-github}
+% ----------------------------------------------------------------------------
+
+When the GitHub provider is enabled, the \texttt{XSDLC} composition generates three categories of GitHub resources, all managed through \texttt{provider-upjet-github}.
+
+\textbf{Branches.} For each environment in the promotion chain, the composition generates two branches: \texttt{environment/<name>} (the active branch that ArgoCD watches) and \texttt{environment/<name>-next} (the proposed branch where the deploy workflow pushes changes). Both branches are sourced from the repository's default branch (\texttt{main}) and use \texttt{deletionPolicy: Orphan} to preserve Git history when the pipeline is removed. For a three-environment pipeline, this produces six branches.
+
+\textbf{Repository file.} The composition commits one GitHub Actions workflow file to the application repository's default branch:
+
+\begin{itemize}
+    \item \texttt{driveby-deploy.yml}: a manual-trigger workflow (\texttt{workflow\_dispatch}) with three inputs: \texttt{source\_branch} (which branch to take manifests from), \texttt{environment} (which environment to deploy to, presented as a choice dropdown generated from the XSDLC's environments array), and \texttt{image\_tag} (the container image tag to stamp into the deployment manifest). The workflow checks out the target \texttt{environment/<name>-next} branch, cleans it, copies the \texttt{manifestsPath} directory from the source branch to the branch root (flattening the directory structure), stamps the image tag via \texttt{sed}, and pushes. This is the bridge between the developer and the XSDLC delivery pipeline: deployment is explicit and targeted at a single environment.
+\end{itemize}
+
+The workflow file uses \texttt{deletionPolicy: Delete} and \texttt{overwriteOnCreate: true}, ensuring that the composition maintains ownership. If an engineer modifies the generated workflow, the Crossplane reconciliation loop detects the drift and restores the composition-generated version.
+
+\textbf{Branch protection.} When enabled, the composition generates \texttt{BranchProtection} rules for gated environments. Each gated environment's active branch requires the corresponding commit status check to pass before merging. The \texttt{-next} branches receive protection to prevent accidental overwrites outside the deploy workflow.
+
+The key insight is that delivery workflows are \textit{generated infrastructure}, not hand-authored configuration. The composition maintains them as part of the reconciliation loop, just as it maintains in-cluster resources. This eliminates a common source of configuration drift: workflow files that diverge across repositories because they were copied and manually modified rather than generated from a common template.
+
+% ----------------------------------------------------------------------------
+\subsection{ArgoCD Application Generation}
+\label{subsec:argocd-generation}
+% ----------------------------------------------------------------------------
+
+The composition generates an ArgoCD Application for every environment in the promotion chain, not just gated environments. Each Application watches its environment's active branch (\texttt{environment/<name>}) and deploys to the corresponding namespace (\texttt{<appName>-<envName>}).
+
+The \texttt{autoMerge} field on each environment controls the sync policy:
+
+\begin{itemize}
+    \item \texttt{autoMerge: true} (default): the Application is configured with \texttt{automated.selfHeal: true} and \texttt{automated.prune: true}. ArgoCD automatically synchronizes changes and self-heals drifted resources. This is the typical configuration for development and staging environments.
+    \item \texttt{autoMerge: false}: the Application has no automated sync policy. An operator must manually trigger synchronization in the ArgoCD UI or CLI. This is the typical configuration for production environments where human approval is required before deployment.
+\end{itemize}
+
+All generated Applications include \texttt{CreateNamespace=true} in their sync options, ensuring that the target namespace is created automatically if it does not exist. Each Application carries labels (\texttt{driveby.io/app}, \texttt{driveby.io/environment}) that enable the ArgoCDCommitStatus resource to aggregate health signals across all environments.
 
 % ============================================================================
-\section{Three-Tier Configuration Model}
-\label{sec:three-tier-config}
+\section{Two-Tier Configuration Model}
+\label{sec:two-tier-config}
 % ============================================================================
 
-The system implements a three-tier configuration resolution model that balances simplicity with flexibility. Figure~\ref{fig:three-tier-config} illustrates the resolution order.
+The system implements a two-tier configuration resolution model that balances simplicity with flexibility. Figure~\ref{fig:two-tier-config} illustrates the resolution order.
 
 \begin{figure}[htbp]
 \centering
-\input{figures/three-tier-config.tex}
-\caption{Three-tier configuration resolution. Each tier overrides values from the tier above, with Tier~3 (XRD spec) having the highest priority.}
-\label{fig:three-tier-config}
+\input{figures/two-tier-config.tex}
+\caption{Two-tier configuration resolution. Tier~2 (XRD spec) overrides values from Tier~1 (Helm defaults), with the XRD spec having the highest priority.}
+\label{fig:two-tier-config}
 \end{figure}
 
-\textbf{Tier~1: Helm values} (\texttt{values.yaml}) provide chart-wide defaults that apply to all resources generated by the Helm chart. These include the base domain (\texttt{private.novelcore.org}), the DriveBy container image (\texttt{ghcr.io/meter-peter/driveby:latest}), secret names, webhook port (12000), EventBus configuration, and ingress settings. Tier~1 values are baked into the composition templates at Helm rendering time.
+\textbf{Tier~1: Helm values} (\texttt{values.yaml}) provide chart-wide defaults that apply to all resources generated by the Helm chart. These include the base domain (\texttt{private.novelcore.org}), the DriveBy container image (\texttt{ghcr.io/meter-peter/driveby:latest}), secret names, webhook port (12000), EventBus configuration, and ingress settings. Tier~1 values are baked into the composition templates at Helm rendering time. This tier captures all cluster-specific configuration that applies uniformly across all \texttt{XSDLC} custom resources.
 
-\textbf{Tier~2: EnvironmentConfigs} provide cluster-level overrides that take precedence over Helm defaults. Two EnvironmentConfigs are deployed: \texttt{driveby-template-config} (shared defaults for template compositions) and \texttt{driveby-instance-config} (defaults for instance compositions). These are Crossplane-native resources that can be updated independently of the Helm chart, enabling per-cluster customization without chart modifications.
+\textbf{Tier~2: XRD spec fields} provide per-resource overrides with the highest priority. When an operator specifies a value in the \texttt{XSDLC} spec, it takes precedence over the Helm default. This tier enables per-application customization (e.g., a specific API using a different validation mode, a non-standard port, or custom load test parameters).
 
-\textbf{Tier~3: XRD spec fields} provide per-resource overrides with the highest priority. When an operator specifies a value in the \texttt{XQualityGateTemplate} or \texttt{XQualityGate} spec, it takes precedence over both EnvironmentConfig and Helm defaults. This tier enables per-API customization (e.g., a specific API using a different validation mode or a non-standard port).
-
-The resolution is implemented in the go-templating function using a precedence chain. For each configurable value, the template checks: (1)~if the XRD spec provides the value, use it; (2)~else if the EnvironmentConfig provides the value, use it; (3)~else use the Helm default. This pattern is applied consistently across more than twenty configurable parameters including domain, namespace, image references, secret names, ingress class, cluster issuer, webhook port, JetStream version and replicas, and GitHub configuration.
+The resolution is implemented in the go-templating function using a simple precedence check. For each configurable value, the template checks: (1)~if the XRD spec provides the value, use it; (2)~else use the Helm default. This pattern is applied consistently across more than twenty configurable parameters including domain, namespace, image references, secret names, ingress class, cluster issuer, webhook port, JetStream version and replicas, and GitHub configuration. The elimination of the intermediate EnvironmentConfig tier---present in an earlier three-tier design---simplifies both the mental model and the composition logic without sacrificing meaningful flexibility.
 
 Table~\ref{tab:config-tiers} lists representative parameters and their resolution across tiers.
 
 \begin{table}[htbp]
 \centering
-\caption{Representative configuration parameters and their three-tier resolution.}
+\caption{Representative configuration parameters and their two-tier resolution.}
 \label{tab:config-tiers}
 \small
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{Parameter} & \textbf{Tier~1 (Helm)} & \textbf{Tier~2 (EnvConfig)} & \textbf{Tier~3 (XRD)} \\
+\textbf{Parameter} & \textbf{Tier~1 (Helm)} & \textbf{Tier~2 (XRD)} \\
 \midrule
-Base domain        & \texttt{private.novelcore.org} & --- & --- \\
-DriveBy image      & \texttt{ghcr.io/.../driveby:latest} & --- & per-resource \\
-Validation mode    & \texttt{strict} & --- & per-resource \\
-Webhook port       & 12000 & per-cluster & per-resource \\
-Ingress class      & \texttt{traefik-system} & per-cluster & --- \\
-JetStream replicas & 1 & per-cluster & per-resource \\
-GitHub API URL     & \texttt{https://api.github.com} & per-cluster & --- \\
+Base domain        & \texttt{private.novelcore.org} & --- \\
+DriveBy image      & \texttt{ghcr.io/.../driveby:latest} & per-resource \\
+Validation mode    & \texttt{strict} & per-resource \\
+Webhook port       & 12000 & per-resource \\
+Ingress class      & \texttt{traefik-system} & --- \\
+JetStream replicas & 1 & per-resource \\
+GitHub API URL     & \texttt{https://api.github.com} & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -213,7 +499,7 @@ GitHub API URL     & \texttt{https://api.github.com} & per-cluster & --- \\
 \label{sec:argo-events-arch}
 % ============================================================================
 
-Argo Events provides the event-driven layer that connects external triggers (GitHub webhooks) to internal actions (workflow submissions). The architecture uses three Argo Events resources, each generated by the \texttt{XQualityGate} composition.
+Argo Events provides the event-driven layer that connects external triggers (GitHub webhooks) to internal actions (workflow submissions). The architecture uses three Argo Events resources, each generated by the \texttt{XSDLC} composition for every environment that defines a quality gate.
 
 % ----------------------------------------------------------------------------
 \subsection{EventBus}
@@ -229,10 +515,10 @@ The JetStream backing ensures that webhook events are not lost if the Sensor is 
 \label{subsec:eventsource}
 % ----------------------------------------------------------------------------
 
-The EventSource defines how external events enter the system. For quality gate validation, the EventSource is configured as a webhook listener on port 12000. Each event trigger defined in the \texttt{XQualityGate} spec generates a named webhook endpoint. For example, a trigger named \texttt{pr-validation} produces an endpoint at:
+The EventSource defines how external events enter the system. For quality gate validation, the EventSource is configured as a webhook listener on port 12000. Each quality gate generates a named webhook endpoint following the pattern \texttt{/<appName>-<envName>-gate-pr-trigger}. For example, the staging gate for \texttt{perfect-api} produces:
 
 \begin{verbatim}
-/perfect-api-staging-promotion-pr-validation
+/perfect-api-staging-gate-pr-trigger
 \end{verbatim}
 
 GitHub is configured to deliver webhook events to this endpoint via the Ingress route. The EventSource receives the raw webhook payload, validates it, and publishes it to the EventBus for consumption by Sensors.
@@ -283,28 +569,48 @@ The parameter extraction combines dynamic values from the webhook payload (PR nu
 \label{sec:argo-workflows-dag}
 % ============================================================================
 
-The validation pipeline is implemented as an Argo Workflows WorkflowTemplate containing a directed acyclic graph (DAG) of seven steps. The Sensor submits workflow runs from this template, passing the extracted parameters. Figure~\ref{fig:staging-dag} (reproduced from Chapter~\ref{ch:architecture}) shows the DAG structure.
+The validation pipeline is implemented as an Argo Workflows WorkflowTemplate containing a directed acyclic graph (DAG). Unlike fixed pipelines, the DAG is \textit{dynamically generated} by the Crossplane composition based on the gate's \texttt{checks[]} array (Section~\ref{subsec:multi-check-gates}). The Sensor submits workflow runs from this template, passing the extracted parameters.
 
 % ----------------------------------------------------------------------------
 \subsection{Pipeline Steps}
 \label{subsec:pipeline-steps}
 % ----------------------------------------------------------------------------
 
-The seven steps execute in the following order, with steps 6 and 7 running in parallel after step 5:
+The DAG follows a fixed preamble, a dynamic checks section, and a fixed postamble:
 
-\textbf{Step 1: set-pending-status.} Posts a ``pending'' commit status to the PR's head SHA via the GitHub API. This provides immediate visual feedback on the PR that validation is in progress. When the GitOps Promoter is enabled, a parallel step creates a CommitStatus custom resource with phase \texttt{pending}.
+\textbf{Preamble (fixed steps):}
 
-\textbf{Step 2: wait-for-source-ready.} Polls the source environment (e.g., \texttt{perfect-api-dev}) to verify that the API deployment is healthy and ready to accept validation requests. The step performs up to 24 health checks at 5-second intervals (2 minutes maximum), using \texttt{curl} to probe the API's health endpoint. This wait ensures that validation does not run against a partially deployed or restarting instance.
+\begin{enumerate}
+    \item \textbf{set-pending-status}: Posts a ``pending'' commit status to the PR's head SHA via the GitHub API. A parallel step (\textbf{update-commitstatus-pending}) creates a CommitStatus custom resource with phase \texttt{pending} for the GitOps Promoter.
 
-\textbf{Step 3: spec-sync-check.} Fetches the OpenAPI specification from the source environment's API endpoint and verifies it is accessible. This step detects configuration errors (wrong port, wrong endpoint path, service not exposed) before the main validation begins.
+    \item \textbf{wait-for-source-ready}: Polls the source environment (e.g., \texttt{perfect-api-dev}) to verify that the API deployment is healthy. The step performs up to 24 health checks at 5-second intervals (2 minutes maximum), using \texttt{curl} to probe the API's OpenAPI endpoint. This wait ensures that validation does not run against a partially deployed or restarting instance.
+\end{enumerate}
 
-\textbf{Step 4: validate-source.} Runs the DriveBy CLI in \texttt{validate-only} mode against the source environment's API. The container image \texttt{ghcr.io/meter-peter/driveby:latest} executes with the validation mode configured in the template (default: strict). The validation report is stored as a workflow artifact.
+\textbf{Dynamic checks (from \texttt{checks[]} array):}
 
-\textbf{Step 5: functional-test-source.} Runs the DriveBy CLI in \texttt{function-only} mode, executing functional tests against the live API instance in the source environment. Authentication credentials are injected from Kubernetes secrets.
+For each check in the gate's ordered \texttt{checks[]} array, the composition generates a DAG step named \texttt{check-<index>-<type>}. Each step depends on the previous step, forming a sequential chain. The step template is selected by check type:
 
-\textbf{Step 6: report-success.} Posts a ``success'' commit status to the PR's head SHA. When the GitOps Promoter is enabled, updates the CommitStatus custom resource to phase \texttt{success}, signaling that the promotion gate has passed.
+\begin{itemize}
+    \item \texttt{validate-only} $\rightarrow$ \texttt{driveby-validate}: Runs the DriveBy CLI with the configured validation mode. The container image \texttt{ghcr.io/meter-peter/driveby:latest} executes with flags derived from the check's \texttt{validationConfig}. The validation report is stored on a shared PVC at \texttt{/tmp/reports}.
+    \item \texttt{functional-test} $\rightarrow$ \texttt{driveby-functional}: Runs the DriveBy CLI in \texttt{function-only} mode against the live API. Authentication credentials are injected from Kubernetes secrets.
+    \item \texttt{load-test} $\rightarrow$ \texttt{driveby-loadtest}: Runs k6 load testing with parameters from the check's \texttt{loadTestConfig} (concurrent users, duration, P95 threshold, success rate).
+\end{itemize}
 
-\textbf{Step 7: comment-pr.} Posts the validation report as a comment on the pull request using DriveBy's \texttt{--github-comment} flag. This provides human-readable results directly in the PR conversation.
+\textbf{Postamble (fixed steps, parallel after last check):}
+
+\begin{enumerate}
+    \item \textbf{report-success}: Posts a ``success'' commit status to the PR's head SHA.
+    \item \textbf{comment-pr}: Posts the validation report as a comment on the pull request, reading saved reports from the shared PVC via DriveBy's \texttt{github-comment} command.
+    \item \textbf{update-commitstatus-success}: Updates the CommitStatus custom resource to phase \texttt{success}, signaling that the promotion gate has passed.
+\end{enumerate}
+
+For example, a staging gate with two checks (\texttt{validate-only}, \texttt{functional-test}) produces the DAG:
+
+\begin{verbatim}
+set-pending → health-check → check-0-validate-only →
+  check-1-functional-test → report-success / comment-pr /
+  update-commitstatus-success
+\end{verbatim}
 
 % ----------------------------------------------------------------------------
 \subsection{Exit Handler}
@@ -320,29 +626,25 @@ The exit handler is critical for the quality gate pattern. Without it, a failed 
 \label{sec:helm-chart}
 % ============================================================================
 
-The entire Kubernetes infrastructure is packaged as a Helm chart (\texttt{driveby}, version~0.4.0) that installs all Crossplane resources, XRDs, compositions, and provider configuration in a single \texttt{helm install} command.
+The entire Kubernetes infrastructure is packaged as a Helm chart (\texttt{driveby}, version~2.0.0) that installs all Crossplane resources, XRDs, compositions, and provider configuration in a single \texttt{helm install} command.
 
 % ----------------------------------------------------------------------------
 \subsection{Chart Structure and Install Order}
 \label{subsec:chart-structure}
 % ----------------------------------------------------------------------------
 
-The chart contains Crossplane provider references (\texttt{provider-kubernetes}~v0.14.1), Crossplane functions (go-templating, auto-ready, sequencer, environment-configs), XRD definitions (template and instance), composition definitions (template and instance), a ProviderConfig for the Kubernetes provider, and optional secret templates.
+The chart contains Crossplane provider references (\texttt{provider-kubernetes}~v0.14.1), Crossplane functions (go-templating, auto-ready), the \texttt{XSDLC} XRD definition, the \texttt{XSDLC} composition, a ProviderConfig for the Kubernetes provider, and optional secret templates.
 
-Installation follows an eight-step order designed to handle Crossplane's CRD chicken-and-egg problem: the Crossplane provider must be installed and healthy before ProviderConfig resources that reference it, and XRDs must be installed before compositions that implement them. The recommended sequence is:
+Installation follows a four-step order designed to handle Crossplane's CRD chicken-and-egg problem: the Crossplane provider must be installed and healthy before ProviderConfig resources that reference it, and the XRD must be installed before the composition that implements it. The recommended sequence is:
 
 \begin{enumerate}
     \item Pre-install: Crossplane provider and functions (wait for CRDs)
     \item Secrets: GitHub PAT, API auth, image pull credentials
-    \item Helm install: XRDs, compositions, ProviderConfig
-    \item EnvironmentConfigs: Cluster-level configuration
-    \item XQualityGateTemplate: Shared validation infrastructure
-    \item XQualityGate: Per-API event pipeline
-    \item GitHub webhook: Configure repository webhook to the Ingress endpoint
-    \item GitOps Promoter: ScmProvider, GitRepository, PromotionStrategy (if enabled)
+    \item Helm install: XRD, composition, ProviderConfig
+    \item Apply \texttt{XSDLC} CR: A single custom resource generates all quality gate infrastructure---RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, and ArgoCDCommitStatus resources
 \end{enumerate}
 
-Steps 5--8 are handled by Crossplane once the XRDs and compositions are installed. The operator creates the custom resources (steps 5--6) and Crossplane provisions all child resources automatically.
+Step~4 is handled by Crossplane once the XRD and composition are installed. The operator creates a single \texttt{XSDLC} custom resource per application, and Crossplane provisions all child resources automatically.
 
 % ----------------------------------------------------------------------------
 \subsection{OCI Distribution}
@@ -353,7 +655,7 @@ The chart is published to an OCI-compliant registry~\cite{helm-oci} at \texttt{o
 
 \begin{verbatim}
 helm install driveby oci://ghcr.io/meter-peter/charts/driveby \
-  --version 0.4.0 --namespace driveby --create-namespace
+  --version 2.0.0 --namespace driveby --create-namespace
 \end{verbatim}
 
 Versioned chart releases are produced automatically by the release pipeline described in Chapter~\ref{ch:workflow}.
@@ -363,8 +665,12 @@ Versioned chart releases are produced automatically by the release pipeline desc
 \label{sec:k8s-summary}
 % ============================================================================
 
-This chapter described the Kubernetes infrastructure that transforms DriveBy from a standalone CLI tool into a declarative, event-driven quality gate system. The two-XRD model (Section~\ref{sec:xrd-design}) separates shared validation logic from per-API event routing, enabling a one-to-many relationship between templates and instances. The composition pipeline (Section~\ref{sec:composition-pipeline}) uses Crossplane's pipeline-mode functions to generate all required resources from minimal operator input. The three-tier configuration model (Section~\ref{sec:three-tier-config}) balances simplicity with flexibility across chart, cluster, and resource levels.
+This chapter described the Kubernetes infrastructure that transforms DriveBy from a standalone CLI tool into a declarative, event-driven quality gate system, tracing the evolution from shell script through Go CLI, container image, and workflow step to Crossplane custom resource (Section~\ref{sec:cli-to-cr-evolution}).
 
-The Argo Events layer (Section~\ref{sec:argo-events-arch}) provides reliable, filtered event delivery from GitHub webhooks to workflow submissions. The seven-step Argo Workflows DAG (Section~\ref{sec:argo-workflows-dag}) orchestrates the full validation pipeline---from health checking through static validation and functional testing to commit status reporting---with an exit handler that guarantees explicit quality signals on every run.
+The Kubernetes controller pattern (Section~\ref{sec:controller-pattern}) provides the operational model: level-triggered reconciliation loops that guarantee eventual consistency and self-healing. Crossplane extends this model as a universal control plane, managing resources across both the Kubernetes cluster and the GitHub API through a dual-provider architecture (Section~\ref{subsec:provider-architecture}). The declarative lifecycle (Section~\ref{sec:lifecycle-management}) shows how these mechanisms operate across the full lifecycle: platform installation (Day~0), pipeline creation (Day~1), continuous reconciliation (Day~2), and updates or deletion (Day~N).
 
-Chapter~\ref{ch:workflow} describes how this infrastructure operates within the broader GitOps pipeline: the promotion-driven quality gate flow, the GitOps Promoter's multi-environment model, and the CI/CD pipelines that build, test, and release the DriveBy system itself.
+The single-CR \texttt{XSDLC} model (Section~\ref{sec:xrd-design}) defines an entire SDLC pipeline---environments, multi-check quality gates, and promotion strategy---in one custom resource with only two required fields. The composition pipeline (Section~\ref{sec:composition-pipeline}) uses Crossplane's pipeline-mode functions to generate all required resources from this minimal input, including GitHub branches, delivery workflows, branch protection rules, and ArgoCD Applications (Sections~\ref{subsec:generated-github} and~\ref{subsec:argocd-generation}). The two-tier configuration model (Section~\ref{sec:two-tier-config}) balances simplicity with flexibility across chart-wide defaults and per-resource overrides.
+
+The Argo Events layer (Section~\ref{sec:argo-events-arch}) provides reliable, filtered event delivery from GitHub webhooks to workflow submissions. The Argo Workflows DAG (Section~\ref{sec:argo-workflows-dag}) orchestrates the full validation pipeline---from health checking through multi-check validation steps to commit status reporting---with an exit handler that guarantees explicit quality signals on every run.
+
+Chapter~\ref{ch:workflow} describes how this infrastructure operates within the broader GitOps pipeline: the single-repo architecture and BYOCI design principle, the promotion-driven quality gate flow, human-in-the-loop patterns, and the quality gate as a closed-loop control system.

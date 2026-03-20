@@ -17,6 +17,7 @@ func NewRegistry() *Registry {
 			&P004Schema{},
 			&P005Security{},
 			&P008Versioning{},
+			&P009TestReadiness{},
 		},
 	}
 }
@@ -43,6 +44,8 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
 		return nil
 	case types.ValidationModeMinimal:
 		return []PrincipleChecker{r.Get("P001")}
+	case types.ValidationModeTestReady:
+		return []PrincipleChecker{r.Get("P001"), r.Get("P004"), r.Get("P009")}
 	case types.ValidationModeStrict:
 		return []PrincipleChecker{
 			r.Get("P001"),

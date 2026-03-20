@@ -7,7 +7,7 @@ const (
 	ValidationModeStrict   ValidationMode = "strict"    // Comprehensive validation
 	ValidationModeMinimal  ValidationMode = "minimal"   // Basic validation for test generation
 	ValidationModeTestOnly ValidationMode = "test-only" // Skip validation, run tests only
-	ValidationModeFlexible ValidationMode = "flexible"  // Allow tests even with some validation failures
+	ValidationModeTestReady ValidationMode = "test-ready" // Pre-flight check: is the spec good enough for meaningful testing?
 )
 
 // TestMode defines the type of testing to perform

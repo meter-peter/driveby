@@ -14,7 +14,7 @@ No package may import a package to its left. `types` has zero internal dependenc
 | Package | Path | Purpose |
 |---------|------|---------|
 | main | `cmd/driveby/main.go` | Entry point, calls `cli.Execute()` |
-| cli | `internal/cli/` | Cobra commands: root, validate, functional, loadtest, combined, github, version. Config shared via `config.go`. |
+| cli | `internal/cli/` | Cobra commands: root, validate, functional, loadtest, combined, github-status, github-comment, version. Config shared via `config.go`. |
 | engine | `internal/engine/engine.go` | Orchestrator: loads spec, selects principles by mode, runs checkers, aggregates results |
 | principles | `internal/principles/` | 8 DDT principle checkers (P001-P008), registry, interface definition |
 | spec | `internal/spec/` | `APISpec` interface + adapters for OpenAPI 3.x and Swagger 2.x |
@@ -49,7 +49,7 @@ Tests live in `test/`, not alongside source files:
 - **minimal** — P001 (compliance) only; fast CI gate
 - **strict** — P001-P005, P008; comprehensive static analysis
 - **test-only** — Skips static validation, runs runtime tests only (P006/P007 when implemented)
-- **flexible** — P001 only (same as minimal); allows tests even with some validation failures
+- **test-ready** — P001 + P004 (types only) + P009 (new); pre-flight check for meaningful testing
 
 ## Thesis Mapping
 - **Chapter 3 (Methodology)**: Principles P001-P008 map directly to `internal/principles/`

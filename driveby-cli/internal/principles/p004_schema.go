@@ -63,6 +63,63 @@ func (p *P004Schema) Check(_ context.Context, doc spec.APISpec, mode types.Valid
 		return result
 	}
 
+	// In test-ready mode, check schema existence + types (no constraints)
+	if mode == types.ValidationModeTestReady {
+		var typeIssues []string
+		for path, pathItem := range doc.Paths() {
+			if pathItem == nil || pathItem.Operations == nil {
+				continue
+			}
+			for method, operation := range pathItem.Operations {
+				if operation == nil {
+					continue
+				}
+				opKey := fmt.Sprintf("%s %s", method, path)
+
+				// Check if request body has schema with types
+				if operation.RequestBody != nil {
+					if operation.RequestBody.Content == nil {
+						result.Passed = false
+						result.Message = fmt.Sprintf("Request body missing content schema: %s", opKey)
+						return result
+					}
+					for contentType, content := range operation.RequestBody.Content {
+						if content == nil || content.Schema == nil {
+							result.Passed = false
+							result.Message = fmt.Sprintf("Request body missing schema for %s: %s", contentType, opKey)
+							return result
+						}
+						// Check schema types recursively
+						p.checkSchemaTypes(content.Schema, fmt.Sprintf("%s %s", opKey, contentType), &typeIssues)
+					}
+				}
+
+				// Check if parameters have schemas with types
+				for _, param := range operation.Parameters {
+					if param == nil {
+						continue
+					}
+					if param.Schema == nil {
+						result.Passed = false
+						result.Message = fmt.Sprintf("Parameter missing schema: %s %s", param.Name, opKey)
+						return result
+					}
+					if param.Schema.Type == "" {
+						typeIssues = append(typeIssues, fmt.Sprintf("%s: param %s missing type", opKey, param.Name))
+					}
+				}
+			}
+		}
+		if len(typeIssues) > 0 {
+			result.Passed = false
+			result.Message = fmt.Sprintf("Schema type issues found: %s", strings.Join(typeIssues, "; "))
+			result.SuggestedFix = "Add type specifications to all schemas so test data generation produces typed values"
+		} else {
+			result.Message = "All requests have schema definitions with type specifications"
+		}
+		return result
+	}
+
 	// Strict mode - comprehensive validation
 	checks := make(map[string]bool)
 	messages := make(map[string]string)
@@ -349,5 +406,27 @@ func (p *P004Schema) validateSchemaConstraints(schema *spec.Schema, ctx, content
 	// Check array items
 	if schema.Type == "array" && schema.Items != nil {
 		p.validateSchemaConstraints(schema.Items, fmt.Sprintf("%s[]", ctx), contentType, checks, missingValidation)
+	}
+}
+
+// checkSchemaTypes checks that a schema and its properties have type
+// specifications (used by test-ready mode). Does NOT check constraints.
+func (p *P004Schema) checkSchemaTypes(schema *spec.Schema, ctx string, issues *[]string) {
+	if schema == nil {
+		return
+	}
+	if schema.Type == "" && len(schema.AllOf) == 0 && len(schema.OneOf) == 0 && len(schema.AnyOf) == 0 {
+		*issues = append(*issues, fmt.Sprintf("%s: schema missing type", ctx))
+		return
+	}
+	if schema.Properties != nil {
+		for name, prop := range schema.Properties {
+			if prop != nil && prop.Type == "" && len(prop.AllOf) == 0 && len(prop.OneOf) == 0 && len(prop.AnyOf) == 0 {
+				*issues = append(*issues, fmt.Sprintf("%s: property %s missing type", ctx, name))
+			}
+		}
+	}
+	if schema.Type == "array" && schema.Items != nil {
+		p.checkSchemaTypes(schema.Items, fmt.Sprintf("%s[]", ctx), issues)
 	}
 }

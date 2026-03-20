@@ -14,9 +14,9 @@ thesis/
     01-introduction.tex
     02-related-work.tex
     03-methodology-ddt.tex
-    04-architecture.tex
-    05-workflow.tex
-    06-evaluation.tex
+    04-cli-architecture.tex
+    05-kubernetes-architecture.tex
+    06-gitops-pipeline.tex
     07-conclusion.tex
 ```
 
@@ -35,8 +35,8 @@ thesis/
 **Key content**: Position DDT against Schemathesis, Dredd, Spectral, Optic. Distinguish documentation-driven from contract-driven testing. Cover GitOps fundamentals (ArgoCD, Flux).
 
 ### Chapter 3 — Methodology: DDT (`03-methodology-ddt.tex`)
-**Expected sections**: DDT Paradigm Overview, The Three Axioms (Completeness, Determinism, Observability), The Eight Principles (P001-P008), Axiom-to-Principle Mapping, Validation Modes
-**Source files to read**: `docs/principles/P001-P008.md`, `docs/ddt-axioms.md`
+**Expected sections**: DDT Paradigm Overview, The Three Axioms (Completeness, Determinism, Observability), The Nine Principles (P001-P009), Axiom-to-Principle Mapping, Validation Modes
+**Source files to read**: `docs/principles/P001-P009.md`, `docs/ddt-axioms.md`
 **Code files to read**:
 - `driveby-cli/internal/principles/checker.go` — PrincipleChecker interface
 - `driveby-cli/internal/principles/p001_compliance.go` through `p008_versioning.go` — each principle's checks
@@ -44,11 +44,11 @@ thesis/
 - `driveby-cli/internal/types/modes.go` — ValidationMode definitions
 **Key content**:
 - Define 3 axioms: Completeness (spec fully describes API), Determinism (same input = same output), Observability (validation results are measurable)
-- Define 8 principles with formal identifiers P001-P008
+- Define 9 principles with formal identifiers P001-P009
 - Axiom mapping: Completeness -> P001-P004, Determinism -> P006, Observability -> P005/P007/P008
-- Validation modes: minimal, strict, test-only, flexible
+- Validation modes: minimal, strict, test-only, test-ready
 
-### Chapter 4 — System Architecture (`04-architecture.tex`)
+### Chapter 4 — CLI Architecture (`04-cli-architecture.tex`)
 **Expected sections**: Architecture Overview, Dependency Flow, Spec Abstraction Layer, Engine Design, Principle Checker Pattern, Report Generation, CLI Design
 **Source files to read**: `docs/CLI_USAGE.md`, `docs/architecture.md`
 **Code files to read**:
@@ -65,44 +65,46 @@ thesis/
 - APISpec adapter pattern (version-agnostic validation)
 - Engine orchestration: load spec -> select principles by mode -> run checkers -> aggregate -> report
 
-### Chapter 5 — End-to-End Workflow (`05-workflow.tex`)
-**Expected sections**: GitOps Integration, Event-Driven Validation (Argo Events), Validation Pipeline (Argo Workflows), Infrastructure Provisioning (Crossplane), Environment Promotion (GitOps Promoter), CI/CD Feedback Loop
-**Source files to read**: `docs/WORKFLOW.md`, `docs/MINIMAL_MODE_GUIDE.md`
+### Chapter 5 — Kubernetes Architecture (`05-kubernetes-architecture.tex`)
+**Expected sections**: Crossplane XRD Design, XSDLC Composition Architecture, Declarative Resource Generation, Two-Tier Configuration, Single-Repo Branch Model, BYOCI Delivery Pipeline
+**Source files to read**: `docs/deployment-guide.md`, `docs/quality-gate-sdlc.md`, `docs/responsibility-matrix.md`
 **Code files to read**:
-- `kubernetes/examples/argo-workflows/` — workflow templates
-- `kubernetes/examples/argo-events/` — event triggers
-- `kubernetes/examples/crossplane/` — compositions
-- `kubernetes/examples/gitops-promoter/` — promotion logic
-- `kubernetes/helm/driveby/` — Helm chart
-- `.github/workflows/ci.yml` — CI pipeline
-- `samples/configs/` — configuration examples
-- `samples/workflows/local-demo.sh` — demo script
+- `kubernetes/helm/driveby/templates/crossplane/composition-sdlc.yaml` — XSDLC composition
+- `kubernetes/helm/driveby/templates/crossplane/xrd-sdlc.yaml` — XRD schema
+- `kubernetes/examples/novelcore-perfect-api/` — reference XSDLC CR
+- `kubernetes/examples/gitops-promoter/` — promoter CRD examples
+- `kubernetes/helm/driveby/values.yaml` — two-tier defaults
+- `kubernetes/helm/driveby/Chart.yaml` — chart metadata
 **Key content**:
-- Full pipeline: git push -> Argo Events sensor -> Argo Workflow (fetch spec, validate, report) -> Crossplane provision -> GitOps Promoter advance
-- Validation modes in CI context (minimal for PRs, strict for releases)
+- XSDLC as single-CR declarative pipeline (~35 YAML lines → ~34 resources)
+- BYOCI model: XSDLC is a delivery pipeline, not a CI system
+- Two-tier config: values.yaml defaults → XRD spec overrides (no EnvironmentConfigs)
+- Dynamic environment chain (any N environments, minimum 2)
+- Auto-generated GitHub workflow (driveby-deploy — manual trigger deploy pipeline)
 - Target cluster: private.novelcore.org
 
-### Chapter 6 — Evaluation (`06-evaluation.tex`)
-**Expected sections**: Evaluation Methodology, Controlled Evaluation (perfect-api), Large-Scale Evaluation (APIs.guru), Results and Analysis, Threats to Validity
-**Source files to read**: `docs/evaluation-methodology.md`
+### Chapter 6 — GitOps Pipeline (`06-gitops-pipeline.tex`)
+**Expected sections**: Single-Repo Architecture, BYOCI Model, Promotion Flow, Quality Gate Implementation, Event-Driven Validation, Production Deployment, Evaluation
+**Source files to read**: `docs/gitops-pipeline.md`, `docs/quality-gate-sdlc.md`, `docs/evaluation-methodology.md`
 **Code files to read**:
+- `kubernetes/helm/driveby/templates/crossplane/composition-sdlc.yaml` — composition
+- `kubernetes/examples/novelcore-perfect-api/` — reference deployment
 - `apis/perfect-api/perfect-api.py` — reference API implementation
 - `apis/perfect-api/openapi.json` — reference spec
 - `tools/harvest-openapi-apisguru.py` — dataset harvesting
-- `tools/probe-openapi-endpoints.py` — endpoint probing
 - `tools/run-openapi-batch.sh` — batch validation
-- `tests/openapis-sample.csv` — sample dataset
 **Key content**:
-- Controlled evaluation: run all principles against perfect-api, expect all-pass
-- Large-scale evaluation: run against N APIs from APIs.guru, analyze pass/fail rates per principle
-- Metrics: per-principle pass rate, overall DDT score, execution time
-- Statistical analysis of principle correlation
+- End-to-end flow: developer triggers deploy → manifests to env-next → promote → gate → merge → sync
+- BYOCI: developer's CI builds; XSDLC delivers
+- Production deployment on private.novelcore.org
+- Controlled evaluation: perfect-api against all principles
+- Large-scale evaluation: APIs.guru dataset
 
 ### Chapter 7 — Conclusion (`07-conclusion.tex`)
 **Expected sections**: Summary of Contributions, Answers to Research Questions, Limitations, Future Work
 **Source files to read**: `docs/Thesis.md`
 **Code files to read**: None
-**Key content**: Summarize DDT paradigm contribution, DriveBy tool contribution, evaluation findings. Future work: P006/P007 implementation, broader language support, enterprise adoption.
+**Key content**: Summarize DDT paradigm contribution, DriveBy tool contribution, XSDLC delivery pipeline contribution, evaluation findings. Future work: broader language support, enterprise adoption, additional check types.
 
 ## Complete Feed Map
 
@@ -121,7 +123,8 @@ thesis/
 | Engine Design | `internal/engine/engine.go` | `docs/architecture.md` |
 | CLI Design | `internal/cli/root.go`, `validate.go`, `config.go` | `docs/CLI_USAGE.md` |
 | Validation Modes | `internal/types/modes.go`, `internal/principles/registry.go` | `docs/MINIMAL_MODE_GUIDE.md` |
-| GitOps Pipeline | `kubernetes/examples/` | `docs/WORKFLOW.md` |
+| XSDLC Architecture | `kubernetes/helm/driveby/templates/crossplane/` | `docs/quality-gate-sdlc.md`, `docs/deployment-guide.md` |
+| GitOps Pipeline | `kubernetes/examples/novelcore-perfect-api/` | `docs/gitops-pipeline.md` |
 | Evaluation Data | `tools/`, `apis/perfect-api/` | `docs/evaluation-methodology.md` |
 | CI/CD Integration | `.github/workflows/ci.yml` | `docs/WORKFLOW.md` |
 
@@ -146,6 +149,12 @@ thesis/
 - [DONE] Pipeline diagram: GitOps event-driven workflow (Ch.5) — `figures/workflow-pipeline.tex`, `fig:gitops-pipeline`
 - [DONE] Staging promotion DAG (Ch.5) — `figures/staging-promotion-dag.tex`, `fig:staging-dag`
 - [DONE] Evaluation framework (Ch.6) — `figures/evaluation-methodology.tex`, `fig:eval-methodology`
+- [REMOVED] Provider architecture (Ch.5) — `figures/provider-architecture.tex` — figure cut, text kept inline
+- [DONE] Crossplane reconciliation loop (Ch.5) — `figures/crossplane-reconciliation-loop.tex`, `fig:crossplane-reconciliation-loop`
+- [DONE] Declarative lifecycle (Ch.5) — `figures/declarative-lifecycle.tex`, `fig:declarative-lifecycle`
+- [DONE] Single-repo branch flow (Ch.6) — `figures/single-repo-branch-flow.tex`, `fig:single-repo-branch-flow`
+- [DONE] Human-in-the-loop (Ch.6) — `figures/human-in-the-loop.tex`, `fig:human-in-the-loop`
+- [DONE] Quality control loop (Ch.6) — `figures/quality-control-loop.tex`, `fig:quality-control-loop`
 - Bar chart: per-principle pass rates across APIs.guru dataset (Ch.6) — TODO (requires evaluation data)
 - Table: perfect-api validation results (Ch.6) — TODO (requires evaluation data)
 - All figures are TikZ vector diagrams (inline LaTeX, no external image files needed)
@@ -154,7 +163,7 @@ thesis/
 - Academic tone, third person, present tense for methodology
 - Past tense for evaluation results ("The evaluation showed...")
 - Cite all claims via `references.bib`
-- Map code to chapters: P001-P008 -> Chapter 3, architecture -> Chapter 4
+- Map code to chapters: P001-P009 -> Chapter 3, architecture -> Chapter 4
 - Pull technical details from `driveby-cli/` source for accuracy
 - Reference PRD docs in `docs/` for vision alignment
 - Figures go in `thesis/figures/`, referenced with `\includegraphics`

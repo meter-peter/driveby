@@ -19,6 +19,7 @@ Defined in `checker.go`. Every principle checker must implement this interface. 
 | `p004_schema.go` | P004 | Schema Definitions — validates request/response schemas, type coverage, allOf flattening | Complete | ~353 |
 | `p005_security.go` | P005 | Security Standards — checks security schemes, global security, HTTPS enforcement | Complete | ~221 |
 | `p008_versioning.go` | P008 | Versioning Strategy — validates API versioning in paths/headers, deprecation markers | Complete | ~163 |
+| `p009_test_readiness.go` | P009 | Test Readiness — checks path param examples, request body examples, response schemas | Complete | ~160 |
 | — | P006 | Functional Testing — runtime endpoint testing (auth, responses, contracts) | **Not yet implemented** | — |
 | — | P007 | Performance Testing — load testing, latency thresholds, rate limiting | **Not yet implemented** | — |
 
@@ -36,7 +37,7 @@ P006 and P007 require live API access and are partially covered by `internal/tes
 | Axiom | Principles | Rationale |
 |-------|-----------|-----------|
 | **Completeness** | P001, P002, P003, P004 | Spec must fully describe the API contract |
-| **Determinism** | P006 | Same spec + same API = same test results |
+| **Determinism** | P006, P009 | Same spec + same API = same test results |
 | **Observability** | P005, P007, P008 | Security, performance, and versioning are observable properties |
 
 ## Thesis Mapping

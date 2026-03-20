@@ -1,0 +1,99 @@
+{{- if .Values.crossplane.enabled }}
+{{/*
+  Post-install/upgrade Job that waits for Crossplane providers to register their CRDs,
+  then creates ProviderConfig resources. Handles the chicken-and-egg problem on first install.
+  On subsequent upgrades where CRDs already exist, the ProviderConfig templates in
+  provider-config.yaml and github-provider-config.yaml render directly.
+*/}}
+{{- if not (.Capabilities.APIVersions.Has "kubernetes.crossplane.io/v1alpha1") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: driveby-provider-config-setup
+  namespace: {{ .Values.namespace | default "driveby" }}
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: driveby-provider-config-setup
+      restartPolicy: OnFailure
+      containers:
+        - name: setup
+          image: bitnami/kubectl:1.30
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              echo "=== Waiting for provider-kubernetes to be Healthy ==="
+              kubectl wait providers.pkg.crossplane.io provider-kubernetes \
+                --for=condition=Healthy --timeout=180s
+
+              echo "=== Creating kubernetes ProviderConfig ==="
+              cat <<'PCEOF' | kubectl apply -f -
+              apiVersion: kubernetes.crossplane.io/v1alpha1
+              kind: ProviderConfig
+              metadata:
+                name: {{ .Values.crossplane.providerConfig.name }}
+              spec:
+                credentials:
+                  source: {{ .Values.crossplane.providerConfig.credentials }}
+              PCEOF
+
+              {{- if .Values.githubProvider.enabled }}
+              echo "=== Waiting for provider-upjet-github to be Healthy ==="
+              kubectl wait providers.pkg.crossplane.io provider-upjet-github \
+                --for=condition=Healthy --timeout=180s
+
+              echo "=== Creating github ProviderConfig ==="
+              cat <<'PCEOF' | kubectl apply -f -
+              apiVersion: github.upbound.io/v1beta1
+              kind: ProviderConfig
+              metadata:
+                name: {{ .Values.githubProvider.providerConfigName }}
+              spec:
+                credentials:
+                  source: Secret
+                  secretRef:
+                    namespace: {{ .Values.namespace | default "driveby" }}
+                    name: {{ .Values.githubProvider.secretName }}
+                    key: {{ .Values.githubProvider.secretKey }}
+              PCEOF
+              {{- end }}
+
+              echo "=== ProviderConfigs created successfully ==="
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: driveby-provider-config-setup
+  namespace: {{ .Values.namespace | default "driveby" }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: driveby-provider-config-setup
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: driveby-provider-config-setup
+    namespace: {{ .Values.namespace | default "driveby" }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,12 @@
+{{- if and .Values.crossplane.enabled .Values.githubProvider.enabled }}
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-upjet-github
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  package: "{{ .Values.githubProvider.provider.package }}:{{ .Values.githubProvider.provider.version }}"
+  runtimeConfigRef:
+    name: default
+{{- end }}

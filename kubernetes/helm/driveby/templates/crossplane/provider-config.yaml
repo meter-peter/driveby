@@ -1,4 +1,11 @@
 {{- if .Values.crossplane.enabled }}
+{{/*
+  ProviderConfig for provider-kubernetes.
+  On first install, provider CRDs may not exist yet.
+  The post-install Job (provider-config-job.yaml) handles this with kubectl wait + apply.
+  On subsequent upgrades, Helm applies this directly since CRDs are already registered.
+*/}}
+{{- if .Capabilities.APIVersions.Has "kubernetes.crossplane.io/v1alpha1" }}
 apiVersion: kubernetes.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
@@ -8,4 +15,5 @@ metadata:
 spec:
   credentials:
     source: {{ .Values.crossplane.providerConfig.credentials }}
+{{- end }}
 {{- end }}

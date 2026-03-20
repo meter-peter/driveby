@@ -308,6 +308,21 @@ var CorePrinciples = []Principle{
 			"Migration guides are referenced",
 		},
 	},
+	{
+		ID:          "P009",
+		Name:        "Test Readiness",
+		Description: "Validates that the specification provides enough detail for meaningful functional and load testing",
+		Category:    "Testing",
+		Severity:    "warning",
+		Tags:        []string{"testing", "readiness", "examples", "schemas"},
+		AutoFixable: false,
+		Checks: []string{
+			"Path parameters have examples or typed schemas",
+			"Request bodies have examples or typed schema properties",
+			"2xx responses have schemas defined",
+			"2xx responses have examples defined",
+		},
+	},
 }
 
 // ValidatorConfig holds configuration for the validator

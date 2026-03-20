@@ -1,0 +1,234 @@
+{{- if .Values.crossplane.enabled }}
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xsdlcs.driveby.io
+  labels:
+    {{- include "driveby.labels" . | nindent 4 }}
+spec:
+  scope: Namespaced
+  group: driveby.io
+  names:
+    kind: XSDLC
+    plural: xsdlcs
+  defaultCompositionRef:
+    name: xsdlcs.driveby.io
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        description: "XSDLC v2.0.0 — single-repo delivery pipeline. One CR provisions branches, workflows, ArgoCD apps, promoter, and quality gates."
+        required:
+        - spec
+        properties:
+          spec:
+            type: object
+            required:
+            - repository
+            - environments
+            properties:
+              repository:
+                type: object
+                description: "GitHub repository (source code + manifests coexist)"
+                required:
+                - owner
+                - name
+                properties:
+                  owner:
+                    type: string
+                    description: "GitHub repo owner (e.g., novelcore)"
+                  name:
+                    type: string
+                    description: "GitHub repo name (e.g., perfect-api)"
+                  defaultBranch:
+                    type: string
+                    description: "Default branch where manifests live"
+                    default: "main"
+                  manifestsPath:
+                    type: string
+                    description: "Directory on main containing K8s manifests"
+                    default: "manifests"
+
+              apiConfig:
+                type: object
+                description: "API configuration for DriveBy validation"
+                properties:
+                  serviceName:
+                    type: string
+                    description: "Kubernetes service name (defaults to metadata.name)"
+                  port:
+                    type: integer
+                    description: "API port"
+                    default: 8000
+                  openapiEndpoint:
+                    type: string
+                    description: "OpenAPI spec path"
+                    default: "/openapi.json"
+
+              validationDefaults:
+                type: object
+                description: "Shared defaults for all validation gates"
+                properties:
+                  drivebyImage:
+                    type: string
+                    description: "DriveBy CLI container image"
+                  validationMode:
+                    type: string
+                    description: "Default validation mode for validation gates"
+                    default: "strict"
+                    enum:
+                    - minimal
+                    - strict
+                    - test-only
+                    - test-ready
+
+              environments:
+                type: array
+                description: "Ordered list of promotion environments (min 2)"
+                minItems: 2
+                items:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      description: "Environment name (e.g., dev, staging, prod)"
+                    branch:
+                      type: string
+                      description: "Git branch (default: environment/<name>)"
+                    autoMerge:
+                      type: boolean
+                      description: "Auto-merge promotion PRs (default: true)"
+                      default: true
+                    namespaceOverride:
+                      type: string
+                      description: "Override namespace (default: <appName>-<name>)"
+                    gate:
+                      type: object
+                      description: "Quality gate for this environment's promotion"
+                      properties:
+                        checks:
+                          type: array
+                          description: "Ordered list of checks — each becomes a DAG step in the workflow"
+                          items:
+                            type: object
+                            required:
+                            - type
+                            properties:
+                              type:
+                                type: string
+                                description: "Check type"
+                                enum:
+                                - validate-only
+                                - functional-test
+                                - load-test
+                              validationConfig:
+                                type: object
+                                description: "Validation-specific config (for validate-only checks)"
+                                properties:
+                                  validationMode:
+                                    type: string
+                                    description: "Validation mode override"
+                                    enum:
+                                    - minimal
+                                    - strict
+                                    - test-only
+                                    - test-ready
+                              loadTestConfig:
+                                type: object
+                                description: "Load test parameters (for load-test checks)"
+                                properties:
+                                  concurrentUsers:
+                                    type: integer
+                                    description: "Number of concurrent users"
+                                    default: 10
+                                  testDuration:
+                                    type: string
+                                    description: "Duration of load test"
+                                    default: "5m"
+                                  maxLatencyP95:
+                                    type: string
+                                    description: "Maximum allowed P95 latency"
+                                    default: "500ms"
+                                  minSuccessRate:
+                                    type: number
+                                    description: "Minimum success rate (0-1)"
+                                    default: 0.99
+                        commitStatusKey:
+                          type: string
+                          description: "Commit status key (default: <envName>-gate)"
+                        sourceNamespaceOverride:
+                          type: string
+                          description: "Override source namespace (default: <appName>-<prevEnv>)"
+
+          status:
+            type: object
+            properties:
+              ready:
+                type: boolean
+                description: "Overall readiness"
+              environmentCount:
+                type: integer
+                description: "Number of environments"
+              gateCount:
+                type: integer
+                description: "Number of gated environments"
+              gates:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    environment:
+                      type: string
+                    gateType:
+                      type: string
+                    commitStatusKey:
+                      type: string
+                    webhookUrl:
+                      type: string
+                    ready:
+                      type: boolean
+              promotionStrategy:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  ready:
+                    type: boolean
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                    reason:
+                      type: string
+                    message:
+                      type: string
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+    additionalPrinterColumns:
+    - name: App
+      type: string
+      jsonPath: .metadata.name
+    - name: Environments
+      type: integer
+      jsonPath: .status.environmentCount
+    - name: Gates
+      type: integer
+      jsonPath: .status.gateCount
+    - name: Ready
+      type: string
+      jsonPath: .status.conditions[?(@.type=='Ready')].status
+    - name: Age
+      type: date
+      jsonPath: .metadata.creationTimestamp
+{{- end }}

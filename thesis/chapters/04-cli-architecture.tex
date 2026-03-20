@@ -1,7 +1,7 @@
 \chapter{CLI Architecture}
 \label{ch:architecture}
 
-Chapter~\ref{ch:methodology} defined Documentation-Driven Testing as a two-layer methodology: three axioms and eight validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
+Chapter~\ref{ch:methodology} defined Documentation-Driven Testing as a two-layer methodology: three axioms and nine validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
 
 The scope of this chapter is the DriveBy binary itself---its internal packages, interfaces, and data structures. The Kubernetes infrastructure that hosts DriveBy as a quality gate is presented in Chapter~\ref{ch:kubernetes}, and the GitOps pipelines that trigger and consume its output are described in Chapter~\ref{ch:workflow}.
 
@@ -100,7 +100,7 @@ const (
     ValidationModeStrict   ValidationMode = "strict"
     ValidationModeMinimal  ValidationMode = "minimal"
     ValidationModeTestOnly ValidationMode = "test-only"
-    ValidationModeFlexible ValidationMode = "flexible"
+    ValidationModeTestReady ValidationMode = "test-ready"
 )
 
 const (
@@ -394,7 +394,7 @@ Table~\ref{tab:checker-implementations} lists all principle checker implementati
 \end{tabular}
 \end{table}
 
-The check counts correspond to those enumerated in Section~\ref{sec:eight-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal requires handling nested objects, arrays, allOf compositions, and enum validation at every level.
+The check counts correspond to those enumerated in Section~\ref{sec:nine-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal requires handling nested objects, arrays, allOf compositions, and enum validation at every level.
 
 % ----------------------------------------------------------------------------
 \subsection{The Registry and Mode-Based Selection}
@@ -420,18 +420,20 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
         return nil
     case types.ValidationModeMinimal:
         return []PrincipleChecker{r.Get("P001")}
+    case types.ValidationModeTestReady:
+        return []PrincipleChecker{r.Get("P001"), r.Get("P004"), r.Get("P009")}
     case types.ValidationModeStrict:
         return []PrincipleChecker{
             r.Get("P001"), r.Get("P002"), r.Get("P003"),
             r.Get("P004"), r.Get("P005"), r.Get("P008"),
         }
-    default: // flexible
+    default:
         return []PrincipleChecker{r.Get("P001")}
     }
 }
 \end{lstlisting}
 
-The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal and flexible modes evaluate only P001; strict mode evaluates all six implemented principles; test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
+The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P004 (type checks only), and P009; strict mode evaluates all six static documentation principles; test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
 
 % ============================================================================
 \section{The Validation Engine}
@@ -577,7 +579,7 @@ DriveBy's CLI is built with the Cobra framework~\cite{cobra} and organized as a 
 \toprule
 \textbf{Command} & \textbf{Mode} & \textbf{Description} \\
 \midrule
-\texttt{validate-only} & minimal/strict/flexible & Run static validation only (P001--P008 based on mode) \\
+\texttt{validate-only} & minimal/strict/test-ready & Run static validation only (P001--P009 based on mode) \\
 \texttt{function-only}  & --- & Run functional tests only (endpoint contract verification) \\
 \texttt{load-only}     & --- & Run load/performance tests only (vegeta-based) \\
 \texttt{test-only}     & test-only & Run both functional and performance tests without static validation \\
@@ -633,4 +635,4 @@ This chapter described the architecture of the DriveBy framework across nine int
 
 The runtime testing subsystem (Section~\ref{sec:runtime-testing}) extends validation beyond static analysis to live API verification, deriving test cases deterministically from the specification. The report generator (Section~\ref{sec:report-generation}) produces JSON and Markdown outputs suitable for both machine consumption and human review. The CLI (Section~\ref{sec:cli}) exposes all capabilities through a four-command interface with structured exit codes designed for CI/CD integration.
 
-Chapter~\ref{ch:kubernetes} describes the Kubernetes infrastructure that hosts DriveBy as a quality gate---Crossplane XRDs, Argo Events, and Argo Workflows---while Chapter~\ref{ch:workflow} describes the GitOps pipelines that trigger validation and promote environments based on its results.
+While the DriveBy CLI is a complete, self-contained validation tool, its full potential is realized when embedded within declarative infrastructure. The architecture described in this chapter---zero-dependency types, a version-agnostic specification interface, and structured machine-readable output---was designed to support multiple execution models. The same principle checkers that run in a developer's terminal can run inside a Kubernetes workflow container without modification. Chapter~\ref{ch:kubernetes} describes how the CLI becomes part of a declarative, event-driven quality gate system using Crossplane custom resources, and Chapter~\ref{ch:workflow} describes the GitOps pipelines that trigger validation and promote environments based on its results.

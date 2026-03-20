@@ -12,41 +12,116 @@ kubernetes/
       templates/
         crossplane/     # Crossplane resources (providers, functions, XRDs, compositions)
           provider-kubernetes.yaml     # Provider CR
-          functions.yaml               # 4 Function CRs
+          functions.yaml               # 2 Function CRs (go-templating, auto-ready)
           provider-config.yaml         # ProviderConfig (InjectedIdentity)
-          xrd-template.yaml            # XQualityGateTemplate XRD
-          xrd-instance.yaml            # XQualityGate XRD
-          composition-template.yaml    # Template composition (RBAC + WorkflowTemplate)
-          composition-instance.yaml    # Instance composition (EventBus + EventSource + Sensor + Ingress + Promoter)
-        argo-events/    # Argo Events (non-Crossplane fallback, gated behind !crossplane.enabled)
+          github-provider-config.yaml  # GitHub ProviderConfig (for branch protection)
+          xrd-sdlc.yaml               # XSDLC XRD — single CR for full promotion pipeline
+          composition-sdlc.yaml       # XSDLC composition — generates all resources
         argocd/         # ArgoCD AppProject
-        secrets/        # Secret templates (api-auth, github-app)
+        secrets/        # Secret templates (api-auth, github-app, ghcr-creds, github-provider-token)
   examples/
-    argo-workflows/     # Argo Workflow templates for validation pipelines
-    argo-events/        # Argo Events triggers (webhook, git sensor)
-    crossplane/         # Crossplane XQualityGate examples
-      template-example.yaml      # XQualityGateTemplate CR example
-      instance-example.yaml      # XQualityGate CR example
-      environment-configs.yaml   # Template + Instance EnvironmentConfigs
-    gitops-promoter/    # GitOps Promoter examples (ScmProvider, GitRepository, PromotionStrategy, CommitStatus)
+    novelcore-perfect-api/  # Single-file XSDLC showcase
+    gitops-promoter/    # GitOps Promoter CRD reference (ScmProvider, GitRepository, PromotionStrategy, CommitStatus)
   README.md
 ```
 
-> **Note**: The `manifests/` directory (raw YAML duplicates) was removed in v0.3.0 — all resources are now managed by the Helm chart + Crossplane compositions.
-
 ## Promotion Flow
 
-Quality gates trigger on **promotion PRs in the gitops repo** (`perfect-api-gitops`), validate against the **source environment** (dev), and gate promotion to the **target environment** (staging):
+Quality gates use a **multi-check model** — each gate defines an ordered list of checks.
+
+### Repo Layout (Single-Repo Model)
+The application repository holds both source code and Kubernetes manifests on `main`. Engineers own all manifest config (replicas, resources, env vars). The XSDLC only manages **promotion** and **quality gates** — it does not patch or rewrite manifests.
 
 ```
-Push to main (DRY branch) → Hydrator builds environment/*-next branches
-    → Promoter auto-PRs environment/dev-next → environment/dev → ArgoCD syncs dev
-    → Promoter auto-PRs environment/staging-next → environment/staging
-    → Webhook triggers DriveBy validation against dev
-    → Workflow creates CommitStatus CRD (phase: success)
-    → Promoter auto-merges → ArgoCD syncs staging
-    → Promoter auto-PRs environment/prod-next → environment/prod (autoMerge: false — manual approval)
+perfect-api/
+  src/                    # developer's code
+  Dockerfile              # developer's build
+  manifests/
+    deployment.yaml       # same manifest for all envs (image tag managed by CI)
+    service.yaml
 ```
+
+### Generated Workflow (1 — BYOCI showcase)
+
+- `driveby-deploy.yml` — Manual trigger (`workflow_dispatch`): pick source branch, target environment, and image tag. The developer's own CI builds the image; this workflow showcases the BYOCI model by deploying manifests + image tag to `environment/<env>-next`. Promoter takes over from there.
+
+### End-to-End Flow
+
+```
+Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
+  Inputs: source_branch (e.g. main), environment (e.g. dev), image_tag (e.g. v1.2.3)
+    → Checks out environment/<env>-next, cleans it
+    → Copies manifests/ from source branch → flattens to branch root
+    → Stamps image tag in deployment.yaml → pushes to env-next
+    → Promoter auto-merges dev-next → dev (no gate) → ArgoCD syncs dev
+
+  Gate 1 — Staging Gate (checks: validate-only + functional-test):
+    → Promoter auto-PRs environment/staging-next → environment/staging
+    → Webhook triggers DriveBy workflow against dev
+    → Workflow runs checks sequentially → creates CommitStatus CRD (phase: success)
+    → Promoter auto-merges → ArgoCD syncs staging
+
+  Gate 2 — Prod Gate (checks: validate-only + load-test):
+    → Promoter auto-PRs environment/prod-next → environment/prod
+    → Webhook triggers DriveBy workflow against staging
+    → Workflow runs checks sequentially → creates CommitStatus CRD (phase: success)
+    → Promoter does NOT auto-merge (autoMerge: false — manual approval required)
+```
+
+## XSDLC XRD (v2.1.0)
+
+### Required Fields (2)
+| Field | Description |
+|-------|-------------|
+| `repository.{owner,name}` | GitHub repository owner and name (e.g., novelcore/perfect-api) |
+| `environments` | Ordered list of promotion environments (min 2) |
+
+### Per-Environment Fields
+| Field | Default | Description |
+|-------|---------|-------------|
+| `name` | (required) | Environment name |
+| `branch` | `environment/<name>` | Git branch |
+| `autoMerge` | `true` | Auto-merge promotion PRs |
+| `namespaceOverride` | `<appName>-<name>` | Override target namespace |
+| `gate.checks` | (required if gate set) | Ordered list of checks (each becomes a DAG step) |
+| `gate.commitStatusKey` | `<envName>-gate` | Override commit status key |
+| `gate.sourceNamespaceOverride` | `<appName>-<prevEnv>` | Override source namespace |
+
+### Check Types (gate.checks[].type)
+| Type | CLI Command | Description |
+|------|-------------|-------------|
+| `validate-only` | `validate-only --validation-mode <mode>` | Static validation (P001-P009 based on mode) |
+| `functional-test` | `function-only` | Functional API testing (P006) |
+| `load-test` | `load-only` | k6 load testing with configurable thresholds |
+
+### Per-Check Config
+| Field | Applies To | Description |
+|-------|-----------|-------------|
+| `validationConfig.validationMode` | `validate-only` | Validation mode override |
+| `loadTestConfig.concurrentUsers` | `load-test` | Number of concurrent users (default: 10) |
+| `loadTestConfig.testDuration` | `load-test` | Duration of load test (default: 5m) |
+| `loadTestConfig.maxLatencyP95` | `load-test` | Maximum P95 latency (default: 500ms) |
+| `loadTestConfig.minSuccessRate` | `load-test` | Minimum success rate 0-1 (default: 0.99) |
+
+### Optional Top-Level Fields
+| Field | Default | Description |
+|-------|---------|-------------|
+| `manifestsPath` | `manifests` | Path within the repository where Kubernetes manifests live |
+| `apiConfig.serviceName` | `metadata.name` | K8s service name |
+| `apiConfig.port` | `8000` | API port |
+| `apiConfig.openapiEndpoint` | `/openapi.json` | OpenAPI spec path |
+| `validationDefaults.drivebyImage` | `ghcr.io/meter-peter/driveby:latest` | DriveBy image |
+| `validationDefaults.validationMode` | `strict` | Default validation mode |
+
+### Derived Fields (all automatic)
+| Field | Derivation |
+|-------|-----------|
+| `appName` | `metadata.name` |
+| `branch` | `environment/<envName>` |
+| `sourceNamespace` | `<appName>-<previousEnvName>` |
+| `targetNamespace` | `<appName>-<envName>` |
+| `commitStatusKey` | `<envName>-gate` |
+| All cluster config | `values.yaml` (baked at helm-template time) |
 
 ## Cluster State
 
@@ -58,23 +133,24 @@ Push to main (DRY branch) → Hydrator builds environment/*-next branches
 | `perfect-api-staging` | Staging environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-prod` | Production environment for perfect-api (manual sync) | ArgoCD |
 
-### ArgoCD Resources
+### ArgoCD Resources (Crossplane-managed via XSDLC — always generated)
 | Resource | Namespace | Details |
 |----------|-----------|---------|
-| AppProject `perfect-api` | argocd | Sources: `novelcore/perfect-api-gitops`, Destinations: dev + staging + prod |
-| Application `perfect-api-dev` | argocd | Path: `overlays/dev`, autoSync + selfHeal + CreateNamespace |
-| Application `perfect-api-staging` | argocd | Path: `overlays/staging`, autoSync + selfHeal |
-| Application `perfect-api-prod` | argocd | Path: `overlays/prod`, manual sync |
+| AppProject `driveby` | argocd | Sources: `*`, Destinations: `*` namespace (Helm chart) |
+| Application `perfect-api-dev` | argocd | Path: `.` (env branch root), autoSync + selfHeal + CreateNamespace (XSDLC) |
+| Application `perfect-api-staging` | argocd | Path: `.`, autoSync + selfHeal (XSDLC) |
+| Application `perfect-api-prod` | argocd | Path: `.`, manual sync (autoMerge: false) (XSDLC) |
 
-### Argo Events (Crossplane-managed)
+### Argo Events (Crossplane-managed via XSDLC)
 | Resource | Name | Namespace | Details |
 |----------|------|-----------|---------|
 | EventBus | `default` | driveby | 1-replica JetStream (NATS v2.10.10) |
-| EventSource | `perfect-api-staging-promotion-eventsource` | driveby | GitHub webhook on port 12000, endpoint `/perfect-api-staging-promotion-pr-validation` |
-| Sensor | `perfect-api-staging-promotion-sensor` | driveby | Triggers `driveby-staging-promotion` WorkflowTemplate on PR open/reopen/sync |
-| Ingress | `perfect-api-staging-promotion-webhook-ingress` | driveby | `perfect-api-staging-promotion-webhook.private.novelcore.org` → EventSource svc |
-
-GitHub webhook is auto-provisioned by Argo Events (via the GitHub App) on `novelcore/perfect-api-gitops` to POST `pull_request` events to `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`.
+| EventSource | `perfect-api-staging-gate-eventsource` | driveby | GitHub webhook on port 12000 |
+| EventSource | `perfect-api-prod-gate-eventsource` | driveby | GitHub webhook on port 12000 |
+| Sensor | `perfect-api-staging-gate-sensor` | driveby | Triggers workflow on PR to `environment/staging` |
+| Sensor | `perfect-api-prod-gate-sensor` | driveby | Triggers workflow on PR to `environment/prod` |
+| Ingress | `perfect-api-staging-gate-webhook-ingress` | driveby | TLS webhook endpoint |
+| Ingress | `perfect-api-prod-gate-webhook-ingress` | driveby | TLS webhook endpoint |
 
 ### Secrets
 | Secret | Namespace(s) | Keys |
@@ -82,13 +158,13 @@ GitHub webhook is auto-provisioned by Argo Events (via the GitHub App) on `novel
 | `ghcr-creds` | perfect-api-dev, perfect-api-staging, perfect-api-prod, driveby | Docker registry auth for ghcr.io |
 | `api-auth` | perfect-api-dev, perfect-api-staging, perfect-api-prod | `api-key`, `api-key-header` |
 | `driveby-api-auth` | driveby | `api-key`, `api-key-header` |
-| `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` (for all GitHub operations: commit status, PR comments, promoter SCM access) |
+| `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` |
 
-### GitOps Promoter Resources (Crossplane-managed)
+### GitOps Promoter Resources (Crossplane-managed via XSDLC)
 | Resource | Name | Namespace | Details |
 |----------|------|-----------|---------|
 | ScmProvider | `perfect-api-github` | driveby | GitHub App auth for promoter SCM access |
-| GitRepository | `perfect-api-gitops` | driveby | Points promoter to gitops repo via ScmProvider |
+| GitRepository | `perfect-api` | driveby | Points promoter to the application repository via ScmProvider |
 | PromotionStrategy | `perfect-api-promotion` | driveby | Environment chain: dev → staging → prod, with commit status gates |
 | ArgoCDCommitStatus | `perfect-api-argocd-health` | driveby | Aggregates ArgoCD app health into CommitStatus |
 | ChangeTransferPolicy | (auto-created) | driveby | Auto-created by PromotionStrategy controller per environment |
@@ -96,49 +172,59 @@ GitHub webhook is auto-provisioned by Argo Events (via the GitHub App) on `novel
 ### External Repos
 | Repo | Purpose |
 |------|---------|
-| `novelcore/perfect-api` | App code (FastAPI), CI builds `ghcr.io/novelcore/perfect-api:latest` |
-| `novelcore/perfect-api-gitops` | Kustomize base + overlays (dev/staging/prod), synced by ArgoCD. Webhook triggers quality gate on promotion PRs. |
+| `novelcore/perfect-api` | Source code + Kubernetes manifests (`manifests/`); workflows auto-generated by XSDLC |
 
 ## Helm Chart (`helm/driveby/`)
-Production Helm chart (v0.4.0) that installs the full DriveBy quality gate system:
+Production Helm chart (v2.1.0) that installs the full DriveBy quality gate system:
 - **Crossplane providers**: `provider-kubernetes` v0.14.1
-- **Crossplane functions**: `function-go-templating`, `function-auto-ready`, `function-environment-configs` (sequencer removed — not needed for flat resource sets)
-- **XRDs**: `xqualitygatetemplates.driveby.io`, `xqualitygates.driveby.io` (both v1alpha1)
-- **Compositions**: Template (generates RBAC + WorkflowTemplate + CommitStatus steps), Instance (generates EventBus + EventSource + Sensor + Ingress + Promoter resources)
+- **Crossplane functions**: `function-go-templating`, `function-auto-ready`
+- **XRD**: `xsdlcs.driveby.io` (v1alpha1) — single CR for full promotion pipeline
+- **Composition**: XSDLC composition generates all resources (RBAC, WorkflowTemplates, EventBus, EventSource, Sensor, Ingress, Promoter, BranchProtection)
 - **ProviderConfig**: `kubernetes-provider` with InjectedIdentity
-- Raw Argo templates gated behind `not .Values.crossplane.enabled` (legacy fallback)
+- **GitHub ProviderConfig**: `github-provider` for `provider-upjet-github` (branch protection rules)
 
 Install:
 ```bash
-# Pre-install provider-kubernetes (CRDs must exist before helm install)
-kubectl apply -f <provider-kubernetes-cr>
-kubectl wait --for=condition=Healthy provider/provider-kubernetes --timeout=120s
-# Then helm install
 helm upgrade --install driveby ./kubernetes/helm/driveby/ \
   --set crossplane.enabled=true
 ```
 
-## WorkflowTemplate DAG (Promotion Pipeline)
+## WorkflowTemplate DAGs (Multi-Check Gates)
+
+Gates use a dynamic **checks** array — each check becomes a sequential DAG step:
 
 ```
-set-pending-status ──────────────────────┐
-update-commitstatus-pending ────────────┤ (parallel)
-                                        ├─> wait-for-source-ready → validate-source → functional-test-source
-                                        │                                                    ↓
-                                        │                           report-success + comment-pr + update-commitstatus-success
+set-pending → health-check → check-0-<type> → check-1-<type> → ... → check-N-<type>
+                                                                            ↓
+                              report-success + comment-pr + update-commitstatus-success
 ```
 
-- Validates against the **source environment** (dev), not staging
-- `wait-for-source-ready`: health-check loop (max 2min) against `http://{service-name}.{source-namespace}:{port}{openapi-endpoint}`
-- Commit status descriptions: "Validating dev environment..." / "Dev validation passed, safe to promote" / "Dev validation failed, promotion blocked"
+### Example: staging gate (validate-only + functional-test)
+```
+set-pending → health-check → check-0-validate-only → check-1-functional-test
+                                                             ↓
+                              report-success + comment-pr + update-commitstatus-success
+```
+
+### Example: prod gate (validate-only + load-test)
+```
+set-pending → health-check → check-0-validate-only → check-1-load-test
+                                                            ↓
+                              report-success + comment-pr + update-commitstatus-success
+```
+
+- All pipelines validate against the **source environment** (previous env), not target
+- Step templates (`driveby-validate`, `driveby-functional`, `driveby-loadtest`) accept input parameters from the DAG
+- Shared `reports` PVC (64Mi) mounts at `/tmp/reports` across all DriveBy steps — `comment-pr` reads saved reports via `github-comment` instead of re-running tests
+- **v2.0.0 breaking change**: `softwareRepository`, `DISPATCH_PAT`, and `GITOPS_PAT` removed — single-repo model requires only one GitHub App credential
+- Environment-specific config (replicas, resources, env vars) is **engineer-owned** in the repository's `manifests/` directory
 
 ## Configurability Model
-Compositions use a three-tier variable resolution pattern:
+Compositions use a **two-tier** variable resolution pattern:
 1. **values.yaml** (`defaults.*`) — chart-level defaults, baked at `helm template` time
-2. **EnvironmentConfig** — cluster-level overrides, resolved at Crossplane composition runtime via `.environment.*`
-3. **XRD spec fields** — per-CR overrides, resolved at composition runtime via `$xr.spec.*`
+2. **XRD spec fields** — per-CR overrides, resolved at composition runtime
 
-Resolution order in go-templates: `$xr.spec.X | default ($env.Y | default "<helm-baked-default>")`
+EnvironmentConfigs have been removed. All cluster config lives in `values.yaml`.
 
 ## Target Cluster
 - **Cluster**: `private.novelcore.org` (via `access.kubecore.eu`)

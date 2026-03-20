@@ -239,6 +239,11 @@ func writeValidationReportComment(sb *strings.Builder, r *types.ValidationReport
 	// --- Performance results ---
 	if r.TestResults != nil && r.TestResults.Performance != nil {
 		writePerformanceResults(sb, r.TestResults.Performance)
+	} else {
+		// Fallback: extract P007 PerformanceMetrics from PrincipleResult.Details
+		if pr := extractPerformanceFromPrinciples(r); pr != nil {
+			writePerformanceResults(sb, pr)
+		}
 	}
 }
 
@@ -617,6 +622,30 @@ func writePerformanceResults(sb *strings.Builder, pr *types.PerformanceTestResul
 		}
 		sb.WriteString("\n</details>\n\n")
 	}
+}
+
+// extractPerformanceFromPrinciples scans P007 Details for *PerformanceMetrics
+// and converts it to *PerformanceTestResults for comment rendering.
+func extractPerformanceFromPrinciples(r *types.ValidationReport) *types.PerformanceTestResults {
+	for _, p := range r.Principles {
+		if p.Principle.ID != "P007" {
+			continue
+		}
+		if pm, ok := p.Details.(*types.PerformanceMetrics); ok {
+			return &types.PerformanceTestResults{
+				TotalRequests:     int64(pm.TotalRequests),
+				SuccessCount:      int64(pm.SuccessCount),
+				ErrorCount:        int64(pm.ErrorCount),
+				ErrorRate:         pm.ErrorRate,
+				LatencyP50:        pm.LatencyP50,
+				LatencyP95:        pm.LatencyP95,
+				LatencyP99:        pm.LatencyP99,
+				RequestsPerSecond: pm.RequestsPerSec,
+				Duration:          pm.EndTime.Sub(pm.StartTime),
+			}
+		}
+	}
+	return nil
 }
 
 // capitalizeFirst returns the string with the first letter uppercased.

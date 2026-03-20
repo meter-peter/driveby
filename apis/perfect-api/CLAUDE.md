@@ -1,7 +1,6 @@
 # Perfect API — FastAPI Reference Implementation
 
 > **Moved to separate repo**: [`novelcore/perfect-api`](https://github.com/novelcore/perfect-api)
-> GitOps manifests: [`novelcore/perfect-api-gitops`](https://github.com/novelcore/perfect-api-gitops)
 
 ## Overview
 A FastAPI (Python) application designed as the "known-good" reference implementation for DriveBy validation. This API is intentionally well-documented and well-structured to serve as the positive control in thesis evaluation.
@@ -16,7 +15,7 @@ The source code and Dockerfile now live in their own repo. This directory retain
 | Prod | `https://perfect-api-prod.private.novelcore.org` | ArgoCD (manual sync) |
 
 - **Container image**: `ghcr.io/novelcore/perfect-api:latest` (built by GitHub Actions on push to main)
-- **GitOps repo**: `novelcore/perfect-api-gitops` — kustomize base + overlays (staging/prod)
+- **GitOps manifests**: `manifests/` directory in `novelcore/perfect-api` (single-repo model — source and manifests co-located)
 - **ArgoCD AppProject**: `perfect-api` in `argocd` namespace
 - **Database**: PostgreSQL 16 StatefulSet per environment (currently unused — API uses in-memory storage)
 

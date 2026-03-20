@@ -1,0 +1,44 @@
+% Crossplane Reconciliation Loop — Chapter 5, Section 5.4.2
+% Circular: XSDLC CR → Composition → Desired Children → Providers → Actual Resources → Status feedback
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    stage/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!60!black,
+        fill=#1!12,
+        minimum width=3cm,
+        minimum height=0.9cm,
+        font=\small,
+        align=center
+    },
+    arrow/.style={
+        ->,
+        thick,
+        #1!50!black
+    }
+]
+
+% Circular layout (clockwise from top)
+\node[stage=violet] (xsdlc)    at (0,3.5)    {\textbf{XSDLC CR}\\(desired state)};
+\node[stage=teal]   (comp)     at (4.5,1.75)  {\textbf{Composition}\\(go-templating)};
+\node[stage=blue]   (desired)  at (4.5,-1.75) {\textbf{Desired Children}\\(generated manifests)};
+\node[stage=orange] (provider) at (0,-3.5)    {\textbf{Providers}\\(reconcile each child)};
+\node[stage=green!60!black]  (actual)   at (-4.5,-1.75) {\textbf{Actual Resources}\\(cluster + GitHub)};
+\node[stage=red!70!black]    (status)   at (-4.5,1.75)  {\textbf{Status Feedback}\\(ready/not-ready)};
+
+% Clockwise arrows
+\draw[arrow=violet]            (xsdlc.east)    -- node[above,font=\scriptsize,sloped] {spec input} (comp.north);
+\draw[arrow=teal]              (comp.south)     -- node[right,font=\scriptsize] {render} (desired.north);
+\draw[arrow=blue]              (desired.south)  -- node[below,font=\scriptsize,sloped] {create/update} (provider.east);
+\draw[arrow=orange]            (provider.west)  -- node[below,font=\scriptsize,sloped] {provision} (actual.south);
+\draw[arrow=green!60!black]    (actual.north)   -- node[left,font=\scriptsize] {observe} (status.south);
+\draw[arrow=red!70!black,dashed] (status.north) -- node[above,font=\scriptsize,sloped] {conditions} (xsdlc.west);
+
+% Center label
+\node[font=\small\bfseries,text=gray!70,align=center] at (0,0) {Continuous\\Reconciliation};
+
+% auto-ready annotation
+\node[font=\tiny\itshape,text=red!50!black,align=center] at (-3.2,3.2) {function-auto-ready\\marks READY=True};
+
+\end{tikzpicture}
