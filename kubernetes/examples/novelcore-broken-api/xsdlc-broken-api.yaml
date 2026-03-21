@@ -4,10 +4,8 @@ metadata:
   name: broken-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: broken-api
   gitopsRepository:
+    owner: novelcore
     name: broken-api-gitops
 
   apiConfig:

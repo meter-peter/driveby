@@ -1,0 +1,123 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "sys-prod-issuer-dns",
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"Ingress\",\"metadata\":{\"annotations\":{\"cert-manager.io/cluster-issuer\":\"sys-prod-issuer-dns\",\"traefik.ingress.kubernetes.io/router.entrypoints\":\"websecure\",\"traefik.ingress.kubernetes.io/router.tls\":\"true\"},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\"},\"name\":\"perfect-api-prod-gate-webhook-ingress\",\"namespace\":\"driveby\"},\"spec\":{\"ingressClassName\":\"traefik-system\",\"rules\":[{\"host\":\"perfect-api-prod-gate-webhook.private.novelcore.org\",\"http\":{\"paths\":[{\"backend\":{\"service\":{\"name\":\"perfect-api-prod-gate-eventsource-svc\",\"port\":{\"number\":12000}}},\"path\":\"/\",\"pathType\":\"Prefix\"}]}}],\"tls\":[{\"hosts\":[\"perfect-api-prod-gate-webhook.private.novelcore.org\"],\"secretName\":\"perfect-api-prod-gate-webhook-tls\"}]}}",
+          "traefik.ingress.kubernetes.io/router.entrypoints": "websecure",
+          "traefik.ingress.kubernetes.io/router.tls": "true"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "prod-gate"
+        },
+        "name": "perfect-api-prod-gate-webhook-ingress",
+        "namespace": "driveby",
+        "resourceVersion": "245720499",
+        "uid": "5bf74cfb-c1eb-4add-a23d-76f0a3a47687"
+      },
+      "spec": {
+        "ingressClassName": "traefik-system",
+        "rules": [
+          {
+            "host": "perfect-api-prod-gate-webhook.private.novelcore.org",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "perfect-api-prod-gate-eventsource-svc",
+                      "port": {
+                        "number": 12000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "perfect-api-prod-gate-webhook.private.novelcore.org"
+            ],
+            "secretName": "perfect-api-prod-gate-webhook-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "sys-prod-issuer-dns",
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"Ingress\",\"metadata\":{\"annotations\":{\"cert-manager.io/cluster-issuer\":\"sys-prod-issuer-dns\",\"traefik.ingress.kubernetes.io/router.entrypoints\":\"websecure\",\"traefik.ingress.kubernetes.io/router.tls\":\"true\"},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\"},\"name\":\"perfect-api-staging-gate-webhook-ingress\",\"namespace\":\"driveby\"},\"spec\":{\"ingressClassName\":\"traefik-system\",\"rules\":[{\"host\":\"perfect-api-staging-gate-webhook.private.novelcore.org\",\"http\":{\"paths\":[{\"backend\":{\"service\":{\"name\":\"perfect-api-staging-gate-eventsource-svc\",\"port\":{\"number\":12000}}},\"path\":\"/\",\"pathType\":\"Prefix\"}]}}],\"tls\":[{\"hosts\":[\"perfect-api-staging-gate-webhook.private.novelcore.org\"],\"secretName\":\"perfect-api-staging-gate-webhook-tls\"}]}}",
+          "traefik.ingress.kubernetes.io/router.entrypoints": "websecure",
+          "traefik.ingress.kubernetes.io/router.tls": "true"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "staging-gate"
+        },
+        "name": "perfect-api-staging-gate-webhook-ingress",
+        "namespace": "driveby",
+        "resourceVersion": "245720595",
+        "uid": "db163d15-dc9a-4c3b-83d4-8396f6347511"
+      },
+      "spec": {
+        "ingressClassName": "traefik-system",
+        "rules": [
+          {
+            "host": "perfect-api-staging-gate-webhook.private.novelcore.org",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "perfect-api-staging-gate-eventsource-svc",
+                      "port": {
+                        "number": 12000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "perfect-api-staging-gate-webhook.private.novelcore.org"
+            ],
+            "secretName": "perfect-api-staging-gate-webhook-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

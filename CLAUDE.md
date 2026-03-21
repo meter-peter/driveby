@@ -100,9 +100,9 @@ When writing Crossplane resources:
 - **`loadTestConfig`**: configures load testing parameters — `concurrentUsers`, `testDuration`, `maxLatencyP95`, `minSuccessRate`
 - Helm chart (v3.0.0) installs `provider-kubernetes` + Crossplane functions + XRD + composition
 - **ArgoCD Application generation**: Always generated for every environment using `sourceHydrator` (drySource → overlay, syncSource → env branch, hydrateTo → env-next branch). All apps get `autoSync` with selfHeal. `autoMerge: false` only controls Promoter PR merge behavior, not ArgoCD sync.
-- **Simplified UX**: ~35 lines of YAML per app. Only `repository` and `environments` required. All cluster config from `values.yaml`. No EnvironmentConfigs.
+- **Simplified UX**: ~35 lines of YAML per app. Only `gitopsRepository` (owner + name) and `environments` required. All cluster config from `values.yaml`. No EnvironmentConfigs. No software repo reference needed.
 - **Two-tier config**: `values.yaml` defaults → XRD spec overrides (EnvironmentConfig layer removed)
-- **`gitopsRepository.name`**: Optional override for the gitops repo name (default: `<repository.name>-gitops`)
+- **`gitopsRepository`**: Required — `owner` (GitHub org) and `name` (gitops repo name). The software repo is never referenced by XSDLC.
 - **Branch protection**: When `githubProvider.enabled`, XSDLC auto-provisions GitHub BranchProtection rules per gated environment + `*-next` branch protection (on the gitops repo)
 - See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
 

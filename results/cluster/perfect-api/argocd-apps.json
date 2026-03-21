@@ -1,0 +1,570 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "Application",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"perfect-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "finalizers": [
+          "resources-finalizer.argocd.argoproj.io"
+        ],
+        "generation": 31,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "dev"
+        },
+        "name": "perfect-api-dev",
+        "namespace": "argocd",
+        "resourceVersion": "245764532",
+        "uid": "137d1187-af49-4207-9e15-5308d137c3bd"
+      },
+      "spec": {
+        "destination": {
+          "namespace": "perfect-api-dev",
+          "server": "https://kubernetes.default.svc"
+        },
+        "project": "driveby",
+        "sourceHydrator": {
+          "drySource": {
+            "path": "dry/overlays/dev",
+            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+            "targetRevision": "main"
+          },
+          "hydrateTo": {
+            "targetBranch": "environment/dev-next"
+          },
+          "syncSource": {
+            "path": "manifests",
+            "targetBranch": "environment/dev"
+          }
+        },
+        "syncPolicy": {
+          "automated": {
+            "prune": true,
+            "selfHeal": true
+          },
+          "syncOptions": [
+            "CreateNamespace=true"
+          ]
+        }
+      },
+      "status": {
+        "controllerNamespace": "argocd",
+        "health": {
+          "lastTransitionTime": "2026-03-21T16:24:57Z",
+          "status": "Healthy"
+        },
+        "history": [
+          {
+            "deployStartedAt": "2026-03-21T16:24:54Z",
+            "deployedAt": "2026-03-21T16:24:54Z",
+            "id": 0,
+            "initiatedBy": {
+              "automated": true
+            },
+            "revision": "7022743888f452ff78a03b0abd296ff9f47830c1",
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/dev"
+            }
+          }
+        ],
+        "operationState": {
+          "finishedAt": "2026-03-21T16:24:54Z",
+          "message": "successfully synced (all tasks run)",
+          "operation": {
+            "initiatedBy": {
+              "automated": true
+            },
+            "retry": {
+              "limit": 5
+            },
+            "sync": {
+              "prune": true,
+              "revision": "7022743888f452ff78a03b0abd296ff9f47830c1",
+              "source": {
+                "path": "manifests",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "environment/dev"
+              },
+              "syncOptions": [
+                "CreateNamespace=true"
+              ]
+            }
+          },
+          "phase": "Succeeded",
+          "startedAt": "2026-03-21T16:24:54Z",
+          "syncResult": {
+            "resources": [
+              {
+                "group": "",
+                "hookPhase": "Running",
+                "kind": "Service",
+                "message": "service/perfect-api created",
+                "name": "perfect-api",
+                "namespace": "perfect-api-dev",
+                "status": "Synced",
+                "syncPhase": "Sync",
+                "version": "v1"
+              },
+              {
+                "group": "apps",
+                "hookPhase": "Running",
+                "images": [
+                  "ghcr.io/novelcore/broken-api:latest"
+                ],
+                "kind": "Deployment",
+                "message": "deployment.apps/perfect-api created",
+                "name": "perfect-api",
+                "namespace": "perfect-api-dev",
+                "status": "Synced",
+                "syncPhase": "Sync",
+                "version": "v1"
+              }
+            ],
+            "revision": "7022743888f452ff78a03b0abd296ff9f47830c1",
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/dev"
+            }
+          }
+        },
+        "reconciledAt": "2026-03-21T17:21:11Z",
+        "resourceHealthSource": "appTree",
+        "resources": [
+          {
+            "kind": "Service",
+            "name": "perfect-api",
+            "namespace": "perfect-api-dev",
+            "status": "Synced",
+            "version": "v1"
+          },
+          {
+            "group": "apps",
+            "kind": "Deployment",
+            "name": "perfect-api",
+            "namespace": "perfect-api-dev",
+            "status": "Synced",
+            "version": "v1"
+          }
+        ],
+        "sourceHydrator": {
+          "currentOperation": {
+            "drySHA": "b843ecd54b2661f35ab5b058101977847c60edb0",
+            "finishedAt": "2026-03-21T16:25:07Z",
+            "hydratedSHA": "b445d984ba8869b63c6a1ce2781c6df7278cebc2",
+            "message": "",
+            "phase": "Hydrated",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/dev",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/dev-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/dev"
+              }
+            },
+            "startedAt": "2026-03-21T16:24:54Z"
+          },
+          "lastSuccessfulOperation": {
+            "drySHA": "b843ecd54b2661f35ab5b058101977847c60edb0",
+            "hydratedSHA": "b445d984ba8869b63c6a1ce2781c6df7278cebc2",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/dev",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/dev-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/dev"
+              }
+            }
+          }
+        },
+        "sourceType": "Directory",
+        "summary": {
+          "images": [
+            "ghcr.io/novelcore/broken-api:latest"
+          ]
+        },
+        "sync": {
+          "comparedTo": {
+            "destination": {
+              "namespace": "perfect-api-dev",
+              "server": "https://kubernetes.default.svc"
+            },
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/dev"
+            }
+          },
+          "revision": "7022743888f452ff78a03b0abd296ff9f47830c1",
+          "status": "Synced"
+        }
+      }
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "Application",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"perfect-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "finalizers": [
+          "resources-finalizer.argocd.argoproj.io"
+        ],
+        "generation": 23,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "prod"
+        },
+        "name": "perfect-api-prod",
+        "namespace": "argocd",
+        "resourceVersion": "245763107",
+        "uid": "5ea53a86-6498-4e3f-bb6c-14369408ba45"
+      },
+      "spec": {
+        "destination": {
+          "namespace": "perfect-api-prod",
+          "server": "https://kubernetes.default.svc"
+        },
+        "project": "driveby",
+        "sourceHydrator": {
+          "drySource": {
+            "path": "dry/overlays/prod",
+            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+            "targetRevision": "main"
+          },
+          "hydrateTo": {
+            "targetBranch": "environment/prod-next"
+          },
+          "syncSource": {
+            "path": "manifests",
+            "targetBranch": "environment/prod"
+          }
+        },
+        "syncPolicy": {
+          "automated": {
+            "prune": true,
+            "selfHeal": true
+          },
+          "syncOptions": [
+            "CreateNamespace=true"
+          ]
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+            "type": "ComparisonError"
+          }
+        ],
+        "controllerNamespace": "argocd",
+        "health": {
+          "lastTransitionTime": "2026-03-21T16:24:55Z",
+          "status": "Healthy"
+        },
+        "reconciledAt": "2026-03-21T17:19:17Z",
+        "resourceHealthSource": "appTree",
+        "sourceHydrator": {
+          "currentOperation": {
+            "drySHA": "b843ecd54b2661f35ab5b058101977847c60edb0",
+            "finishedAt": "2026-03-21T16:25:11Z",
+            "hydratedSHA": "e14ce96964d2dff09bb6021275e9199489057fb9",
+            "message": "",
+            "phase": "Hydrated",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/prod",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/prod-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/prod"
+              }
+            },
+            "startedAt": "2026-03-21T16:24:55Z"
+          },
+          "lastSuccessfulOperation": {
+            "drySHA": "b843ecd54b2661f35ab5b058101977847c60edb0",
+            "hydratedSHA": "e14ce96964d2dff09bb6021275e9199489057fb9",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/prod",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/prod-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/prod"
+              }
+            }
+          }
+        },
+        "sync": {
+          "comparedTo": {
+            "destination": {
+              "namespace": "perfect-api-prod",
+              "server": "https://kubernetes.default.svc"
+            },
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/prod"
+            }
+          },
+          "revision": "environment/prod",
+          "status": "Unknown"
+        }
+      }
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "Application",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"perfect-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:53Z",
+        "finalizers": [
+          "resources-finalizer.argocd.argoproj.io"
+        ],
+        "generation": 31,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "staging"
+        },
+        "name": "perfect-api-staging",
+        "namespace": "argocd",
+        "resourceVersion": "245761471",
+        "uid": "2a3f6858-d0d7-4596-a5cc-1188533ecb43"
+      },
+      "spec": {
+        "destination": {
+          "namespace": "perfect-api-staging",
+          "server": "https://kubernetes.default.svc"
+        },
+        "project": "driveby",
+        "sourceHydrator": {
+          "drySource": {
+            "path": "dry/overlays/staging",
+            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+            "targetRevision": "main"
+          },
+          "hydrateTo": {
+            "targetBranch": "environment/staging-next"
+          },
+          "syncSource": {
+            "path": "manifests",
+            "targetBranch": "environment/staging"
+          }
+        },
+        "syncPolicy": {
+          "automated": {
+            "prune": true,
+            "selfHeal": true
+          },
+          "syncOptions": [
+            "CreateNamespace=true"
+          ]
+        }
+      },
+      "status": {
+        "controllerNamespace": "argocd",
+        "health": {
+          "lastTransitionTime": "2026-03-21T16:24:57Z",
+          "status": "Healthy"
+        },
+        "history": [
+          {
+            "deployStartedAt": "2026-03-21T16:24:54Z",
+            "deployedAt": "2026-03-21T16:24:54Z",
+            "id": 0,
+            "initiatedBy": {
+              "automated": true
+            },
+            "revision": "f57b8ea6984db4bcffd54dff55002859489951db",
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/staging"
+            }
+          }
+        ],
+        "operationState": {
+          "finishedAt": "2026-03-21T16:24:54Z",
+          "message": "successfully synced (all tasks run)",
+          "operation": {
+            "initiatedBy": {
+              "automated": true
+            },
+            "retry": {
+              "limit": 5
+            },
+            "sync": {
+              "prune": true,
+              "revision": "f57b8ea6984db4bcffd54dff55002859489951db",
+              "source": {
+                "path": "manifests",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "environment/staging"
+              },
+              "syncOptions": [
+                "CreateNamespace=true"
+              ]
+            }
+          },
+          "phase": "Succeeded",
+          "startedAt": "2026-03-21T16:24:54Z",
+          "syncResult": {
+            "resources": [
+              {
+                "group": "",
+                "hookPhase": "Running",
+                "kind": "Service",
+                "message": "service/perfect-api created",
+                "name": "perfect-api",
+                "namespace": "perfect-api-staging",
+                "status": "Synced",
+                "syncPhase": "Sync",
+                "version": "v1"
+              },
+              {
+                "group": "apps",
+                "hookPhase": "Running",
+                "images": [
+                  "ghcr.io/novelcore/perfect-api:latest"
+                ],
+                "kind": "Deployment",
+                "message": "deployment.apps/perfect-api created",
+                "name": "perfect-api",
+                "namespace": "perfect-api-staging",
+                "status": "Synced",
+                "syncPhase": "Sync",
+                "version": "v1"
+              }
+            ],
+            "revision": "f57b8ea6984db4bcffd54dff55002859489951db",
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/staging"
+            }
+          }
+        },
+        "reconciledAt": "2026-03-21T17:17:05Z",
+        "resourceHealthSource": "appTree",
+        "resources": [
+          {
+            "kind": "Service",
+            "name": "perfect-api",
+            "namespace": "perfect-api-staging",
+            "status": "Synced",
+            "version": "v1"
+          },
+          {
+            "group": "apps",
+            "kind": "Deployment",
+            "name": "perfect-api",
+            "namespace": "perfect-api-staging",
+            "status": "Synced",
+            "version": "v1"
+          }
+        ],
+        "sourceHydrator": {
+          "currentOperation": {
+            "drySHA": "51c2218572e2fbfd7ef1495682b34324bfaecee6",
+            "finishedAt": "2026-03-21T16:24:58Z",
+            "hydratedSHA": "83fa8c577dae696d43305c2e3924d0d1025850b6",
+            "message": "",
+            "phase": "Hydrated",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/staging",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/staging-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/staging"
+              }
+            },
+            "startedAt": "2026-03-21T16:24:54Z"
+          },
+          "lastSuccessfulOperation": {
+            "drySHA": "51c2218572e2fbfd7ef1495682b34324bfaecee6",
+            "hydratedSHA": "83fa8c577dae696d43305c2e3924d0d1025850b6",
+            "sourceHydrator": {
+              "drySource": {
+                "path": "dry/overlays/staging",
+                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                "targetRevision": "main"
+              },
+              "hydrateTo": {
+                "targetBranch": "environment/staging-next"
+              },
+              "syncSource": {
+                "path": "manifests",
+                "targetBranch": "environment/staging"
+              }
+            }
+          }
+        },
+        "sourceType": "Directory",
+        "summary": {
+          "images": [
+            "ghcr.io/novelcore/perfect-api:latest"
+          ]
+        },
+        "sync": {
+          "comparedTo": {
+            "destination": {
+              "namespace": "perfect-api-staging",
+              "server": "https://kubernetes.default.svc"
+            },
+            "source": {
+              "path": "manifests",
+              "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+              "targetRevision": "environment/staging"
+            }
+          },
+          "revision": "f57b8ea6984db4bcffd54dff55002859489951db",
+          "status": "Synced"
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

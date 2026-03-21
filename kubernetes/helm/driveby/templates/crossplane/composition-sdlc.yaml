@@ -52,16 +52,15 @@ spec:
           {{`{{- $githubProviderConfigName := `}}"{{ .Values.githubProvider.providerConfigName }}"{{` -}}`}}
           {{- end }}
 
-          {{`{{/* Repository config */}}`}}
-          {{`{{- $repoOwner := $spec.repository.owner -}}`}}
-          {{`{{- $repoName := $spec.repository.name -}}`}}
-          {{`{{- $repoFullName := printf "%s/%s" $repoOwner $repoName -}}`}}
-
-          {{`{{/* GitOps repository (dedicated, auto-created) */}}`}}
-          {{`{{- $gitopsRepoConfig := $spec.gitopsRepository | default dict -}}`}}
-          {{`{{- $gitopsRepoName := $gitopsRepoConfig.name | default (printf "%s-gitops" $repoName) -}}`}}
+          {{`{{/* GitOps repository config */}}`}}
+          {{`{{- $repoOwner := $spec.gitopsRepository.owner -}}`}}
+          {{`{{- $gitopsRepoName := $spec.gitopsRepository.name -}}`}}
           {{`{{- $gitopsRepoFullName := printf "%s/%s" $repoOwner $gitopsRepoName -}}`}}
           {{`{{- $gitopsRepoUrl := printf "https://github.com/%s/%s.git" $repoOwner $gitopsRepoName -}}`}}
+
+          {{`{{/* API container image */}}`}}
+          {{`{{- $apiConfig := $spec.apiConfig | default dict -}}`}}
+          {{`{{- $apiImage := $apiConfig.image | default (printf "ghcr.io/%s/%s:latest" $repoOwner $xrName) -}}`}}
 
           {{`{{/* Source hydrator paths */}}`}}
           {{`{{- $drySourcePath := "dry" -}}`}}
@@ -354,7 +353,7 @@ spec:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
               name: {{`{{ $gitopsRepoName }}`}}
-              description: "GitOps manifests for {{`{{ $repoFullName }}`}} — managed by XSDLC"
+              description: "GitOps manifests for {{`{{ $gitopsRepoFullName }}`}} — managed by XSDLC"
               visibility: private
               autoInit: true
           {{- end }}
@@ -430,7 +429,7 @@ spec:
                     spec:
                       containers:
                         - name: {{`{{ $appName }}`}}
-                          image: ghcr.io/{{`{{ $repoOwner }}`}}/{{`{{ $repoName }}`}}:latest
+                          image: {{`{{ $apiImage }}`}}
                           ports:
                             - containerPort: {{`{{ $appPort }}`}}
                           env:

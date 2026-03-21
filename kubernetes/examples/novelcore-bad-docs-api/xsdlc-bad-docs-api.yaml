@@ -4,10 +4,8 @@ metadata:
   name: bad-docs-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: bad-docs-api
   gitopsRepository:
+    owner: novelcore
     name: bad-docs-api-gitops
 
   apiConfig:

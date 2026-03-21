@@ -27,35 +27,30 @@ spec:
           spec:
             type: object
             required:
-            - repository
+            - gitopsRepository
             - environments
             properties:
-              repository:
+              gitopsRepository:
                 type: object
-                description: "Software repository (source code — where the API runs)"
+                description: "Dedicated GitOps repository (auto-created, holds dry manifests on main and hydrated output on environment branches)"
                 required:
                 - owner
                 - name
                 properties:
                   owner:
                     type: string
-                    description: "GitHub repo owner (e.g., novelcore)"
+                    description: "GitHub org/user that owns the gitops repo (e.g., novelcore)"
                   name:
                     type: string
-                    description: "Software repo name (e.g., perfect-api)"
-
-              gitopsRepository:
-                type: object
-                description: "Dedicated GitOps repository (auto-created, holds manifests on environment branches)"
-                properties:
-                  name:
-                    type: string
-                    description: "GitOps repo name (default: <repository.name>-gitops)"
+                    description: "GitOps repo name (e.g., perfect-api-gitops)"
 
               apiConfig:
                 type: object
                 description: "API configuration for DriveBy validation"
                 properties:
+                  image:
+                    type: string
+                    description: "Container image for the API (e.g., ghcr.io/novelcore/perfect-api:latest)"
                   serviceName:
                     type: string
                     description: "Kubernetes service name (defaults to metadata.name)"

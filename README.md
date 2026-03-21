@@ -63,10 +63,8 @@ metadata:
   name: perfect-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: perfect-api
   gitopsRepository:
+    owner: novelcore
     name: perfect-api-gitops
   environments:
     - name: dev
@@ -90,7 +88,7 @@ spec:
               minSuccessRate: 0.995
 ```
 
-Only two required fields: `repository` and `environments` (minimum 2). Each environment can optionally define a `gate` with an ordered `checks` array — each check becomes a DAG step in the validation workflow.
+Only two required fields: `gitopsRepository` (owner + name) and `environments` (minimum 2). Each environment can optionally define a `gate` with an ordered `checks` array — each check becomes a DAG step in the validation workflow.
 
 Creates: ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection, deploy workflow
 

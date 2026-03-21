@@ -1,0 +1,540 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "promoter.argoproj.io/v1alpha1",
+      "kind": "PromotionStrategy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"PromotionStrategy\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"perfect-api-dev-promotion\",\"namespace\":\"driveby\"},\"spec\":{\"environments\":[{\"autoMerge\":true,\"branch\":\"environment/dev\"}],\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:55Z",
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "dev"
+        },
+        "name": "perfect-api-dev-promotion",
+        "namespace": "driveby",
+        "resourceVersion": "245764408",
+        "uid": "2d9a676a-1d99-4ecd-873a-f36c8233efcc"
+      },
+      "spec": {
+        "environments": [
+          {
+            "autoMerge": true,
+            "branch": "environment/dev"
+          }
+        ],
+        "gitRepositoryRef": {
+          "name": "perfect-api-gitops"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T17:21:01Z",
+            "message": "Reconciliation successful",
+            "observedGeneration": 1,
+            "reason": "ReconciliationSuccess",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "environments": [
+          {
+            "active": {
+              "dry": {
+                "author": "meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:20:11Z",
+                "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                "sha": "01a532e41a3901edb0d4110616a35623c8babaf6",
+                "subject": "test: deploy broken-api to dev"
+              },
+              "hydrated": {
+                "author": "driveby-promoter[bot]",
+                "body": "Promote 01a53 to `environment/dev`\n\nThis PR is promoting the environment branch `environment/dev` which is currently on dry sha 77a97ffc8ff999d54f14c999220fdb0eae8e202e to dry sha 01a532e41a3901edb0d4110616a35623c8babaf6.\n\nPull-request-merge-time: 2026-03-21T15:44:25Z",
+                "commitTime": "2026-03-21T15:44:26Z",
+                "sha": "7022743888f452ff78a03b0abd296ff9f47830c1",
+                "subject": "Merge pull request #6 from novelcore/environment/dev-next"
+              }
+            },
+            "branch": "environment/dev",
+            "history": [
+              {
+                "active": {
+                  "dry": {
+                    "author": "meter-peter <metrospa@hotmail.com>",
+                    "commitTime": "2026-03-21T15:20:11Z",
+                    "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                    "sha": "01a532e41a3901edb0d4110616a35623c8babaf6",
+                    "subject": "test: deploy broken-api to dev"
+                  },
+                  "hydrated": {
+                    "author": "driveby-promoter[bot]",
+                    "body": "Promote 01a53 to `environment/dev`\n\nThis PR is promoting the environment branch `environment/dev` which is currently on dry sha 77a97ffc8ff999d54f14c999220fdb0eae8e202e to dry sha 01a532e41a3901edb0d4110616a35623c8babaf6.\n\nPull-request-merge-time: 2026-03-21T15:44:25Z",
+                    "commitTime": "2026-03-21T15:44:26Z",
+                    "sha": "7022743888f452ff78a03b0abd296ff9f47830c1",
+                    "subject": "Merge pull request #6 from novelcore/environment/dev-next"
+                  }
+                },
+                "proposed": {
+                  "hydrated": {}
+                },
+                "pullRequest": {
+                  "prMergeTime": "2026-03-21T15:44:25Z"
+                }
+              },
+              {
+                "active": {
+                  "dry": {
+                    "author": "Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+                    "commitTime": "2026-03-21T03:17:34Z",
+                    "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                    "sha": "77a97ffc8ff999d54f14c999220fdb0eae8e202e",
+                    "subject": "chore: seed dry manifests [driveby-managed]"
+                  },
+                  "hydrated": {
+                    "author": "driveby-promoter[bot]",
+                    "body": "Promote 77a97 to `environment/dev`\n\nThis PR is promoting the environment branch `environment/dev` which is currently on dry sha  to dry sha 77a97ffc8ff999d54f14c999220fdb0eae8e202e.\n\nPull-request-merge-time: 2026-03-21T03:21:46Z",
+                    "commitTime": "2026-03-21T03:21:46Z",
+                    "sha": "9a039d90ce9a3808c075036c8be7078ae26dfe21",
+                    "subject": "Merge pull request #3 from novelcore/environment/dev-next"
+                  }
+                },
+                "proposed": {
+                  "hydrated": {}
+                },
+                "pullRequest": {
+                  "prMergeTime": "2026-03-21T03:21:46Z"
+                }
+              },
+              {
+                "active": {
+                  "dry": {},
+                  "hydrated": {
+                    "author": "Petros Evangelos Triantafyllis",
+                    "commitTime": "2026-03-21T03:16:36Z",
+                    "sha": "d6ec709cc7775b7084044ed782259fb94631df39",
+                    "subject": "Initial commit"
+                  }
+                },
+                "proposed": {
+                  "hydrated": {}
+                },
+                "pullRequest": {}
+              }
+            ],
+            "proposed": {
+              "dry": {
+                "author": "meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:20:11Z",
+                "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                "sha": "01a532e41a3901edb0d4110616a35623c8babaf6",
+                "subject": "test: deploy broken-api to dev"
+              },
+              "hydrated": {
+                "author": "Argo CD",
+                "body": "Co-authored-by: meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:44:06Z",
+                "sha": "b445d984ba8869b63c6a1ce2781c6df7278cebc2",
+                "subject": "01a532e: test: deploy broken-api to dev"
+              },
+              "note": {
+                "drySha": "b843ecd54b2661f35ab5b058101977847c60edb0"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "promoter.argoproj.io/v1alpha1",
+      "kind": "PromotionStrategy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"PromotionStrategy\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"perfect-api-prod-promotion\",\"namespace\":\"driveby\"},\"spec\":{\"environments\":[{\"activeCommitStatuses\":[{\"key\":\"prod-gate\"}],\"autoMerge\":false,\"branch\":\"environment/prod\",\"proposedCommitStatuses\":[{\"key\":\"prod-gate\"}]}],\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:53Z",
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "prod"
+        },
+        "name": "perfect-api-prod-promotion",
+        "namespace": "driveby",
+        "resourceVersion": "245764399",
+        "uid": "a84a7b0d-3da0-4b97-81c1-860d5fa67d69"
+      },
+      "spec": {
+        "environments": [
+          {
+            "activeCommitStatuses": [
+              {
+                "key": "prod-gate"
+              }
+            ],
+            "autoMerge": false,
+            "branch": "environment/prod",
+            "proposedCommitStatuses": [
+              {
+                "key": "prod-gate"
+              }
+            ]
+          }
+        ],
+        "gitRepositoryRef": {
+          "name": "perfect-api-gitops"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T17:21:01Z",
+            "message": "Reconciliation successful",
+            "observedGeneration": 1,
+            "reason": "ReconciliationSuccess",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "environments": [
+          {
+            "active": {
+              "commitStatuses": [
+                {
+                  "description": "Waiting for status to be reported",
+                  "key": "prod-gate",
+                  "phase": "pending"
+                }
+              ],
+              "dry": {},
+              "hydrated": {
+                "author": "Petros Evangelos Triantafyllis",
+                "commitTime": "2026-03-21T03:16:36Z",
+                "sha": "d6ec709cc7775b7084044ed782259fb94631df39",
+                "subject": "Initial commit"
+              }
+            },
+            "branch": "environment/prod",
+            "history": [
+              {
+                "active": {
+                  "dry": {},
+                  "hydrated": {
+                    "author": "Petros Evangelos Triantafyllis",
+                    "commitTime": "2026-03-21T03:16:36Z",
+                    "sha": "d6ec709cc7775b7084044ed782259fb94631df39",
+                    "subject": "Initial commit"
+                  }
+                },
+                "proposed": {
+                  "hydrated": {}
+                },
+                "pullRequest": {}
+              }
+            ],
+            "proposed": {
+              "commitStatuses": [
+                {
+                  "description": "All checks passed, safe to promote to prod",
+                  "key": "prod-gate",
+                  "phase": "success",
+                  "url": "https://argo.private.novelcore.org/workflows"
+                }
+              ],
+              "dry": {
+                "author": "meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:48:14Z",
+                "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                "sha": "3efe2c544eb6fe4a05b2cd419c27190dedc8af13",
+                "subject": "test: deploy broken-api to ALL environments via base"
+              },
+              "hydrated": {
+                "author": "Argo CD",
+                "body": "Co-authored-by: meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:48:49Z",
+                "sha": "e14ce96964d2dff09bb6021275e9199489057fb9",
+                "subject": "3efe2c5: test: deploy broken-api to ALL environments via base"
+              },
+              "note": {
+                "drySha": "b843ecd54b2661f35ab5b058101977847c60edb0"
+              }
+            },
+            "pullRequest": {
+              "id": "11",
+              "prCreationTime": "2026-03-21T16:29:27Z",
+              "state": "open",
+              "url": "https://github.com/novelcore/perfect-api-gitops/pull/11"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "promoter.argoproj.io/v1alpha1",
+      "kind": "PromotionStrategy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"PromotionStrategy\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"perfect-api-staging-promotion\",\"namespace\":\"driveby\"},\"spec\":{\"environments\":[{\"activeCommitStatuses\":[{\"key\":\"staging-gate\"}],\"autoMerge\":true,\"branch\":\"environment/staging\",\"proposedCommitStatuses\":[{\"key\":\"staging-gate\"}]}],\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/environment": "staging"
+        },
+        "name": "perfect-api-staging-promotion",
+        "namespace": "driveby",
+        "resourceVersion": "245764590",
+        "uid": "3a5d0311-2f51-4e09-9048-668ce59bf5a7"
+      },
+      "spec": {
+        "environments": [
+          {
+            "activeCommitStatuses": [
+              {
+                "key": "staging-gate"
+              }
+            ],
+            "autoMerge": true,
+            "branch": "environment/staging",
+            "proposedCommitStatuses": [
+              {
+                "key": "staging-gate"
+              }
+            ]
+          }
+        ],
+        "gitRepositoryRef": {
+          "name": "perfect-api-gitops"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T17:21:15Z",
+            "message": "Reconciliation successful",
+            "observedGeneration": 1,
+            "reason": "ReconciliationSuccess",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "environments": [
+          {
+            "active": {
+              "commitStatuses": [
+                {
+                  "description": "Waiting for status to be reported",
+                  "key": "staging-gate",
+                  "phase": "pending"
+                }
+              ],
+              "dry": {
+                "author": "Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+                "commitTime": "2026-03-21T03:17:34Z",
+                "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                "sha": "77a97ffc8ff999d54f14c999220fdb0eae8e202e",
+                "subject": "chore: seed dry manifests [driveby-managed]"
+              },
+              "hydrated": {
+                "author": "driveby-promoter[bot]",
+                "body": "Promote 77a97 to `environment/staging`\n\nThis PR is promoting the environment branch `environment/staging` which is currently on dry sha  to dry sha 77a97ffc8ff999d54f14c999220fdb0eae8e202e.\n\nPull-request-merge-time: 2026-03-21T03:24:11Z",
+                "commitTime": "2026-03-21T03:24:12Z",
+                "sha": "f57b8ea6984db4bcffd54dff55002859489951db",
+                "subject": "Merge pull request #1 from novelcore/environment/staging-next"
+              }
+            },
+            "branch": "environment/staging",
+            "history": [
+              {
+                "active": {
+                  "commitStatuses": [
+                    {
+                      "key": "staging-gate",
+                      "phase": "pending"
+                    }
+                  ],
+                  "dry": {
+                    "author": "Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+                    "commitTime": "2026-03-21T03:17:34Z",
+                    "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                    "sha": "77a97ffc8ff999d54f14c999220fdb0eae8e202e",
+                    "subject": "chore: seed dry manifests [driveby-managed]"
+                  },
+                  "hydrated": {
+                    "author": "driveby-promoter[bot]",
+                    "body": "Promote 77a97 to `environment/staging`\n\nThis PR is promoting the environment branch `environment/staging` which is currently on dry sha  to dry sha 77a97ffc8ff999d54f14c999220fdb0eae8e202e.\n\nPull-request-merge-time: 2026-03-21T03:24:11Z",
+                    "commitTime": "2026-03-21T03:24:12Z",
+                    "sha": "f57b8ea6984db4bcffd54dff55002859489951db",
+                    "subject": "Merge pull request #1 from novelcore/environment/staging-next"
+                  }
+                },
+                "proposed": {
+                  "commitStatuses": [
+                    {
+                      "key": "staging-gate",
+                      "phase": "pending",
+                      "url": "https://argo.private.novelcore.org/workflows"
+                    }
+                  ],
+                  "hydrated": {
+                    "author": "Argo CD",
+                    "body": "Co-authored-by: Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+                    "commitTime": "2026-03-21T03:18:51Z",
+                    "sha": "3b5b32a552c4c530f119ce398d595537a09874c9",
+                    "subject": "77a97ff: chore: seed dry manifests [driveby-managed]"
+                  }
+                },
+                "pullRequest": {
+                  "id": "1",
+                  "prCreationTime": "2026-03-21T03:21:42Z",
+                  "prMergeTime": "2026-03-21T03:24:11Z",
+                  "url": "https://github.com/novelcore/perfect-api-gitops/pull/1"
+                }
+              },
+              {
+                "active": {
+                  "dry": {},
+                  "hydrated": {
+                    "author": "Petros Evangelos Triantafyllis",
+                    "commitTime": "2026-03-21T03:16:36Z",
+                    "sha": "d6ec709cc7775b7084044ed782259fb94631df39",
+                    "subject": "Initial commit"
+                  }
+                },
+                "proposed": {
+                  "hydrated": {}
+                },
+                "pullRequest": {}
+              }
+            ],
+            "proposed": {
+              "commitStatuses": [
+                {
+                  "description": "Quality checks failed, promotion to staging blocked",
+                  "key": "staging-gate",
+                  "phase": "failure",
+                  "url": "https://argo.private.novelcore.org/workflows"
+                }
+              ],
+              "dry": {
+                "author": "meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:48:14Z",
+                "repoURL": "https://git@github.com/novelcore/perfect-api-gitops",
+                "sha": "3efe2c544eb6fe4a05b2cd419c27190dedc8af13",
+                "subject": "test: deploy broken-api to ALL environments via base"
+              },
+              "hydrated": {
+                "author": "Argo CD",
+                "body": "Co-authored-by: meter-peter <metrospa@hotmail.com>",
+                "commitTime": "2026-03-21T15:48:39Z",
+                "sha": "83fa8c577dae696d43305c2e3924d0d1025850b6",
+                "subject": "3efe2c5: test: deploy broken-api to ALL environments via base"
+              },
+              "note": {
+                "drySha": "51c2218572e2fbfd7ef1495682b34324bfaecee6"
+              }
+            },
+            "pullRequest": {
+              "id": "10",
+              "prCreationTime": "2026-03-21T16:29:26Z",
+              "state": "open",
+              "url": "https://github.com/novelcore/perfect-api-gitops/pull/10"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "promoter.argoproj.io/v1alpha1",
+      "kind": "GitRepository",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"GitRepository\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\"},\"name\":\"perfect-api-gitops\",\"namespace\":\"driveby\"},\"spec\":{\"github\":{\"name\":\"perfect-api-gitops\",\"owner\":\"novelcore\"},\"scmProviderRef\":{\"name\":\"perfect-api-github\"}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:55Z",
+        "finalizers": [
+          "gitrepository.promoter.argoproj.io/finalizer"
+        ],
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api"
+        },
+        "name": "perfect-api-gitops",
+        "namespace": "driveby",
+        "resourceVersion": "245720874",
+        "uid": "7a626ebb-d241-4f2a-8c08-876f3d8ff755"
+      },
+      "spec": {
+        "github": {
+          "name": "perfect-api-gitops",
+          "owner": "novelcore"
+        },
+        "scmProviderRef": {
+          "kind": "ScmProvider",
+          "name": "perfect-api-github"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:55Z",
+            "message": "Reconciliation successful",
+            "observedGeneration": 1,
+            "reason": "ReconciliationSuccess",
+            "status": "True",
+            "type": "Ready"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "promoter.argoproj.io/v1alpha1",
+      "kind": "ScmProvider",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"ScmProvider\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\"},\"name\":\"perfect-api-github\",\"namespace\":\"driveby\"},\"spec\":{\"github\":{\"appID\":3133001,\"installationID\":117564832},\"isApp\":true,\"secretRef\":{\"name\":\"github-app-credentials\"}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "finalizers": [
+          "scmprovider.promoter.argoproj.io/finalizer"
+        ],
+        "generation": 1,
+        "labels": {
+          "driveby.io/app": "perfect-api"
+        },
+        "name": "perfect-api-github",
+        "namespace": "driveby",
+        "resourceVersion": "245720684",
+        "uid": "0d1d7dd0-8c97-4808-ba1a-ca34523e5c10"
+      },
+      "spec": {
+        "github": {
+          "appID": 3133001,
+          "installationID": 117564832
+        },
+        "secretRef": {
+          "name": "github-app-credentials"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "message": "Reconciliation successful",
+            "observedGeneration": 1,
+            "reason": "ReconciliationSuccess",
+            "status": "True",
+            "type": "Ready"
+          }
+        ]
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

@@ -178,7 +178,7 @@ The quality gate infrastructure is provisioned through a single Crossplane Compo
 \label{subsec:xrd-xsdlc}
 % ----------------------------------------------------------------------------
 
-The \texttt{XSDLC} XRD requires only two fields: \texttt{repository} (the GitOps repository owner and name) and \texttt{environments} (the ordered list of environments in the promotion chain). From these two inputs, the composition generates all resources needed for the full software delivery lifecycle pipeline.
+The \texttt{XSDLC} XRD requires only two fields: \texttt{gitopsRepository} (the GitHub owner and gitops repository name) and \texttt{environments} (the ordered list of environments in the promotion chain). The software repository is never referenced---XSDLC manages only the gitops repo. From these two inputs, the composition generates all resources needed for the full software delivery lifecycle pipeline.
 
 A single \texttt{XSDLC} custom resource generates two categories of resources. \textit{App-level shared resources} are created once per CR:
 
@@ -255,10 +255,8 @@ metadata:
   name: perfect-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: perfect-api
   gitopsRepository:
+    owner: novelcore
     name: perfect-api-gitops
   environments:
     - name: dev

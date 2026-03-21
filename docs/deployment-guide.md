@@ -74,7 +74,7 @@ perfect-api-gitops/         # GitOps repo — auto-created
     ...
 ```
 
-- The `gitopsRepository.name` field controls the name (default: `<repository.name>-gitops`).
+- The `gitopsRepository` field is required — specify `owner` (GitHub org) and `name` (gitops repo name).
 - Dry manifests live on `main` in `dry/base/` and `dry/overlays/<env>/`. Each overlay references `../../base` and can customize replicas, env vars, images, etc.
 - ArgoCD Source Hydrator renders each overlay and writes the hydrated output to `environment/<env>-next` branches automatically. Developers do **not** push to `-next` branches directly.
 
@@ -501,11 +501,9 @@ metadata:
   name: another-api
   namespace: driveby
 spec:
-  repository:
-    owner: meter-peter
-    name: another-api
   gitopsRepository:
-    name: another-api-gitops    # optional — defaults to <name>-gitops
+    owner: meter-peter
+    name: another-api-gitops
   environments:
     - name: dev
     - name: staging

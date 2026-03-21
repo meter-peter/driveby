@@ -4,10 +4,8 @@ metadata:
   name: slow-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: slow-api
   gitopsRepository:
+    owner: novelcore
     name: slow-api-gitops
 
   apiConfig:

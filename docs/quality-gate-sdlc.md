@@ -152,7 +152,7 @@ spec:
 
 Instead of manually deploying EventBus + EventSource + Sensor + Ingress + WorkflowTemplate + RBAC + Promoter resources, DriveBy uses a single Crossplane XRD: **XSDLC** (`driveby.io/v1alpha1`).
 
-One XSDLC CR (~30 lines of YAML) defines the entire promotion pipeline for an API, including a dedicated gitops repository, all environments, quality gates, and promoter integration. Only two fields are required: `repository` and `environments`. The XSDLC auto-creates a separate gitops repository (default: `<repo-name>-gitops`) where all environment branches, PRs, and webhooks live. The software repository is never modified.
+One XSDLC CR (~30 lines of YAML) defines the entire promotion pipeline for an API, including a dedicated gitops repository, all environments, quality gates, and promoter integration. Only two fields are required: `gitopsRepository` (owner + name) and `environments`. The software repository is never referenced — XSDLC only manages the gitops repo.
 
 ### Resource Flow
 
@@ -189,11 +189,9 @@ metadata:
   name: perfect-api
   namespace: driveby
 spec:
-  repository:
-    owner: novelcore
-    name: perfect-api
   gitopsRepository:
-    name: perfect-api-gitops   # auto-created; defaults to <repository.name>-gitops
+    owner: novelcore
+    name: perfect-api-gitops
 
   apiConfig:
     port: 8000

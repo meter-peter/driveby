@@ -101,7 +101,7 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
 ### Required Fields (2)
 | Field | Description |
 |-------|-------------|
-| `repository.{owner,name}` | GitHub repository owner and name (e.g., novelcore/perfect-api) |
+| `gitopsRepository.{owner,name}` | GitHub org/user and gitops repo name (e.g., novelcore/perfect-api-gitops) |
 | `environments` | Ordered list of promotion environments (min 2) |
 
 ### Per-Environment Fields
@@ -134,7 +134,7 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
 ### Optional Top-Level Fields
 | Field | Default | Description |
 |-------|---------|-------------|
-| `gitopsRepository.name` | `<repository.name>-gitops` | Name of the gitops repo (auto-created by XSDLC) |
+| `apiConfig.image` | `ghcr.io/<owner>/<appName>:latest` | Container image for the API |
 | `apiConfig.serviceName` | `metadata.name` | K8s service name |
 | `apiConfig.port` | `8000` | API port |
 | `apiConfig.openapiEndpoint` | `/openapi.json` | OpenAPI spec path |

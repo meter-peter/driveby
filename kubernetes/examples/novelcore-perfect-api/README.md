@@ -140,7 +140,7 @@ From this single CR, the XSDLC composition generates:
 | Value | Source |
 |-------|--------|
 | `appName` | `metadata.name` |
-| `gitopsRepoName` | `gitopsRepository.name` or `<repository.name>-gitops` |
+| `gitopsRepoName` | `gitopsRepository.name` (required) |
 | `branch` | `environment/<envName>` |
 | `sourceNamespace` | `<appName>-<previousEnvName>` |
 | `targetNamespace` | `<appName>-<envName>` |

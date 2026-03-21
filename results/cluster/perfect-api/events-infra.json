@@ -1,0 +1,497 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "EventSource",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"EventSource\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\"},\"name\":\"perfect-api-prod-gate-eventsource\",\"namespace\":\"driveby\"},\"spec\":{\"github\":{\"pr-trigger\":{\"active\":true,\"contentType\":\"json\",\"deleteHookOnFinish\":true,\"events\":[\"pull_request\"],\"githubApp\":{\"appID\":3133001,\"installationID\":117564832,\"privateKey\":{\"key\":\"githubAppPrivateKey\",\"name\":\"github-app-credentials\"}},\"insecure\":false,\"repositories\":[{\"names\":[\"perfect-api-gitops\"],\"owner\":\"novelcore\"}],\"webhook\":{\"endpoint\":\"/perfect-api-prod-gate-pr-trigger\",\"method\":\"POST\",\"port\":\"12000\",\"url\":\"https://perfect-api-prod-gate-webhook.private.novelcore.org\"}}}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:53Z",
+        "finalizers": [
+          "eventsource-controller"
+        ],
+        "generation": 2,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "prod-gate"
+        },
+        "name": "perfect-api-prod-gate-eventsource",
+        "namespace": "driveby",
+        "resourceVersion": "245720363",
+        "uid": "c4bce534-0c29-49cf-91d2-634b5124f047"
+      },
+      "spec": {
+        "github": {
+          "pr-trigger": {
+            "active": true,
+            "contentType": "json",
+            "deleteHookOnFinish": true,
+            "events": [
+              "pull_request"
+            ],
+            "githubApp": {
+              "appID": 3133001,
+              "installationID": 117564832,
+              "privateKey": {
+                "key": "githubAppPrivateKey",
+                "name": "github-app-credentials"
+              }
+            },
+            "id": 0,
+            "owner": "",
+            "repositories": [
+              {
+                "names": [
+                  "perfect-api-gitops"
+                ],
+                "owner": "novelcore"
+              }
+            ],
+            "repository": "",
+            "webhook": {
+              "endpoint": "/perfect-api-prod-gate-pr-trigger",
+              "method": "POST",
+              "port": "12000",
+              "url": "https://perfect-api-prod-gate-webhook.private.novelcore.org"
+            }
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:53Z",
+            "status": "True",
+            "type": "Deployed"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:53Z",
+            "status": "True",
+            "type": "SourcesProvided"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "EventSource",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"EventSource\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\"},\"name\":\"perfect-api-staging-gate-eventsource\",\"namespace\":\"driveby\"},\"spec\":{\"github\":{\"pr-trigger\":{\"active\":true,\"contentType\":\"json\",\"deleteHookOnFinish\":true,\"events\":[\"pull_request\"],\"githubApp\":{\"appID\":3133001,\"installationID\":117564832,\"privateKey\":{\"key\":\"githubAppPrivateKey\",\"name\":\"github-app-credentials\"}},\"insecure\":false,\"repositories\":[{\"names\":[\"perfect-api-gitops\"],\"owner\":\"novelcore\"}],\"webhook\":{\"endpoint\":\"/perfect-api-staging-gate-pr-trigger\",\"method\":\"POST\",\"port\":\"12000\",\"url\":\"https://perfect-api-staging-gate-webhook.private.novelcore.org\"}}}}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:53Z",
+        "finalizers": [
+          "eventsource-controller"
+        ],
+        "generation": 2,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "staging-gate"
+        },
+        "name": "perfect-api-staging-gate-eventsource",
+        "namespace": "driveby",
+        "resourceVersion": "245720419",
+        "uid": "dd457db9-04b2-4644-83f8-09b50e4cbd72"
+      },
+      "spec": {
+        "github": {
+          "pr-trigger": {
+            "active": true,
+            "contentType": "json",
+            "deleteHookOnFinish": true,
+            "events": [
+              "pull_request"
+            ],
+            "githubApp": {
+              "appID": 3133001,
+              "installationID": 117564832,
+              "privateKey": {
+                "key": "githubAppPrivateKey",
+                "name": "github-app-credentials"
+              }
+            },
+            "id": 0,
+            "owner": "",
+            "repositories": [
+              {
+                "names": [
+                  "perfect-api-gitops"
+                ],
+                "owner": "novelcore"
+              }
+            ],
+            "repository": "",
+            "webhook": {
+              "endpoint": "/perfect-api-staging-gate-pr-trigger",
+              "method": "POST",
+              "port": "12000",
+              "url": "https://perfect-api-staging-gate-webhook.private.novelcore.org"
+            }
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "Deployed"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "SourcesProvided"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "Sensor",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Sensor\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\"},\"name\":\"perfect-api-prod-gate-sensor\",\"namespace\":\"driveby\"},\"spec\":{\"dependencies\":[{\"eventName\":\"pr-trigger\",\"eventSourceName\":\"perfect-api-prod-gate-eventsource\",\"filters\":{\"data\":[{\"path\":\"body.action\",\"type\":\"string\",\"value\":[\"opened\",\"reopened\",\"synchronize\"]},{\"path\":\"body.pull_request.base.ref\",\"type\":\"string\",\"value\":[\"environment/prod\"]}]},\"name\":\"pr-trigger-dep\"}],\"triggers\":[{\"template\":{\"argoWorkflow\":{\"operation\":\"submit\",\"parameters\":[{\"dest\":\"spec.arguments.parameters.0.value\",\"src\":{\"dataKey\":\"body.number\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.1.value\",\"src\":{\"dataKey\":\"body.pull_request.head.sha\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.2.value\",\"src\":{\"dataKey\":\"body.repository.owner.login\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.3.value\",\"src\":{\"dataKey\":\"body.repository.name\",\"dependencyName\":\"pr-trigger-dep\"}}],\"source\":{\"resource\":{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Workflow\",\"metadata\":{\"generateName\":\"perfect-api-prod-gate-pipeline-\",\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"driveby.io/trigger\":\"pr-trigger\"},\"namespace\":\"driveby\"},\"spec\":{\"arguments\":{\"parameters\":[{\"name\":\"pr-number\"},{\"name\":\"head-sha\"},{\"name\":\"github-owner\"},{\"name\":\"github-repo\"},{\"name\":\"app-name\",\"value\":\"perfect-api\"},{\"name\":\"app-port\",\"value\":\"8000\"},{\"name\":\"source-namespace\",\"value\":\"perfect-api-staging\"},{\"name\":\"target-namespace\",\"value\":\"perfect-api-prod\"},{\"name\":\"service-name\",\"value\":\"perfect-api\"},{\"name\":\"openapi-endpoint\",\"value\":\"/openapi.json\"}]},\"workflowTemplateRef\":{\"name\":\"perfect-api-prod-gate\"}}}}},\"name\":\"pr-trigger-workflow-trigger\"}}]}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "finalizers": [
+          "sensor-controller"
+        ],
+        "generation": 2,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "prod-gate"
+        },
+        "name": "perfect-api-prod-gate-sensor",
+        "namespace": "driveby",
+        "resourceVersion": "245720519",
+        "uid": "15e7911c-e54b-4dd5-8d2f-82e6e6ad0a1d"
+      },
+      "spec": {
+        "dependencies": [
+          {
+            "eventName": "pr-trigger",
+            "eventSourceName": "perfect-api-prod-gate-eventsource",
+            "filters": {
+              "data": [
+                {
+                  "path": "body.action",
+                  "type": "string",
+                  "value": [
+                    "opened",
+                    "reopened",
+                    "synchronize"
+                  ]
+                },
+                {
+                  "path": "body.pull_request.base.ref",
+                  "type": "string",
+                  "value": [
+                    "environment/prod"
+                  ]
+                }
+              ]
+            },
+            "name": "pr-trigger-dep"
+          }
+        ],
+        "loggingFields": null,
+        "triggers": [
+          {
+            "template": {
+              "argoWorkflow": {
+                "operation": "submit",
+                "parameters": [
+                  {
+                    "dest": "spec.arguments.parameters.0.value",
+                    "src": {
+                      "dataKey": "body.number",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.1.value",
+                    "src": {
+                      "dataKey": "body.pull_request.head.sha",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.2.value",
+                    "src": {
+                      "dataKey": "body.repository.owner.login",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.3.value",
+                    "src": {
+                      "dataKey": "body.repository.name",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  }
+                ],
+                "source": {
+                  "resource": {
+                    "apiVersion": "argoproj.io/v1alpha1",
+                    "kind": "Workflow",
+                    "metadata": {
+                      "generateName": "perfect-api-prod-gate-pipeline-",
+                      "labels": {
+                        "driveby.io/app": "perfect-api",
+                        "driveby.io/gate": "prod-gate",
+                        "driveby.io/trigger": "pr-trigger"
+                      },
+                      "namespace": "driveby"
+                    },
+                    "spec": {
+                      "arguments": {
+                        "parameters": [
+                          {
+                            "name": "pr-number"
+                          },
+                          {
+                            "name": "head-sha"
+                          },
+                          {
+                            "name": "github-owner"
+                          },
+                          {
+                            "name": "github-repo"
+                          },
+                          {
+                            "name": "app-name",
+                            "value": "perfect-api"
+                          },
+                          {
+                            "name": "app-port",
+                            "value": "8000"
+                          },
+                          {
+                            "name": "source-namespace",
+                            "value": "perfect-api-staging"
+                          },
+                          {
+                            "name": "target-namespace",
+                            "value": "perfect-api-prod"
+                          },
+                          {
+                            "name": "service-name",
+                            "value": "perfect-api"
+                          },
+                          {
+                            "name": "openapi-endpoint",
+                            "value": "/openapi.json"
+                          }
+                        ]
+                      },
+                      "workflowTemplateRef": {
+                        "name": "perfect-api-prod-gate"
+                      }
+                    }
+                  }
+                }
+              },
+              "name": "pr-trigger-workflow-trigger"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "DependenciesProvided"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "Deployed"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "TriggersProvided"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "kind": "Sensor",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Sensor\",\"metadata\":{\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\"},\"name\":\"perfect-api-staging-gate-sensor\",\"namespace\":\"driveby\"},\"spec\":{\"dependencies\":[{\"eventName\":\"pr-trigger\",\"eventSourceName\":\"perfect-api-staging-gate-eventsource\",\"filters\":{\"data\":[{\"path\":\"body.action\",\"type\":\"string\",\"value\":[\"opened\",\"reopened\",\"synchronize\"]},{\"path\":\"body.pull_request.base.ref\",\"type\":\"string\",\"value\":[\"environment/staging\"]}]},\"name\":\"pr-trigger-dep\"}],\"triggers\":[{\"template\":{\"argoWorkflow\":{\"operation\":\"submit\",\"parameters\":[{\"dest\":\"spec.arguments.parameters.0.value\",\"src\":{\"dataKey\":\"body.number\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.1.value\",\"src\":{\"dataKey\":\"body.pull_request.head.sha\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.2.value\",\"src\":{\"dataKey\":\"body.repository.owner.login\",\"dependencyName\":\"pr-trigger-dep\"}},{\"dest\":\"spec.arguments.parameters.3.value\",\"src\":{\"dataKey\":\"body.repository.name\",\"dependencyName\":\"pr-trigger-dep\"}}],\"source\":{\"resource\":{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Workflow\",\"metadata\":{\"generateName\":\"perfect-api-staging-gate-pipeline-\",\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"driveby.io/trigger\":\"pr-trigger\"},\"namespace\":\"driveby\"},\"spec\":{\"arguments\":{\"parameters\":[{\"name\":\"pr-number\"},{\"name\":\"head-sha\"},{\"name\":\"github-owner\"},{\"name\":\"github-repo\"},{\"name\":\"app-name\",\"value\":\"perfect-api\"},{\"name\":\"app-port\",\"value\":\"8000\"},{\"name\":\"source-namespace\",\"value\":\"perfect-api-dev\"},{\"name\":\"target-namespace\",\"value\":\"perfect-api-staging\"},{\"name\":\"service-name\",\"value\":\"perfect-api\"},{\"name\":\"openapi-endpoint\",\"value\":\"/openapi.json\"}]},\"workflowTemplateRef\":{\"name\":\"perfect-api-staging-gate\"}}}}},\"name\":\"pr-trigger-workflow-trigger\"}}]}}"
+        },
+        "creationTimestamp": "2026-03-21T16:24:54Z",
+        "finalizers": [
+          "sensor-controller"
+        ],
+        "generation": 2,
+        "labels": {
+          "driveby.io/app": "perfect-api",
+          "driveby.io/gate": "staging-gate"
+        },
+        "name": "perfect-api-staging-gate-sensor",
+        "namespace": "driveby",
+        "resourceVersion": "245720714",
+        "uid": "dd57ecb0-ae55-4600-b059-62ecc5e07219"
+      },
+      "spec": {
+        "dependencies": [
+          {
+            "eventName": "pr-trigger",
+            "eventSourceName": "perfect-api-staging-gate-eventsource",
+            "filters": {
+              "data": [
+                {
+                  "path": "body.action",
+                  "type": "string",
+                  "value": [
+                    "opened",
+                    "reopened",
+                    "synchronize"
+                  ]
+                },
+                {
+                  "path": "body.pull_request.base.ref",
+                  "type": "string",
+                  "value": [
+                    "environment/staging"
+                  ]
+                }
+              ]
+            },
+            "name": "pr-trigger-dep"
+          }
+        ],
+        "loggingFields": null,
+        "triggers": [
+          {
+            "template": {
+              "argoWorkflow": {
+                "operation": "submit",
+                "parameters": [
+                  {
+                    "dest": "spec.arguments.parameters.0.value",
+                    "src": {
+                      "dataKey": "body.number",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.1.value",
+                    "src": {
+                      "dataKey": "body.pull_request.head.sha",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.2.value",
+                    "src": {
+                      "dataKey": "body.repository.owner.login",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  },
+                  {
+                    "dest": "spec.arguments.parameters.3.value",
+                    "src": {
+                      "dataKey": "body.repository.name",
+                      "dependencyName": "pr-trigger-dep"
+                    }
+                  }
+                ],
+                "source": {
+                  "resource": {
+                    "apiVersion": "argoproj.io/v1alpha1",
+                    "kind": "Workflow",
+                    "metadata": {
+                      "generateName": "perfect-api-staging-gate-pipeline-",
+                      "labels": {
+                        "driveby.io/app": "perfect-api",
+                        "driveby.io/gate": "staging-gate",
+                        "driveby.io/trigger": "pr-trigger"
+                      },
+                      "namespace": "driveby"
+                    },
+                    "spec": {
+                      "arguments": {
+                        "parameters": [
+                          {
+                            "name": "pr-number"
+                          },
+                          {
+                            "name": "head-sha"
+                          },
+                          {
+                            "name": "github-owner"
+                          },
+                          {
+                            "name": "github-repo"
+                          },
+                          {
+                            "name": "app-name",
+                            "value": "perfect-api"
+                          },
+                          {
+                            "name": "app-port",
+                            "value": "8000"
+                          },
+                          {
+                            "name": "source-namespace",
+                            "value": "perfect-api-dev"
+                          },
+                          {
+                            "name": "target-namespace",
+                            "value": "perfect-api-staging"
+                          },
+                          {
+                            "name": "service-name",
+                            "value": "perfect-api"
+                          },
+                          {
+                            "name": "openapi-endpoint",
+                            "value": "/openapi.json"
+                          }
+                        ]
+                      },
+                      "workflowTemplateRef": {
+                        "name": "perfect-api-staging-gate"
+                      }
+                    }
+                  }
+                }
+              },
+              "name": "pr-trigger-workflow-trigger"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "DependenciesProvided"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "Deployed"
+          },
+          {
+            "lastTransitionTime": "2026-03-21T16:24:54Z",
+            "status": "True",
+            "type": "TriggersProvided"
+          }
+        ]
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}
