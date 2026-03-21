@@ -499,6 +499,103 @@ spec:
           {{- end }}
 
           {{`{{/* ============================================================ */}}`}}
+          {{`{{/* ArgoCD push secret — Source Hydrator needs repository-write   */}}`}}
+          {{`{{/* access to the gitops repo. One secret per XSDLC, created in  */}}`}}
+          {{`{{/* the argocd namespace with the standard label.                */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          ---
+          # ArgoCD push secret for Source Hydrator (gitops repo write access)
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-argocd-push-secret
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: argocd-push-secret
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            references:
+              - patchesFrom:
+                  apiVersion: v1
+                  kind: Secret
+                  name: {{`{{ $githubAppSecretName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  fieldPath: data.githubAppPrivateKey
+                toFieldPath: data.githubAppPrivateKey
+              - patchesFrom:
+                  apiVersion: v1
+                  kind: Secret
+                  name: {{`{{ $githubAppSecretName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  fieldPath: data.githubAppID
+                toFieldPath: data.githubAppID
+              - patchesFrom:
+                  apiVersion: v1
+                  kind: Secret
+                  name: {{`{{ $githubAppSecretName }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  fieldPath: data.githubInstallationID
+                toFieldPath: data.githubAppInstallationID
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: {{`{{ $xrName }}`}}-push-secret
+                  namespace: {{`{{ $argocdAppNamespace }}`}}
+                  labels:
+                    argocd.argoproj.io/secret-type: repository-write
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                type: Opaque
+                stringData:
+                  url: {{`{{ $gitopsRepoUrl }}`}}
+                  type: git
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Per-environment: ghcr-creds secret in each app namespace     */}}`}}
+          {{`{{/* Copies imagePullSecret from driveby namespace so pods can    */}}`}}
+          {{`{{/* pull container images from GHCR without manual setup.        */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $envNamespace := $env.namespaceOverride | default (printf "%s-%s" $appName $env.name) }}`}}
+          {{`{{- $idxStr := printf "%d" $idx }}`}}
+          ---
+          # ghcr-creds secret (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}}) — copied from driveby namespace
+          apiVersion: kubernetes.crossplane.io/v1alpha2
+          kind: Object
+          metadata:
+            name: {{`{{ $xrName }}`}}-ghcr-creds-{{`{{ $idxStr }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: ghcr-creds-{{`{{ $idxStr }}`}}
+          spec:
+            deletionPolicy: Delete
+            providerConfigRef:
+              name: {{`{{ $providerConfigName }}`}}
+            references:
+              - patchesFrom:
+                  apiVersion: v1
+                  kind: Secret
+                  name: {{`{{ $imagePullSecret }}`}}
+                  namespace: {{`{{ $appNamespace }}`}}
+                  fieldPath: data[.dockerconfigjson]
+                toFieldPath: data[.dockerconfigjson]
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: {{`{{ $imagePullSecret }}`}}
+                  namespace: {{`{{ $envNamespace }}`}}
+                  labels:
+                    driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/environment: {{`{{ $env.name | quote }}`}}
+                type: kubernetes.io/dockerconfigjson
+          {{`{{- end }}`}}
+
+          {{`{{/* ============================================================ */}}`}}
           {{`{{/* Per-environment: ArgoCD Applications (always generated)       */}}`}}
           {{`{{/* Every env uses sourceHydrator: renders its overlay from main  */}}`}}
           {{`{{/* drySource → dry/overlays/<env>, hydrateTo → env-next branch  */}}`}}
