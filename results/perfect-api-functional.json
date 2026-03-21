@@ -1,0 +1,213 @@
+{
+    "status": "passed",
+    "exit_code": 0,
+    "version": "1.0.0",
+    "environment": "production",
+    "timestamp": "2026-03-21T19:04:52.462942657+02:00",
+    "principles": [
+        {
+            "Principle": {
+                "id": "P006",
+                "name": "API Contract Testing",
+                "description": "Validates that the API implementation matches its specification through functional testing",
+                "category": "Testing",
+                "severity": "critical",
+                "tags": [
+                    "testing",
+                    "contract",
+                    "implementation"
+                ],
+                "auto_fixable": false,
+                "checks": [
+                    "All endpoints are reachable",
+                    "Response status codes match documentation",
+                    "Response schemas match documentation",
+                    "Authentication works as documented",
+                    "Required parameters are enforced",
+                    "Request validation works as documented",
+                    "Error responses match documentation"
+                ]
+            },
+            "Passed": true,
+            "Message": "All documented endpoints are reachable and return documented status codes.",
+            "Details": [
+                {
+                    "method": "DELETE",
+                    "path": "/products/{product_id}",
+                    "status": "success",
+                    "status_code": 404,
+                    "response_time": 1103042,
+                    "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19"
+                },
+                {
+                    "method": "GET",
+                    "path": "/products/{product_id}",
+                    "status": "success",
+                    "status_code": 404,
+                    "response_time": 631627,
+                    "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19"
+                },
+                {
+                    "method": "PUT",
+                    "path": "/products/{product_id}",
+                    "status": "success",
+                    "status_code": 404,
+                    "response_time": 812374,
+                    "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19"
+                },
+                {
+                    "method": "POST",
+                    "path": "/tasks",
+                    "status": "success",
+                    "status_code": 201,
+                    "response_time": 810924,
+                    "response_body": "eyJpZCI6IjM3MDRlNWE2LWUxMzctNDcwMi1hMjA1LTE2NGJkYjE4MjQ3ZSIsInRpdGxlIjoiU2FtcGxlIFRhc2siLCJkZXNjcmlwdGlvbiI6IkV4YW1wbGUgZGVzY3JpcHRpb24ifQ=="
+                },
+                {
+                    "method": "POST",
+                    "path": "/test/echo",
+                    "status": "success",
+                    "status_code": 200,
+                    "response_time": 730542,
+                    "response_body": "eyJhY3RpdmUiOnRydWUsIm1lc3NhZ2UiOiJUZXN0IG1lc3NhZ2UiLCJudW1iZXIiOjQyfQ=="
+                },
+                {
+                    "method": "GET",
+                    "path": "/test/health",
+                    "status": "success",
+                    "status_code": 200,
+                    "response_time": 746767,
+                    "response_body": "eyJzdGF0dXMiOiJoZWFsdGh5IiwidmVyc2lvbiI6IjEuMC4wIiwidGltZXN0YW1wIjoiMjAyNi0wMy0yMVQxNzowNDo1Mi40NjA1ODUifQ=="
+                },
+                {
+                    "method": "GET",
+                    "path": "/products",
+                    "status": "success",
+                    "status_code": 200,
+                    "response_time": 932041,
+                    "response_body": "W3sibmFtZSI6IldpcmVsZXNzIEhlYWRwaG9uZXMiLCJkZXNjcmlwdGlvbiI6Ik5vaXNlLWNhbmNlbGxpbmcgd2lyZWxlc3MgaGVhZHBob25lcyB3aXRoIDIwaCBiYXR0ZXJ5IGxpZmUiLCJwcmljZSI6OTkuOTksImNhdGVnb3J5IjoiZWxlY3Ryb25pY3MiLCJpbl9zdG9jayI6dHJ1ZSwidGFncyI6WyJ3aXJlbGVzcyIsImF1ZGlvIiwiYmx1ZXRvb3RoIl0sImlkIjoiYzMzMGIxNzQtNDJiZC00MjZlLThmMTYtZTdlNTIxMTZmNjFjIiwiY3JlYXRlZF9hdCI6IjIwMjYtMDMtMjFUMTY6NTg6MDAuMDk5MTY5IiwidXBkYXRlZF9hdCI6IjIwMjYtMDMtMjFUMTY6NTg6MDAuMDk5MTY5In0seyJuYW1lIjoiQ290dG9uIFQtU2hpcnQiLCJkZXNjcmlwdGlvbiI6IkNvbWZvcnRhYmxlIDEwMCUgY290dG9uIHQtc2hpcnQsIGF2YWlsYWJsZSBpbiBtdWx0aXBsZSBjb2xvcnMiLCJwcmljZSI6MTkuOTksImNhdGVnb3J5IjoiY2xvdGhpbmciLCJpbl9zdG9jayI6dHJ1ZSwidGFncyI6WyJjb3R0b24iLCJjYXN1YWwiLCJzdW1tZXIiXSwiaWQiOiJlZjIzODNiYi1lYTY3LTQwZjItYjZlMC1mNzY1YzgyMWY0NDAiLCJjcmVhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNjo1ODowMC4wOTkxOTEiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNjo1ODowMC4wOTkxOTEifSx7Im5hbWUiOiJXaXJlbGVzcyBIZWFkcGhvbmVzIiwiZGVzY3JpcHRpb24iOiJOb2lzZS1jYW5jZWxsaW5nIHdpcmVsZXNzIGhlYWRwaG9uZXMgd2l0aCAyMGggYmF0dGVyeSBsaWZlIiwicHJpY2UiOjk5Ljk5LCJjYXRlZ29yeSI6ImVsZWN0cm9uaWNzIiwiaW5fc3RvY2siOnRydWUsInRhZ3MiOlsid2lyZWxlc3MiLCJhdWRpbyIsImJsdWV0b290aCJdLCJpZCI6ImQwNjYyZjM1LTRlZTctNDJiMy04NTFkLTlhYWJlNTZhYTEwNCIsImNyZWF0ZWRfYXQiOiIyMDI2LTAzLTIxVDE3OjAxOjU1LjI3NDY3NiIsInVwZGF0ZWRfYXQiOiIyMDI2LTAzLTIxVDE3OjAxOjU1LjI3NDY3NiJ9XQ=="
+                },
+                {
+                    "method": "POST",
+                    "path": "/products",
+                    "status": "success",
+                    "status_code": 201,
+                    "response_time": 849610,
+                    "response_body": "eyJuYW1lIjoiV2lyZWxlc3MgSGVhZHBob25lcyIsImRlc2NyaXB0aW9uIjoiTm9pc2UtY2FuY2VsbGluZyB3aXJlbGVzcyBoZWFkcGhvbmVzIHdpdGggMjBoIGJhdHRlcnkgbGlmZSIsInByaWNlIjo5OS45OSwiY2F0ZWdvcnkiOiJlbGVjdHJvbmljcyIsImluX3N0b2NrIjp0cnVlLCJ0YWdzIjpbIndpcmVsZXNzIiwiYXVkaW8iLCJibHVldG9vdGgiXSwiaWQiOiJlMWViMzI1My1mYThkLTRjOTgtOGQ3YS05MjNjOTA3NDgzN2IiLCJjcmVhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNzowNDo1Mi40NjI1NDUiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNzowNDo1Mi40NjI1NDUifQ=="
+                }
+            ],
+            "Explanation": "",
+            "SuggestedFix": "",
+            "TestImpact": null
+        }
+    ],
+    "total_checks": 1,
+    "passed_checks": 1,
+    "failed_checks": 0,
+    "summary": {
+        "CriticalIssues": 0,
+        "Warnings": 0,
+        "Info": 0,
+        "Categories": null,
+        "FailedTags": null,
+        "TestSummary": null
+    },
+    "test_results": {
+        "Functional": {
+            "TotalEndpoints": 8,
+            "TestedEndpoints": 8,
+            "PassedEndpoints": 8,
+            "FailedEndpoints": 0,
+            "SkippedEndpoints": 0,
+            "EndpointResults": [
+                {
+                    "Method": "DELETE",
+                    "Path": "/products/{product_id}",
+                    "Status": "passed",
+                    "StatusCode": 404,
+                    "ResponseTime": 1103042,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "GET",
+                    "Path": "/products/{product_id}",
+                    "Status": "passed",
+                    "StatusCode": 404,
+                    "ResponseTime": 631627,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "PUT",
+                    "Path": "/products/{product_id}",
+                    "Status": "passed",
+                    "StatusCode": 404,
+                    "ResponseTime": 812374,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "POST",
+                    "Path": "/tasks",
+                    "Status": "passed",
+                    "StatusCode": 201,
+                    "ResponseTime": 810924,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "POST",
+                    "Path": "/test/echo",
+                    "Status": "passed",
+                    "StatusCode": 200,
+                    "ResponseTime": 730542,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "GET",
+                    "Path": "/test/health",
+                    "Status": "passed",
+                    "StatusCode": 200,
+                    "ResponseTime": 746767,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "GET",
+                    "Path": "/products",
+                    "Status": "passed",
+                    "StatusCode": 200,
+                    "ResponseTime": 932041,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                },
+                {
+                    "Method": "POST",
+                    "Path": "/products",
+                    "Status": "passed",
+                    "StatusCode": 201,
+                    "ResponseTime": 849610,
+                    "Errors": null,
+                    "Warnings": null,
+                    "TestCases": null
+                }
+            ],
+            "AverageResponseTime": 827115,
+            "MaxResponseTime": 1103042,
+            "MinResponseTime": 631627
+        },
+        "Performance": null,
+        "StartTime": "2026-03-21T19:04:52.462942711+02:00",
+        "EndTime": "2026-03-21T19:04:52.462942754+02:00",
+        "Status": "passed"
+    }
+}

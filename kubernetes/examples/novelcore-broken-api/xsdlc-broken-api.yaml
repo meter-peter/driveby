@@ -15,14 +15,22 @@ spec:
     openapiEndpoint: /openapi.json
 
   validationDefaults:
-    validationMode: minimal
+    validationMode: strict
 
   environments:
     - name: dev
+
     - name: staging
       gate:
         checks:
           - type: validate-only
             validationConfig:
-              validationMode: minimal
+              validationMode: strict
           - type: functional-test
+
+    - name: prod
+      autoMerge: false
+      gate:
+        checks:
+          - type: validate-only
+          - type: load-test

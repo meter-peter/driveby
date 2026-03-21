@@ -1,14 +1,14 @@
 apiVersion: driveby.io/v1alpha1
 kind: XSDLC
 metadata:
-  name: bad-docs-api
+  name: no-auth-api
   namespace: driveby
 spec:
   repository:
     owner: novelcore
-    name: bad-docs-api
+    name: no-auth-api
   gitopsRepository:
-    name: bad-docs-api-gitops
+    name: no-auth-api-gitops
 
   apiConfig:
     port: 8000
@@ -32,4 +32,4 @@ spec:
       gate:
         checks:
           - type: validate-only
-          - type: load-test
+          - type: functional-test

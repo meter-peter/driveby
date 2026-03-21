@@ -8,6 +8,10 @@ Contains sample API implementations used for controlled evaluation of DriveBy's 
 | Directory | Description | Spec Version | Status |
 |-----------|-------------|-------------|--------|
 | `perfect-api/` | FastAPI reference implementation — designed to pass all static DDT principles | OpenAPI 3.1.0 | Complete |
+| `bad-docs-api/` | FastAPI with stripped documentation — fails P002 (Documentation Quality) and P003 (Error Handling) | OpenAPI 3.0.3 | Complete |
+| `no-auth-api/` | FastAPI without authentication — fails P005 (Security Standards) | OpenAPI 3.0.3 | Complete |
+| `slow-api/` | FastAPI with artificial latency (500ms per request) — fails P007 (Performance Testing) under load | OpenAPI 3.0.3 | Complete |
+| `broken-api/` | FastAPI with spec-vs-implementation mismatches — fails P006 (Functional Testing) | OpenAPI 3.1.0 | Complete |
 
 ## Evaluation Purpose
 - **Thesis Chapter 6**: These sample APIs provide the controlled evaluation environment
@@ -26,8 +30,7 @@ Example: `driveby validate-only --openapi https://petstore3.swagger.io/api/v3/op
 Reference result: Swagger Petstore v3 scores 1/6 in strict mode (only P001 passes).
 
 ## Gaps
-- Currently only 1 local sample API (perfect-api)
-- Consider adding: a deliberately flawed API (failing P001-P005), a minimal API (edge cases), a Swagger 2.0 API (testing swagger2.go adapter)
+- 5 APIs now cover the full validation matrix (P001-P009). Consider adding: a Swagger 2.0 API (testing swagger2.go adapter), a minimal edge-case API
 
 ## Rules
 - Each API directory must contain its own `openapi.json` (or equivalent spec file)

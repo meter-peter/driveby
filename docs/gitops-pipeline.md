@@ -193,7 +193,7 @@ update-commitstatus-pending ─────────────┤ (parallel
 | update-commitstatus-pending | `update-commitstatus` | Creates CommitStatus CRD with phase=pending |
 | update-commitstatus-success | `update-commitstatus` | Creates CommitStatus CRD with phase=success |
 
-**Exit handler:** On failure, sets commit status to "failure" and creates CommitStatus CRD with phase=failure.
+**Exit handler:** On failure, three tasks run in parallel: (1) sets GitHub commit status to "failure", (2) creates CommitStatus CRD with phase=failure, and (3) posts the DriveBy validation report as a PR comment with whatever results were collected before the failure. This ensures developers always see detailed failure information on the PR, not just a generic "checks failed" status.
 
 All validation targets the **source environment** (dev), not the target (staging). The source env must be deployed and healthy before promotion.
 

@@ -47,6 +47,9 @@ Each gate defines an ordered list of **checks** that become sequential DAG steps
 set-pending -> health-check -> check-0-<type> -> check-1-<type> -> ... -> check-N-<type>
                                                                                 |
                                                    report-success + comment-pr + update-commitstatus-success
+
+Exit handler (on failure):
+  report-failure-github + update-commitstatus-failure + comment-pr-failure (parallel)
 ```
 
 **Example: staging gate** (validate-only + functional-test):
@@ -54,6 +57,8 @@ set-pending -> health-check -> check-0-<type> -> check-1-<type> -> ... -> check-
 set-pending -> health-check -> check-0-validate-only -> check-1-functional-test
                                                                |
                                    report-success + comment-pr + update-commitstatus-success
+
+On failure: report-failure-github + update-commitstatus-failure + comment-pr-failure
 ```
 
 **Example: prod gate** (validate-only + load-test):
@@ -61,6 +66,8 @@ set-pending -> health-check -> check-0-validate-only -> check-1-functional-test
 set-pending -> health-check -> check-0-validate-only -> check-1-load-test
                                                               |
                                    report-success + comment-pr + update-commitstatus-success
+
+On failure: report-failure-github + update-commitstatus-failure + comment-pr-failure
 ```
 
 ### 7. Commit Status as Gate Signal
@@ -226,6 +233,30 @@ Each gate defines an ordered `checks` array. Each check becomes a sequential DAG
 | `validate-only` | `validate-only --validation-mode <mode>` | Static validation (P001-P009 based on mode) |
 | `functional-test` | `function-only` | Functional API testing (P006) |
 | `load-test` | `load-only` | k6 load testing with configurable thresholds |
+
+### Implicit Validation
+
+If a gate defines runtime checks (`functional-test` or `load-test`) but no `validate-only` check, the composition **automatically injects** a `validate-only` check using the `validationDefaults.validationMode` (default: `strict`). This guarantees that static validation always runs before expensive runtime checks, acting as a fail-fast safeguard.
+
+For example, a gate with only `load-test`:
+```yaml
+gate:
+  checks:
+    - type: load-test
+```
+becomes at render time:
+```yaml
+gate:
+  checks:
+    - type: validate-only        # auto-injected
+      validationConfig:
+        validationMode: strict   # from validationDefaults
+    - type: load-test
+```
+
+### Check Ordering
+
+Regardless of the order specified in `gate.checks[]`, `validate-only` checks always run **before** runtime checks (`functional-test`, `load-test`). The composition sorts checks so that all `validate-only` entries execute first in the DAG, followed by the remaining checks in their original order. This ensures static validation failures are caught before launching expensive test workloads.
 
 ### Manifest-Agnostic Design (Two-Repo Model with Source Hydrator)
 

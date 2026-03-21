@@ -19,3 +19,79 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  bad-docs-api:
+    build:
+      context: ./apis/bad-docs-api
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./apis/bad-docs-api/bad_docs_api.py:/app/bad_docs_api.py
+      - ./apis/bad-docs-api/openapi.json:/app/openapi.json
+    command: uvicorn bad_docs_api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  no-auth-api:
+    build:
+      context: ./apis/no-auth-api
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./apis/no-auth-api/no_auth_api.py:/app/no_auth_api.py
+      - ./apis/no-auth-api/openapi.json:/app/openapi.json
+    command: uvicorn no_auth_api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  slow-api:
+    build:
+      context: ./apis/slow-api
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./apis/slow-api/slow_api.py:/app/slow_api.py
+      - ./apis/slow-api/openapi.json:/app/openapi.json
+    command: uvicorn slow_api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  broken-api:
+    build:
+      context: ./apis/broken-api
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8000"
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./apis/broken-api/broken_api.py:/app/broken_api.py
+      - ./apis/broken-api/openapi.json:/app/openapi.json
+    command: uvicorn broken_api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

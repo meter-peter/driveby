@@ -340,12 +340,14 @@ spec:
           {{- if .Values.githubProvider.enabled }}
           ---
           # GitHub Repository: auto-create dedicated gitops repo
+          # crossplane.io/external-name set so re-applying XSDLC adopts existing repo
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: Repository
           metadata:
             name: {{`{{ $xrName }}`}}-gitops-repository
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: gitops-repository
+              crossplane.io/external-name: {{`{{ $gitopsRepoName }}`}}
           spec:
             deletionPolicy: Orphan
             providerConfigRef:
@@ -383,7 +385,7 @@ spec:
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/kustomization.yaml
               commitMessage: "chore: seed dry manifests [driveby-managed]"
-              overwriteOnCreate: false
+              overwriteOnCreate: true
               content: |
                 apiVersion: kustomize.config.k8s.io/v1beta1
                 kind: Kustomization
@@ -408,7 +410,7 @@ spec:
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/deployment.yaml
               commitMessage: "chore: seed dry manifests [driveby-managed]"
-              overwriteOnCreate: false
+              overwriteOnCreate: true
               content: |
                 apiVersion: apps/v1
                 kind: Deployment
@@ -452,7 +454,7 @@ spec:
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/service.yaml
               commitMessage: "chore: seed dry manifests [driveby-managed]"
-              overwriteOnCreate: false
+              overwriteOnCreate: true
               content: |
                 apiVersion: v1
                 kind: Service
@@ -488,7 +490,7 @@ spec:
               branch: main
               file: {{`{{ printf "%s/overlays/%s/kustomization.yaml" $drySourcePath $env.name }}`}}
               commitMessage: "chore: seed dry manifests [driveby-managed]"
-              overwriteOnCreate: false
+              overwriteOnCreate: true
               content: |
                 apiVersion: kustomize.config.k8s.io/v1beta1
                 kind: Kustomization
@@ -571,8 +573,29 @@ spec:
 
           {{`{{- if $env.gate -}}`}}
 
-          {{`{{/* Checks array — gate.checks[] */}}`}}
+          {{`{{/* Checks array — gate.checks[] with auto-injection and ordering */}}`}}
           {{`{{- $checks := $env.gate.checks | default list -}}`}}
+
+          {{`{{/* Auto-inject validate-only if runtime checks exist but no validation */}}`}}
+          {{`{{- $hasValidation := false -}}`}}
+          {{`{{- $hasRuntimeChecks := false -}}`}}
+          {{`{{- range $check := $checks -}}`}}
+          {{`{{-   if eq $check.type "validate-only" }}{{ $hasValidation = true }}{{ end -}}`}}
+          {{`{{-   if or (eq $check.type "functional-test") (eq $check.type "load-test") }}{{ $hasRuntimeChecks = true }}{{ end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- if and (not $hasValidation) $hasRuntimeChecks -}}`}}
+          {{`{{-   $checks = prepend $checks (dict "type" "validate-only" "validationConfig" (dict "validationMode" $defaultValidationMode)) -}}`}}
+          {{`{{- end -}}`}}
+
+          {{`{{/* Sort checks: validate-only always runs first (fail-fast) */}}`}}
+          {{`{{- $sortedChecks := list -}}`}}
+          {{`{{- range $check := $checks -}}`}}
+          {{`{{-   if eq $check.type "validate-only" }}{{ $sortedChecks = append $sortedChecks $check }}{{ end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- range $check := $checks -}}`}}
+          {{`{{-   if ne $check.type "validate-only" }}{{ $sortedChecks = append $sortedChecks $check }}{{ end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $checks = $sortedChecks -}}`}}
 
           {{`{{/* Commit status key */}}`}}
           {{`{{- $commitStatusKey := "" -}}`}}
@@ -1055,6 +1078,9 @@ spec:
                                   value: "failure"
                                 - name: description
                                   value: "Quality checks failed, promotion to {{`{{ $env.name }}`}} blocked"
+                          - name: comment-pr-failure
+                            when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
+                            template: github-pr-comment
 
                     - name: exit-handler-github
                       container:

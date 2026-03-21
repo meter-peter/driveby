@@ -21,7 +21,11 @@ kubernetes/
         secrets/        # Secret templates (api-auth, github-app, ghcr-creds, github-provider-token)
   examples/
     novelcore-perfect-api/  # Single-file XSDLC showcase (two-repo model)
-    gitops-promoter/    # GitOps Promoter CRD reference (ScmProvider, GitRepository, PromotionStrategy, CommitStatus)
+    novelcore-bad-docs-api/ # XSDLC: fails P002+P003 at staging validate-only
+    novelcore-no-auth-api/  # XSDLC: fails P005 at staging validate-only
+    novelcore-slow-api/     # XSDLC: passes staging, fails prod load-test
+    novelcore-broken-api/   # XSDLC: passes validate-only, fails functional-test
+    gitops-promoter/    # GitOps Promoter CRD reference
   README.md
 ```
 
@@ -222,6 +226,9 @@ Gates use a dynamic **checks** array — each check becomes a sequential DAG ste
 set-pending → health-check → check-0-<type> → check-1-<type> → ... → check-N-<type>
                                                                             ↓
                               report-success + comment-pr + update-commitstatus-success
+
+Exit handler (on failure):
+  report-failure-github + update-commitstatus-failure + comment-pr-failure (parallel)
 ```
 
 ### Example: staging gate (validate-only + functional-test)
@@ -238,6 +245,12 @@ set-pending → health-check → check-0-validate-only → check-1-load-test
                               report-success + comment-pr + update-commitstatus-success
 ```
 
+### Check Ordering & Auto-Injection
+- **Auto-injection**: If a gate has runtime checks (`functional-test`/`load-test`) but no `validate-only`, a `validate-only` check is auto-injected using `validationDefaults.validationMode`
+- **Sorting**: `validate-only` checks always run before runtime checks regardless of the order in `gate.checks[]`
+- **Failure reporting**: Exit handler posts the DriveBy report as a PR comment on failure (`comment-pr-failure`), so developers see which principles failed — not just a generic "checks failed" status
+
+### Notes
 - All pipelines validate against the **source environment** (previous env), not target
 - Step templates (`driveby-validate`, `driveby-functional`, `driveby-loadtest`) accept input parameters from the DAG
 - Shared `reports` PVC (64Mi) mounts at `/tmp/reports` across all DriveBy steps — `comment-pr` reads saved reports via `github-comment` instead of re-running tests

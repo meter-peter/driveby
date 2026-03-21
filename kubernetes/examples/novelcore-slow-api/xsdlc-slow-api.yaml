@@ -1,14 +1,14 @@
 apiVersion: driveby.io/v1alpha1
 kind: XSDLC
 metadata:
-  name: bad-docs-api
+  name: slow-api
   namespace: driveby
 spec:
   repository:
     owner: novelcore
-    name: bad-docs-api
+    name: slow-api
   gitopsRepository:
-    name: bad-docs-api-gitops
+    name: slow-api-gitops
 
   apiConfig:
     port: 8000
@@ -26,6 +26,7 @@ spec:
           - type: validate-only
             validationConfig:
               validationMode: strict
+          - type: functional-test
 
     - name: prod
       autoMerge: false
@@ -33,3 +34,8 @@ spec:
         checks:
           - type: validate-only
           - type: load-test
+            loadTestConfig:
+              concurrentUsers: 10
+              testDuration: "15s"
+              maxLatencyP95: "200ms"
+              minSuccessRate: 0.99

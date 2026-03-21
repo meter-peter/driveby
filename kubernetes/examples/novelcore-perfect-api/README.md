@@ -21,6 +21,9 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
          └── Promoter PRs prod-next → prod → Gate 2 fires
          └── validate-only (strict) + load-test against staging
          └── Manual approval required (autoMerge: false)
+
+Note: If a gate omits `validate-only` but has runtime checks, validation is auto-injected.
+On failure, the PR receives a detailed DriveBy report (not just a generic "checks failed" status).
 ```
 
 ## Repository Layout

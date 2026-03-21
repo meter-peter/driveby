@@ -28,11 +28,12 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 | Directory | Purpose | Status | CLAUDE.md |
 |-----------|---------|--------|-----------|
 | `driveby-cli/` | Go CLI tool — the core validation engine | Active development | [`driveby-cli/CLAUDE.md`](driveby-cli/CLAUDE.md) |
-| `apis/` | Sample APIs for testing (perfect-api) — source now in [`novelcore/perfect-api`](https://github.com/novelcore/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
+| `apis/` | Sample APIs for testing (5 APIs: perfect, bad-docs, no-auth, slow, broken) | 5 APIs complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
 | `kubernetes/` | Helm chart (Crossplane XRDs + compositions), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
 | `samples/` | Example configs, reports | Removed (v3.0.0) | — |
 | `thesis/` | LaTeX thesis document (10 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
 | `tools/` | Python/bash utilities for batch testing | Complete | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
+| `results/` | DriveBy validation test results (JSON) | Active | [`results/CLAUDE.md`](results/CLAUDE.md) |
 | `docs/` | Documentation hub | Partial | [`docs/CLAUDE.md`](docs/CLAUDE.md) |
 | `.github/` | CI/CD workflows | Active | [`.github/CLAUDE.md`](.github/CLAUDE.md) |
 
