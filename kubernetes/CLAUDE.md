@@ -181,12 +181,13 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
 | Ingress | `perfect-api-prod-gate-webhook-ingress` | driveby | TLS webhook endpoint |
 
 ### Secrets
-| Secret | Namespace(s) | Keys |
-|--------|-------------|------|
-| `ghcr-creds` | perfect-api-dev, perfect-api-staging, perfect-api-prod, driveby | Docker registry auth for ghcr.io |
-| `api-auth` | perfect-api-dev, perfect-api-staging, perfect-api-prod | `api-key`, `api-key-header` |
-| `driveby-api-auth` | driveby | `api-key`, `api-key-header` |
-| `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` |
+| Secret | Namespace(s) | Keys | Managed By |
+|--------|-------------|------|------------|
+| `ghcr-creds` | driveby | Docker registry auth for ghcr.io | Helm chart (`secrets.ghcr.enabled`) |
+| `ghcr-creds` | `<app>-{dev,staging,prod}` | Docker registry auth (copied from driveby ns) | **XSDLC composition** (auto) |
+| `<app>-push-secret` | argocd | ArgoCD repository-write for gitops repo | **XSDLC composition** (auto) |
+| `driveby-api-auth` | driveby | `api-key`, `api-key-header` | Helm chart |
+| `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` | Helm chart |
 
 ### GitOps Promoter Resources (Crossplane-managed via XSDLC)
 | Resource | Name | Namespace | Details |
@@ -208,7 +209,7 @@ Production Helm chart (v3.0.0) that installs the full DriveBy quality gate syste
 - **Crossplane providers**: `provider-kubernetes` v0.14.1
 - **Crossplane functions**: `function-go-templating`, `function-auto-ready`
 - **XRD**: `xsdlcs.driveby.io` (v1alpha1) — single CR for full promotion pipeline
-- **Composition**: XSDLC composition generates all resources (RBAC, WorkflowTemplates, EventBus, EventSource, Sensor, Ingress, Promoter, BranchProtection)
+- **Composition**: XSDLC composition generates all resources (RBAC, WorkflowTemplates, EventBus, EventSource, Sensor, Ingress, Promoter, BranchProtection, ArgoCD push secrets, per-namespace ghcr-creds)
 - **ProviderConfig**: `kubernetes-provider` with InjectedIdentity
 - **GitHub ProviderConfig**: `github-provider` for `provider-upjet-github` (branch protection rules)
 

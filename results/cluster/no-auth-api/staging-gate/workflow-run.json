@@ -1,0 +1,1398 @@
+{
+    "apiVersion": "argoproj.io/v1alpha1",
+    "kind": "Workflow",
+    "metadata": {
+        "annotations": {
+            "workflows.argoproj.io/pod-name-format": "v2"
+        },
+        "creationTimestamp": "2026-03-21T18:33:19Z",
+        "generateName": "no-auth-api-staging-gate-pipeline-",
+        "generation": 15,
+        "labels": {
+            "driveby.io/app": "no-auth-api",
+            "driveby.io/gate": "staging-gate",
+            "driveby.io/trigger": "pr-trigger",
+            "events.argoproj.io/action-timestamp": "1774117998944",
+            "events.argoproj.io/sensor": "no-auth-api-staging-gate-sensor",
+            "events.argoproj.io/trigger": "pr-trigger-workflow-trigger",
+            "workflows.argoproj.io/completed": "true",
+            "workflows.argoproj.io/creator": "system-serviceaccount-driveby-default",
+            "workflows.argoproj.io/phase": "Failed"
+        },
+        "name": "no-auth-api-staging-gate-pipeline-pf7nc",
+        "namespace": "driveby",
+        "resourceVersion": "245831374",
+        "uid": "169d9699-cb83-440f-a706-9524de85fb81"
+    },
+    "spec": {
+        "arguments": {
+            "parameters": [
+                {
+                    "name": "pr-number",
+                    "value": "1"
+                },
+                {
+                    "name": "head-sha",
+                    "value": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+                },
+                {
+                    "name": "github-owner",
+                    "value": "novelcore"
+                },
+                {
+                    "name": "github-repo",
+                    "value": "no-auth-api-gitops"
+                },
+                {
+                    "name": "app-name",
+                    "value": "no-auth-api"
+                },
+                {
+                    "name": "app-port",
+                    "value": "8000"
+                },
+                {
+                    "name": "source-namespace",
+                    "value": "no-auth-api-dev"
+                },
+                {
+                    "name": "target-namespace",
+                    "value": "no-auth-api-staging"
+                },
+                {
+                    "name": "service-name",
+                    "value": "no-auth-api"
+                },
+                {
+                    "name": "openapi-endpoint",
+                    "value": "/openapi.json"
+                }
+            ]
+        },
+        "workflowTemplateRef": {
+            "name": "no-auth-api-staging-gate"
+        }
+    },
+    "status": {
+        "artifactGCStatus": {
+            "notSpecified": true
+        },
+        "artifactRepositoryRef": {
+            "artifactRepository": {},
+            "default": true
+        },
+        "conditions": [
+            {
+                "status": "False",
+                "type": "PodRunning"
+            },
+            {
+                "status": "True",
+                "type": "Completed"
+            }
+        ],
+        "finishedAt": "2026-03-21T18:33:59Z",
+        "nodes": {
+            "no-auth-api-staging-gate-pipeline-pf7nc": {
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-346919383",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-1566510713"
+                ],
+                "displayName": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "finishedAt": "2026-03-21T18:33:49Z",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "outboundNodes": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-1566510713",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-1732634785"
+                ],
+                "phase": "Failed",
+                "progress": "3/4",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 12
+                },
+                "startedAt": "2026-03-21T18:33:19Z",
+                "templateName": "promotion-pipeline",
+                "templateScope": "local/",
+                "type": "DAG"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-1566510713": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "displayName": "update-commitstatus-pending",
+                "finishedAt": "2026-03-21T18:33:22Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1566510713",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for staging environment..."
+                        }
+                    ]
+                },
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.update-commitstatus-pending",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 1
+                },
+                "startedAt": "2026-03-21T18:33:19Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-1732634785": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "displayName": "update-commitstatus-success",
+                "finishedAt": "2026-03-21T18:33:49Z",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1732634785",
+                "message": "omitted: depends condition not met",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.update-commitstatus-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-1783911245": {
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-3150777415"
+                ],
+                "displayName": "no-auth-api-staging-gate-pipeline-pf7nc.onExit",
+                "finishedAt": "2026-03-21T18:33:59Z",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit",
+                "nodeFlag": {
+                    "hooked": true
+                },
+                "outboundNodes": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-3150777415"
+                ],
+                "phase": "Succeeded",
+                "progress": "3/3",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 13
+                },
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "exit-handler",
+                "templateScope": "local/",
+                "type": "DAG"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-2097497908": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "displayName": "report-success",
+                "finishedAt": "2026-03-21T18:33:49Z",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
+                "message": "omitted: depends condition not met",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.report-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-2639104640": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
+                "displayName": "report-failure-github",
+                "finishedAt": "2026-03-21T18:33:55Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.report-failure-github",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 6
+                },
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "exit-handler-github",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-2965375668": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
+                "displayName": "comment-pr-failure",
+                "finishedAt": "2026-03-21T18:33:54Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.comment-pr-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 5
+                },
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "github-pr-comment",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-3150777415": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
+                "displayName": "update-commitstatus-failure",
+                "finishedAt": "2026-03-21T18:33:53Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3150777415",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "failure"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Quality checks failed, promotion to staging blocked"
+                        }
+                    ]
+                },
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.update-commitstatus-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 2
+                },
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-3174179847": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
+                    "no-auth-api-staging-gate-pipeline-pf7nc-1732634785"
+                ],
+                "displayName": "check-0-validate-only",
+                "finishedAt": "2026-03-21T18:33:44Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3174179847",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "validation-mode",
+                            "value": "strict"
+                        }
+                    ]
+                },
+                "message": "Error (exit code 1)",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.check-0-validate-only",
+                "outputs": {
+                    "exitCode": "1"
+                },
+                "phase": "Failed",
+                "progress": "0/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 4
+                },
+                "startedAt": "2026-03-21T18:33:39Z",
+                "templateName": "driveby-validate",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-346919383": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-3830857553"
+                ],
+                "displayName": "set-pending-status",
+                "finishedAt": "2026-03-21T18:33:24Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-346919383",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "state",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for staging environment..."
+                        }
+                    ]
+                },
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.set-pending-status",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 4
+                },
+                "startedAt": "2026-03-21T18:33:19Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-3830857553": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-pf7nc-3174179847"
+                ],
+                "displayName": "wait-for-source-ready",
+                "finishedAt": "2026-03-21T18:33:33Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3830857553",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.wait-for-source-ready",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 3
+                },
+                "startedAt": "2026-03-21T18:33:29Z",
+                "templateName": "health-check-source",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-pf7nc-62065626": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "displayName": "comment-pr",
+                "finishedAt": "2026-03-21T18:33:49Z",
+                "id": "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
+                "message": "omitted: depends condition not met",
+                "name": "no-auth-api-staging-gate-pipeline-pf7nc.comment-pr",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-21T18:33:49Z",
+                "templateName": "github-pr-comment",
+                "templateScope": "local/",
+                "type": "Skipped"
+            }
+        },
+        "persistentVolumeClaims": [
+            {
+                "name": "reports",
+                "persistentVolumeClaim": {
+                    "claimName": "no-auth-api-staging-gate-pipeline-pf7nc-reports"
+                }
+            }
+        ],
+        "phase": "Failed",
+        "progress": "6/7",
+        "resourcesDuration": {
+            "cpu": 0,
+            "memory": 25
+        },
+        "startedAt": "2026-03-21T18:33:19Z",
+        "storedTemplates": {
+            "namespaced/no-auth-api-staging-gate/driveby-validate": {
+                "container": {
+                    "args": [
+                        "validate-only",
+                        "--openapi",
+                        "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                        "--host",
+                        "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                        "--port",
+                        "{{workflow.parameters.app-port}}",
+                        "--validation-mode",
+                        "{{inputs.parameters.validation-mode}}",
+                        "--report-dir",
+                        "/tmp/reports"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "API_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "api-key",
+                                    "name": "driveby-api-auth"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/tmp/reports",
+                            "name": "reports"
+                        }
+                    ]
+                },
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "validation-mode"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "driveby-validate",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/exit-handler": {
+                "dag": {
+                    "tasks": [
+                        {
+                            "arguments": {},
+                            "name": "report-failure-github",
+                            "template": "exit-handler-github",
+                            "when": "{{workflow.status}} != Succeeded"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "failure"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Quality checks failed, promotion to staging blocked"
+                                    }
+                                ]
+                            },
+                            "name": "update-commitstatus-failure",
+                            "template": "update-commitstatus",
+                            "when": "{{workflow.status}} != Succeeded"
+                        },
+                        {
+                            "arguments": {},
+                            "name": "comment-pr-failure",
+                            "template": "github-pr-comment",
+                            "when": "{{workflow.status}} != Succeeded"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "exit-handler",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/exit-handler-github": {
+                "container": {
+                    "args": [
+                        "github-status",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--sha",
+                        "{{workflow.parameters.head-sha}}",
+                        "--state",
+                        "failure",
+                        "--description",
+                        "Quality checks failed, promotion to staging blocked",
+                        "--context",
+                        "staging-gate",
+                        "--target-url",
+                        "https://argo.private.novelcore.org/workflows"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "exit-handler-github",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/github-commit-status": {
+                "container": {
+                    "args": [
+                        "github-status",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--sha",
+                        "{{workflow.parameters.head-sha}}",
+                        "--state",
+                        "{{inputs.parameters.state}}",
+                        "--description",
+                        "{{inputs.parameters.description}}",
+                        "--context",
+                        "staging-gate",
+                        "--target-url",
+                        "https://argo.private.novelcore.org/workflows"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "state"
+                        },
+                        {
+                            "name": "description"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "github-commit-status",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/github-pr-comment": {
+                "container": {
+                    "args": [
+                        "github-comment",
+                        "--report-dir",
+                        "/tmp/reports",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--github-pr-number",
+                        "{{workflow.parameters.pr-number}}"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/tmp/reports",
+                            "name": "reports"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "github-pr-comment",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/health-check-source": {
+                "container": {
+                    "args": [
+                        "echo \"=== Health-checking source environment ===\"\necho \"Target: http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\"\nATTEMPTS=0\nMAX_ATTEMPTS=60\nwhile [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do\n  ATTEMPTS=$((ATTEMPTS + 1))\n  HTTP_CODE=$(curl -sf -o /dev/null -w \"%{http_code}\" \\\n    \"http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\" 2>/dev/null || echo \"000\")\n  if [ \"$HTTP_CODE\" = \"200\" ]; then\n    echo \"Source environment is ready (attempt $ATTEMPTS)\"\n    exit 0\n  fi\n  echo \"Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s...\"\n  sleep 5\ndone\necho \"ERROR: Source environment not ready after 5 minutes\"\nexit 1\n"
+                    ],
+                    "command": [
+                        "sh",
+                        "-c"
+                    ],
+                    "image": "curlimages/curl:8.7.1",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "health-check-source",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/promotion-pipeline": {
+                "dag": {
+                    "tasks": [
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "state",
+                                        "value": "pending"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Running quality checks for staging environment..."
+                                    }
+                                ]
+                            },
+                            "name": "set-pending-status",
+                            "template": "github-commit-status"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "pending"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Running quality checks for staging environment..."
+                                    }
+                                ]
+                            },
+                            "name": "update-commitstatus-pending",
+                            "template": "update-commitstatus"
+                        },
+                        {
+                            "arguments": {},
+                            "dependencies": [
+                                "set-pending-status"
+                            ],
+                            "name": "wait-for-source-ready",
+                            "template": "health-check-source"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "validation-mode",
+                                        "value": "strict"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "wait-for-source-ready"
+                            ],
+                            "name": "check-0-validate-only",
+                            "template": "driveby-validate"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "state",
+                                        "value": "success"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "All checks passed, safe to promote to staging"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "check-0-validate-only"
+                            ],
+                            "name": "report-success",
+                            "template": "github-commit-status"
+                        },
+                        {
+                            "arguments": {},
+                            "dependencies": [
+                                "check-0-validate-only"
+                            ],
+                            "name": "comment-pr",
+                            "template": "github-pr-comment"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "success"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "All checks passed, safe to promote to staging"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "check-0-validate-only"
+                            ],
+                            "name": "update-commitstatus-success",
+                            "template": "update-commitstatus"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "promotion-pipeline",
+                "outputs": {}
+            },
+            "namespaced/no-auth-api-staging-gate/update-commitstatus": {
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase"
+                        },
+                        {
+                            "name": "description"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "update-commitstatus",
+                "outputs": {},
+                "resource": {
+                    "action": "apply",
+                    "manifest": "apiVersion: promoter.argoproj.io/v1alpha1\nkind: CommitStatus\nmetadata:\n  name: staging-gate-{{workflow.parameters.head-sha}}\n  namespace: driveby\n  labels:\n    promoter.argoproj.io/commit-status: staging-gate\n    driveby.io/app: no-auth-api\n    driveby.io/gate: staging-gate\nspec:\n  gitRepositoryRef:\n    name: {{workflow.parameters.app-name}}-gitops\n  sha: {{workflow.parameters.head-sha}}\n  name: staging-gate\n  description: {{inputs.parameters.description}}\n  phase: {{inputs.parameters.phase}}\n  url: https://argo.private.novelcore.org/workflows\n"
+                }
+            }
+        },
+        "storedWorkflowTemplateSpec": {
+            "arguments": {
+                "parameters": [
+                    {
+                        "name": "pr-number",
+                        "value": "1"
+                    },
+                    {
+                        "name": "head-sha",
+                        "value": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+                    },
+                    {
+                        "name": "github-owner",
+                        "value": "novelcore"
+                    },
+                    {
+                        "name": "github-repo",
+                        "value": "no-auth-api-gitops"
+                    },
+                    {
+                        "name": "app-name",
+                        "value": "no-auth-api"
+                    },
+                    {
+                        "default": "8000",
+                        "name": "app-port",
+                        "value": "8000"
+                    },
+                    {
+                        "default": "no-auth-api-dev",
+                        "name": "source-namespace",
+                        "value": "no-auth-api-dev"
+                    },
+                    {
+                        "default": "no-auth-api-staging",
+                        "name": "target-namespace",
+                        "value": "no-auth-api-staging"
+                    },
+                    {
+                        "default": "no-auth-api",
+                        "name": "service-name",
+                        "value": "no-auth-api"
+                    },
+                    {
+                        "default": "/openapi.json",
+                        "name": "openapi-endpoint",
+                        "value": "/openapi.json"
+                    }
+                ]
+            },
+            "entrypoint": "promotion-pipeline",
+            "onExit": "exit-handler",
+            "serviceAccountName": "driveby",
+            "templates": [
+                {
+                    "dag": {
+                        "tasks": [
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "state",
+                                            "value": "pending"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Running quality checks for staging environment..."
+                                        }
+                                    ]
+                                },
+                                "name": "set-pending-status",
+                                "template": "github-commit-status"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "pending"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Running quality checks for staging environment..."
+                                        }
+                                    ]
+                                },
+                                "name": "update-commitstatus-pending",
+                                "template": "update-commitstatus"
+                            },
+                            {
+                                "arguments": {},
+                                "dependencies": [
+                                    "set-pending-status"
+                                ],
+                                "name": "wait-for-source-ready",
+                                "template": "health-check-source"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "validation-mode",
+                                            "value": "strict"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "wait-for-source-ready"
+                                ],
+                                "name": "check-0-validate-only",
+                                "template": "driveby-validate"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "state",
+                                            "value": "success"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "All checks passed, safe to promote to staging"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "check-0-validate-only"
+                                ],
+                                "name": "report-success",
+                                "template": "github-commit-status"
+                            },
+                            {
+                                "arguments": {},
+                                "dependencies": [
+                                    "check-0-validate-only"
+                                ],
+                                "name": "comment-pr",
+                                "template": "github-pr-comment"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "success"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "All checks passed, safe to promote to staging"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "check-0-validate-only"
+                                ],
+                                "name": "update-commitstatus-success",
+                                "template": "update-commitstatus"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "promotion-pipeline",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-status",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--sha",
+                            "{{workflow.parameters.head-sha}}",
+                            "--state",
+                            "{{inputs.parameters.state}}",
+                            "--description",
+                            "{{inputs.parameters.description}}",
+                            "--context",
+                            "staging-gate",
+                            "--target-url",
+                            "https://argo.private.novelcore.org/workflows"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "state"
+                            },
+                            {
+                                "name": "description"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "github-commit-status",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "echo \"=== Health-checking source environment ===\"\necho \"Target: http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\"\nATTEMPTS=0\nMAX_ATTEMPTS=60\nwhile [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do\n  ATTEMPTS=$((ATTEMPTS + 1))\n  HTTP_CODE=$(curl -sf -o /dev/null -w \"%{http_code}\" \\\n    \"http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\" 2>/dev/null || echo \"000\")\n  if [ \"$HTTP_CODE\" = \"200\" ]; then\n    echo \"Source environment is ready (attempt $ATTEMPTS)\"\n    exit 0\n  fi\n  echo \"Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s...\"\n  sleep 5\ndone\necho \"ERROR: Source environment not ready after 5 minutes\"\nexit 1\n"
+                        ],
+                        "command": [
+                            "sh",
+                            "-c"
+                        ],
+                        "image": "curlimages/curl:8.7.1",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "health-check-source",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "validate-only",
+                            "--openapi",
+                            "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                            "--host",
+                            "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                            "--port",
+                            "{{workflow.parameters.app-port}}",
+                            "--validation-mode",
+                            "{{inputs.parameters.validation-mode}}",
+                            "--report-dir",
+                            "/tmp/reports"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "API_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "api-key",
+                                        "name": "driveby-api-auth"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/reports",
+                                "name": "reports"
+                            }
+                        ]
+                    },
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "validation-mode"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "driveby-validate",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-comment",
+                            "--report-dir",
+                            "/tmp/reports",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--github-pr-number",
+                            "{{workflow.parameters.pr-number}}"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/reports",
+                                "name": "reports"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "github-pr-comment",
+                    "outputs": {}
+                },
+                {
+                    "dag": {
+                        "tasks": [
+                            {
+                                "arguments": {},
+                                "name": "report-failure-github",
+                                "template": "exit-handler-github",
+                                "when": "{{workflow.status}} != Succeeded"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "failure"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Quality checks failed, promotion to staging blocked"
+                                        }
+                                    ]
+                                },
+                                "name": "update-commitstatus-failure",
+                                "template": "update-commitstatus",
+                                "when": "{{workflow.status}} != Succeeded"
+                            },
+                            {
+                                "arguments": {},
+                                "name": "comment-pr-failure",
+                                "template": "github-pr-comment",
+                                "when": "{{workflow.status}} != Succeeded"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "exit-handler",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-status",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--sha",
+                            "{{workflow.parameters.head-sha}}",
+                            "--state",
+                            "failure",
+                            "--description",
+                            "Quality checks failed, promotion to staging blocked",
+                            "--context",
+                            "staging-gate",
+                            "--target-url",
+                            "https://argo.private.novelcore.org/workflows"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "exit-handler-github",
+                    "outputs": {}
+                },
+                {
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "phase"
+                            },
+                            {
+                                "name": "description"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "update-commitstatus",
+                    "outputs": {},
+                    "resource": {
+                        "action": "apply",
+                        "manifest": "apiVersion: promoter.argoproj.io/v1alpha1\nkind: CommitStatus\nmetadata:\n  name: staging-gate-{{workflow.parameters.head-sha}}\n  namespace: driveby\n  labels:\n    promoter.argoproj.io/commit-status: staging-gate\n    driveby.io/app: no-auth-api\n    driveby.io/gate: staging-gate\nspec:\n  gitRepositoryRef:\n    name: {{workflow.parameters.app-name}}-gitops\n  sha: {{workflow.parameters.head-sha}}\n  name: staging-gate\n  description: {{inputs.parameters.description}}\n  phase: {{inputs.parameters.phase}}\n  url: https://argo.private.novelcore.org/workflows\n"
+                    }
+                }
+            ],
+            "volumeClaimTemplates": [
+                {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "name": "reports"
+                    },
+                    "spec": {
+                        "accessModes": [
+                            "ReadWriteOnce"
+                        ],
+                        "resources": {
+                            "requests": {
+                                "storage": "64Mi"
+                            }
+                        }
+                    },
+                    "status": {}
+                }
+            ],
+            "workflowTemplateRef": {
+                "name": "no-auth-api-staging-gate"
+            }
+        },
+        "taskResultsCompletionStatus": {
+            "no-auth-api-staging-gate-pipeline-pf7nc-1566510713": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-2639104640": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-2965375668": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-3150777415": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-3174179847": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-346919383": true,
+            "no-auth-api-staging-gate-pipeline-pf7nc-3830857553": true
+        }
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "apiVersion": "promoter.argoproj.io/v1alpha1",
+    "kind": "CommitStatus",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-ec344c33c12870c6025ededc62497ec915c6009d\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"slow-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"ec344c33c12870c6025ededc62497ec915c6009d\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+        },
+        "creationTimestamp": "2026-03-21T18:21:04Z",
+        "generation": 4,
+        "labels": {
+            "driveby.io/app": "slow-api",
+            "driveby.io/gate": "staging-gate",
+            "promoter.argoproj.io/commit-status": "staging-gate"
+        },
+        "name": "staging-gate-ec344c33c12870c6025ededc62497ec915c6009d",
+        "namespace": "driveby",
+        "resourceVersion": "245831647",
+        "uid": "fbab9a8c-0bcf-477e-a492-8f3f52b62a9f"
+    },
+    "spec": {
+        "description": "All checks passed, safe to promote to staging",
+        "gitRepositoryRef": {
+            "name": "slow-api-gitops"
+        },
+        "name": "staging-gate",
+        "phase": "success",
+        "sha": "ec344c33c12870c6025ededc62497ec915c6009d",
+        "url": "https://argo.private.novelcore.org/workflows"
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-03-21T18:34:07Z",
+                "message": "Reconciliation successful",
+                "observedGeneration": 4,
+                "reason": "ReconciliationSuccess",
+                "status": "True",
+                "type": "Ready"
+            }
+        ],
+        "id": "68033099681",
+        "phase": "success",
+        "sha": "ec344c33c12870c6025ededc62497ec915c6009d"
+    }
+}

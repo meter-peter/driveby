@@ -28,7 +28,28 @@ Complete guide to installing DriveBy quality gates on a Kubernetes cluster (XSDL
 | Argo Events | 1.9+ | Controller running |
 | Traefik | 2.10+ | Ingress controller (`ingressClassName: traefik-system`) |
 | cert-manager | 1.13+ | With a configured ClusterIssuer |
-| GitOps Promoter | 0.1+ | Required; install controller for automated promotion |
+| GitOps Promoter | 0.1+ | Required; install controller with ≥512Mi memory for 5+ apps |
+
+### GitHub App Requirements
+
+The GitHub App used by both the Promoter and Argo Events must have access to **all gitops repositories** created by XSDLC. Two options:
+
+1. **Recommended**: Set the App's repository access to **"All repositories"** in the GitHub org settings. This ensures any new gitops repo auto-created by XSDLC is automatically accessible.
+2. **Manual**: After each XSDLC CR is applied, add the newly created gitops repo to the App's installation (GitHub → Org Settings → Applications → Configure).
+
+If the App doesn't have access to a gitops repo, the Promoter will fail with `repository not found` errors and no promotion PRs will be created.
+
+### GitOps Promoter Memory
+
+The Promoter controller needs sufficient memory for the number of GitRepositories it manages. Default 128Mi is insufficient for 5+ apps:
+
+| Apps | Recommended Memory (manager container) |
+|------|----------------------------------------|
+| 1-3 | 256Mi |
+| 4-10 | 1Gi |
+| 10+ | 2Gi |
+
+**Important**: The `manager` container is typically at index `[0]` in the deployment spec. Ensure you patch the correct container — the `kube-rbac-proxy` sidecar needs only 128Mi.
 
 ## Repository Structure
 
@@ -305,36 +326,26 @@ helm upgrade --install driveby ./kubernetes/helm/driveby/ \
 
 ### ArgoCD Push Secret (for Source Hydrator)
 
-**Required** — the ArgoCD Source Hydrator needs push access to write hydrated manifests to `-next` branches in the gitops repo. Create a `repository-write` secret in the `argocd` namespace using the same GitHub App credentials:
+**Auto-managed by XSDLC** — the composition automatically creates a `repository-write` secret in the `argocd` namespace for each gitops repo. No manual secret creation needed.
+
+After applying an XSDLC CR, verify the push secret was created:
 
 ```bash
-# Extract credentials from the driveby GitHub App secret
-APP_ID=$(kubectl get secret github-app-credentials -n driveby -o jsonpath='{.data.githubAppID}' | base64 -d)
-INSTALL_ID=$(kubectl get secret github-app-credentials -n driveby -o jsonpath='{.data.githubInstallationID}' | base64 -d)
-PRIVATE_KEY=$(kubectl get secret github-app-credentials -n driveby -o jsonpath='{.data.githubAppPrivateKey}' | base64 -d)
-
-# Convert scientific notation to integers (Helm may store as float)
-APP_ID_INT=$(python3 -c "print(int(float('$APP_ID')))")
-INSTALL_ID_INT=$(python3 -c "print(int(float('$INSTALL_ID')))")
-
-# Create the push secret — URL must match the exact gitops repo
-kubectl create secret generic driveby-push-secret \
-  --namespace argocd \
-  --from-literal=url="https://github.com/YOUR_ORG/YOUR_APP-gitops.git" \
-  --from-literal=type=git \
-  --from-literal=githubAppID="$APP_ID_INT" \
-  --from-literal=githubAppInstallationID="$INSTALL_ID_INT" \
-  --from-literal=githubAppPrivateKey="$PRIVATE_KEY" \
-  --dry-run=client -o yaml | \
-  kubectl label --local -f - argocd.argoproj.io/secret-type=repository-write -o yaml --dry-run=client | \
-  kubectl apply -f -
+kubectl get secrets -n argocd -l argocd.argoproj.io/secret-type=repository-write
+# Expected: one secret per XSDLC (e.g., perfect-api-push-secret)
 ```
 
-**Important**: After creating this secret, restart the ArgoCD commit-server pod so it picks up the new credentials:
+**Important**: After the first XSDLC is applied, restart the ArgoCD commit-server pod so it picks up the new credentials:
 
 ```bash
 kubectl delete pod -n argocd -l app.kubernetes.io/name=argocd-commit-server
 ```
+
+### Container Registry Credentials (per-namespace)
+
+**Auto-managed by XSDLC** — the composition automatically copies the `ghcr-creds` secret from the `driveby` namespace into each environment namespace (e.g., `perfect-api-dev`, `perfect-api-staging`). No manual per-namespace secret creation needed.
+
+The source `ghcr-creds` secret must exist in the `driveby` namespace (created via Helm values or manually — see Container Registry section below).
 
 ### API Auth (for DriveBy validation)
 

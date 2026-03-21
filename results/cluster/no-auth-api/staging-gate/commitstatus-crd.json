@@ -1,0 +1,45 @@
+{
+    "apiVersion": "promoter.argoproj.io/v1alpha1",
+    "kind": "CommitStatus",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"no-auth-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+        },
+        "creationTimestamp": "2026-03-21T18:21:02Z",
+        "generation": 4,
+        "labels": {
+            "driveby.io/app": "no-auth-api",
+            "driveby.io/gate": "staging-gate",
+            "promoter.argoproj.io/commit-status": "staging-gate"
+        },
+        "name": "staging-gate-d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+        "namespace": "driveby",
+        "resourceVersion": "245831113",
+        "uid": "8dbf237f-a0ae-4f4b-8c81-28e9ca9cd3a0"
+    },
+    "spec": {
+        "description": "Quality checks failed, promotion to staging blocked",
+        "gitRepositoryRef": {
+            "name": "no-auth-api-gitops"
+        },
+        "name": "staging-gate",
+        "phase": "failure",
+        "sha": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+        "url": "https://argo.private.novelcore.org/workflows"
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-03-21T18:33:53Z",
+                "message": "Reconciliation successful",
+                "observedGeneration": 4,
+                "reason": "ReconciliationSuccess",
+                "status": "True",
+                "type": "Ready"
+            }
+        ],
+        "id": "68033095356",
+        "phase": "failure",
+        "sha": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+    }
+}

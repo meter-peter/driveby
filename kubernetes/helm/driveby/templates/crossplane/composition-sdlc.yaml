@@ -427,6 +427,8 @@ spec:
                       labels:
                         app: {{`{{ $appName }}`}}
                     spec:
+                      imagePullSecrets:
+                        - name: {{`{{ $imagePullSecret }}`}}
                       containers:
                         - name: {{`{{ $appName }}`}}
                           image: {{`{{ $apiImage }}`}}
