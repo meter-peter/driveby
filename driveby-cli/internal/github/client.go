@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -429,33 +430,123 @@ func writeMapDetails(sb *strings.Builder, m map[string]interface{}) {
 		return
 	}
 
-	// Check if this looks like a structured error with known fields
-	hasErrors := false
-	for _, key := range []string{"errors", "issues", "failures", "missing", "violations"} {
-		if items, ok := m[key]; ok {
-			if list, ok := items.([]interface{}); ok && len(list) > 0 {
-				hasErrors = true
-				sb.WriteString(fmt.Sprintf("**%s:**\n\n", capitalizeFirst(key)))
-				for _, item := range list {
-					if s, ok := item.(string); ok {
-						sb.WriteString(fmt.Sprintf("- %s\n", s))
-					} else if im, ok := item.(map[string]interface{}); ok {
-						writeDetailItem(sb, im)
-					} else {
-						sb.WriteString(fmt.Sprintf("- %v\n", item))
+	rendered := false
+
+	// DDT principle checker output: "checks" map with pass/fail booleans
+	if checks, ok := m["checks"].(map[string]interface{}); ok {
+		messages, _ := m["messages"].(map[string]interface{})
+
+		var failed []string
+		var passed []string
+		for name, val := range checks {
+			if b, ok := val.(bool); ok {
+				if b {
+					passed = append(passed, name)
+				} else {
+					failed = append(failed, name)
+				}
+			}
+		}
+
+		sort.Strings(failed)
+		sort.Strings(passed)
+
+		if len(failed) > 0 {
+			sb.WriteString("**Failed checks:**\n\n")
+			for _, name := range failed {
+				sb.WriteString(fmt.Sprintf("- ❌ %s", name))
+				if messages != nil {
+					if msg, ok := messages[name].(string); ok && msg != "" {
+						sb.WriteString(fmt.Sprintf(" — %s", msg))
 					}
 				}
 				sb.WriteString("\n")
 			}
+			sb.WriteString("\n")
+		}
+
+		if len(passed) > 0 {
+			sb.WriteString("<details><summary>Passed checks (" + fmt.Sprintf("%d", len(passed)) + ")</summary>\n\n")
+			for _, name := range passed {
+				sb.WriteString(fmt.Sprintf("- ✅ %s\n", name))
+			}
+			sb.WriteString("\n</details>\n\n")
+		}
+
+		// Render any additional detail keys (missing_docs, missing_errors, etc.)
+		for key, val := range m {
+			if key == "checks" || key == "messages" {
+				continue
+			}
+			writeDetailKey(sb, key, val)
+		}
+
+		rendered = true
+	}
+
+	// Legacy/generic: look for known error list keys
+	if !rendered {
+		for _, key := range []string{"errors", "issues", "failures", "missing", "violations"} {
+			if items, ok := m[key]; ok {
+				if list, ok := items.([]interface{}); ok && len(list) > 0 {
+					rendered = true
+					sb.WriteString(fmt.Sprintf("**%s:**\n\n", capitalizeFirst(key)))
+					for _, item := range list {
+						if s, ok := item.(string); ok {
+							sb.WriteString(fmt.Sprintf("- %s\n", s))
+						} else if im, ok := item.(map[string]interface{}); ok {
+							writeDetailItem(sb, im)
+						} else {
+							sb.WriteString(fmt.Sprintf("- %v\n", item))
+						}
+					}
+					sb.WriteString("\n")
+				}
+			}
 		}
 	}
 
-	if !hasErrors {
-		// Render as JSON block
+	if !rendered {
+		// Last resort: JSON block
 		if data, err := json.MarshalIndent(m, "", "  "); err == nil {
 			sb.WriteString("<details><summary>Raw details</summary>\n\n```json\n")
 			sb.WriteString(string(data))
 			sb.WriteString("\n```\n\n</details>\n\n")
+		}
+	}
+}
+
+// writeDetailKey renders a single detail key (like missing_docs, missing_errors) as a readable list.
+func writeDetailKey(sb *strings.Builder, key string, val interface{}) {
+	label := strings.ReplaceAll(key, "_", " ")
+	label = capitalizeFirst(label)
+
+	switch v := val.(type) {
+	case map[string]interface{}:
+		// Map of check name → list of items (e.g., missing_docs: {"check": ["item1", ...]})
+		hasContent := false
+		for checkName, items := range v {
+			if list, ok := items.([]interface{}); ok && len(list) > 0 {
+				if !hasContent {
+					sb.WriteString(fmt.Sprintf("**%s:**\n\n", label))
+					hasContent = true
+				}
+				sb.WriteString(fmt.Sprintf("_%s:_\n", checkName))
+				for _, item := range list {
+					sb.WriteString(fmt.Sprintf("  - %v\n", item))
+				}
+			}
+		}
+		if hasContent {
+			sb.WriteString("\n")
+		}
+	case []interface{}:
+		if len(v) > 0 {
+			sb.WriteString(fmt.Sprintf("**%s:**\n\n", label))
+			for _, item := range v {
+				sb.WriteString(fmt.Sprintf("- %v\n", item))
+			}
+			sb.WriteString("\n")
 		}
 	}
 }
