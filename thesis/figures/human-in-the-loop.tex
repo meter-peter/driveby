@@ -1,77 +1,131 @@
-% Human-in-the-Loop — Chapter 6, Section 6.5.2
-% Pipeline with green (automated) and amber (human) steps for staging vs prod
+% Human-in-the-Loop — Chapter 6
+% Modular environment pipeline: 3 configurable slots per environment
+% Shows how independent parameters compose different automation profiles
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
-    auto step/.style={
+    % Slot styles
+    auto slot/.style={
         rectangle,
         rounded corners=3pt,
         draw=green!60!black,
         fill=green!10,
-        minimum width=2cm,
-        minimum height=0.7cm,
+        minimum width=2.4cm,
+        minimum height=0.8cm,
         font=\scriptsize,
         align=center
     },
-    human step/.style={
+    human slot/.style={
         rectangle,
         rounded corners=3pt,
         draw=orange!70!black,
         fill=orange!15,
-        minimum width=2cm,
-        minimum height=0.7cm,
+        minimum width=2.4cm,
+        minimum height=0.8cm,
         font=\scriptsize,
         align=center
     },
-    lane label/.style={
+    absent slot/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=black!25,
+        fill=black!4,
+        minimum width=2.4cm,
+        minimum height=0.8cm,
+        font=\scriptsize,
+        align=center,
+        text=black!40
+    },
+    fixed slot/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=blue!40!black,
+        fill=blue!8,
+        minimum width=2.4cm,
+        minimum height=0.8cm,
+        font=\scriptsize,
+        align=center
+    },
+    env label/.style={
         font=\small\bfseries,
-        text=#1!70!black,
-        anchor=east
+        anchor=east,
+        text=#1!70!black
+    },
+    param label/.style={
+        font=\tiny\itshape,
+        text=black!55,
+        align=center
+    },
+    slot header/.style={
+        font=\scriptsize\bfseries,
+        text=black!70,
+        align=center
     }
 ]
 
-% Lane labels
-\node[lane label=teal] at (-0.3,1.5) {Staging};
-\node[lane label=violet] at (-0.3,-1.5) {Production};
+% Column headers
+\node[slot header] at (2.2,3.5)  {Propagate};
+\node[slot header] at (5.0,3.5)  {Quality Gate};
+\node[slot header] at (7.8,3.5)  {Merge Policy};
+\node[slot header] at (10.6,3.5) {Sync Policy};
 
-% Staging lane (mostly automated)
-\node[human step] (s1) at (1.5,1.5) {Code\\Author};
-\node[auto step]  (s2) at (3.8,1.5) {Propagate};
-\node[auto step]  (s3) at (6.1,1.5) {DDT Gate};
-\node[auto step]  (s4) at (8.4,1.5) {Auto-merge};
-\node[auto step]  (s5) at (10.7,1.5) {ArgoCD\\Sync};
+% Parameter labels below headers
+\node[param label] at (5.0,3.05) {\texttt{gate.checks[]}};
+\node[param label] at (7.8,3.05) {\texttt{autoMerge}};
+\node[param label] at (10.6,3.05) {always auto-sync};
 
-\draw[->,thick] (s1) -- (s2);
-\draw[->,thick] (s2) -- (s3);
-\draw[->,thick] (s3) -- (s4);
-\draw[->,thick] (s4) -- (s5);
+% === Environment template row 1: no gate, auto everything ===
+\node[env label=blue] at (0.2,2.0) {Env$_1$};
+\node[fixed slot]  (a1) at (2.2,2.0)  {Promoter\\auto-PR};
+\node[absent slot] (a2) at (5.0,2.0)  {--- none ---};
+\node[auto slot]   (a3) at (7.8,2.0)  {Auto-merge};
+\node[fixed slot]  (a4) at (10.6,2.0) {Auto-sync};
 
-% Production lane (human checkpoints)
-\node[human step] (p1) at (1.5,-1.5) {Code\\Author};
-\node[auto step]  (p2) at (3.8,-1.5) {Propagate};
-\node[auto step]  (p3) at (6.1,-1.5) {Load Gate};
-\node[human step] (p4) at (8.4,-1.5) {Manual\\Approve};
-\node[human step] (p5) at (10.7,-1.5) {Manual\\Sync};
+\draw[->,thick,black!40] (a1) -- (a2);
+\draw[->,thick,black!40] (a2) -- (a3);
+\draw[->,thick,black!40] (a3) -- (a4);
 
-\draw[->,thick] (p1) -- (p2);
-\draw[->,thick] (p2) -- (p3);
-\draw[->,thick] (p3) -- (p4);
-\draw[->,thick] (p4) -- (p5);
+% === Environment template row 2: gate + auto ===
+\node[env label=teal] at (0.2,0.5) {Env$_2$};
+\node[fixed slot]  (b1) at (2.2,0.5)  {Promoter\\auto-PR};
+\node[auto slot]   (b2) at (5.0,0.5)  {DDT + Functional};
+\node[auto slot]   (b3) at (7.8,0.5)  {Auto-merge};
+\node[fixed slot]  (b4) at (10.6,0.5) {Auto-sync};
 
-% Lane backgrounds
+\draw[->,thick,black!40] (b1) -- (b2);
+\draw[->,thick,black!40] (b2) -- (b3);
+\draw[->,thick,black!40] (b3) -- (b4);
+
+% === Environment template row 3: gate + human approval ===
+\node[env label=red] at (0.2,-1.0) {Env$_N$};
+\node[fixed slot]  (c1) at (2.2,-1.0) {Promoter\\auto-PR};
+\node[auto slot]   (c2) at (5.0,-1.0) {DDT + Load Test};
+\node[human slot]  (c3) at (7.8,-1.0) {Manual\\approval};
+\node[fixed slot]  (c4) at (10.6,-1.0) {Auto-sync};
+
+\draw[->,thick,black!40] (c1) -- (c2);
+\draw[->,thick,black!40] (c2) -- (c3);
+\draw[->,thick,black!40] (c3) -- (c4);
+
+% Row backgrounds
 \begin{scope}[on background layer]
-    \node[rectangle, rounded corners=4pt, fill=teal!5, draw=teal!20,
-          fit={($(s1.north west)+(-0.2,0.3)$) ($(s5.south east)+(0.2,-0.3)$)}] {};
-    \node[rectangle, rounded corners=4pt, fill=violet!5, draw=violet!20,
-          fit={($(p1.north west)+(-0.2,0.3)$) ($(p5.south east)+(0.2,-0.3)$)}] {};
+    \node[rectangle, rounded corners=4pt, fill=blue!3, draw=blue!15,
+          fit={($(a1.north west)+(-0.15,0.2)$) ($(a4.south east)+(0.15,-0.2)$)}] {};
+    \node[rectangle, rounded corners=4pt, fill=teal!3, draw=teal!15,
+          fit={($(b1.north west)+(-0.15,0.2)$) ($(b4.south east)+(0.15,-0.2)$)}] {};
+    \node[rectangle, rounded corners=4pt, fill=red!3, draw=red!12,
+          fit={($(c1.north west)+(-0.15,0.2)$) ($(c4.south east)+(0.15,-0.2)$)}] {};
 \end{scope}
 
-% Legend
-\node[auto step, minimum width=1.5cm] (leg1) at (3.5,-3.2) {Automated};
-\node[human step, minimum width=1.5cm] (leg2) at (6.5,-3.2) {Human};
-\node[font=\scriptsize] at (4.95,-3.2) {=};
+% Vertical ellipsis between env 2 and env N
+\node[font=\large,text=black!30] at (0.2,-0.25) {$\vdots$};
 
-% Annotation arrows for key decisions
-\node[font=\tiny\itshape,text=green!50!black] at (8.4,0.6) {autoMerge: true};
-\node[font=\tiny\itshape,text=orange!50!black] at (8.4,-0.6) {autoMerge: false};
+% Legend
+\node[auto slot, minimum width=1.6cm, minimum height=0.5cm]   (lg1) at (2.5,-2.5) {\scriptsize Automated};
+\node[human slot, minimum width=1.6cm, minimum height=0.5cm]  (lg2) at (5.0,-2.5) {\scriptsize Human};
+\node[absent slot, minimum width=1.6cm, minimum height=0.5cm] (lg3) at (7.5,-2.5) {\scriptsize Absent};
+\node[fixed slot, minimum width=1.6cm, minimum height=0.5cm]  (lg4) at (10.0,-2.5) {\scriptsize Fixed};
+
+% Annotation: independent configuration
+\node[param label] at (7.8,-2.0) {quality gate + merge policy configurable per environment; propagate + sync are fixed};
 
 \end{tikzpicture}

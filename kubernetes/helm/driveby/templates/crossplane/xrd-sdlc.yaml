@@ -20,7 +20,7 @@ spec:
     schema:
       openAPIV3Schema:
         type: object
-        description: "XSDLC v2.0.0 — single-repo delivery pipeline. One CR provisions branches, workflows, ArgoCD apps, promoter, and quality gates."
+        description: "XSDLC v3.0.0 — two-repo GitOps delivery pipeline. One CR provisions a dedicated gitops repo, branches, ArgoCD apps, promoter, and quality gates."
         required:
         - spec
         properties:
@@ -32,7 +32,7 @@ spec:
             properties:
               repository:
                 type: object
-                description: "GitHub repository (source code + manifests coexist)"
+                description: "Software repository (source code — where the API runs)"
                 required:
                 - owner
                 - name
@@ -42,15 +42,15 @@ spec:
                     description: "GitHub repo owner (e.g., novelcore)"
                   name:
                     type: string
-                    description: "GitHub repo name (e.g., perfect-api)"
-                  defaultBranch:
+                    description: "Software repo name (e.g., perfect-api)"
+
+              gitopsRepository:
+                type: object
+                description: "Dedicated GitOps repository (auto-created, holds manifests on environment branches)"
+                properties:
+                  name:
                     type: string
-                    description: "Default branch where manifests live"
-                    default: "main"
-                  manifestsPath:
-                    type: string
-                    description: "Directory on main containing K8s manifests"
-                    default: "manifests"
+                    description: "GitOps repo name (default: <repository.name>-gitops)"
 
               apiConfig:
                 type: object
@@ -107,6 +107,10 @@ spec:
                     namespaceOverride:
                       type: string
                       description: "Override namespace (default: <appName>-<name>)"
+                    argocdHealthCheck:
+                      type: boolean
+                      description: "Require ArgoCD app health before promoting from this environment (default: false)"
+                      default: false
                     gate:
                       type: object
                       description: "Quality gate for this environment's promotion"

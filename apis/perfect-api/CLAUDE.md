@@ -12,10 +12,10 @@ The source code and Dockerfile now live in their own repo. This directory retain
 | Environment | URL | Managed By |
 |-------------|-----|------------|
 | Staging | `https://perfect-api-staging.private.novelcore.org` | ArgoCD (autoSync) |
-| Prod | `https://perfect-api-prod.private.novelcore.org` | ArgoCD (manual sync) |
+| Prod | `https://perfect-api-prod.private.novelcore.org` | ArgoCD (autoSync, autoMerge: false) |
 
 - **Container image**: `ghcr.io/novelcore/perfect-api:latest` (built by GitHub Actions on push to main)
-- **GitOps manifests**: `manifests/` directory in `novelcore/perfect-api` (single-repo model — source and manifests co-located)
+- **GitOps manifests**: `novelcore/perfect-api-gitops` (two-repo model — dedicated gitops repo, auto-created by XSDLC)
 - **ArgoCD AppProject**: `perfect-api` in `argocd` namespace
 - **Database**: PostgreSQL 16 StatefulSet per environment (currently unused — API uses in-memory storage)
 

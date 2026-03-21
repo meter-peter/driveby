@@ -7,8 +7,8 @@ spec:
   repository:
     owner: novelcore
     name: broken-api
-    defaultBranch: main
-    manifestsPath: manifests
+  gitopsRepository:
+    name: broken-api-gitops
 
   apiConfig:
     port: 8000

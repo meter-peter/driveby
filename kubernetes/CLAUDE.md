@@ -20,7 +20,7 @@ kubernetes/
         argocd/         # ArgoCD AppProject
         secrets/        # Secret templates (api-auth, github-app, ghcr-creds, github-provider-token)
   examples/
-    novelcore-perfect-api/  # Single-file XSDLC showcase
+    novelcore-perfect-api/  # Single-file XSDLC showcase (two-repo model)
     gitops-promoter/    # GitOps Promoter CRD reference (ScmProvider, GitRepository, PromotionStrategy, CommitStatus)
   README.md
 ```
@@ -29,46 +29,70 @@ kubernetes/
 
 Quality gates use a **multi-check model** — each gate defines an ordered list of checks.
 
-### Repo Layout (Single-Repo Model)
-The application repository holds both source code and Kubernetes manifests on `main`. Engineers own all manifest config (replicas, resources, env vars). The XSDLC only manages **promotion** and **quality gates** — it does not patch or rewrite manifests.
+### Repo Layout (Two-Repo Model with Source Hydrator)
+XSDLC v3.0.0 uses a **two-repo model** with ArgoCD Source Hydrator: the software repo is untouched by XSDLC, and a separate gitops repo (auto-created by XSDLC) holds dry manifests on `main` and hydrated output on per-environment branches. Engineers own all manifest config (replicas, resources, env vars). The XSDLC only manages **promotion** and **quality gates** — it does not patch or rewrite manifests.
 
 ```
-perfect-api/
-  src/                    # developer's code
-  Dockerfile              # developer's build
-  manifests/
-    deployment.yaml       # same manifest for all envs (image tag managed by CI)
-    service.yaml
+perfect-api/           (software repo — untouched by XSDLC)
+  src/
+  Dockerfile
+
+perfect-api-gitops/    (gitops repo — auto-created by XSDLC)
+  main branch:
+    dry/
+      base/
+        kustomization.yaml       # references deployment.yaml + service.yaml
+        deployment.yaml           # boilerplate deployment
+        service.yaml              # boilerplate service
+      overlays/
+        dev/
+          kustomization.yaml     # resources: [../../base], namespace: perfect-api-dev
+        staging/
+          kustomization.yaml     # resources: [../../base], namespace: perfect-api-staging
+        prod/
+          kustomization.yaml     # resources: [../../base], namespace: perfect-api-prod
+
+  environment/dev-next:           # written by ArgoCD hydrator (from dry/overlays/dev)
+    manifests/
+      deployment.yaml
+      service.yaml
+    hydrator.metadata             # {"drySha": "abc123..."}
+
+  environment/dev:                # merged by Promoter from dev-next
+    manifests/ + hydrator.metadata
+
+  environment/staging-next:       # written by ArgoCD hydrator (from dry/overlays/staging)
+    manifests/ + hydrator.metadata
+
+  environment/staging:            # merged by Promoter from staging-next (after gate passes)
+    manifests/ + hydrator.metadata
+
+  environment/prod-next:          # written by ArgoCD hydrator (from dry/overlays/prod)
+    manifests/ + hydrator.metadata
+
+  environment/prod:               # merged by Promoter from prod-next (after gate passes)
+    manifests/ + hydrator.metadata
 ```
 
-### Generated Workflow (1 — BYOCI showcase)
+### Source Hydrator Flow
 
-- `driveby-deploy.yml` — Manual trigger (`workflow_dispatch`): pick source branch, target environment, and image tag. The developer's own CI builds the image; this workflow showcases the BYOCI model by deploying manifests + image tag to `environment/<env>-next`. Promoter takes over from there.
+ALL environments use ArgoCD Source Hydrator. Each ArgoCD Application points its `drySource` to `main:dry/overlays/<env>` and `hydrateTo` to `environment/<env>-next`. The hydrator independently renders each overlay and writes the hydrated output (with `hydrator.metadata`) to that environment's `-next` branch. There is no linear propagation of hydrated content between environments — each env hydrates independently from `main`. The Promoter only handles merging `-next` into the active branch (with optional quality gates).
+
+### No Generated Workflows
+
+XSDLC v3.0.0 generates **no workflows** in the software repo. Developers update dry manifests on `main` in the gitops repo (either `dry/base/` for all-env changes or `dry/overlays/<env>/` for per-env changes). The hydrator independently renders each overlay to its corresponding `-next` branch, and the Promoter drives the promotion pipeline from there.
 
 ### End-to-End Flow
 
 ```
-Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
-  Inputs: source_branch (e.g. main), environment (e.g. dev), image_tag (e.g. v1.2.3)
-    → Checks out environment/<env>-next, cleans it
-    → Copies manifests/ from source branch → flattens to branch root
-    → Stamps image tag in deployment.yaml → pushes to env-next
-    → Promoter auto-merges dev-next → dev (no gate) → ArgoCD syncs dev
-
-  Gate 1 — Staging Gate (checks: validate-only + functional-test):
-    → Promoter auto-PRs environment/staging-next → environment/staging
-    → Webhook triggers DriveBy workflow against dev
-    → Workflow runs checks sequentially → creates CommitStatus CRD (phase: success)
-    → Promoter auto-merges → ArgoCD syncs staging
-
-  Gate 2 — Prod Gate (checks: validate-only + load-test):
-    → Promoter auto-PRs environment/prod-next → environment/prod
-    → Webhook triggers DriveBy workflow against staging
-    → Workflow runs checks sequentially → creates CommitStatus CRD (phase: success)
-    → Promoter does NOT auto-merge (autoMerge: false — manual approval required)
+Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/)
+  → ArgoCD hydrator renders each overlay → writes to environment/<env>-next:manifests/ + hydrator.metadata
+  → For ungated envs (dev): Promoter auto-merges dev-next → dev → ArgoCD syncs from manifests/
+  → For gated envs (staging): Promoter PRs staging-next → staging → Webhook fires → DriveBy validates → auto-merge on success
+  → For gated envs (prod): Promoter PRs prod-next → prod → Webhook fires → DriveBy validates → autoMerge: false → manual approval
 ```
 
-## XSDLC XRD (v2.1.0)
+## XSDLC XRD (v3.0.0)
 
 ### Required Fields (2)
 | Field | Description |
@@ -106,7 +130,7 @@ Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
 ### Optional Top-Level Fields
 | Field | Default | Description |
 |-------|---------|-------------|
-| `manifestsPath` | `manifests` | Path within the repository where Kubernetes manifests live |
+| `gitopsRepository.name` | `<repository.name>-gitops` | Name of the gitops repo (auto-created by XSDLC) |
 | `apiConfig.serviceName` | `metadata.name` | K8s service name |
 | `apiConfig.port` | `8000` | API port |
 | `apiConfig.openapiEndpoint` | `/openapi.json` | OpenAPI spec path |
@@ -131,15 +155,15 @@ Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
 | `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors, Promoter resources) | Helm chart + Crossplane |
 | `perfect-api-dev` | Dev environment for perfect-api (autoSync) | ArgoCD |
 | `perfect-api-staging` | Staging environment for perfect-api (autoSync) | ArgoCD |
-| `perfect-api-prod` | Production environment for perfect-api (manual sync) | ArgoCD |
+| `perfect-api-prod` | Production environment for perfect-api (autoSync — `autoMerge: false` only controls Promoter PR merge) | ArgoCD |
 
 ### ArgoCD Resources (Crossplane-managed via XSDLC — always generated)
 | Resource | Namespace | Details |
 |----------|-----------|---------|
 | AppProject `driveby` | argocd | Sources: `*`, Destinations: `*` namespace (Helm chart) |
-| Application `perfect-api-dev` | argocd | Path: `.` (env branch root), autoSync + selfHeal + CreateNamespace (XSDLC) |
-| Application `perfect-api-staging` | argocd | Path: `.`, autoSync + selfHeal (XSDLC) |
-| Application `perfect-api-prod` | argocd | Path: `.`, manual sync (autoMerge: false) (XSDLC) |
+| Application `perfect-api-dev` | argocd | sourceHydrator: drySource=main:dry/overlays/dev, syncSource=env/dev:manifests/, hydrateTo=env/dev-next; autoSync + selfHeal (XSDLC) |
+| Application `perfect-api-staging` | argocd | sourceHydrator: drySource=main:dry/overlays/staging, syncSource=env/staging:manifests/, hydrateTo=env/staging-next; autoSync + selfHeal (XSDLC) |
+| Application `perfect-api-prod` | argocd | sourceHydrator: drySource=main:dry/overlays/prod, syncSource=env/prod:manifests/, hydrateTo=env/prod-next; autoSync + selfHeal (XSDLC) — `autoMerge: false` only controls Promoter PR merge, not ArgoCD sync |
 
 ### Argo Events (Crossplane-managed via XSDLC)
 | Resource | Name | Namespace | Details |
@@ -147,8 +171,8 @@ Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
 | EventBus | `default` | driveby | 1-replica JetStream (NATS v2.10.10) |
 | EventSource | `perfect-api-staging-gate-eventsource` | driveby | GitHub webhook on port 12000 |
 | EventSource | `perfect-api-prod-gate-eventsource` | driveby | GitHub webhook on port 12000 |
-| Sensor | `perfect-api-staging-gate-sensor` | driveby | Triggers workflow on PR to `environment/staging` |
-| Sensor | `perfect-api-prod-gate-sensor` | driveby | Triggers workflow on PR to `environment/prod` |
+| Sensor | `perfect-api-staging-gate-sensor` | driveby | Triggers workflow on PR to `environment/staging` in gitops repo |
+| Sensor | `perfect-api-prod-gate-sensor` | driveby | Triggers workflow on PR to `environment/prod` in gitops repo |
 | Ingress | `perfect-api-staging-gate-webhook-ingress` | driveby | TLS webhook endpoint |
 | Ingress | `perfect-api-prod-gate-webhook-ingress` | driveby | TLS webhook endpoint |
 
@@ -164,7 +188,7 @@ Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
 | Resource | Name | Namespace | Details |
 |----------|------|-----------|---------|
 | ScmProvider | `perfect-api-github` | driveby | GitHub App auth for promoter SCM access |
-| GitRepository | `perfect-api` | driveby | Points promoter to the application repository via ScmProvider |
+| GitRepository | `perfect-api` | driveby | Points promoter to the gitops repository via ScmProvider |
 | PromotionStrategy | `perfect-api-promotion` | driveby | Environment chain: dev → staging → prod, with commit status gates |
 | ArgoCDCommitStatus | `perfect-api-argocd-health` | driveby | Aggregates ArgoCD app health into CommitStatus |
 | ChangeTransferPolicy | (auto-created) | driveby | Auto-created by PromotionStrategy controller per environment |
@@ -172,10 +196,11 @@ Developer triggers "DriveBy Deploy" workflow (Actions → workflow_dispatch)
 ### External Repos
 | Repo | Purpose |
 |------|---------|
-| `novelcore/perfect-api` | Source code + Kubernetes manifests (`manifests/`); workflows auto-generated by XSDLC |
+| `novelcore/perfect-api` | Software repo — source code + Dockerfile (untouched by XSDLC) |
+| `novelcore/perfect-api-gitops` | GitOps repo — auto-created by XSDLC, holds manifests on per-environment branches |
 
 ## Helm Chart (`helm/driveby/`)
-Production Helm chart (v2.1.0) that installs the full DriveBy quality gate system:
+Production Helm chart (v3.0.0) that installs the full DriveBy quality gate system:
 - **Crossplane providers**: `provider-kubernetes` v0.14.1
 - **Crossplane functions**: `function-go-templating`, `function-auto-ready`
 - **XRD**: `xsdlcs.driveby.io` (v1alpha1) — single CR for full promotion pipeline
@@ -216,8 +241,7 @@ set-pending → health-check → check-0-validate-only → check-1-load-test
 - All pipelines validate against the **source environment** (previous env), not target
 - Step templates (`driveby-validate`, `driveby-functional`, `driveby-loadtest`) accept input parameters from the DAG
 - Shared `reports` PVC (64Mi) mounts at `/tmp/reports` across all DriveBy steps — `comment-pr` reads saved reports via `github-comment` instead of re-running tests
-- **v2.0.0 breaking change**: `softwareRepository`, `DISPATCH_PAT`, and `GITOPS_PAT` removed — single-repo model requires only one GitHub App credential
-- Environment-specific config (replicas, resources, env vars) is **engineer-owned** in the repository's `manifests/` directory
+- Environment-specific config (replicas, resources, env vars) is **engineer-owned** in the gitops repo's per-environment overlays (`dry/overlays/<env>/` on `main`)
 
 ## Configurability Model
 Compositions use a **two-tier** variable resolution pattern:

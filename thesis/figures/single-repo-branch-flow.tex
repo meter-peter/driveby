@@ -1,5 +1,5 @@
-% Single-Repo Branch Flow — Chapter 6, Section 6.3.3
-% Branch topology: main → manual deploy → env-next → promoter PRs → env → ArgoCD
+% Two-Repo Branch Flow with Source Hydrator — Chapter 6, Section 6.3.3
+% Developer commits dry manifests on main → hydrator renders per-env overlays → env-next → Promoter PRs → env → ArgoCD
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     branch/.style={
@@ -29,29 +29,30 @@
     }
 ]
 
-% Main branch (top)
-\node[branch=violet] (main) at (5,0) {\textbf{main}\\(src/ + manifests/)};
+% Developer commit on main (top)
+\node[action, minimum width=5cm] (push) at (5,0) {Developer commits dry manifests\\on \texttt{main} branch};
 
 % BYOCI boundary
 \draw[boundary=red!70!black] (-0.5,-0.7) -- (10.5,-0.7);
-\node[font=\tiny\bfseries,text=red!60!black,anchor=east] at (10.5,-0.5) {Developer's CI ends here};
-\node[font=\tiny\bfseries,text=teal!60!black,anchor=east] at (10.5,-0.9) {XSDLC delivery begins here};
+\node[font=\tiny\bfseries,text=red!60!black,anchor=east] at (10.5,-0.5) {Developer updates dry manifests on main (BYOCI)};
+\node[font=\tiny\bfseries,text=teal!60!black,anchor=east] at (10.5,-0.9) {XSDLC hydrates, promotes, gates, syncs};
 
-% Manual deploy action (targets ONE env at a time)
-\node[action, minimum width=4cm] (deploy) at (5,-1.5) {driveby-deploy.yml\\(workflow\_dispatch)};
-\draw[->,thick,violet!50!black] (main) -- (deploy);
+% ArgoCD Hydrator step
+\node[branch=violet, minimum width=8cm] (hydrator) at (5,-1.6) {ArgoCD Source Hydrator renders per-environment overlays};
 
-% env-next branches — deploy targets one at a time (dashed lines for non-selected)
+\draw[->,thick,violet!50!black] (push.south) -- (hydrator.north);
+
+% env-next branches in gitops repo
 \node[branch=blue] (devnext)     at (0,-2.8) {environment/\\dev-next};
 \node[branch=blue] (stagingnext) at (5,-2.8) {environment/\\staging-next};
 \node[branch=blue] (prodnext)    at (10,-2.8) {environment/\\prod-next};
 
-\draw[->,thick,blue!50!black] (deploy.south) -- ++(0,-0.3) -| (devnext.north);
-\draw[->,thick,blue!50!black,dashed] (deploy.south) -- (stagingnext.north);
-\draw[->,thick,blue!50!black,dashed] (deploy.south) -- ++(0,-0.3) -| (prodnext.north);
+\draw[->,thick,blue!50!black] (hydrator.south) -- ++(0,-0.1) -| (devnext.north);
+\draw[->,thick,blue!50!black] (hydrator.south) -- (stagingnext.north);
+\draw[->,thick,blue!50!black] (hydrator.south) -- ++(0,-0.1) -| (prodnext.north);
 
-% Label showing it's one-at-a-time
-\node[font=\tiny,text=blue!60!black,anchor=west] at (6.8,-2.1) {one env per trigger};
+% Label showing hydrated output
+\node[font=\tiny,text=blue!60!black,anchor=west] at (6.8,-2.1) {manifests/ + hydrator.metadata};
 
 % Promoter PRs
 \node[action] (pr1) at (0,-3.8) {auto-merge (no gate)};
@@ -78,13 +79,13 @@
 \draw[->,thick,teal!50!black] (gate1) -- (staging);
 \draw[->,thick,teal!50!black] (gate2) -- (prod);
 
-% ArgoCD sync
+% ArgoCD sync (all auto)
 \node[branch=green!60!black] (argodev) at (0,-6.8) {ArgoCD sync\\(auto)};
 \node[branch=green!60!black] (argostg) at (5,-6.8) {ArgoCD sync\\(auto)};
-\node[branch=green!60!black, draw=red!60!black, fill=red!8] (argoprod) at (10,-6.8) {ArgoCD sync\\(manual)};
+\node[branch=green!60!black] (argoprod) at (10,-6.8) {ArgoCD sync\\(auto)};
 
 \draw[->,thick,green!40!black] (dev) -- (argodev);
 \draw[->,thick,green!40!black] (staging) -- (argostg);
-\draw[->,thick,red!40!black] (prod) -- (argoprod);
+\draw[->,thick,green!40!black] (prod) -- (argoprod);
 
 \end{tikzpicture}

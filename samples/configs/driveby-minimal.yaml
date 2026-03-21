@@ -1,7 +1,0 @@
-# DriveBy minimal configuration
-openapi: "https://example.com/openapi.json"
-host: "api.example.com"
-port: "443"
-protocol: "https"
-validation-mode: "minimal"
-report-dir: "/tmp/driveby-reports"

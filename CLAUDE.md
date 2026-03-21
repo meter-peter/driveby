@@ -30,8 +30,8 @@ DriveBy is a thesis-ready API validation framework implementing Documentation-Dr
 | `driveby-cli/` | Go CLI tool — the core validation engine | Active development | [`driveby-cli/CLAUDE.md`](driveby-cli/CLAUDE.md) |
 | `apis/` | Sample APIs for testing (perfect-api) — source now in [`novelcore/perfect-api`](https://github.com/novelcore/perfect-api) | 1 API complete | [`apis/CLAUDE.md`](apis/CLAUDE.md) |
 | `kubernetes/` | Helm chart (Crossplane XRDs + compositions), examples | Deployed | [`kubernetes/CLAUDE.md`](kubernetes/CLAUDE.md) |
-| `samples/` | Example configs, reports, demo workflows | Configs complete | [`samples/CLAUDE.md`](samples/CLAUDE.md) |
-| `thesis/` | LaTeX thesis document (7 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
+| `samples/` | Example configs, reports | Removed (v3.0.0) | — |
+| `thesis/` | LaTeX thesis document (10 chapters) | In progress | [`thesis/CLAUDE.md`](thesis/CLAUDE.md) |
 | `tools/` | Python/bash utilities for batch testing | Complete | [`tools/CLAUDE.md`](tools/CLAUDE.md) |
 | `docs/` | Documentation hub | Partial | [`docs/CLAUDE.md`](docs/CLAUDE.md) |
 | `.github/` | CI/CD workflows | Active | [`.github/CLAUDE.md`](.github/CLAUDE.md) |
@@ -89,30 +89,31 @@ When writing Crossplane resources:
 4. Only fall back to web search if context7 lacks the information
 
 ## Crossplane Quality Gates (XSDLC)
-- **XSDLC** (`driveby.io/v1alpha1`) — fully turnkey GitOps delivery pipeline. One CR provisions branches, workflows, ArgoCD apps, promoter, and quality gates
-- A single XSDLC CR generates: ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection rules, GitHub Actions workflows, ActionsSecrets, ActionsVariables
+- **XSDLC** (`driveby.io/v1alpha1`) — fully turnkey GitOps delivery pipeline. One CR provisions a dedicated gitops repo, branches, ArgoCD apps, promoter, and quality gates
+- A single XSDLC CR generates: GitOps Repository, ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection rules
+- **Two-repo model with Source Hydrator** (v3.0.0): XSDLC auto-creates a dedicated gitops repo per app (via `provider-upjet-github` Repository). The software repo is untouched. The gitops repo's `main` branch holds dry manifests in `dry/base/` + `dry/overlays/<env>/` (Kustomize). ArgoCD Source Hydrator renders each overlay and writes hydrated output (with `hydrator.metadata`) to `environment/<env>-next` branches. The Promoter creates PRs from `-next` to active branches; gates fire on those PRs.
+- **Per-environment overlays**: Each environment has its own Kustomize overlay (`dry/overlays/<env>/`), enabling per-env customization (replicas, env vars, images). Each ArgoCD Application uses `sourceHydrator` pointing to its overlay — no linear propagation between environments.
+- **BYOCI boundary**: Developers update dry manifests on `main` in the gitops repo. The hydrator + Promoter handle the rest. XSDLC does NOT generate any CI/CD workflows.
 - **Multi-check gates**: Each gate defines an ordered `checks` array — each check becomes a DAG step
 - **Check types**: `validate-only` (static validation), `functional-test` (P006), `load-test` (k6 load testing)
 - **`loadTestConfig`**: configures load testing parameters — `concurrentUsers`, `testDuration`, `maxLatencyP95`, `minSuccessRate`
-- Helm chart (v2.1.0) installs `provider-kubernetes` + Crossplane functions + XRD + composition
-- **Single-repo model**: XSDLC is a delivery pipeline, not a CI system. One GitOps repo contains both the manifests and the XSDLC CR. Engineers own per-env manifests under `manifestsPath` directories. XSDLC only manages **promotion** and **quality gates**.
-- **ArgoCD Application generation**: Always generated for every environment. `autoMerge: false` → manual sync, otherwise automated sync.
+- Helm chart (v3.0.0) installs `provider-kubernetes` + Crossplane functions + XRD + composition
+- **ArgoCD Application generation**: Always generated for every environment using `sourceHydrator` (drySource → overlay, syncSource → env branch, hydrateTo → env-next branch). All apps get `autoSync` with selfHeal. `autoMerge: false` only controls Promoter PR merge behavior, not ArgoCD sync.
 - **Simplified UX**: ~35 lines of YAML per app. Only `repository` and `environments` required. All cluster config from `values.yaml`. No EnvironmentConfigs.
 - **Two-tier config**: `values.yaml` defaults → XRD spec overrides (EnvironmentConfig layer removed)
-- **`manifestsPath`**: Path within the repo where per-environment manifests live. XSDLC reads this to locate the correct directory for each environment.
-- **Generated workflow**: `driveby-deploy.yml` in the single repo — BYOCI showcase: developer's CI builds the image, this workflow deploys manifests + image tag to a chosen environment
-- **Branch protection**: When `githubProvider.enabled`, XSDLC auto-provisions GitHub BranchProtection rules per gated environment + `*-next` branch protection
+- **`gitopsRepository.name`**: Optional override for the gitops repo name (default: `<repository.name>-gitops`)
+- **Branch protection**: When `githubProvider.enabled`, XSDLC auto-provisions GitHub BranchProtection rules per gated environment + `*-next` branch protection (on the gitops repo)
 - See `docs/deployment-guide.md` for installation, `docs/quality-gate-sdlc.md` for architecture
 
 ## Releasing
 
 1. Ensure CI is green on `main`
-2. Tag: `git tag -a v2.0.0 -m "DriveBy v2.0.0: single-repo delivery pipeline"`
-3. Push: `git push origin v2.0.0`
+2. Tag: `git tag -a v3.0.0 -m "DriveBy v3.0.0: two-repo GitOps delivery pipeline"`
+3. Push: `git push origin v3.0.0`
 4. The `release.yml` workflow produces:
    - GitHub Release with 6 platform binaries + SHA256 checksums (via GoReleaser)
-   - Docker images: `ghcr.io/meter-peter/driveby:2.0.0`, `:2.0`, `:latest`
-   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:2.0.0`
+   - Docker images: `ghcr.io/meter-peter/driveby:3.0.0`, `:3.0`, `:latest`
+   - Helm chart: `oci://ghcr.io/meter-peter/charts/driveby:3.0.0`
 
 ## Target Cluster
 - Cluster: `private.novelcore.org`

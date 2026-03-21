@@ -17,7 +17,10 @@ thesis/
     04-cli-architecture.tex
     05-kubernetes-architecture.tex
     06-gitops-pipeline.tex
-    07-conclusion.tex
+    07-evaluation.tex
+    08-ai-assisted-development.tex
+    09-discussion.tex
+    10-conclusion.tex
 ```
 
 ## Chapter-by-Chapter Specification
@@ -66,7 +69,7 @@ thesis/
 - Engine orchestration: load spec -> select principles by mode -> run checkers -> aggregate -> report
 
 ### Chapter 5 — Kubernetes Architecture (`05-kubernetes-architecture.tex`)
-**Expected sections**: Crossplane XRD Design, XSDLC Composition Architecture, Declarative Resource Generation, Two-Tier Configuration, Single-Repo Branch Model, BYOCI Delivery Pipeline
+**Expected sections**: Crossplane XRD Design, XSDLC Composition Architecture, Declarative Resource Generation, Two-Tier Configuration, Two-Repo GitOps Model, BYOCI Delivery Pipeline
 **Source files to read**: `docs/deployment-guide.md`, `docs/quality-gate-sdlc.md`, `docs/responsibility-matrix.md`
 **Code files to read**:
 - `kubernetes/helm/driveby/templates/crossplane/composition-sdlc.yaml` — XSDLC composition
@@ -80,11 +83,11 @@ thesis/
 - BYOCI model: XSDLC is a delivery pipeline, not a CI system
 - Two-tier config: values.yaml defaults → XRD spec overrides (no EnvironmentConfigs)
 - Dynamic environment chain (any N environments, minimum 2)
-- Auto-generated GitHub workflow (driveby-deploy — manual trigger deploy pipeline)
+- Auto-created GitOps repository per app (no generated workflows)
 - Target cluster: private.novelcore.org
 
 ### Chapter 6 — GitOps Pipeline (`06-gitops-pipeline.tex`)
-**Expected sections**: Single-Repo Architecture, BYOCI Model, Promotion Flow, Quality Gate Implementation, Event-Driven Validation, Production Deployment, Evaluation
+**Expected sections**: Two-Repo Architecture, BYOCI Model, Promotion Flow, Quality Gate Implementation, Event-Driven Validation, Production Deployment, Evaluation
 **Source files to read**: `docs/gitops-pipeline.md`, `docs/quality-gate-sdlc.md`, `docs/evaluation-methodology.md`
 **Code files to read**:
 - `kubernetes/helm/driveby/templates/crossplane/composition-sdlc.yaml` — composition
@@ -100,11 +103,34 @@ thesis/
 - Controlled evaluation: perfect-api against all principles
 - Large-scale evaluation: APIs.guru dataset
 
-### Chapter 7 — Conclusion (`07-conclusion.tex`)
-**Expected sections**: Summary of Contributions, Answers to Research Questions, Limitations, Future Work
+### Chapter 7 — Evaluation (`07-evaluation.tex`)
+**Expected sections**: Evaluation Framework, Controlled Evaluation (perfect-api), Large-Scale Evaluation (APIs.guru), Operational Evaluation, CI/CD Integration Metrics
+**Source files to read**: `docs/evaluation-methodology.md`
+**Code files to read**:
+- `tools/harvest-openapi-apisguru.py` — dataset harvesting
+- `tools/probe-openapi-endpoints.py` — endpoint probing
+- `tools/run-openapi-batch.sh` — batch validation
+- `apis/perfect-api/openapi.json` — reference spec
+- `driveby-cli/test/` — test fixtures and integration tests
+**Key content**: Three-arm evaluation (controlled, large-scale, operational), defect injection, APIs.guru pass rates, CI/CD metrics
+
+### Chapter 8 — AI-Assisted Development (`08-ai-assisted-development.tex`)
+**Expected sections**: Agentic Development as Method, CLAUDE.md Knowledge Protocol, Persistent Agent Memory, Agent-Driven Multi-API Evaluation, Agent-Driven Thesis Writing, DDT as Agent Feedback Infrastructure, Lessons Learned
+**Source files to read**: All CLAUDE.md files across the monorepo, `tools/check-docs.sh`
+**Code files to read**: None (methodology chapter about the development process)
+**Key content**: CLAUDE.md hierarchy (11 files), persistent memory system, agent-driven evaluation workflow, thesis writing protocol, DDT output as agent feedback, validate-diagnose-remediate-revalidate loop
+
+### Chapter 9 — Discussion (`09-discussion.tex`)
+**Expected sections**: Revisiting RQs, Specification Quality Gap, BYOCI Boundary, Threats to Validity, Implications for Practice
+**Source files to read**: None (synthesis chapter)
+**Code files to read**: None
+**Key content**: Evidence-based revisit of RQ1-RQ4, systemic quality gap analysis, BYOCI trade-offs, validity threats, practical implications
+
+### Chapter 10 — Conclusion (`10-conclusion.tex`)
+**Expected sections**: Summary of Contributions, Answers to Research Questions, XSDLC as Ontological Specification, Limitations, Future Work
 **Source files to read**: `docs/Thesis.md`
 **Code files to read**: None
-**Key content**: Summarize DDT paradigm contribution, DriveBy tool contribution, XSDLC delivery pipeline contribution, evaluation findings. Future work: broader language support, enterprise adoption, additional check types.
+**Key content**: Four contributions (DDT, DriveBy, XSDLC, agent methodology), RQ answers, ontological framing, limitations (principle coverage, keyword checks, single format, evaluation scale), future work (adaptive thresholds, agent remediation, P006/P007 wrappers, multi-format, multi-cluster)
 
 ## Complete Feed Map
 
@@ -152,7 +178,7 @@ thesis/
 - [REMOVED] Provider architecture (Ch.5) — `figures/provider-architecture.tex` — figure cut, text kept inline
 - [DONE] Crossplane reconciliation loop (Ch.5) — `figures/crossplane-reconciliation-loop.tex`, `fig:crossplane-reconciliation-loop`
 - [DONE] Declarative lifecycle (Ch.5) — `figures/declarative-lifecycle.tex`, `fig:declarative-lifecycle`
-- [DONE] Single-repo branch flow (Ch.6) — `figures/single-repo-branch-flow.tex`, `fig:single-repo-branch-flow`
+- [DONE] Two-repo branch flow (Ch.6) — `figures/single-repo-branch-flow.tex`, `fig:single-repo-branch-flow`
 - [DONE] Human-in-the-loop (Ch.6) — `figures/human-in-the-loop.tex`, `fig:human-in-the-loop`
 - [DONE] Quality control loop (Ch.6) — `figures/quality-control-loop.tex`, `fig:quality-control-loop`
 - Bar chart: per-principle pass rates across APIs.guru dataset (Ch.6) — TODO (requires evaluation data)

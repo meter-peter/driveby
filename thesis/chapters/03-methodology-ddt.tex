@@ -80,7 +80,7 @@ Each DDT principle defines a specific dimension of API quality, traces its ratio
 
 P001 validates that the API specification conforms to the OpenAPI standard~\cite{openapi} and is structurally sound. A specification that fails P001 cannot be reliably consumed by code generators, documentation renderers, or downstream validators. P001 is therefore a prerequisite for all other principles.
 
-P001 performs eight checks: (1)~the specification version is present and valid; (2)~required info fields (title, version) exist; (3)~at least one path is defined; (4)~components are structurally valid; (5)~the overall specification structure passes schema validation; (6)~no duplicate \texttt{operationId} values exist across operations; (7)~all HTTP methods are standard (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE); and (8)~null type usage conforms to the specification version (OpenAPI~3.0.x vs.\ 3.1.0 semantics).
+P001 performs seven checks: (1)~the specification version is present and valid; (2)~required info fields (title, version) exist; (3)~at least one path is defined; (4)~components are structurally valid; (5)~the overall specification structure passes validation via the \texttt{APISpec.ValidateStructure()} adapter method, which delegates to the underlying parser's schema validator; (6)~no duplicate \texttt{operationId} values exist across operations; and (7)~all HTTP methods are standard (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, TRACE). For OpenAPI~3.x specifications, the structural check~(5) additionally verifies null type semantics: OpenAPI~3.1.0 permits \texttt{type: ``null''} directly, whereas OpenAPI~3.0.x requires the nullable keyword---a specification that uses the wrong null representation for its declared version fails the structural check.
 
 P001 runs in every validation mode. A structurally invalid specification cannot be meaningfully assessed by any other principle.
 
@@ -106,9 +106,9 @@ P002 addresses a gap identified in Chapter~\ref{ch:related-work}: existing linte
 
 P003 validates that the specification documents error responses comprehensively and consistently. Undocumented error responses are a primary source of integration failures: a consumer encounters an unexpected 403 or 422 response that the specification never mentioned, and must reverse-engineer the error format from raw HTTP responses.
 
-P003 performs six checks: (1)~all operations document at least one 4xx error response; (2)~all operations document at least one 5xx error response; (3)~error responses include descriptive error codes; (4)~error response schemas contain structured fields (message, code, or details); (5)~common error responses are defined as reusable components; and (6)~error response formats are consistent across operations (all errors share the same schema structure).
+P003 is mode-aware. In \textit{minimal} mode, it performs only a lightweight check: for error responses that are already present, it verifies that each has a description. This provides fast feedback without penalizing incomplete specifications. In \textit{strict} mode, P003 performs seven comprehensive checks: (1)~all operations document at least one 4xx error response; (2)~all operations document at least one 5xx error response; (3)~error responses include descriptive error codes (via non-empty descriptions); (4)~error responses include error messages; (5)~error response schemas contain structured fields (\texttt{message}, \texttt{code}, or \texttt{details} properties); (6)~common error responses (400, 401, 403, 404, 500) are defined as reusable components in \texttt{components.responses}; and (7)~error response formats are consistent across operations (all errors share the same schema property structure).
 
-The consistency check (6) is particularly valuable. APIs that return \texttt{\{``message'': ...\}} for 400 errors but \texttt{\{``error'': ..., ``code'': ...\}} for 500 errors impose unnecessary complexity on consumers. P003 detects this inconsistency and flags it.
+The consistency check~(7) is particularly valuable. APIs that return \texttt{\{``message'': ...\}} for 400 errors but \texttt{\{``error'': ..., ``code'': ...\}} for 500 errors impose unnecessary complexity on consumers. The implementation collects the sorted property names of each error response schema and flags any specification where more than one distinct format appears.
 
 % ----------------------------------------------------------------------------
 \subsection{P004: Schema Definitions}
@@ -119,9 +119,9 @@ The consistency check (6) is particularly valuable. APIs that return \texttt{\{`
 
 P004 validates that request and response schemas are precise, constrained, and complete. A schema that declares a field as type \texttt{string} without length constraints, pattern restrictions, or format specifications provides the consumer with no useful validation guidance. P004 ensures schemas are not merely present but informative.
 
-P004 performs nine checks: (1)~all path parameters have schemas; (2)~all query parameters have schemas; (3)~all request bodies have content schemas; (4)~all schemas specify data types; (5)~all string fields have length constraints (\texttt{minLength}, \texttt{maxLength}) or pattern restrictions; (6)~all numeric fields have range constraints (\texttt{minimum}, \texttt{maximum}); (7)~all required fields listed in \texttt{required} arrays exist in \texttt{properties}; (8)~all enum values are non-null; and (9)~schemas are validated recursively, including nested objects and array items.
+P004 is the most mode-sensitive principle. In \textit{minimal} mode, it checks only schema existence---that parameters and request bodies have schemas defined at all. In \textit{test-ready} mode, it checks schema existence plus type specifications (every schema and its properties must declare a type), but does \textit{not} enforce constraints---the goal is to confirm that test data generators can produce typed values. In \textit{strict} mode, P004 performs ten comprehensive checks: (1)~all path parameters have schemas; (2)~all query parameters have schemas; (3)~all header parameters have schemas; (4)~all request bodies have content schemas; (5)~all schemas specify data types; (6)~all schemas have appropriate constraints; (7)~all required fields listed in \texttt{required} arrays exist in \texttt{properties}; (8)~all enum values are non-null; (9)~all numeric fields have range constraints (\texttt{minimum}, \texttt{maximum}); and (10)~all string fields have length constraints (\texttt{minLength}, \texttt{maxLength}) or pattern restrictions.
 
-The recursive validation (9) distinguishes P004 from shallow schema checks. A top-level object may have a well-defined schema while its nested \texttt{address} field is typed as a bare \texttt{object} with no properties defined. P004 traverses the full schema tree, applying constraint checks at every level. This aligns with the JSON Schema specification's~\cite{json-schema-2020} principle that schemas should be as restrictive as the domain permits.
+All checks are applied recursively through the schema tree, including nested object properties and array items. A top-level object may have a well-defined schema while its nested \texttt{address} field is typed as a bare \texttt{object} with no properties defined. P004's \texttt{validateSchemaConstraints} method traverses the full schema tree, applying constraint checks at every level. This aligns with the JSON Schema specification's~\cite{json-schema-2020} principle that schemas should be as restrictive as the domain permits.
 
 % ----------------------------------------------------------------------------
 \subsection{P005: Security Standards}
@@ -132,9 +132,9 @@ The recursive validation (9) distinguishes P004 from shallow schema checks. A to
 
 P005 validates that the specification defines security mechanisms comprehensively and consistently. Security misconfigurations in API specifications---missing authentication requirements, undefined security schemes, inconsistent enforcement---are among the top risks identified by the OWASP API Security project~\cite{owasp-api-security}. A specification that omits security definitions leaves consumers guessing about authentication requirements and leaves automated tools unable to verify security compliance~\cite{api-security-testing}.
 
-P005 performs seven checks: (1)~at least one security scheme is defined in \texttt{components.securitySchemes}; (2)~global security requirements are set at the top level; (3)~all operations are covered by either global or operation-level security; (4)~OAuth2 and OpenID Connect schemes are referenced with scopes in at least one security requirement; (5)~API key schemes include descriptions; (6)~API key schemes specify the \texttt{name} and \texttt{in} fields (header, query, or cookie location); and (7)~all security scheme names referenced in security requirements are defined in components.
+P005 is mode-aware. In \textit{minimal} mode, only checks~(1) and~(2) are evaluated---a fast gate that verifies security schemes exist and global requirements are set. In \textit{strict} mode, P005 performs all seven checks: (1)~at least one security scheme is defined in \texttt{components.securitySchemes}; (2)~global security requirements are set at the top level; (3)~all operations are covered by either global or operation-level security (operations inherit global security when no operation-level security is declared); (4)~OAuth2 and OpenID Connect schemes are referenced with scopes in at least one security requirement; (5)~API key schemes include descriptions; (6)~API key schemes specify the \texttt{name} and \texttt{in} fields (header, query, or cookie location); and (7)~all security scheme names referenced in security requirements are defined in components.
 
-Check~(7) addresses a subtle but dangerous inconsistency: a security requirement referencing a scheme name that does not exist in \texttt{components.securitySchemes}. This creates a specification that appears to enforce security but whose enforcement is undefined. P005 detects such phantom references.
+Check~(7) addresses a subtle but dangerous inconsistency: a security requirement referencing a scheme name that does not exist in \texttt{components.securitySchemes}. This creates a specification that appears to enforce security but whose enforcement is undefined. P005's \texttt{collectInconsistentRefs} helper scans both global and per-operation security requirements to detect such phantom references.
 
 % ----------------------------------------------------------------------------
 \subsection{P006: Functional Testing}
@@ -171,9 +171,9 @@ The pending work mirrors P006: integrating the existing performance testing logi
 
 P008 validates that the API follows a disciplined versioning strategy. APIs evolve; without explicit versioning, deprecation notices, and migration guidance, consumers face silent breaking changes. P008 ensures the specification communicates its version lifecycle clearly, following the Semantic Versioning convention~\cite{semver}.
 
-P008 performs seven checks: (1)~the API version is specified in the info section; (2)~the version follows Semantic Versioning format (MAJOR.MINOR.PATCH); (3)~the versioning strategy is documented in the API description; (4)~deprecated operations include deprecation details in their descriptions; (5)~breaking changes are documented or a changelog is referenced; (6)~version compatibility (backward compatibility) is addressed; and (7)~migration or upgrade guides are referenced.
+P008 is mode-aware. In \textit{minimal} mode, only checks~(1) and~(2) are evaluated---a fast gate that verifies a version exists and follows semver. In \textit{strict} mode, P008 performs all seven checks: (1)~the API version is specified in the info section; (2)~the version follows Semantic Versioning format (MAJOR.MINOR.PATCH), validated via the regular expression \texttt{\textasciicircum\textbackslash d+\textbackslash.\textbackslash d+\textbackslash.\textbackslash d+\$}; (3)~the versioning strategy is documented in the API description (detected by keyword match for ``version''); (4)~deprecated operations include deprecation details in their descriptions (operations marked \texttt{deprecated: true} must contain the word ``deprecat'' in their description); (5)~breaking changes are documented or a changelog is referenced; (6)~version compatibility (backward compatibility) is addressed; and (7)~migration or upgrade guides are referenced.
 
-Checks (3)--(7) are distinctive. Most tools verify that a version string exists (check~1) and optionally that it follows semver (check~2). P008 goes further by requiring that the specification communicates its \textit{versioning practices}: how consumers should handle version transitions, what has changed, and where to find migration guidance. This transforms the version field from a static label into a living contract about the API's evolution.
+Checks (3)--(7) are distinctive. Most tools verify that a version string exists (check~1) and optionally that it follows semver (check~2). P008 goes further by requiring that the specification communicates its \textit{versioning practices}: how consumers should handle version transitions, what has changed, and where to find migration guidance. Checks~(3) and (5)--(7) scan the API's \texttt{info.description} field for relevant keywords, transforming the version field from a static label into a living contract about the API's evolution.
 
 % ----------------------------------------------------------------------------
 \subsection{P009: Test Readiness}
@@ -241,7 +241,7 @@ Determinism grounds P006 and P009. P006 validates runtime behavior determinism; 
 
 Observability grounds three principles that validate externally measurable properties: security posture (P005), performance characteristics (P007), and versioning discipline (P008). These properties share a common trait: they produce quantitative, structured signals that automated systems can consume. P005 is classified as critical because security misconfigurations pose immediate risk; P007 and P008 are classified as warnings because they represent quality dimensions that degrade gracefully rather than failing catastrophically.
 
-The severity classification---critical versus warning---governs how validation results translate to quality gate decisions. A critical failure (P001 or P005) blocks promotion in a CI/CD pipeline. A warning (P002, P003, P004, P007, P008, P009) is reported but does not block, allowing teams to adopt DDT incrementally without requiring immediate perfection across all dimensions.
+The severity classification---critical versus warning---governs how validation results translate to quality gate decisions through a deterministic exit code mechanism. The DriveBy engine iterates over all principle results; if any principle with \texttt{severity: critical} has \texttt{Passed: false}, the overall report status is set to \texttt{``failed''} and the process exits with code~1. If only warning-severity principles fail, the report status remains \texttt{``passed''} and the exit code is~0. This binary mapping---critical failure produces exit code~1, warnings do not---is the mechanism by which DDT integrates with CI/CD quality gates: a pipeline step that runs \texttt{driveby validate-only} fails the build only on critical issues (P001 or P005), while documentation gaps (P002), error handling weaknesses (P003, P004), and versioning concerns (P008, P009) are reported but do not block promotion. This allows teams to adopt DDT incrementally without requiring immediate perfection across all dimensions.
 
 % ============================================================================
 \section{Validation Modes}
@@ -254,7 +254,7 @@ Table~\ref{tab:validation-modes} presents the mode-to-principle mapping.
 
 \begin{table}[htbp]
 \centering
-\caption{Validation modes and the principles each mode evaluates.}
+\caption{Validation modes and the principles each mode evaluates. The registry's \texttt{ForMode()} method returns only the checkers listed for each mode.}
 \label{tab:validation-modes}
 \small
 \begin{tabular}{@{}lccccccccc@{}}
@@ -264,20 +264,20 @@ Table~\ref{tab:validation-modes} presents the mode-to-principle mapping.
 Minimal    & \cmark & & & & & & & & \\
 Test-ready & \cmark & & & \cmark$^\dagger$ & & & & & \cmark \\
 Strict     & \cmark & \cmark & \cmark & \cmark & \cmark & & & \cmark & \\
-Test-only  &        &        &        &        &        & \cmark$^*$ & \cmark$^*$ & & \\
+Test-only  &        &        &        &        &        & $\circ$ & $\circ$ & & \\
 \bottomrule
 \end{tabular}
 
 \vspace{2mm}
-\noindent\small{$^*$ P006 and P007 are planned but not yet implemented as principle checkers.}\\
-\noindent\small{$^\dagger$ P004 in test-ready mode checks schema existence and types only, without constraint validation.}
+\noindent\small{$\circ$ P006 and P007 are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers. In the current implementation, \texttt{ForMode(test-only)} returns no static checkers; the mode instead triggers the runtime testing pipeline (functional and load tests) directly via separate CLI commands.}\\
+\noindent\small{$^\dagger$ P004 in test-ready mode checks schema existence and type specifications only, without constraint validation.}
 \end{table}
 
 \textbf{Minimal mode} evaluates only P001 (OpenAPI Specification Compliance). It serves as a fast quality gate suitable for pull request pipelines where rapid feedback is prioritized over exhaustive validation. A specification that passes minimal mode is structurally valid and safe for code generation, but its documentation quality, error handling, and security definitions are unchecked.
 
 \textbf{Strict mode} evaluates P001 through P005 and P008---all implemented static principles. It provides comprehensive specification quality assessment without requiring a live API instance. Strict mode is appropriate for release pipelines, pre-merge gates, and periodic audits where thorough validation justifies the additional execution time.
 
-\textbf{Test-only mode} skips all static validation and runs only runtime tests (P006 and P007, when implemented). It is designed for scenarios where the specification has already been validated statically and the focus is on verifying that the live API conforms to it. Test-only mode decouples static and runtime validation, allowing them to run in separate pipeline stages or on different schedules.
+\textbf{Test-only mode} skips all static validation. The principle registry returns no checkers for this mode; instead, the CLI's \texttt{test-only} command triggers the runtime testing pipeline directly---functional endpoint testing and load testing---against a live API instance. In the current implementation, this runtime logic is not yet wrapped as P006 and P007 \texttt{PrincipleChecker} instances, but it is fully operational via the \texttt{function-only} and \texttt{load-only} CLI commands. Test-only mode is designed for scenarios where the specification has already been validated statically and the focus is on verifying that the live API conforms to it, decoupling static and runtime validation into separate pipeline stages.
 
 \textbf{Test-ready mode} evaluates P001, P004 (in an intermediate form that checks schema types without constraints), and P009 (Test Readiness). It serves as a fast pre-flight check that answers the question: \textit{is this specification good enough to produce meaningful test results?} Without this mode, functional tests send placeholder values that are rejected by API validation, and load tests run for minutes before revealing that the specification was incomplete. Test-ready mode runs in seconds and gates whether testing is worth executing.
 

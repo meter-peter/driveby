@@ -7,8 +7,8 @@ spec:
   repository:
     owner: novelcore
     name: perfect-api
-    defaultBranch: main
-    manifestsPath: manifests
+  gitopsRepository:
+    name: perfect-api-gitops
 
   apiConfig:
     port: 8000

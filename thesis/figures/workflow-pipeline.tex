@@ -1,5 +1,5 @@
-% GitOps Event-Driven Pipeline — Chapter 5
-% Shows: Developer PR → GitHub Webhook → Traefik → EventSource → EventBus → Sensor → Workflow → Feedback
+% GitOps Event-Driven Pipeline with Source Hydrator — Chapter 6
+% Developer commits dry manifests → Hydrator renders → -next branch → Promoter PR → Webhook → Argo Events → Workflow → Feedback
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.6cm,
@@ -8,7 +8,7 @@
         rounded corners=3pt,
         draw=#1!60!black,
         fill=#1!12,
-        minimum width=2.2cm,
+        minimum width=2cm,
         minimum height=0.8cm,
         font=\scriptsize,
         align=center
@@ -28,44 +28,64 @@
 
 % Lane backgrounds
 \begin{scope}[on background layer]
-    \node[lane bg=violet, minimum width=3.2cm, minimum height=3.5cm] at (0.9,0) {};
-    \node[lane bg=blue,   minimum width=2.2cm, minimum height=3.5cm] at (3.5,0) {};
-    \node[lane bg=teal,   minimum width=4.8cm, minimum height=3.5cm] at (6.6,0) {};
-    \node[lane bg=orange, minimum width=4.2cm, minimum height=3.5cm] at (10.8,0) {};
+    \node[lane bg=red,    minimum width=2.4cm, minimum height=3.5cm] at (-2,0) {};
+    \node[lane bg=violet, minimum width=2.4cm, minimum height=3.5cm] at (0.3,0) {};
+    \node[lane bg=blue,   minimum width=3.2cm, minimum height=3.5cm] at (2.8,0) {};
+    \node[lane bg=cyan,   minimum width=2cm, minimum height=3.5cm] at (5,0) {};
+    \node[lane bg=teal,   minimum width=3.6cm, minimum height=3.5cm] at (7.4,0) {};
+    \node[lane bg=orange, minimum width=4cm, minimum height=3.5cm] at (11,0) {};
 \end{scope}
 
 % Lane labels (top)
-\node[lane label=violet]  at (-0.4,1.9)  {GitHub};
-\node[lane label=blue]    at (2.5,1.9)   {Ingress};
-\node[lane label=teal]    at (4.3,1.9)   {Argo Events};
-\node[lane label=orange]  at (8.8,1.9)   {Argo Workflows};
+\node[lane label=red]     at (-3.1,1.9)  {BYOCI};
+\node[lane label=violet]  at (-0.8,1.9)  {Hydrator};
+\node[lane label=blue]    at (1.3,1.9)   {GitHub};
+\node[lane label=cyan]    at (4.1,1.9)   {Ingress};
+\node[lane label=teal]    at (5.7,1.9)   {Argo Events};
+\node[lane label=orange]  at (9.1,1.9)   {Argo Workflows};
+
+% BYOCI lane (developer trigger)
+\node[stage=red] (deploy) at (-2,0.8)  {Developer\\commits dry};
+\node[stage=red] (main)   at (-2,-0.5) {\texttt{main}\\branch};
+\draw[->,thick] (deploy) -- (main);
+
+% Hydrator lane
+\node[stage=violet] (hydrator) at (0.3,0.8)  {ArgoCD\\Hydrator};
+\node[stage=violet] (nextbr)   at (0.3,-0.5) {\texttt{-next}\\branch};
+\draw[->,thick] (main) -- (hydrator);
+\draw[->,thick] (hydrator) -- (nextbr);
 
 % GitHub lane
-\node[stage=violet] (dev)     at (0.2,0.8)  {Developer\\opens PR};
-\node[stage=violet] (webhook) at (0.2,-0.5) {GitHub\\Webhook};
-\draw[->,thick] (dev) -- (webhook);
+\node[stage=blue] (promoter) at (2.3,0.8)  {Promoter\\creates PR};
+\node[stage=blue] (webhook)  at (2.3,-0.5) {GitHub\\Webhook};
+\draw[->,thick] (nextbr) -- (promoter);
+\draw[->,thick] (promoter) -- (webhook);
 
 % Ingress lane
-\node[stage=blue] (traefik) at (3.5,0.1) {Traefik\\Ingress};
+\node[stage=cyan] (traefik) at (5,0.1) {Traefik\\Ingress};
 \draw[->,thick] (webhook) -- (traefik);
 
 % Argo Events lane
-\node[stage=teal] (es) at (5.5,0.8)  {EventSource\\(webhook)};
-\node[stage=teal] (eb) at (5.5,-0.5) {EventBus\\(NATS JetStream)};
-\node[stage=teal] (sensor) at (7.8,0.1) {Sensor\\(trigger)};
+\node[stage=teal] (es)     at (6.3,0.8)  {EventSource\\(webhook)};
+\node[stage=teal] (eb)     at (6.3,-0.5) {EventBus\\(JetStream)};
+\node[stage=teal] (sensor) at (8.5,0.1)  {Sensor\\(filter)};
 \draw[->,thick] (traefik) -- (es);
 \draw[->,thick] (es) -- (eb);
 \draw[->,thick] (eb) -- (sensor);
 
 % Argo Workflows lane
-\node[stage=orange] (wf) at (10,0.8)   {Argo\\Workflow};
-\node[stage=orange] (status) at (10,-0.5) {Commit\\Status};
-\node[stage=orange] (comment) at (11.8,-0.5) {PR\\Comment};
+\node[stage=orange] (wf)      at (10.2,0.8)  {Argo\\Workflow};
+\node[stage=orange] (status)  at (10.2,-0.5) {Commit\\Status};
+\node[stage=orange] (comment) at (12,-0.5)   {PR\\Comment};
 \draw[->,thick] (sensor) -- (wf);
 \draw[->,thick] (wf) -- (status);
 \draw[->,thick] (wf) -- (comment);
 
-% Feedback loop back to GitHub
-\draw[->,thick,violet!60!black,dashed] (status.south) -- ++(0,-0.6) -| ($(dev.south)+(0.3,-0.6)$) -- ($(dev.south)+(0.3,0)$);
+% Feedback loop back to Promoter PR
+\draw[->,thick,blue!60!black,dashed] (status.south) -- ++(0,-0.6) -| ($(promoter.south)+(0.3,-0.6)$) -- ($(promoter.south)+(0.3,0)$);
+
+% BYOCI boundary annotation
+\draw[dashed,thick,red!60!black] (-0.8,1.8) -- (-0.8,-1.8);
+\node[font=\tiny\bfseries,text=red!60!black,anchor=north,rotate=90] at (-0.75,-0.5) {BYOCI boundary};
 
 \end{tikzpicture}

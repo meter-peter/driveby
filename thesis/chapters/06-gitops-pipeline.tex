@@ -1,7 +1,7 @@
 \chapter{GitOps Pipeline and CI/CD}
 \label{ch:workflow}
 
-Chapter~\ref{ch:kubernetes} described the Kubernetes infrastructure---Crossplane XRDs, Argo Events, Argo Workflows---that implements the quality gate system. This chapter describes how that infrastructure operates within the broader GitOps pipeline: the promotion-driven quality gate flow, the event-driven validation pipeline end-to-end, the single-repo architecture and its ``Bring Your Own CI'' design principle, the GitOps Promoter's multi-environment model, human-in-the-loop decision patterns, and the quality gate as a closed-loop control system. The chapter also describes the three CI/CD pipelines that build, test, and release the DriveBy system itself.
+Chapter~\ref{ch:kubernetes} described the Kubernetes infrastructure---Crossplane XRDs, Argo Events, Argo Workflows---that implements the quality gate system. This chapter describes how that infrastructure operates within the broader GitOps pipeline: the promotion-driven quality gate flow, the event-driven validation pipeline end-to-end, the two-repo architecture and its ``Bring Your Own CI'' (BYOCI) design principle, the GitOps Promoter's multi-environment model, human-in-the-loop decision patterns, and the quality gate as a closed-loop control system. The chapter also describes how DriveBy itself is released---binaries, container images, and Helm charts---through automated GitHub Actions pipelines.
 
 Together, Chapters~\ref{ch:architecture},~\ref{ch:kubernetes}, and this chapter form a three-layer value chain: the DriveBy CLI provides the validation logic, Kubernetes infrastructure orchestrates its execution, and GitOps pipelines make validation results drive promotion decisions. This chapter describes the outermost layer---the point where validation results become operational signals that advance or block software delivery.
 
@@ -12,20 +12,20 @@ The chapter addresses Research Question~3 (RQ3): \textit{How effectively does sp
 \label{sec:promotion-driven-gate}
 % ============================================================================
 
-The quality gate operates on a key insight: \textit{validate the source environment, not the target}. When a developer merges code into the application repository, the CI pipeline builds and deploys the new version to the development environment. ArgoCD~\cite{argocd} synchronizes the development environment automatically. The GitOps Promoter detects the successful synchronization and creates a promotion pull request proposing to update the staging environment's manifest to the new version.
+The quality gate operates on a key insight: \textit{validate the source environment, not the target}. The developer's own CI builds a new container image (the BYOCI boundary described in Section~\ref{subsec:byoci}), then commits the updated dry manifests and image tag to the \texttt{main} branch of the dedicated gitops repository. The ArgoCD Source Hydrator~\cite{argocd-hydrator} renders each environment's Kustomize overlay and writes hydrated output to the corresponding \texttt{-next} branch. The GitOps Promoter creates a promotion PR from the \texttt{-next} branch to the active branch, and ArgoCD~\cite{argocd} synchronizes the environment once the PR is merged.
 
 This promotion PR triggers the quality gate. The GitHub webhook fires, the EventSource receives the event, the Sensor filters for PR actions, and the Workflow executes validation against the \textit{development} environment---the environment where the new code is already running. The validation results determine whether the promotion PR is approved (merged) or blocked (left open with a failure status).
 
 This inversion is deliberate. Validating the source environment ensures that quality is assessed against the actual deployment rather than a hypothetical future state. If the API in development passes strict DDT validation, the same code deployed to staging will behave identically (assuming equivalent infrastructure). The alternative---validating the target environment after promotion---would detect problems only after the potentially breaking change has already been deployed, violating the shift-left principle~\cite{shift-left}.
 
-Figure~\ref{fig:gitops-pipeline} shows the end-to-end pipeline from developer pull request to validation feedback.
+Figure~\ref{fig:gitops-pipeline} shows the end-to-end pipeline from deploy trigger to validation feedback.
 
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{%
 \input{figures/workflow-pipeline.tex}%
 }
-\caption{End-to-end GitOps validation pipeline. A developer opens a promotion PR; the webhook triggers Argo Events, which submits an Argo Workflow. Validation results are posted back as commit status and PR comment (dashed feedback loop).}
+\caption{End-to-end GitOps validation pipeline. The developer commits dry manifests to the \texttt{main} branch of the gitops repository (BYOCI boundary). The ArgoCD Source Hydrator renders per-environment overlays and writes hydrated output to \texttt{-next} branches. The Promoter creates a promotion PR; the webhook triggers Argo Events, which submits an Argo Workflow. Validation results are posted back as commit status and PR comment (dashed feedback loop).}
 \label{fig:gitops-pipeline}
 \end{figure}
 
@@ -41,13 +41,11 @@ The event-driven pipeline transforms an external webhook into a structured valid
 \label{subsec:webhook-delivery}
 % ----------------------------------------------------------------------------
 
-The pipeline begins when GitHub delivers a webhook to the Ingress endpoint. The webhook URL follows the pattern:
+The pipeline begins when an external event---a promotion PR opened on GitHub---must be routed to the correct in-cluster EventSource. This is a routing problem: multiple APIs and multiple environments share a single cluster, so each quality gate needs a unique, predictable endpoint that both GitHub and the cluster agree on without manual coordination.
 
-\begin{verbatim}
-https://{app}-{gate}-webhook.{domain}/{trigger-endpoint}
-\end{verbatim}
+The composition solves this through a convention-over-configuration mechanism. Both the webhook URL and the Ingress resource that exposes it are derived deterministically from two identity fields in the \texttt{XSDLC} spec: the application name and the gated environment name. The URL follows the pattern \texttt{https://\{app\}-\{gate\}-webhook.\{domain\}/\{app\}-\{gate\}-pr-trigger}. Because the Ingress resource, the EventSource endpoint, and the GitHub webhook configuration are all generated from the same identity fields by the same composition, they are guaranteed to agree. This provides three properties: (1)~no manual URL management---the operator never configures webhook endpoints; (2)~uniqueness---each gate in the cluster receives a distinct URL; and (3)~predictability---an operator can determine the webhook URL for any gate from the \texttt{XSDLC} CR's fields alone.
 
-For the reference deployment, this resolves to \texttt{https://perfect-api-staging-gate-webhook.private.novelcore.org/perfect-api-staging-gate-pr-trigger}. The Traefik Ingress controller terminates TLS (using a certificate issued by cert-manager), routes the request to the EventSource Service, and delivers the payload to the webhook listener on port~12000.
+The Ingress resource carries a cert-manager annotation that triggers automatic TLS certificate provisioning. TLS termination happens at the Ingress controller (Traefik), so the EventSource receives plaintext HTTP on port~12000 internally. This is an instance of the platform inheritance design goal (Section~\ref{subsec:k8s-design-goals}): the application developer never configures TLS certificates or ingress routing; the platform provides these capabilities, and the composition references them. For the reference deployment, the staging gate resolves to \texttt{https://perfect-api-staging-gate-webhook.private.novelcore.org/\allowbreak perfect-api-staging-gate-pr-trigger}.
 
 % ----------------------------------------------------------------------------
 \subsection{Event Processing}
@@ -66,81 +64,93 @@ For matching events, the Sensor extracts ten parameters from the webhook payload
 The end-to-end latency from webhook delivery to workflow completion depends on three factors: event processing overhead (typically under 2~seconds for EventSource $\rightarrow$ EventBus $\rightarrow$ Sensor $\rightarrow$ workflow submission), source readiness wait (0--120~seconds, depending on whether the deployment is already healthy), and validation execution time (10--60~seconds, depending on specification size and validation mode). In practice, a typical validation cycle for the reference API completes in under 90~seconds from PR creation to commit status posted.
 
 % ============================================================================
-\section{Single-Repo Architecture}
-\label{sec:single-repo}
+\section{Two-Repo Architecture}
+\label{sec:two-repo}
 % ============================================================================
 
-The quality gate system described in this thesis operates within a \textit{single-repository} model that deliberately separates application CI from platform-managed delivery. This section describes the architectural rationale, the boundary between developer and platform responsibilities, and the manifest propagation mechanism that bridges the two.
+The quality gate system operates within a \textit{two-repository} model that enforces a clean separation between the developer's software and the platform's delivery infrastructure. The software repository is entirely developer-owned and untouched by XSDLC. A dedicated GitOps repository is auto-created by the XSDLC composition to hold Kubernetes manifests on per-environment branches. This section describes the architectural rationale, the boundary between developer and platform responsibilities, and the BYOCI integration contract.
 
 % ----------------------------------------------------------------------------
-\subsection{Why a Single Repository}
-\label{subsec:why-single-repo}
+\subsection{Why a Dedicated GitOps Repository}
+\label{subsec:why-two-repo}
 % ----------------------------------------------------------------------------
 
-Traditional GitOps deployments maintain a separate \textit{config repository} alongside the application's source repository. The config repo holds Kubernetes manifests for each environment; a CI pipeline in the source repo updates the config repo on each build. This pattern doubles the number of repositories, fragments the change history across two Git logs, and introduces a synchronization pipeline (``update the config repo'') that must itself be maintained and monitored.
+Traditional GitOps deployments face a tension between two concerns: the developer wants to keep manifests close to the source code for co-evolution, while the platform needs a clean Git-based state store that ArgoCD can watch without being polluted by source code history, CI artifacts, or unrelated commits. Single-repo models that embed manifests in the application repository conflate these concerns: every source commit appears in the ArgoCD diff view, and environment branches---which contain only Kubernetes manifests---create orphan or divergent histories when created in a repository whose \texttt{main} branch carries application source code, tests, and CI configuration. These divergent branches are confusing to developers, pollute the branch namespace, and make the repository's Git history difficult to reason about.
 
-The XSDLC model eliminates this duplication. The application repository holds both source code and Kubernetes manifests in a single tree:
+The XSDLC v3.0.0 model resolves this tension by separating the two concerns into two repositories. The software repository remains untouched; XSDLC auto-creates a dedicated GitOps repository per application that holds dry Kustomize manifests on the \texttt{main} branch and hydrated output on per-environment branches:
 
 \begin{verbatim}
-perfect-api/
-  src/                     # Application source
-  Dockerfile               # Build specification
-  manifests/
-    deployment.yaml        # Kubernetes deployment manifest
-    service.yaml           # Kubernetes service manifest
+perfect-api/                    # Software repository (untouched)
+  src/                          # Application source
+  Dockerfile                    # Build specification
+
+perfect-api-gitops/             # GitOps repository (auto-created)
+  main branch:
+    dry/
+      base/                     # Shared manifests
+        kustomization.yaml      # references deployment.yaml + service.yaml
+        deployment.yaml
+        service.yaml
+      overlays/                 # Per-environment customization
+        dev/kustomization.yaml
+        staging/kustomization.yaml
+        prod/kustomization.yaml
+
+  environment/dev-next   →      # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
+  environment/dev        →      # Merged by Promoter from dev-next
+  environment/staging-next →    # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
+  environment/staging    →      # Merged by Promoter (after gate passes)
+  environment/prod-next  →      # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
+  environment/prod       →      # Merged by Promoter (after gate passes)
 \end{verbatim}
 
-The developer maintains the manifests alongside the source code. When a CI pipeline builds a new container image, it updates \texttt{manifests/deployment.yaml} with the new image tag and pushes to \texttt{main}. The XSDLC delivery pipeline takes over from there, propagating manifests to environment branches, gating promotions, and syncing through ArgoCD. The developer never creates or manages environment branches, promotion PRs, or ArgoCD Applications---the XSDLC composition provisions all of these.
+The GitOps repository's \texttt{main} branch holds dry Kustomize manifests organized as a base-plus-overlays structure. Each environment has its own overlay that references the shared base and can customize deployment parameters (replicas, resource limits, environment variables, image tags). The ArgoCD Source Hydrator~\cite{argocd-hydrator} renders each overlay independently and writes the hydrated output---along with a \texttt{hydrator.metadata} file containing the dry commit SHA---to the corresponding \texttt{environment/<name>-next} branch. The GitOps Promoter detects the new commit and creates a promotion PR from the \texttt{-next} branch to the active branch. Quality gates fire on these PRs; ArgoCD syncs from the active branch once the PR is merged.
+
+Per-environment branches and their corresponding \texttt{-next} branches are created by the XSDLC composition via \texttt{provider-upjet-github}. The software repository is never modified by XSDLC---no workflows are generated, no files are committed, no branches are created. This zero-touch property means that XSDLC can be adopted without any changes to the developer's existing repository structure, CI configuration, or branching strategy.
+
+The developer updates dry manifests on the \texttt{main} branch of the GitOps repository. The hydrator and Promoter handle the rest: rendering overlays, writing to \texttt{-next} branches, creating promotion PRs, triggering quality gates, and merging when gates pass. Because each environment hydrates independently from \texttt{main}, deploying to a specific environment requires only updating its overlay---there is no requirement to propagate changes through earlier environments first.
 
 % ----------------------------------------------------------------------------
 \subsection{Bring Your Own CI (BYOCI)}
 \label{subsec:byoci}
 % ----------------------------------------------------------------------------
 
-The single-repo model embodies a deliberate design principle: \textbf{XSDLC owns delivery, not CI}. The boundary is explicit: \textit{XSDLC's responsibility begins when manifests land on \texttt{main}}.
+The two-repo model embodies a deliberate design principle: \textbf{XSDLC owns delivery, not CI}. The boundary is explicit: \textit{XSDLC's responsibility begins when dry manifests are committed to the \texttt{main} branch of the GitOps repository}.
 
-Everything \textit{before} that boundary is the developer's responsibility: building the application, running unit tests, generating the container image, and updating the manifest with the new image tag. These tasks are inherently application-specific---a Python FastAPI service uses different build tools, test frameworks, and container patterns than a Go gRPC service. No platform abstraction can usefully generalize this diversity without either constraining developer choice or reimplementing CI functionality that mature tools (GitHub Actions, Jenkins, GitLab CI) already provide.
+Everything \textit{before} that point is the developer's responsibility: building the application, running unit tests, generating the container image, and updating dry manifests (base resources or per-environment overlays) on the \texttt{main} branch. These tasks are inherently application-specific---a Python FastAPI service uses different build tools, test frameworks, and container patterns than a Go gRPC service. XSDLC does not generate workflows, provide build templates, or prescribe how dry manifests are authored. The developer can use GitHub Actions, GitLab CI, Jenkins, a shell script, or a manual \texttt{git push}---the platform is agnostic.
 
-Everything \textit{after} that boundary is XSDLC's responsibility: propagating manifests to environment branches, triggering quality gates, managing promotion PRs, posting commit statuses, and syncing ArgoCD Applications. These tasks are platform-generic---the same propagation, gating, and promotion pattern applies regardless of the application's language, framework, or build tool.
+Everything \textit{after} the commit is XSDLC's responsibility. The ArgoCD Source Hydrator renders the Kustomize overlays and writes hydrated output to \texttt{-next} branches. The GitOps Promoter detects the change, creates promotion PRs, quality gates validate the source environment, commit statuses gate merges, and ArgoCD auto-syncs the result. These tasks are platform-generic---the same hydration, promotion, gating, and sync pattern applies regardless of the application's language, framework, or build tool.
 
-This separation contrasts with opinionated CD platforms (Tekton Pipelines, Jenkins X) that attempt to own the full CI/CD lifecycle, providing build templates, test runners, and deployment strategies within a single framework. Such platforms trade flexibility for integration: they work well when the application fits their model and poorly when it does not. XSDLC is composable rather than monolithic---it integrates with any CI system that can push manifest changes to \texttt{main}.
+This separation contrasts with opinionated CD platforms (Tekton Pipelines, Jenkins X) that attempt to own the full CI/CD lifecycle. Such platforms trade flexibility for integration: they work well when the application fits their model and poorly when it does not. XSDLC is composable rather than monolithic---it integrates with any CI system that can commit manifests to a Git branch.
 
 % ----------------------------------------------------------------------------
-\subsection{Manual Deploy Flow}
-\label{subsec:manual-deploy}
+\subsection{Manifest Delivery}
+\label{subsec:manifest-delivery}
 % ----------------------------------------------------------------------------
 
-The bridge between the developer and the XSDLC delivery pipeline is the \texttt{driveby-deploy.yml} workflow, generated by the XSDLC composition and committed to the application repository via \texttt{provider-upjet-github} (Section~\ref{subsec:generated-github}).
+The quality gate pipeline is triggered by a single primitive: \textit{a commit to the \texttt{main} branch of the GitOps repository that modifies dry manifests}. This is the entire integration contract between the developer's CI and the XSDLC delivery platform. XSDLC generates no workflows, commits no files to the software repository, and prescribes no tooling. Any system---GitHub Actions, GitLab CI, Jenkins, a shell script, or a manual \texttt{git push}---that can update Kustomize manifests on the \texttt{main} branch can trigger the full hydration, promotion, and quality gate flow.
 
-The workflow is triggered manually via \texttt{workflow\_dispatch} with three inputs: the source branch to take manifests from, the target environment (presented as a choice dropdown generated from the XSDLC's environments array), and the container image tag to deploy. When triggered, it:
+The contract requires only that valid Kustomize manifests appear on the \texttt{main} branch. The developer edits the shared base (\texttt{dry/base/}) for cross-environment changes or a specific overlay (\texttt{dry/overlays/<env>/}) for environment-specific customization (replicas, image tags, resource limits). The ArgoCD Source Hydrator renders each affected overlay and writes hydrated output to the corresponding \texttt{-next} branch. The Promoter detects the change, creates a promotion PR to the active branch, triggers quality gates if configured, and merges the PR when gates pass (or waits for human approval if \texttt{autoMerge: false}). ArgoCD auto-syncs the active branch's \texttt{manifests/} path to the target namespace.
 
-\begin{enumerate}
-    \item Checks out the \texttt{environment/<name>-next} branch (creating an orphan branch on first deploy).
-    \item Cleans the branch root (removing previous manifest state).
-    \item Copies the \texttt{manifests/} directory from the source branch to the branch root, flattening the directory structure.
-    \item Stamps the image tag into \texttt{deployment.yaml} via \texttt{sed}.
-    \item Commits and pushes to the \texttt{-next} branch.
-\end{enumerate}
-
-This design makes deployment explicit and targeted: the developer chooses which branch to deploy and which environment to target. Unlike an automated propagation model that fans out to all environments simultaneously, the manual trigger allows deploying a feature branch to \texttt{dev} without affecting \texttt{staging} or \texttt{prod}.
+The GitOps repository, its environment branches, and its dry manifest scaffolding are provisioned automatically by XSDLC. The developer never creates environment branches, overlay directories, promotion PRs, ArgoCD Applications, or quality gate infrastructure---the \texttt{XSDLC} custom resource provisions all of these. The developer's sole responsibility is updating dry manifests on \texttt{main}.
 
 % ----------------------------------------------------------------------------
 \subsection{Branch Topology}
 \label{subsec:branch-topology}
 % ----------------------------------------------------------------------------
 
-Figure~\ref{fig:single-repo-branch-flow} shows the complete branch topology for a three-environment pipeline.
+Figure~\ref{fig:single-repo-branch-flow} shows the branch topology in the GitOps repository for a three-environment pipeline.
 
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{%
 \input{figures/single-repo-branch-flow.tex}%
 }
-\caption{Single-repo branch topology. The developer triggers \texttt{driveby-deploy.yml} to push manifests from \texttt{main} to a single \texttt{-next} branch; the Promoter creates PRs to active branches; quality gates control promotion; ArgoCD syncs from active branches. The BYOCI boundary is annotated: developer CI ends at \texttt{main}, XSDLC delivery begins at the deploy step.}
+\caption{Two-repo branch topology. The developer commits dry manifests to \texttt{main} in the auto-created GitOps repository. The ArgoCD Source Hydrator renders per-environment overlays and writes hydrated output to \texttt{-next} branches. The Promoter creates PRs to active branches; quality gates control promotion; ArgoCD auto-syncs from active branches. The software repository is untouched---the BYOCI boundary separates developer CI from XSDLC delivery entirely.}
 \label{fig:single-repo-branch-flow}
 \end{figure}
 
-The branch graph flows from \texttt{main} through the deploy workflow to a single \texttt{environment/<name>-next} branch per trigger. The Promoter creates promotion PRs from each \texttt{-next} branch to its active \texttt{environment/<name>} branch. Quality gates (when defined) evaluate before the PR is merged. ArgoCD watches each active branch and syncs the corresponding namespace.
+The branch graph flows from the developer's commit on \texttt{main} through the hydrator to each \texttt{environment/<name>-next} branch independently. The Promoter creates promotion PRs from each \texttt{-next} branch to its active \texttt{environment/<name>} branch. Quality gates (when defined) evaluate before the PR is merged. ArgoCD watches each active branch and syncs the corresponding namespace from the \texttt{manifests/} path.
 
 % ============================================================================
 \section{Multi-Environment Promotion}
@@ -159,19 +169,21 @@ The GitOps Promoter~\cite{gitops-promoter} automates environment promotion by wa
 \end{figure}
 
 % ----------------------------------------------------------------------------
-\subsection{PromotionStrategy}
+\subsection{PromotionStrategy Generation}
 \label{subsec:promotion-strategy}
 % ----------------------------------------------------------------------------
 
-The PromotionStrategy custom resource defines the environment chain and the commit status keys that gate each transition. For the reference deployment, the strategy specifies three environments:
+The PromotionStrategy is not authored manually. The XSDLC composition generates it declaratively from the \texttt{environments[]} array in the XRD spec. Each environment entry produces a corresponding element in the PromotionStrategy's environment chain, with three derived fields computed automatically:
 
-\begin{enumerate}
-    \item \textbf{Development} (\texttt{dev} branch, \texttt{autoMerge: true}). Changes from the deploy workflow are automatically merged by the Promoter. No quality gate---development is the environment where new code lands first.
-    \item \textbf{Staging} (\texttt{staging} branch, \texttt{autoMerge: true}). Promotion from development to staging is gated by the \texttt{staging-gate} commit status (the default key derived from the environment name). The Promoter creates a promotion PR, waits for the commit status to report success, and merges automatically. If the commit status reports failure, the PR remains open and promotion is blocked.
-    \item \textbf{Production} (\texttt{prod} branch, \texttt{autoMerge: false}). Promotion from staging to production requires manual approval. A human reviewer must merge the promotion PR, providing a final checkpoint before production deployment.
-\end{enumerate}
+\begin{itemize}
+    \item \textbf{Branch}: defaults to \texttt{environment/<name>} but overridable per environment via \texttt{branch}.
+    \item \textbf{autoMerge}: defaults to \texttt{true}; set to \texttt{false} on any environment that requires human approval before promotion.
+    \item \textbf{commitStatusKey}: defaults to \texttt{<envName>-gate}; overridable via \texttt{gate.commitStatusKey}. The key must match between the PromotionStrategy (which watches for it) and the Argo Workflow (which posts it).
+\end{itemize}
 
-This two-tier model balances automation with safety. Development and staging promotions are fully automated (with DDT gating the staging transition); production promotion retains human oversight. Teams can adjust the \texttt{autoMerge} setting per environment to match their risk tolerance.
+This generation model is environment-count agnostic. The composition iterates over the \texttt{environments[]} array with \texttt{range}, producing a PromotionStrategy with \textit{N} environments for any \textit{N} $\geq$ 2. A two-environment chain (dev $\rightarrow$ prod) and a five-environment chain (dev $\rightarrow$ qa $\rightarrow$ staging $\rightarrow$ preprod $\rightarrow$ prod) are both expressed as XSDLC arrays; the composition handles both without modification.
+
+The key design property is \textit{per-environment composability}. Each environment independently controls three dimensions: \textit{whether} a gate exists (\texttt{gate} presence), \textit{what} the gate checks (\texttt{gate.checks[]} array), and \textit{how} promotion proceeds after the gate passes (\texttt{autoMerge}). This produces a combinatorial space of pipeline configurations from a single composition template. For example, a team can run static validation on staging and load testing on production, or functional tests on both, or no gate on any environment---all without modifying the underlying Crossplane composition or Helm chart.
 
 % ----------------------------------------------------------------------------
 \subsection{CommitStatus as Quality Signal}
@@ -198,7 +210,7 @@ The ChangeTransferPolicy defines how changes flow between environments at the Gi
 
 The GitOps Promoter is itself a Kubernetes controller that implements the observe-diff-act pattern (Section~\ref{subsec:reconciliation-loop}) at the Git level rather than the cluster level.
 
-\textbf{Observe.} The PromotionStrategy controller watches two resource types: GitRepository (which tracks the application repository) and CommitStatus (which reports quality gate results). It periodically polls the Git repository to detect changes on proposed branches and reads CommitStatus resources to determine gate outcomes.
+\textbf{Observe.} The PromotionStrategy controller watches two resource types: GitRepository (which tracks the gitops repository) and CommitStatus (which reports quality gate results). It periodically polls the Git repository to detect changes on proposed branches and reads CommitStatus resources to determine gate outcomes.
 
 \textbf{Diff.} For each environment in the promotion chain, the controller compares the proposed branch (\texttt{environment/<name>-next}) against the active branch (\texttt{environment/<name>}). If the branches differ, a promotion is pending. It then checks whether all required CommitStatuses report \texttt{success}. If any CommitStatus reports \texttt{failure} or \texttt{pending}, the promotion is blocked.
 
@@ -223,34 +235,20 @@ The system supports four points on the automation spectrum, controlled by two bo
 \begin{enumerate}
     \item \textbf{Fully automated} (development): \texttt{autoMerge: true}, automated sync. After the developer triggers a deploy, changes flow from the \texttt{-next} branch, are auto-merged by the Promoter, and auto-synced by ArgoCD. No further human intervention after the initial trigger.
     \item \textbf{Automated with quality gate} (staging): \texttt{autoMerge: true}, automated sync, with a commit status gate. The Promoter waits for DDT validation to report success before merging. If validation fails, the PR remains open until the developer fixes the issue and re-pushes. Once the gate passes, promotion and sync are automatic.
-    \item \textbf{Gated with human approval} (production): \texttt{autoMerge: false}, manual sync. The Promoter creates the PR and DDT validates the source environment, but a human must explicitly merge the promotion PR. Even after merge, ArgoCD requires manual sync (since automated sync is disabled). Two human checkpoints bookend the quality gate.
-    \item \textbf{Fully manual}: no quality gate, manual merge, manual sync. This mode is possible but unused in the reference deployment---it offers no advantage over the gated model.
+    \item \textbf{Gated with human approval} (production): \texttt{autoMerge: false}, auto-sync. The Promoter creates the PR and DDT validates the source environment, but a human must explicitly merge the promotion PR. Once merged, ArgoCD auto-syncs the change. The single human checkpoint is the merge decision---ArgoCD always reflects the branch state.
+    \item \textbf{Fully manual merge}: no quality gate, manual merge, auto-sync. This mode is possible but unused in the reference deployment---it offers no advantage over the gated model. ArgoCD still auto-syncs once the branch is updated.
 \end{enumerate}
 
-% ----------------------------------------------------------------------------
-\subsection{Decision Points}
-\label{subsec:decision-points}
-% ----------------------------------------------------------------------------
-
-Figure~\ref{fig:human-in-the-loop} maps the decision points across the staging and production lanes.
+Figure~\ref{fig:human-in-the-loop} illustrates how these two configurable slots---quality gate and merge policy---compose independently per environment. ArgoCD always auto-syncs; the sync policy is fixed. Each configurable slot is a modular parameter in the XSDLC spec; the composition renders the appropriate infrastructure (branch protection rules, CommitStatus gates) based on the selected values. Adding a quality gate or switching from auto-merge to manual approval are each single-field changes that independently affect one slot without impacting the other.
 
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{%
 \input{figures/human-in-the-loop.tex}%
 }
-\caption{Human-in-the-loop patterns. Staging automates everything except code authorship; production adds human approval at the promotion PR merge and ArgoCD sync points. Green steps are automated; amber steps require human judgment.}
+\caption{Modular automation spectrum. Each environment is a pipeline of four stages with two independently configurable slots: quality gate (\texttt{gate.checks[]}) and merge policy (\texttt{autoMerge}). ArgoCD always auto-syncs. The composition renders different infrastructure for each combination---from fully automated (Env$_1$: no gate, auto-merge, auto-sync) through gated automation (Env$_2$: DDT + functional test, auto-merge) to human-controlled merge (Env$_N$: DDT + load test, manual approval, auto-sync). The Propagate and Sync stages are fixed; quality gate and merge policy are configurable per environment.}
 \label{fig:human-in-the-loop}
 \end{figure}
-
-All human intervention points in the system are:
-
-\begin{enumerate}
-    \item \textbf{Code authorship}: the developer writes the code and updates manifests. This is inherently human (or human-supervised, in the case of AI-assisted development).
-    \item \textbf{PR review} (\texttt{autoMerge: false}): a human reviews the promotion PR and decides whether to merge. This checkpoint applies to production promotions, where the decision involves business timing, release coordination, and risk assessment---subjective factors that DDT does not measure.
-    \item \textbf{ArgoCD sync} (manual sync): a human triggers synchronization in the ArgoCD UI. This checkpoint ensures that production deployments are initiated deliberately, not as an automatic consequence of a merge.
-    \item \textbf{Failure diagnosis}: when a quality gate fails, a human (or autonomous agent) must diagnose the failure, fix the issue, and re-push. The DDT validation report provides per-principle diagnostics to guide this process.
-\end{enumerate}
 
 % ----------------------------------------------------------------------------
 \subsection{Automation with Human Override}
@@ -266,30 +264,37 @@ The \texttt{autoMerge: false} setting is a deliberate architectural choice, not 
 \label{sec:control-loop}
 % ============================================================================
 
-This section synthesizes the architectural components described in Chapters~\ref{ch:architecture},~\ref{ch:kubernetes}, and the preceding sections of this chapter into a single control-theoretic framework. The quality gate system implements a \textit{closed-loop negative feedback} controller~\cite{astrom-feedback} that maintains API quality across the delivery pipeline.
+The quality gate system forms a \textit{closed-loop negative feedback} controller~\cite{astrom-feedback}: the OpenAPI specification defines the desired contract, DriveBy measures the deployed API against it, and the result either advances or blocks promotion. This section maps the system's components to control-theoretic primitives and explains why this framing matters for convergence and robustness.
 
 % ----------------------------------------------------------------------------
 \subsection{Control Theory Mapping}
 \label{subsec:control-mapping}
 % ----------------------------------------------------------------------------
 
-The mapping from control theory to the DriveBy quality gate system is direct:
+Table~\ref{tab:control-mapping} maps each control-theoretic role to its concrete implementation in the DriveBy architecture.
 
-\begin{description}
-    \item[Desired State (Setpoint):] The OpenAPI specification declares the desired API contract---the schemas, operations, error responses, security definitions, and documentation that the API should provide. This is the reference input against which the system measures deviation.
+\begin{table}[htbp]
+\centering
+\caption{Control theory mapping to DriveBy quality gate components.}
+\label{tab:control-mapping}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Control Role} & \textbf{Implementation} & \textbf{Function} \\
+\midrule
+Setpoint       & OpenAPI specification       & Desired API contract \\
+Plant          & API deployment (source env) & Running service under test \\
+Sensor         & DriveBy CLI                 & Validates spec against live API \\
+Controller     & Argo Workflow DAG           & Orchestrates checks, emits pass/fail \\
+Actuator       & CommitStatus + Promoter     & Merges or blocks promotion PR \\
+Feedback       & Developer fix cycle         & Re-deploy $\rightarrow$ re-validate $\rightarrow$ converge \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-    \item[Plant:] The API deployment in the source environment (e.g., \texttt{perfect-api-dev}) is the controlled process. Its behavior---response schemas, error codes, latency characteristics---is the output being regulated.
+The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that DDT explicitly prevents.
 
-    \item[Sensor:] The DriveBy CLI is the measurement instrument. It observes the plant's output by fetching the specification, validating it against the DDT principles, and producing a structured report. The sensor converts the plant's complex, multidimensional behavior into a scalar quality signal (pass/fail per principle, aggregate score).
-
-    \item[Controller:] The Argo Workflow DAG is the decision-making component. It orchestrates the sensor (DriveBy validation steps), evaluates the results, and produces a control signal. The controller implements a simple threshold policy: if all checks pass, emit ``success''; if any check fails, emit ``failure''. The exit handler guarantees that the controller always produces a signal---no workflow terminates without an explicit quality verdict.
-
-    \item[Actuator:] The CommitStatus CRD and the GitOps Promoter together form the actuator---the component that translates the control signal into physical action. A ``success'' signal causes the Promoter to merge the promotion PR, advancing the deployment. A ``failure'' signal causes the Promoter to hold the PR open, blocking advancement.
-
-    \item[Feedback Loop:] The Promoter closes the loop. When promotion is blocked (failure signal), the developer must diagnose the issue, fix the code or specification, and re-trigger the deploy workflow. The new manifests update the \texttt{-next} branch, the Promoter updates the PR, and the quality gate re-evaluates. The system iterates until the plant's behavior converges with the desired state.
-\end{description}
-
-Figure~\ref{fig:quality-control-loop} illustrates this mapping.
+Figure~\ref{fig:quality-control-loop} illustrates the closed loop.
 
 \begin{figure}[htbp]
 \centering
@@ -301,75 +306,56 @@ Figure~\ref{fig:quality-control-loop} illustrates this mapping.
 \end{figure}
 
 % ----------------------------------------------------------------------------
-\subsection{Negative Feedback and Convergence}
+\subsection{Convergence and Robustness}
 \label{subsec:negative-feedback}
 % ----------------------------------------------------------------------------
 
-The feedback is \textit{negative}: validation failure produces a signal that opposes the direction of change (blocking promotion rather than advancing it). This is the defining characteristic of a regulating control loop~\cite{astrom-feedback}. Without negative feedback, a failing API would be promoted to staging and then to production, with quality problems detected only after deployment---the shift-right antipattern that DDT explicitly prevents.
+Each quality gate evaluation is a discrete sample: pass or fail. When validation fails, the developer fixes the issue and re-triggers the deploy workflow. The new manifests land on the \texttt{-next} branch, the Promoter updates the PR, and the gate re-evaluates. The loop iterates until the API conforms to its specification---convergence is driven by the developer's corrective action, gated by DriveBy's objective assessment.
 
-The convergence dynamics depend on the developer response. Each quality gate evaluation is a discrete sampling of the plant's state. The developer's fix attempt modifies the plant. The next evaluation samples the modified state. If the fix addresses the failing principle, the quality signal transitions from ``failure'' to ``success'' and the loop converges. If the fix is incomplete, the signal remains ``failure'' and the loop iterates.
-
-The level-triggered nature of the Kubernetes controller pattern (Section~\ref{subsec:reconciliation-loop}) ensures that the control loop is robust to transient failures. If a workflow fails due to infrastructure issues (pod eviction, network timeout) rather than validation failure, the exit handler posts a ``failure'' status. The developer re-pushes (or the Promoter detects the branch change), and the workflow re-executes. The system does not require manual re-triggering because the Promoter continuously reconciles the branch state.
+The Kubernetes controller model (Section~\ref{subsec:reconciliation-loop}) makes this loop robust to transient failures. If a workflow fails due to pod eviction or network timeout, the exit handler posts a ``failure'' status. On the next branch change, the Promoter triggers re-evaluation automatically. No manual re-triggering is needed because the system is level-triggered: it reacts to current state, not to events it might have missed.
 
 % ----------------------------------------------------------------------------
-\subsection{Connecting Theory to Implementation}
+\subsection{Connecting Axioms to Control Requirements}
 \label{subsec:theory-implementation}
 % ----------------------------------------------------------------------------
 
-This control-theoretic framing connects the abstract ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation} of Chapter~\ref{ch:related-work} to the concrete implementation described in this thesis.
+This control-theoretic framing connects to the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation}: the specification is the ontological artifact, the DriveBy CLI is the reconciliation agent, and the quality gate is the correction mechanism.
 
-In Section~\ref{subsec:ontological-reconciliation}, we defined ontological state reconciliation as requiring three components: an ontological artifact (the specification), a reconciliation agent (the validator), and a correction mechanism (the quality gate). The control loop formalization adds precision: the specification is the setpoint, the validator is the sensor, and the quality gate is the controller-actuator pair that closes the feedback loop.
+The three DDT axioms map to necessary control-loop properties. \textit{Completeness} requires that the setpoint fully characterizes the desired behavior---an incomplete specification produces an under-determined loop that cannot distinguish conforming from non-conforming APIs. \textit{Determinism} requires consistent sensor output---a non-deterministic validator would oscillate between pass and fail for identical states. \textit{Observability} requires structured, actionable output---without it, feedback degenerates into a binary gate with no diagnostic value, and developers cannot identify what to fix.
 
-The three DDT axioms map directly to control-theoretic requirements. The \textit{Axiom of Completeness} requires that the setpoint (specification) is expressive enough to fully characterize the desired behavior---an incomplete setpoint produces an under-determined control loop that cannot distinguish conforming from non-conforming behavior. The \textit{Axiom of Determinism} requires that the sensor (validator) produces consistent measurements---a non-deterministic sensor would cause the control loop to oscillate between pass and fail for identical plant states. The \textit{Axiom of Observability} requires that the sensor's output is structured and actionable---an unobservable control loop cannot inform corrective action, and the feedback degenerates into a binary gate with no diagnostic value.
-
-The quality gate system thus instantiates a well-defined control loop in which every component---setpoint, sensor, controller, actuator, and feedback path---has a concrete implementation in the DriveBy architecture. This is not a metaphorical mapping; it is a structural correspondence that explains why the system converges, why it is robust to transient failures, and why the axiomatic foundation is necessary rather than merely desirable.
+This is not a metaphorical mapping. Each component---setpoint, sensor, controller, actuator, feedback path---has a concrete implementation. The correspondence explains why the system converges, why it self-heals, and why the axiomatic foundation is necessary rather than merely desirable.
 
 % ============================================================================
 \section{CI/CD of DriveBy Itself}
 \label{sec:cicd-driveby}
 % ============================================================================
 
-DriveBy's own development is governed by three GitHub Actions~\cite{github-actions} workflows that implement continuous integration, continuous delivery, and release automation. These pipelines demonstrate that the project practices what it preaches: automated quality gates at every stage of the delivery lifecycle.
+DriveBy's own development pipeline serves as a reflexive demonstration of the DDT methodology: the tool that validates API quality is itself subject to automated quality gates at every stage of delivery. The pipeline design follows three principles: (1)~a \textit{test gate} that blocks all artifact production---no binary, image, or chart is published unless tests pass; (2)~\textit{parallel artifact generation}---independent outputs (binaries, container images, Helm charts) are produced concurrently to minimize release latency; and (3)~\textit{multi-format distribution}---a single Git tag produces version-aligned artifacts across three distribution channels, ensuring that consumers always reference a consistent release. Three GitHub Actions~\cite{github-actions} workflows implement these principles.
 
 % ----------------------------------------------------------------------------
 \subsection{Continuous Integration}
 \label{subsec:ci-pipeline}
 % ----------------------------------------------------------------------------
 
-The \texttt{ci.yml} workflow triggers on every push to \texttt{main} and every pull request. It runs a single \texttt{build-and-test} job on Ubuntu with Go~1.21 that executes four steps:
+The \texttt{ci.yml} workflow implements a layered validation strategy where each layer provides a different kind of assurance: compilation verifies build integrity, static analysis detects code-level defects, testing validates behavioral correctness, and a documentation check enforces meta-validation---that documentation artifacts remain synchronized with the codebase. This last layer embodies a DDT-adjacent principle: documentation completeness should be verified automatically, not assumed. The documentation check scans CLAUDE.md files and documentation entries against the source tree, failing the build when they diverge.
 
-\begin{enumerate}
-    \item \textbf{Build}: Compiles the DriveBy binary with version and commit SHA injected via \texttt{ldflags}.
-    \item \textbf{Static analysis}: Runs \texttt{go vet} to detect common Go errors.
-    \item \textbf{Test}: Executes the test suite from \texttt{driveby-cli/test/} with coverage profiling (\texttt{-coverprofile=coverage.out}).
-    \item \textbf{Documentation check}: Runs \texttt{tools/check-docs.sh} to verify that all documented components exist and all source files have corresponding documentation entries.
-\end{enumerate}
-
-The documentation check is a meta-validation step: it ensures that the CLAUDE.md files and documentation artifacts remain synchronized with the codebase. This check embodies a DDT-adjacent principle---documentation completeness should be verified automatically, not assumed.
-
-On pull requests, the workflow uploads the coverage artifact for review. On pushes to \texttt{main}, a subsequent \texttt{docker} job builds the container image (without pushing) to verify the Docker build remains functional.
+The workflow uses a two-tier triggering strategy. On pull requests, it runs all four validation layers and uploads coverage artifacts for review, providing fast feedback during development. On pushes to \texttt{main}, it additionally builds the container image (without pushing) to verify that the Docker build remains functional on the mainline. This tiered approach ensures that PRs receive rapid validation while the mainline maintains a stricter invariant: every commit on \texttt{main} is both tested and container-buildable.
 
 % ----------------------------------------------------------------------------
 \subsection{Docker Image Publishing}
 \label{subsec:docker-publish}
 % ----------------------------------------------------------------------------
 
-The \texttt{docker-publish.yml} workflow publishes container images to the GitHub Container Registry (GHCR) on pushes to \texttt{main} when files in \texttt{driveby-cli/} change. It uses Docker Buildx~\cite{docker-buildx} for multi-platform builds, injecting three build arguments:
+The \texttt{docker-publish.yml} workflow uses path-scoped triggering: it fires only when files under \texttt{driveby-cli/} change on pushes to \texttt{main}, avoiding unnecessary image builds for documentation-only or thesis-only changes. This scoping mechanism ensures that the container image is rebuilt exactly when the validation logic changes and not otherwise.
 
-\begin{itemize}
-    \item \texttt{VERSION}: The current Git tag or \texttt{dev} for unreleased commits.
-    \item \texttt{COMMIT}: The short Git SHA.
-    \item \texttt{BUILD\_DATE}: The ISO-8601 build timestamp.
-\end{itemize}
-
-Images are tagged with \texttt{latest} and the short commit SHA. Layer caching via GitHub Actions Cache reduces build times for incremental changes. The resulting image at \texttt{ghcr.io/meter-peter/driveby} is the same image used by the Argo Workflows validation pipeline.
+The workflow produces images with a dual-tagging strategy that serves two distinct consumers. The \texttt{latest} tag provides a mutable reference for development clusters and Argo Workflows templates that should always run the newest version. The short commit SHA tag provides an immutable reference for production traceability---given a workflow run, an operator can trace the exact binary that executed by inspecting the image tag. Docker Buildx~\cite{docker-buildx} handles multi-platform builds, and layer caching via GitHub Actions Cache reduces build times for incremental changes. The resulting image at \texttt{ghcr.io/meter-peter/driveby} is the same image used by the Argo Workflows validation pipeline.
 
 % ----------------------------------------------------------------------------
 \subsection{Release Pipeline}
 \label{subsec:release-pipeline}
 % ----------------------------------------------------------------------------
 
-The \texttt{release.yml} workflow triggers on semantic version tag pushes (\texttt{v*}) and orchestrates the full release process. Figure~\ref{fig:release-pipeline} shows the pipeline structure.
+The \texttt{release.yml} workflow implements a fan-out pattern: a single semantic version tag push (\texttt{v*}) triggers a test gate, and three independent artifact producers run in parallel after the gate passes. Figure~\ref{fig:release-pipeline} shows the pipeline structure.
 
 \begin{figure}[htbp]
 \centering
@@ -380,55 +366,45 @@ The \texttt{release.yml} workflow triggers on semantic version tag pushes (\text
 \label{fig:release-pipeline}
 \end{figure}
 
-The pipeline runs four jobs:
+The test gate re-runs static analysis and the test suite. All subsequent jobs depend on this gate, enforcing the invariant that no artifacts are produced from untested code. This is the release-level analog of the quality gate pattern: just as DDT blocks promotion on validation failure, the test gate blocks artifact production on test failure.
 
-\textbf{Test gate.} Re-runs \texttt{go vet} and the test suite. All subsequent jobs depend on this gate---no artifacts are produced if tests fail.
+The three parallel producers each address a distinct distribution channel. GoReleaser~\cite{goreleaser} produces cross-compiled platform binaries with SHA256 checksums and an auto-generated changelog, targeting direct CLI consumption. The Docker job produces container images with a semver-derived tagging strategy---full version, major.minor, and \texttt{latest}---that lets consumers choose their stability-versus-freshness trade-off: pinning to a patch version for reproducibility, tracking a minor version for compatible updates, or always using the latest release. The Helm job packages the chart and pushes it to the OCI registry (Section~\ref{subsec:oci-distribution}).
 
-\textbf{GoReleaser.} Uses GoReleaser~\cite{goreleaser}~v2 to produce cross-compiled binaries for six platforms: Linux, macOS, and Windows on both amd64 and arm64 architectures. GoReleaser generates SHA256 checksums for each binary and creates a GitHub Release with the binaries, checksums, and an auto-generated changelog attached. The release changelog summarizes commits since the previous tag.
-
-\textbf{Docker.} Builds and pushes the container image with three semver-derived tags: the full version (\texttt{0.4.0}), the major.minor (\texttt{0.4}), and \texttt{latest}. This tagging strategy enables consumers to pin to a specific patch version, track a minor version, or always use the latest release.
-
-\textbf{Helm.} Packages the Helm chart from \texttt{kubernetes/helm/driveby/} and pushes it to the OCI registry at \texttt{oci://ghcr.io/meter-peter/charts/driveby}. The chart version matches the release tag, ensuring that the chart, container image, and CLI binary are version-aligned.
-
-The three artifact-producing jobs run in parallel after the test gate, minimizing release time. A typical release completes in under five minutes from tag push to all artifacts published.
+The key design property is \textit{version alignment}: the chart version, container image tags, and CLI binary version are all derived from the same Git tag. This single-source-of-truth mechanism ensures that consumers can verify artifact provenance---a chart version \texttt{2.0.0} always corresponds to image tag \texttt{2.0.0} and binary version \texttt{2.0.0}---without cross-referencing build logs. The parallel execution of all three producers minimizes release latency while the shared test gate ensures atomicity: either all three artifacts are produced from tested code, or none are.
 
 % ============================================================================
 \section{Operational Deployment}
 \label{sec:operational-deployment}
 % ============================================================================
 
-The quality gate system is deployed on \texttt{private.novelcore.org}, a Kubernetes cluster managed by Kubecore with ArgoCD~\cite{argocd}, Crossplane~\cite{crossplane}, Argo Events~\cite{argo-events}, Argo Workflows~\cite{argo-workflows}, Traefik, and cert-manager pre-installed.
+The quality gate system follows a \textit{platform-inherited} deployment model: it does not install its own infrastructure but instead declares references to shared platform capabilities that are assumed to be present. This is a deliberate architectural choice that aligns with the separation between Day~0 (platform installation) and Day~1 (pipeline creation) described in Section~\ref{subsec:day0}. The production deployment runs on \texttt{private.novelcore.org}, a Kubernetes cluster managed by Kubecore.
 
 % ----------------------------------------------------------------------------
 \subsection{Prerequisites}
 \label{subsec:prerequisites}
 % ----------------------------------------------------------------------------
 
-The deployment assumes six cluster components:
+The deployment depends on six cluster components, each addressing a distinct concern in the quality gate lifecycle. Crossplane~\cite{crossplane} provides the declarative provisioning layer that translates \texttt{XSDLC} custom resources into managed child resources. ArgoCD~\cite{argocd} provides the GitOps synchronization layer that deploys applications from environment branches. Argo Workflows~\cite{argo-workflows} and Argo Events~\cite{argo-events} provide the event-driven execution layer that triggers and orchestrates validation pipelines. Traefik and cert-manager provide the network ingress layer that routes external webhooks and terminates TLS.
 
-\begin{enumerate}
-    \item \textbf{Crossplane} (v1.14+) with the \texttt{provider-kubernetes} provider for managing in-cluster resources.
-    \item \textbf{ArgoCD} (v2.8+) for GitOps-based application deployment across dev, staging, and prod namespaces.
-    \item \textbf{Argo Workflows} (v3.5+) for container-native workflow execution.
-    \item \textbf{Argo Events} (v1.9+) for event-driven workflow triggering.
-    \item \textbf{Traefik} (v2.10+) as the Ingress controller for routing webhook traffic.
-    \item \textbf{cert-manager} (v1.13+) for automated TLS certificate provisioning.
-\end{enumerate}
+These components form a layered dependency: each layer addresses a distinct concern, and the DriveBy Helm chart creates resources that \textit{reference} components at each layer (Ingress resources reference the Traefik ingress class, certificate annotations reference the cert-manager issuer, workflow submissions reference the Argo Workflows controller) without installing them. This referencing model means that DriveBy can be added to any cluster that already runs these components---a common profile for cloud-native platform teams---without conflicting with existing installations or requiring dedicated infrastructure.
 
-These components are managed independently of the DriveBy installation and are assumed to be healthy. The DriveBy Helm chart creates resources that reference these components (Ingress resources reference the Traefik ingress class, certificate annotations reference the cert-manager issuer) but does not install them.
+The production deployment on \texttt{private.novelcore.org} validates this surgical coexistence model. The cluster is Novelcore's internal development platform (IDP), built entirely on Kubernetes operators and Crossplane compositions, with ArgoCD, Argo Workflows, Argo Events, and Traefik already running in production for other workloads. GitHub is used as the SCM provider because Novelcore already operates on GitHub as its source control platform. DriveBy was installed into this \textit{existing, active cluster} without modifying any of these pre-existing installations---it created resources that reference them, not resources that replace them. The same property holds in reverse: deleting an \texttt{XSDLC} CR removes all DriveBy-managed child resources (WorkflowTemplates, Sensors, EventSources, Ingresses, BranchProtection rules) while leaving ArgoCD, Argo Workflows, and Argo Events completely untouched. Running \texttt{helm uninstall} removes the XRD and composition definitions themselves. At no point does installation or removal require restarting, reconfiguring, or redeploying any platform component. This surgical install/uninstall property is a direct consequence of the referencing model: because DriveBy never owns the infrastructure it depends on, removing DriveBy cannot destabilize the infrastructure it depends on.
 
 % ----------------------------------------------------------------------------
 \subsection{Verification}
 \label{subsec:verification}
 % ----------------------------------------------------------------------------
 
-After deployment, the operator verifies the system through four checks:
+Post-deployment verification follows a layer-by-layer strategy, validating each abstraction level independently to isolate failures:
 
 \begin{enumerate}
-    \item \textbf{Crossplane readiness}: \texttt{kubectl get composite} confirms that XSDLC resources report \texttt{READY=True}.
-    \item \textbf{Argo Events health}: \texttt{kubectl get eventbus,eventsource,sensor -n driveby} confirms all three resources are in a ready state.
-    \item \textbf{Webhook connectivity}: A test webhook payload sent to the Ingress endpoint returns a 200 response.
-    \item \textbf{End-to-end validation}: Opening a test PR on the monitored repository triggers a workflow run. The operator watches \texttt{kubectl get workflows -n driveby} for workflow completion and verifies that commit status and PR comments appear on the test PR.
+    \item \textbf{Declarative provisioning}: Confirming that all \texttt{XSDLC} composites report \texttt{READY=True} verifies that Crossplane successfully generated and reconciled all child resources. A non-ready composite indicates a composition rendering error or a provider authentication failure.
+
+    \item \textbf{Event infrastructure}: Verifying that the EventBus, EventSource, and Sensor resources are healthy confirms that the event pipeline is operational. A failing EventBus typically indicates a NATS JetStream configuration issue; a failing Sensor indicates a filter or template reference error.
+
+    \item \textbf{Network path}: Sending a test webhook payload to the Ingress endpoint and receiving a 200 response confirms the end-to-end network path from the external domain through the Ingress controller to the EventSource. A failure here isolates the problem to DNS resolution, TLS certificate provisioning, or ingress routing.
+
+    \item \textbf{End-to-end behavior}: Opening a test PR on the monitored repository triggers a complete validation cycle. Verifying that the workflow completes, commit status appears on the PR, and a validation report is posted as a PR comment confirms that all layers---event pipeline, workflow orchestration, GitHub API integration, and commit status reporting---function together.
 \end{enumerate}
 
 % ============================================================================
@@ -436,14 +412,18 @@ After deployment, the operator verifies the system through four checks:
 \label{sec:pipeline-summary}
 % ============================================================================
 
-This chapter described the operational GitOps pipeline that connects DriveBy's validation capabilities to the software delivery lifecycle.
+This chapter described the operational GitOps pipeline that connects DriveBy's validation engine to a fully declarative, Kubernetes-native software delivery lifecycle.
 
-The promotion-driven quality gate (Section~\ref{sec:promotion-driven-gate}) validates the source environment before allowing promotion, implementing the shift-left principle at the deployment boundary. The event-driven pipeline (Section~\ref{sec:event-pipeline-detail}) transforms GitHub webhooks into structured validation workflows with sub-90-second latency. The single-repo architecture (Section~\ref{sec:single-repo}) eliminates config-repo duplication and establishes the BYOCI principle: XSDLC owns delivery (promotion and quality gates) while developers retain full control over their CI pipeline.
+The central contribution is \textit{modularity through separation of concerns}. The BYOCI principle (Section~\ref{sec:two-repo}) draws a clean boundary: developers own their CI (build, test, image), while XSDLC owns delivery (promotion, quality gates, environment management). This separation means that onboarding a new API requires no pipeline authoring---a single \texttt{XSDLC} custom resource (\(\sim\)25 lines of YAML) provisions the complete delivery pipeline, including environment branches, ArgoCD Applications, webhook-triggered quality gates, and promotion automation.
 
-The multi-environment promotion model (Section~\ref{sec:multi-env-promotion}) automates the dev $\rightarrow$ staging transition through DDT-gated commit status signals while retaining manual approval for production. The Promoter itself is a reconciliation controller (Section~\ref{subsec:promoter-reconciliation}), implementing observe-diff-act at the Git level. Human-in-the-loop patterns (Section~\ref{sec:human-in-the-loop}) define a clear automation spectrum: objective assessments (validation, load testing) are automated; subjective assessments (production readiness, business timing) are preserved for human judgment.
+The flow is straightforward. A developer commits updated dry manifests to the \texttt{main} branch of the gitops repository. The ArgoCD Source Hydrator renders each environment's Kustomize overlay and writes hydrated output to the corresponding \texttt{-next} branch. The GitOps Promoter creates a promotion PR from \texttt{-next} to the active branch. If a quality gate is defined, it fires automatically: the event-driven pipeline (Section~\ref{sec:event-pipeline-detail}) processes the webhook in under 90~seconds, running whatever checks the gate specifies---static validation, functional testing, load testing, or any combination. The gate result (commit status) determines whether the Promoter merges the PR or blocks it.
 
-The quality gate as control loop (Section~\ref{sec:control-loop}) synthesizes the entire system into a control-theoretic framework, mapping the OpenAPI specification to a setpoint, the DriveBy CLI to a sensor, the Argo Workflow to a controller, and the Promoter to an actuator. This closed-loop negative feedback system ensures convergence: validation failure blocks promotion, driving developers to fix issues until the API conforms to its specification. The three DDT axioms---Completeness, Determinism, and Observability---are shown to be necessary conditions for the control loop to function correctly, connecting the theoretical foundations of Chapter~\ref{ch:related-work} (Section~\ref{subsec:ontological-reconciliation}) to the concrete implementation.
+This composability is the key design property. Each gate's \texttt{checks[]} array is independently configurable per environment: staging might run \texttt{validate-only} + \texttt{functional-test}, production might run \texttt{validate-only} + \texttt{load-test} with stricter thresholds, and development might have no gate at all. Adding or removing checks is a one-line YAML change; the Crossplane composition regenerates the Argo Workflows DAG automatically.
 
-The CI/CD pipelines for DriveBy itself (Section~\ref{sec:cicd-driveby}) demonstrate end-to-end release automation: from test gate through parallel artifact production (binaries, images, Helm chart) to registry publication. Together, these sections show that DDT validation integrates naturally into modern GitOps workflows---not as an afterthought bolted onto an existing pipeline, but as a first-class quality gate in a declarative, event-driven, control-theoretic delivery system.
+The human-in-the-loop model (Section~\ref{sec:human-in-the-loop}) provides a tunable automation spectrum. The \texttt{autoMerge} flag controls whether promotion is fully automated (development, staging after gate passes) or requires explicit human approval (production). ArgoCD always auto-syncs; the \texttt{autoMerge} flag controls only the Promoter's PR merge behavior, not ArgoCD synchronization. The result is a system where objective assessments are automated and subjective decisions---production readiness, business timing---remain with humans.
+
+The control-theoretic framing (Section~\ref{sec:control-loop}) explains \textit{why} this design converges: the OpenAPI specification is the setpoint, DriveBy is the sensor, and the Promoter is the actuator. Negative feedback blocks promotion on failure, driving developers to fix issues until their API conforms. The three DDT axioms---Completeness, Determinism, Observability---are necessary conditions for this loop to function, connecting the theoretical foundations of Chapter~\ref{ch:related-work} to the concrete implementation.
+
+DriveBy's own release pipeline (Section~\ref{sec:cicd-driveby}) demonstrates that the project practices what it preaches: automated test gates, parallel artifact production (binaries, Docker images, Helm charts), and OCI-based distribution to the GitHub Container Registry.
 
 Chapter~\ref{ch:evaluation} evaluates this system empirically, measuring DDT's effectiveness across controlled and large-scale settings.

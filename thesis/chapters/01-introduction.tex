@@ -126,17 +126,21 @@ The opportunity is concrete. OpenAPI specifications already contain the informat
 This thesis investigates the following research questions:
 
 \begin{description}
-  \item[RQ1:] \textit{Can a methodology grounded in specification completeness, behavioral determinism, and operational observability provide automated API quality assurance comparable to manual approaches?}
+  \item[RQ1:] \textit{Can a methodology grounded in specification completeness, behavioral determinism, and operational observability provide automated API quality assurance that eliminates the need for dedicated testers in the promotion pipeline?}
 
-  We formalize DDT as three axioms mapped to nine validation principles and evaluate whether the resulting automated checks detect the same categories of defects that manual review identifies. This question is addressed in Chapters~\ref{ch:methodology} and~\ref{ch:evaluation}.
+  We formalize DDT as three axioms mapped to nine validation principles and evaluate whether the resulting automated checks detect the same categories of defects that manual review identifies---with zero test authorship, zero human interpretation, and zero dedicated QA personnel. This question is addressed in Chapters~\ref{ch:methodology} and~\ref{ch:evaluation}.
 
-  \item[RQ2:] \textit{To what extent can validation rules, test cases, and quality gates be derived automatically from OpenAPI specifications without manual test authorship?}
+  \item[RQ2:] \textit{To what extent can validation rules, test cases, and quality gates be derived automatically from OpenAPI specifications, and does the resulting automation produce actionable, machine-readable signals suitable for both human engineers and autonomous agents?}
 
-  We implement the DriveBy framework, which takes an OpenAPI specification as input and produces a structured validation report as output, with no hand-written test cases required. This question is addressed in Chapters~\ref{ch:architecture} and~\ref{ch:evaluation}.
+  We implement the DriveBy framework, which takes an OpenAPI specification as sole input and produces structured validation reports with per-principle pass/fail status, severity classifications, and suggested remediations. We evaluate this against both a controlled reference API and a large-scale public API dataset. This question is addressed in Chapters~\ref{ch:architecture} and~\ref{ch:evaluation}.
 
-  \item[RQ3:] \textit{How effectively does specification-driven quality assurance integrate into cloud-native GitOps pipelines as an autonomous quality gate?}
+  \item[RQ3:] \textit{How effectively does specification-driven quality assurance integrate into cloud-native GitOps pipelines, and can a single declarative custom resource replace the manual provisioning of quality gate infrastructure?}
 
-  We deploy DriveBy within a Kubernetes-native pipeline using Argo Events, Argo Workflows, Crossplane, and the GitOps Promoter, demonstrating that DDT validation can serve as a fully automated gate in a declarative delivery workflow. This question is addressed in Chapters~\ref{ch:workflow} and~\ref{ch:evaluation}.
+  We design XSDLC, a Crossplane custom resource definition that generates a complete quality-gated delivery pipeline---ArgoCD Applications, Argo Workflows, Argo Events infrastructure, branch protection rules, and GitOps Promoter resources---from approximately 25 lines of YAML in under 15 seconds, replacing hours of manual ClickOps. We deploy this on a production cluster alongside existing infrastructure, validating surgical coexistence and removal. This question is addressed in Chapters~\ref{ch:kubernetes},~\ref{ch:workflow}, and~\ref{ch:evaluation}.
+
+  \item[RQ4:] \textit{Can quality-gated delivery pipelines be expressed as Kubernetes-native ontological specifications that operators and autonomous agents can discover, inspect, and manage as composable building blocks within an internal developer platform?}
+
+  We demonstrate that the XSDLC CRD functions as a machine-readable, structurally typed, discoverable specification---not merely a tool configuration---that integrates into Novelcore's IDP alongside database operators, networking compositions, and observability stacks, all following the same Crossplane pattern. This question is addressed in Chapters~\ref{ch:kubernetes} and~\ref{ch:conclusion}.
 \end{description}
 
 % ============================================================================
@@ -144,16 +148,20 @@ This thesis investigates the following research questions:
 \label{sec:contributions}
 % ============================================================================
 
-This thesis makes four contributions:
+This thesis makes six contributions:
 
 \begin{enumerate}
   \item \textbf{The DDT Methodology.} We define Documentation-Driven Testing as a formal methodology built on three axioms---Completeness, Determinism, and Observability---and nine validation principles (P001--P009) mapped systematically to these axioms. DDT provides a reusable, specification-agnostic framework for deriving API quality gates from documentation artifacts.
 
   \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements DDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, test-ready), and produces structured reports suitable for CI/CD integration.
 
-  \item \textbf{Cloud-Native Quality Gate Infrastructure.} We design and deploy a Kubernetes-native quality gate system using Crossplane custom resource definitions (XRDs), Argo Events for event-driven triggering, Argo Workflows for orchestrated validation pipelines, and the GitOps Promoter for automated multi-environment promotion. This infrastructure demonstrates that DDT validation integrates natively into declarative, reconciliation-based delivery workflows---closing the gap between API quality assurance and modern GitOps practice.
+  \item \textbf{The XSDLC Declarative Pipeline.} We design the XSDLC Crossplane custom resource definition that generates a complete quality-gated delivery pipeline from a single CR (\(\sim\)25 lines of YAML $\rightarrow$ \(\sim\)34 resources in 15 seconds). XSDLC replaces hours of manual ClickOps with a declarative, version-controlled, self-healing specification that can be surgically installed into and removed from existing Kubernetes clusters without affecting pre-existing infrastructure.
 
-  \item \textbf{Empirical Evaluation.} We evaluate DDT through two complementary experiments: a controlled evaluation against a reference API designed to achieve full compliance, and a large-scale evaluation against public APIs harvested from the APIs.guru~\cite{apis-guru} directory. Together, these experiments assess both the correctness and the practical utility of specification-derived validation.
+  \item \textbf{XSDLC as Ontological Specification.} We demonstrate that the XSDLC CRD functions as a Kubernetes-native ontological artifact~\cite{gruber-ontology}---discoverable, inspectable, and manageable by operators and autonomous agents as a composable building block within an internal developer platform. This contribution reframes quality-gated delivery as a platform capability expressed through structured, machine-readable specifications rather than imperative tooling.
+
+  \item \textbf{Empirical Evaluation.} We evaluate DDT through three complementary experiments: a controlled evaluation against a reference API, an agent-driven large-scale evaluation against public APIs from APIs.guru~\cite{apis-guru}, and an operational evaluation on Novelcore's production IDP demonstrating zero-tester quality assurance and declarative load testing contracts.
+
+  \item \textbf{Agent-Driven Development Methodology.} We document the AI-assisted development methodology used to build DriveBy, centered on the CLAUDE.md knowledge protocol---a hierarchical system of machine-first documentation files that provides AI agents with persistent, structured context for cross-session collaboration. The methodology was validated across 57 agent sessions and demonstrates that DDT's structured output is directly consumable by AI agents for automated evaluation and specification remediation.
 \end{enumerate}
 
 % ============================================================================
@@ -161,4 +169,24 @@ This thesis makes four contributions:
 \label{sec:thesis-structure}
 % ============================================================================
 
-The remainder of this thesis is organized as follows. Chapter~\ref{ch:related-work} surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning DDT within the existing landscape. Chapter~\ref{ch:methodology} presents the DDT methodology, defining the three axioms, nine validation principles, and the formal mapping between them. Chapter~\ref{ch:architecture} describes the CLI architecture of the DriveBy framework, including the specification abstraction layer, the principle checker pattern, and the validation engine. Chapter~\ref{ch:kubernetes} presents the Kubernetes architecture: the Crossplane XRD design, composition pipelines, Argo Events infrastructure, and the Argo Workflows validation DAG that together form the cloud-native quality gate system. Chapter~\ref{ch:workflow} describes the GitOps pipeline and CI/CD integration, covering the promotion-driven quality gate flow, the GitOps Promoter's multi-environment model, and the three CI/CD pipelines that build, test, and release DriveBy itself. Chapter~\ref{ch:evaluation} presents the empirical evaluation across three tracks: controlled validation against a reference API, large-scale validation against public APIs, and effort comparison against traditional QA approaches. Chapter~\ref{ch:ai-development} examines AI-assisted development as both a tool used to build this system and a capability that DDT's structured output enables, including the CLAUDE.md protocol and the DDT-agent feedback loop. Chapter~\ref{ch:discussion} discusses the results, revisits the research questions with evidence from the evaluation, and reflects on the thesis as a showcase of modern cloud-native technologies. Chapter~\ref{ch:conclusion} concludes with a summary of contributions, limitations, and directions for future work.
+The remainder of this thesis is organized as follows:
+
+\begin{description}
+  \item[Chapter~\ref{ch:related-work}] surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning DDT within the existing landscape and identifying six research gaps.
+
+  \item[Chapter~\ref{ch:methodology}] presents the DDT methodology: three axioms, nine validation principles, the formal axiom-to-principle mapping, and four validation modes that enable incremental adoption.
+
+  \item[Chapter~\ref{ch:architecture}] describes the DriveBy CLI architecture: the \texttt{APISpec} abstraction layer for version-agnostic validation, the principle checker pattern, the engine's mode-based orchestration, and the structured report generation system.
+
+  \item[Chapter~\ref{ch:kubernetes}] presents the Kubernetes architecture: the XSDLC Crossplane XRD, the composition pipeline that renders WorkflowTemplates through four nested template layers, the Argo Events webhook infrastructure, and the multi-check DAG that orchestrates validation steps.
+
+  \item[Chapter~\ref{ch:workflow}] describes the GitOps pipeline: the promotion-driven quality gate flow, the two-repo BYOCI architecture, the GitOps Promoter's multi-environment model, human-in-the-loop automation patterns, the quality gate as a closed-loop control system, and DriveBy's own CI/CD release pipeline.
+
+  \item[Chapter~\ref{ch:evaluation}] presents the empirical evaluation: controlled validation against a reference API (perfect-api), large-scale validation against public APIs from APIs.guru, and operational evaluation on Novelcore's production IDP demonstrating zero-tester quality assurance, declarative load testing contracts, and 15-second pipeline provisioning.
+
+  \item[Chapter~\ref{ch:ai-development}] examines AI-assisted development: the CLAUDE.md knowledge protocol that enables agentic workflows, the persistent agent memory system, the agent-driven multi-API evaluation, the agent-driven thesis writing process, and DDT as feedback infrastructure for autonomous agent loops.
+
+  \item[Chapter~\ref{ch:discussion}] discusses the results, revisits the research questions with evidence from the evaluation, and reflects on the ontological significance of XSDLC as a platform building block.
+
+  \item[Chapter~\ref{ch:conclusion}] concludes with a summary of contributions, the XSDLC as an ontological specification for operators and agents, limitations, and directions for future work including adaptive load testing thresholds and agent-driven remediation.
+\end{description}

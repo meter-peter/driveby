@@ -48,7 +48,7 @@ Ownership map for every resource in the DriveBy quality gate system. Use this to
 │    Role ─ RoleBinding ─ WorkflowTemplate ─ EventSource                   │
 │    Sensor ─ Service ─ Ingress ─ CommitStatus ─ BranchProtection          │
 │                                                                          │
-│  Repo workflow (1): driveby-deploy                                      │
+│  GitOps repo (1): auto-created via provider-upjet-github                │
 │                                                                          │
 │  Total: ~34 resources for a 3-env, 2-gate setup                         │
 └──────────────────────────────────────────────────────────────────────────┘
@@ -124,7 +124,7 @@ For each environment with a `gate` defined:
 Each gate's WorkflowTemplate contains a dynamic DAG with `check-<idx>-<type>` steps (e.g., `check-0-validate-only`, `check-1-functional-test`).
 
 **Example**: For `perfect-api` with 3 environments (dev, staging, prod) and 2 gates (staging-gate, prod-gate):
-- 6 app-level + (3 × 3 per-env) + (9 × 2 gates) + 1 repo workflow = **~34 resources**
+- 6 app-level + (3 × 3 per-env) + (9 × 2 gates) + 1 gitops repo = **~34 resources**
 
 ## Client Prerequisites — Cluster Infrastructure
 
@@ -246,7 +246,8 @@ spec:
   repository:
     owner: your-org
     name: your-api
-  manifestsPath: manifests
+  gitopsRepository:
+    name: your-api-gitops
   environments:
     - name: dev
     - name: staging
@@ -268,6 +269,6 @@ EOF
 kubectl get xsdlcs -n driveby
 kubectl get workflowtemplates,eventsources,sensors,ingress -n driveby
 kubectl get applications -n argocd | grep your-api   # ArgoCD apps auto-created
-gh api repos/your-org/your-api/contents/.github/workflows --jq '.[].name'
-# Expected: driveby-deploy.yml
+gh api repos/your-org/your-api-gitops --jq '.full_name'
+# Expected: gitops repo exists (auto-created by provider-upjet-github)
 ```

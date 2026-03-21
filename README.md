@@ -66,7 +66,8 @@ spec:
   repository:
     owner: novelcore
     name: perfect-api
-    manifestsPath: manifests
+  gitopsRepository:
+    name: perfect-api-gitops
   environments:
     - name: dev
     - name: staging
@@ -234,7 +235,7 @@ Full CLI reference: [docs/CLI_USAGE.md](docs/CLI_USAGE.md)
 │                                                              │
 │  ┌────────────────┐  ┌────────────────┐  ┌───────────────┐  │
 │  │ app-dev/       │  │ app-staging/   │  │ app-prod/     │  │
-│  │ (autoSync)     │──│ (gate-blocked) │──│ (manual sync) │  │
+│  │ (autoSync)     │──│ (gate-blocked) │──│ (autoSync)    │  │
 │  └────────────────┘  └────────────────┘  └───────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```

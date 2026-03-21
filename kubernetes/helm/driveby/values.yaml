@@ -103,8 +103,8 @@ gitopsPromoter:
     privateKey: ""  # Set at install: --set-file gitopsPromoter.githubApp.privateKey=/path/to/key.pem
   branchPattern: "environment"
 
-# XSDLC v2.0.0 — single-repo delivery pipeline
-# No gitopsPat needed: developer's repo is the only repo.
+# XSDLC v3.0.0 — two-repo GitOps delivery pipeline
+# XSDLC auto-creates a dedicated gitops repo per app.
 # XSDLC owns delivery (propagation, promotion, quality gates), not CI.
 
 # GitHub Provider — for managing branch protection rules via Crossplane

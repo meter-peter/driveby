@@ -55,9 +55,17 @@ spec:
           {{`{{/* Repository config */}}`}}
           {{`{{- $repoOwner := $spec.repository.owner -}}`}}
           {{`{{- $repoName := $spec.repository.name -}}`}}
-          {{`{{- $repoDefaultBranch := $spec.repository.defaultBranch | default "main" -}}`}}
           {{`{{- $repoFullName := printf "%s/%s" $repoOwner $repoName -}}`}}
-          {{`{{- $manifestsPath := $spec.repository.manifestsPath | default "manifests" -}}`}}
+
+          {{`{{/* GitOps repository (dedicated, auto-created) */}}`}}
+          {{`{{- $gitopsRepoConfig := $spec.gitopsRepository | default dict -}}`}}
+          {{`{{- $gitopsRepoName := $gitopsRepoConfig.name | default (printf "%s-gitops" $repoName) -}}`}}
+          {{`{{- $gitopsRepoFullName := printf "%s/%s" $repoOwner $gitopsRepoName -}}`}}
+          {{`{{- $gitopsRepoUrl := printf "https://github.com/%s/%s.git" $repoOwner $gitopsRepoName -}}`}}
+
+          {{`{{/* Source hydrator paths */}}`}}
+          {{`{{- $drySourcePath := "dry" -}}`}}
+          {{`{{- $hydratedPath := "manifests" -}}`}}
 
           {{`{{/* API config with defaults */}}`}}
           {{`{{- $apiConfig := $spec.apiConfig | default dict -}}`}}
@@ -156,7 +164,7 @@ spec:
                   isApp: true
 
           ---
-          # GitRepository -- promoter repo reference (app-level, once)
+          # GitRepository -- promoter repo reference (points to gitops repo, app-level, once)
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
@@ -179,7 +187,7 @@ spec:
                 spec:
                   github:
                     owner: {{`{{ $repoOwner }}`}}
-                    name: {{`{{ $repoName }}`}}
+                    name: {{`{{ $gitopsRepoName }}`}}
                   scmProviderRef:
                     name: {{`{{ $appName }}`}}-github
 
@@ -211,24 +219,39 @@ spec:
                   {{`{{- range $idx, $env := $envs }}`}}
                   {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) }}`}}
                   {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
+                  {{`{{- $hasGate := $env.gate | default false }}`}}
+                  {{`{{- $hasHealthCheck := $env.argocdHealthCheck | default false }}`}}
                     - branch: {{`{{ $branch }}`}}
                       autoMerge: {{`{{ $autoMerge }}`}}
-                      {{`{{- if $env.gate }}`}}
-                      {{`{{- $commitStatusKey := "" }}`}}
-                      {{`{{- if $env.gate.commitStatusKey }}`}}
-                      {{`{{- $commitStatusKey = $env.gate.commitStatusKey }}`}}
-                      {{`{{- else }}`}}
-                      {{`{{- $commitStatusKey = printf "%s-gate" $env.name }}`}}
-                      {{`{{- end }}`}}
+                      {{`{{- if or $hasGate $hasHealthCheck }}`}}
                       activeCommitStatuses:
+                        {{`{{- if $hasHealthCheck }}`}}
+                        - key: argocd-health
+                        {{`{{- end }}`}}
+                        {{`{{- if $hasGate }}`}}
+                        {{`{{- $commitStatusKey := "" }}`}}
+                        {{`{{- if $env.gate.commitStatusKey }}`}}
+                        {{`{{- $commitStatusKey = $env.gate.commitStatusKey }}`}}
+                        {{`{{- else }}`}}
+                        {{`{{- $commitStatusKey = printf "%s-gate" $env.name }}`}}
+                        {{`{{- end }}`}}
                         - key: {{`{{ $commitStatusKey }}`}}
                       proposedCommitStatuses:
                         - key: {{`{{ $commitStatusKey }}`}}
+                        {{`{{- end }}`}}
                       {{`{{- end }}`}}
                   {{`{{- end }}`}}
 
+          {{`{{/* ArgoCDCommitStatus — only for environments with argocdHealthCheck: true */}}`}}
+          {{`{{- $hasAnyHealthCheck := false }}`}}
+          {{`{{- range $env := $envs }}`}}
+          {{`{{- if $env.argocdHealthCheck }}`}}
+          {{`{{- $hasAnyHealthCheck = true }}`}}
+          {{`{{- end }}`}}
+          {{`{{- end }}`}}
+          {{`{{- if $hasAnyHealthCheck }}`}}
           ---
-          # ArgoCDCommitStatus -- aggregates ArgoCD app health (app-level, once)
+          # ArgoCDCommitStatus — per-app, only when at least one env opts in
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
@@ -254,9 +277,11 @@ spec:
                       driveby.io/app: {{`{{ $appName }}`}}
                   promotionStrategyRef:
                     name: {{`{{ $appName }}`}}-promotion
+          {{`{{- end }}`}}
 
           {{`{{/* ============================================================ */}}`}}
           {{`{{/* Environment branches — 2 per env (env + env-next)            */}}`}}
+          {{`{{/* Created in the GITOPS repo, not the software repo            */}}`}}
           {{`{{/* ============================================================ */}}`}}
 
           {{- if .Values.githubProvider.enabled }}
@@ -264,7 +289,7 @@ spec:
           {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) -}}`}}
           {{`{{- $idxStr := printf "%d" $idx }}`}}
           ---
-          # Branch: {{`{{ $branch }}`}} (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
+          # Branch: {{`{{ $branch }}`}} in gitops repo (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: Branch
           metadata:
@@ -276,12 +301,12 @@ spec:
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
-              repository: {{`{{ $repoName }}`}}
+              repository: {{`{{ $gitopsRepoName }}`}}
               branch: {{`{{ $branch }}`}}
-              sourceBranch: {{`{{ $repoDefaultBranch }}`}}
+              sourceBranch: main
 
           ---
-          # Branch: {{`{{ $branch }}`}}-next (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
+          # Branch: {{`{{ $branch }}`}}-next in gitops repo (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}}) — forked from env branch so Promoter can merge
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: Branch
           metadata:
@@ -293,103 +318,184 @@ spec:
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
-              repository: {{`{{ $repoName }}`}}
+              repository: {{`{{ $gitopsRepoName }}`}}
               branch: {{`{{ $branch }}`}}-next
-              sourceBranch: {{`{{ $repoDefaultBranch }}`}}
+              sourceBranch: {{`{{ $branch }}`}}
 
           {{`{{- end }}`}}
           {{- end }}
 
           {{`{{/* ============================================================ */}}`}}
-          {{`{{/* Repo workflow — driveby-deploy (v2.1.0 BYOCI showcase)         */}}`}}
-          {{`{{/* This workflow demonstrates the BYOCI (Bring Your Own CI)       */}}`}}
-          {{`{{/* model: the developer's own CI builds the image, then this      */}}`}}
-          {{`{{/* workflow deploys manifests + image tag to an environment.       */}}`}}
+          {{`{{/* GitOps Repository — auto-created, dedicated for manifests     */}}`}}
+          {{`{{/* Developers update dry manifests on main. ArgoCD hydrator      */}}`}}
+          {{`{{/* renders overlays to -next branches. No deploy workflow        */}}`}}
+          {{`{{/* is generated — XSDLC owns delivery, not CI.                  */}}`}}
           {{`{{/* ============================================================ */}}`}}
 
           {{- if .Values.githubProvider.enabled }}
           ---
-          # RepositoryFile: driveby-deploy.yml
-          # BYOCI showcase: developer's CI builds the image, this workflow deploys it
+          # GitHub Repository: auto-create dedicated gitops repo
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: Repository
+          metadata:
+            name: {{`{{ $xrName }}`}}-gitops-repository
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: gitops-repository
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              name: {{`{{ $gitopsRepoName }}`}}
+              description: "GitOps manifests for {{`{{ $repoFullName }}`}} — managed by XSDLC"
+              visibility: private
+              autoInit: true
+          {{- end }}
+
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Boilerplate dry manifests on main branch of gitops repo       */}}`}}
+          {{`{{/* Seeds main:dry/base/ with deployment + service + kustomization*/}}`}}
+          {{`{{/* and main:dry/overlays/<env>/ per environment.                 */}}`}}
+          {{`{{/* ArgoCD Source Hydrator renders each overlay and writes        */}}`}}
+          {{`{{/* hydrated output to env-next branches. One-time seed only.     */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+
+          {{- if .Values.githubProvider.enabled }}
+          ---
+          # Boilerplate: dry/base/kustomization.yaml (base resources)
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: RepositoryFile
           metadata:
-            name: {{`{{ $xrName }}`}}-workflow-deploy
+            name: {{`{{ $xrName }}`}}-boilerplate-base-kustomization
             annotations:
-              gotemplating.fn.crossplane.io/composition-resource-name: workflow-deploy
+              gotemplating.fn.crossplane.io/composition-resource-name: boilerplate-base-kustomization
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $gitopsRepoName }}`}}
+              branch: main
+              file: {{`{{ $drySourcePath }}`}}/base/kustomization.yaml
+              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              overwriteOnCreate: false
+              content: |
+                apiVersion: kustomize.config.k8s.io/v1beta1
+                kind: Kustomization
+                resources:
+                  - deployment.yaml
+                  - service.yaml
+
+          ---
+          # Boilerplate: dry/base/deployment.yaml (base deployment)
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: RepositoryFile
+          metadata:
+            name: {{`{{ $xrName }}`}}-boilerplate-base-deployment
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: boilerplate-base-deployment
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $gitopsRepoName }}`}}
+              branch: main
+              file: {{`{{ $drySourcePath }}`}}/base/deployment.yaml
+              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              overwriteOnCreate: false
+              content: |
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: {{`{{ $appName }}`}}
+                  labels:
+                    app: {{`{{ $appName }}`}}
+                spec:
+                  replicas: 1
+                  selector:
+                    matchLabels:
+                      app: {{`{{ $appName }}`}}
+                  template:
+                    metadata:
+                      labels:
+                        app: {{`{{ $appName }}`}}
+                    spec:
+                      containers:
+                        - name: {{`{{ $appName }}`}}
+                          image: ghcr.io/{{`{{ $repoOwner }}`}}/{{`{{ $repoName }}`}}:latest
+                          ports:
+                            - containerPort: {{`{{ $appPort }}`}}
+                          env:
+                            - name: PORT
+                              value: "{{`{{ $appPort }}`}}"
+
+          ---
+          # Boilerplate: dry/base/service.yaml (base service)
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: RepositoryFile
+          metadata:
+            name: {{`{{ $xrName }}`}}-boilerplate-base-service
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: boilerplate-base-service
+          spec:
+            deletionPolicy: Orphan
+            providerConfigRef:
+              name: {{`{{ $githubProviderConfigName }}`}}
+            forProvider:
+              repository: {{`{{ $gitopsRepoName }}`}}
+              branch: main
+              file: {{`{{ $drySourcePath }}`}}/base/service.yaml
+              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              overwriteOnCreate: false
+              content: |
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: {{`{{ $appName }}`}}
+                  labels:
+                    app: {{`{{ $appName }}`}}
+                spec:
+                  selector:
+                    app: {{`{{ $appName }}`}}
+                  ports:
+                    - port: {{`{{ $appPort }}`}}
+                      targetPort: {{`{{ $appPort }}`}}
+                      protocol: TCP
+
+          {{`{{/* Per-environment overlay kustomizations — Delete policy so removing */}}`}}
+          {{`{{/* an environment from the XSDLC spec also removes its overlay file.   */}}`}}
+          {{`{{- range $idx, $env := $envs }}`}}
+          ---
+          # Boilerplate: dry/overlays/{{`{{ $env.name }}`}}/kustomization.yaml (env overlay)
+          apiVersion: repo.github.upbound.io/v1alpha1
+          kind: RepositoryFile
+          metadata:
+            name: {{`{{ $xrName }}`}}-boilerplate-overlay-{{`{{ $env.name }}`}}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: boilerplate-overlay-{{`{{ $env.name }}`}}
           spec:
             deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
-              repository: {{`{{ $repoName }}`}}
-              branch: {{`{{ $repoDefaultBranch }}`}}
-              file: .github/workflows/driveby-deploy.yml
-              commitMessage: "chore: add driveby-deploy workflow [driveby-managed]"
-              overwriteOnCreate: true
+              repository: {{`{{ $gitopsRepoName }}`}}
+              branch: main
+              file: {{`{{ printf "%s/overlays/%s/kustomization.yaml" $drySourcePath $env.name }}`}}
+              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              overwriteOnCreate: false
               content: |
-                name: DriveBy Deploy
-                on:
-                  workflow_dispatch:
-                    inputs:
-                      source_branch:
-                        description: 'Branch to deploy from'
-                        required: true
-                        default: '{{`{{ $repoDefaultBranch }}`}}'
-                        type: string
-                      environment:
-                        description: 'Target environment'
-                        required: true
-                        type: choice
-                        options:
-                {{`{{- range $idx, $env := $envs }}`}}
-                          - {{`{{ $env.name }}`}}
-                {{`{{- end }}`}}
-                      image_tag:
-                        description: 'Container image tag to deploy'
-                        required: true
-                        default: 'latest'
-                        type: string
-                concurrency:
-                  group: deploy-${{`{{ "{{ inputs.environment }}" }}`}}
-                  cancel-in-progress: false
-                permissions:
-                  contents: write
-                jobs:
-                  deploy:
-                    runs-on: ubuntu-latest
-                    steps:
-                      - uses: actions/checkout@v4
-                        with:
-                          ref: ${{`{{ "{{ inputs.source_branch }}" }}`}}
-                          fetch-depth: 0
-                      - name: Deploy to environment
-                        run: |
-                          ENV_BRANCH="environment/${{`{{ "{{ inputs.environment }}" }}`}}-next"
-                          git config user.name "driveby-bot"
-                          git config user.email "driveby-bot@users.noreply.github.com"
-                          # Fetch the env-next branch (create orphan if first deploy)
-                          if git fetch origin "$ENV_BRANCH" 2>/dev/null; then
-                            git checkout "$ENV_BRANCH"
-                          else
-                            git checkout --orphan "$ENV_BRANCH"
-                            git rm -rf . 2>/dev/null || true
-                          fi
-                          # Clean — env branches contain ONLY manifests
-                          git rm -rf . 2>/dev/null || true
-                          # Copy manifests from source branch, flatten to branch root
-                          git checkout ${{`{{ "{{ inputs.source_branch }}" }}`}} -- {{`{{ $manifestsPath }}`}}/
-                          mv {{`{{ $manifestsPath }}`}}/* . 2>/dev/null || true
-                          rm -rf {{`{{ $manifestsPath }}`}}/
-                          # Stamp image tag
-                          sed -i "s|image: .*|image: ghcr.io/{{`{{ $repoOwner }}`}}/{{`{{ $repoName }}`}}:${{`{{ "{{ inputs.image_tag }}" }}`}}|" deployment.yaml
-                          git add -A
-                          git diff --cached --quiet || git commit -m "deploy: ${{`{{ "{{ inputs.source_branch }}" }}`}} → ${{`{{ "{{ inputs.environment }}" }}`}} ({{`{{ $repoName }}`}}:${{`{{ "{{ inputs.image_tag }}" }}`}})"
-                          git push origin "$ENV_BRANCH"
+                apiVersion: kustomize.config.k8s.io/v1beta1
+                kind: Kustomization
+                resources:
+                  - ../../base
+          {{`{{- end }}`}}
           {{- end }}
 
           {{`{{/* ============================================================ */}}`}}
           {{`{{/* Per-environment: ArgoCD Applications (always generated)       */}}`}}
+          {{`{{/* Every env uses sourceHydrator: renders its overlay from main  */}}`}}
+          {{`{{/* drySource → dry/overlays/<env>, hydrateTo → env-next branch  */}}`}}
           {{`{{/* ============================================================ */}}`}}
 
           {{`{{- range $idx, $env := $envs }}`}}
@@ -398,7 +504,8 @@ spec:
           {{`{{- $idxStr := printf "%d" $idx }}`}}
           {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
           {{`{{- $argocdAppName := printf "%s-%s" $appName $env.name }}`}}
-          {{`{{- $argocdRepoUrl := printf "https://github.com/%s/%s.git" $repoOwner $repoName }}`}}
+          {{`{{- $argocdRepoUrl := $gitopsRepoUrl }}`}}
+          {{`{{- $overlayPath := printf "%s/overlays/%s" $drySourcePath $env.name }}`}}
           ---
           # ArgoCD Application (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
           apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -425,19 +532,23 @@ spec:
                     - resources-finalizer.argocd.argoproj.io
                 spec:
                   project: {{`{{ $argocdProject }}`}}
-                  source:
-                    repoURL: {{`{{ $argocdRepoUrl }}`}}
-                    targetRevision: {{`{{ $branch }}`}}
-                    path: "."
+                  sourceHydrator:
+                    drySource:
+                      repoURL: {{`{{ $argocdRepoUrl }}`}}
+                      path: {{`{{ $overlayPath }}`}}
+                      targetRevision: main
+                    syncSource:
+                      targetBranch: {{`{{ $branch }}`}}
+                      path: {{`{{ $hydratedPath }}`}}
+                    hydrateTo:
+                      targetBranch: {{`{{ $branch }}`}}-next
                   destination:
                     server: https://kubernetes.default.svc
                     namespace: {{`{{ $envNamespace }}`}}
                   syncPolicy:
-                    {{`{{- if $autoMerge }}`}}
                     automated:
                       selfHeal: true
                       prune: true
-                    {{`{{- end }}`}}
                     syncOptions:
                       - CreateNamespace=true
           {{`{{- end }}`}}
@@ -455,7 +566,7 @@ spec:
 
           {{`{{- if $env.gate -}}`}}
 
-          {{`{{/* Checks array — gate.checks[] (v2.0.0) */}}`}}
+          {{`{{/* Checks array — gate.checks[] */}}`}}
           {{`{{- $checks := $env.gate.checks | default list -}}`}}
 
           {{`{{/* Commit status key */}}`}}
@@ -1011,7 +1122,7 @@ spec:
                             url: {{`{{ $workflowsUrl }}`}}
 
           ---
-          # EventSource -- GitHub webhook receiver (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          # EventSource -- GitHub webhook receiver on gitops repo (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
@@ -1038,7 +1149,7 @@ spec:
                       repositories:
                       - owner: {{`{{ $repoOwner }}`}}
                         names:
-                        - {{`{{ $repoName }}`}}
+                        - {{`{{ $gitopsRepoName }}`}}
                       webhook:
                         endpoint: /{{`{{ $appName }}`}}-{{`{{ $gateName }}`}}-{{`{{ $triggerName }}`}}
                         port: {{`{{ $webhookPort | quote }}`}}
@@ -1232,7 +1343,7 @@ spec:
 
           {{- if .Values.githubProvider.enabled }}
           ---
-          # BranchProtection -- required status check for gate (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
+          # BranchProtection -- required status check for gate on gitops repo (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: BranchProtection
           metadata:
@@ -1244,7 +1355,7 @@ spec:
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
-              repositoryId: {{`{{ $repoName }}`}}
+              repositoryId: {{`{{ $gitopsRepoName }}`}}
               pattern: {{`{{ $branch }}`}}
               enforceAdmins: true
               requiredStatusChecks:
@@ -1266,7 +1377,7 @@ spec:
 
           {{- if .Values.githubProvider.enabled }}
           ---
-          # BranchProtection -- protect *-next branches (allow automation push, block force-push)
+          # BranchProtection -- protect *-next branches in gitops repo (allow force-push for promoter)
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: BranchProtection
           metadata:
@@ -1278,9 +1389,9 @@ spec:
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
-              repositoryId: {{`{{ $repoName }}`}}
+              repositoryId: {{`{{ $gitopsRepoName }}`}}
               pattern: "environment/*-next"
-              allowsForcePushes: false
+              allowsForcePushes: true
               allowsDeletions: false
           {{- end }}
 

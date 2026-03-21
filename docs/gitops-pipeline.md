@@ -1,33 +1,56 @@
 # GitOps Pipeline: Promotion PR to Validated Deployment
 
-This document describes the end-to-end automated pipeline that triggers when a promotion pull request is opened on the `novelcore/perfect-api` repository. It covers every component in the chain: GitHub webhook, Argo Events, Argo Workflows, DriveBy validation, and feedback to the PR.
+This document describes the end-to-end automated pipeline that triggers when a promotion pull request is opened on the **gitops repository**. It covers every component in the chain: GitHub webhook, Argo Events, Argo Workflows, DriveBy validation, and feedback to the PR.
 
-## Pre-Pipeline: Manual Deploy → Promotion PR
+## Two-Repo Model
 
-Before the promotion pipeline triggers, the developer explicitly deploys to an environment using the `driveby-deploy.yml` workflow (manual `workflow_dispatch` trigger). This showcases the **BYOCI model**: the developer's own CI builds the image, and this workflow handles the delivery side — copying manifests and stamping the image tag on the target `env-next` branch.
+XSDLC v3.0.0 uses a **two-repo model** with **ArgoCD Source Hydrator** that cleanly separates concerns:
+
+| Repo | Purpose | Example |
+|------|---------|---------|
+| **Software repo** | Source code, Dockerfiles, CI — where the API lives and is built | `novelcore/perfect-api` |
+| **GitOps repo** | Dry manifests on `main` (Kustomize base + per-env overlays), auto-created by XSDLC | `novelcore/perfect-api-gitops` |
+
+The software repo is owned by the developer and contains everything needed to build and test the application. The gitops repo is the deployment source-of-truth: dry manifests live on `main` in `dry/base/` and `dry/overlays/<env>/`. The ArgoCD Source Hydrator renders each overlay and writes the hydrated output to the corresponding `environment/<env>-next` branch. Each environment has a pair of branches (`environment/<env>` and `environment/<env>-next`), and ArgoCD syncs from the environment branches. XSDLC auto-creates the gitops repo and its branch structure but does **not** generate any CI workflows — developers update dry manifests on `main` however they choose (manually, CI scripts, automation).
+
+## Pre-Pipeline: Dry Manifests Updated, Hydrator Writes to -next Branches
+
+Before the promotion pipeline triggers, the developer updates dry manifests on the `main` branch of the gitops repo. The ArgoCD Source Hydrator then renders the per-environment Kustomize overlays and writes hydrated manifests to the corresponding `environment/<env>-next` branches. XSDLC does **not** generate any CI workflow — developers choose their own mechanism for updating dry manifests:
+
+- **Manual push:** `git push` changes to dry manifests on `main`
+- **CI script:** A step in the software repo's CI pipeline updates image tags or overlay configuration on `main`
+- **Automation tool:** Renovate, or any tool that commits to the gitops repo's `main` branch
 
 ```
- Developer's CI builds image → developer triggers "DriveBy Deploy" (workflow_dispatch)
-   Inputs: source_branch (e.g. main), environment (e.g. dev), image_tag (e.g. v1.2.3)
+ Developer updates dry manifests on main (dry/base/ or dry/overlays/<env>/)
+   (via manual push, CI script, or any automation)
          |
          v
- driveby-deploy.yml: copies manifests/ + stamps image tag → environment/<env>-next
+ ArgoCD Source Hydrator renders the per-env Kustomize overlay
+   → writes hydrated manifests to environment/<env>-next branch (manifests/ + hydrator.metadata)
          |
          v
- Promoter creates promotion PRs (triggers the pipeline below)
+ Promoter detects new commits on <env>-next, opens promotion PR (<env>-next → <env>)
+         |
+         v
+ Webhook fires on the gitops repo → triggers the quality gate pipeline below
 ```
 
 **Required setup:**
-- `manifests/` directory in the repo containing K8s manifests
-- Developer's own CI that builds and pushes the container image
+- GitOps repo with dry manifests on `main` and environment branches (auto-created by XSDLC)
+- ArgoCD Source Hydrator configured per-environment (auto-configured by XSDLC ArgoCD Applications)
+- Developer's own mechanism for updating dry manifests on `main`
 
 ## Pipeline Overview
 
 ```
- Developer opens promotion PR on perfect-api (dev → staging)
+ Hydrator renders dry/overlays/<env>/ from main → writes to environment/<env>-next
          |
          v
- GitHub sends webhook (pull_request event)
+ Promoter opens promotion PR on gitops repo (environment/dev-next → environment/dev)
+         |
+         v
+ GitHub sends webhook (pull_request event) from the gitops repo
          |
          v
  Traefik Ingress (perfect-api-staging-promotion-webhook.private.novelcore.org)
@@ -71,7 +94,7 @@ Before the promotion pipeline triggers, the developer explicitly deploys to an e
 
 ### 1. GitHub Webhook
 
-A repository webhook on `novelcore/perfect-api` sends `pull_request` events to the cluster. The webhook targets the single repo because quality gates validate **promotion PRs**.
+A repository webhook on the **gitops repo** (e.g., `novelcore/perfect-api-gitops`) sends `pull_request` events to the cluster. The webhook targets the gitops repo because promotion PRs — opened by the Promoter when new commits land on `-next` branches — happen there.
 
 - **URL:** `https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation`
 - **Content type:** `application/json`
@@ -82,7 +105,7 @@ This webhook is auto-created by Argo Events when the corresponding `XSDLC` is re
 To manually recreate or troubleshoot:
 
 ```bash
-gh api repos/novelcore/perfect-api/hooks --method POST \
+gh api repos/novelcore/perfect-api-gitops/hooks --method POST \
   -f name=web -F active=true \
   -f 'config[url]=https://perfect-api-staging-promotion-webhook.private.novelcore.org/perfect-api-staging-promotion-pr-validation' \
   -f 'config[content_type]=json' \
@@ -138,7 +161,7 @@ Parameter extraction from webhook payload:
 | `pr-number` | `body.number` | `1` |
 | `head-sha` | `body.pull_request.head.sha` | `d6eca53...` |
 | `github-owner` | `body.repository.owner.login` | `meter-peter` |
-| `github-repo` | `body.repository.name` | `perfect-api` |
+| `github-repo` | `body.repository.name` | `perfect-api-gitops` |
 | `source-namespace` | static | `perfect-api-dev` |
 | `target-namespace` | static | `perfect-api-staging` |
 | `service-name` | static | `perfect-api` |
@@ -201,7 +224,7 @@ The XSDLC composition generates promoter resources that close the automation loo
 | Resource | Purpose |
 |----------|---------|
 | ScmProvider | GitHub App auth for promoter SCM operations |
-| GitRepository | Points promoter to the single repo (`novelcore/perfect-api`) |
+| GitRepository | Points promoter to the **gitops repo** (e.g., `novelcore/perfect-api-gitops`) |
 | PromotionStrategy | Defines environment chain (dev → staging → prod) with commit status gates |
 | ArgoCDCommitStatus | Aggregates ArgoCD app health into a CommitStatus |
 

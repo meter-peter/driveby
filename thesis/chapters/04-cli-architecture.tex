@@ -341,7 +341,7 @@ This design realizes the Strategy pattern~\cite{gof}. Each checker is an interch
 \label{subsec:checker-implementation}
 % ----------------------------------------------------------------------------
 
-All six implemented checkers follow a consistent internal pattern. Listing~\ref{lst:p001} shows an abbreviated version of P001 (OpenAPI Specification Compliance) to illustrate the pattern.
+All seven implemented checkers follow a consistent internal pattern. Listing~\ref{lst:p001} shows an abbreviated version of P001 (OpenAPI Specification Compliance) to illustrate the pattern.
 
 \begin{lstlisting}[language=Go,caption={P001 checker pattern (abbreviated, \texttt{principles/p001\_compliance.go}).},label={lst:p001}]
 type P001Compliance struct{}
@@ -384,17 +384,18 @@ Table~\ref{tab:checker-implementations} lists all principle checker implementati
 \toprule
 \textbf{File} & \textbf{Principle} & \textbf{Checks} & \textbf{LOC} \\
 \midrule
-\texttt{p001\_compliance.go}   & P001: OpenAPI Compliance     & 8  & 180 \\
+\texttt{p001\_compliance.go}   & P001: OpenAPI Compliance     & 7  & 180 \\
 \texttt{p002\_documentation.go} & P002: Documentation Quality  & 10 & 197 \\
-\texttt{p003\_errors.go}       & P003: Error Handling          & 6  & 234 \\
-\texttt{p004\_schema.go}       & P004: Schema Definitions      & 9  & 353 \\
+\texttt{p003\_errors.go}       & P003: Error Handling          & 7  & 234 \\
+\texttt{p004\_schema.go}       & P004: Schema Definitions      & 10 & 353 \\
 \texttt{p005\_security.go}     & P005: Security Standards      & 7  & 221 \\
 \texttt{p008\_versioning.go}   & P008: Versioning Strategy     & 7  & 163 \\
+\texttt{p009\_testreadiness.go} & P009: Test Readiness          & 4  & 195 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The check counts correspond to those enumerated in Section~\ref{sec:nine-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal requires handling nested objects, arrays, allOf compositions, and enum validation at every level.
+The check counts correspond to those enumerated in Section~\ref{sec:nine-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal requires handling nested objects, arrays, allOf compositions, and enum validation at every level. P009 (Test Readiness) completes the seven-checker set, validating whether the specification provides sufficient examples and typed schemas for meaningful runtime testing.
 
 % ----------------------------------------------------------------------------
 \subsection{The Registry and Mode-Based Selection}
@@ -410,6 +411,7 @@ func NewRegistry() *Registry {
             &P001Compliance{}, &P002Documentation{},
             &P003Errors{}, &P004Schema{},
             &P005Security{}, &P008Versioning{},
+            &P009TestReadiness{},
         },
     }
 }
@@ -433,7 +435,7 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
 }
 \end{lstlisting}
 
-The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P004 (type checks only), and P009; strict mode evaluates all six static documentation principles; test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
+The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P004 (type checks only), and P009; strict mode evaluates all six static principles (P001--P005, P008); test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
 
 % ============================================================================
 \section{The Validation Engine}
@@ -568,7 +570,7 @@ This JSON-first design also enables a class of consumer that the architecture an
 \label{subsec:command-structure}
 % ----------------------------------------------------------------------------
 
-DriveBy's CLI is built with the Cobra framework~\cite{cobra} and organized as a root command with four subcommands. Table~\ref{tab:cli-commands} summarizes the command tree.
+DriveBy's CLI is built with the Cobra framework~\cite{cobra} and organized as a root command with seven subcommands. Table~\ref{tab:cli-commands} summarizes the command tree.
 
 \begin{table}[htbp]
 \centering
@@ -579,10 +581,13 @@ DriveBy's CLI is built with the Cobra framework~\cite{cobra} and organized as a 
 \toprule
 \textbf{Command} & \textbf{Mode} & \textbf{Description} \\
 \midrule
-\texttt{validate-only} & minimal/strict/test-ready & Run static validation only (P001--P009 based on mode) \\
-\texttt{function-only}  & --- & Run functional tests only (endpoint contract verification) \\
-\texttt{load-only}     & --- & Run load/performance tests only (vegeta-based) \\
-\texttt{test-only}     & test-only & Run both functional and performance tests without static validation \\
+\texttt{validate-only}  & minimal/strict/test-ready & Run static validation only (P001--P009 based on mode) \\
+\texttt{function-only}   & --- & Run functional tests only (endpoint contract verification) \\
+\texttt{load-only}       & --- & Run load/performance tests only (vegeta-based) \\
+\texttt{test-only}       & test-only & Run both functional and performance tests \\
+\texttt{github-status}   & --- & Set GitHub commit status on a specific SHA \\
+\texttt{github-comment}  & --- & Post combined validation report as PR comment \\
+\texttt{version}         & --- & Print version, commit, and build date \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -631,7 +636,7 @@ DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocat
 \label{sec:architecture-summary}
 % ============================================================================
 
-This chapter described the architecture of the DriveBy framework across nine internal packages. The specification abstraction layer (Section~\ref{sec:spec-abstraction}) provides version-agnostic validation through the Adapter pattern, ensuring that principle checkers operate identically on OpenAPI~3.x and Swagger~2.0 specifications. The principle checker pattern (Section~\ref{sec:principle-checker}) uses the Strategy pattern to encapsulate each DDT principle as an interchangeable validator selected by the registry based on validation mode. The engine (Section~\ref{sec:engine}) orchestrates the four-step pipeline---load, select, evaluate, aggregate---that produces deterministic, structured reports.
+This chapter described the architecture of the DriveBy framework across nine internal packages. The specification abstraction layer (Section~\ref{sec:spec-abstraction}) provides version-agnostic validation through the Adapter pattern, ensuring that principle checkers operate identically on OpenAPI~3.x and Swagger~2.0 specifications. The principle checker pattern (Section~\ref{sec:principle-checker}) uses the Strategy pattern to encapsulate each DDT principle as an interchangeable validator selected by the registry based on validation mode. Seven principle checkers (P001--P005, P008, P009) are registered; P006 and P007 are implemented as dedicated test runners outside the registry. The engine (Section~\ref{sec:engine}) orchestrates the four-step pipeline---load, select, evaluate, aggregate---that produces deterministic, structured reports.
 
 The runtime testing subsystem (Section~\ref{sec:runtime-testing}) extends validation beyond static analysis to live API verification, deriving test cases deterministically from the specification. The report generator (Section~\ref{sec:report-generation}) produces JSON and Markdown outputs suitable for both machine consumption and human review. The CLI (Section~\ref{sec:cli}) exposes all capabilities through a four-command interface with structured exit codes designed for CI/CD integration.
 

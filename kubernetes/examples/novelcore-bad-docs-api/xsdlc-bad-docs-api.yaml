@@ -7,8 +7,8 @@ spec:
   repository:
     owner: novelcore
     name: bad-docs-api
-    defaultBranch: main
-    manifestsPath: manifests
+  gitopsRepository:
+    name: bad-docs-api-gitops
 
   apiConfig:
     port: 8000
