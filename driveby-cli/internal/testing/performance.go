@@ -2,15 +2,22 @@ package testing
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/meter-peter/driveby/driveby-cli/internal/loader"
 	"github.com/meter-peter/driveby/driveby-cli/internal/types"
+	"github.com/sirupsen/logrus"
 	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
+
+func basicAuth(username, password string) string {
+	return base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+}
 
 // PerformanceTester handles performance testing of API endpoints
 type PerformanceTester struct {
@@ -59,6 +66,31 @@ func (t *PerformanceTester) TestPerformance(ctx context.Context) (*types.Validat
 		return nil, fmt.Errorf("failed to get API document")
 	}
 
+	// Build auth header if configured
+	var authHeader http.Header
+	if t.config.Auth != nil {
+		authHeader = make(http.Header)
+		if t.config.Auth.APIKey != "" {
+			header := t.config.Auth.APIKeyHeader
+			if header == "" {
+				header = "X-API-Key"
+			}
+			authHeader.Set(header, t.config.Auth.APIKey)
+		} else if t.config.Auth.Token != "" {
+			tokenType := t.config.Auth.TokenType
+			if tokenType == "" {
+				tokenType = "Bearer"
+			}
+			header := t.config.Auth.TokenHeader
+			if header == "" {
+				header = "Authorization"
+			}
+			authHeader.Set(header, fmt.Sprintf("%s %s", tokenType, t.config.Auth.Token))
+		} else if t.config.Auth.Username != "" {
+			authHeader.Set("Authorization", "Basic "+basicAuth(t.config.Auth.Username, t.config.Auth.Password))
+		}
+	}
+
 	// Create targets for all endpoints
 	var targets []vegeta.Target
 	for path, pathItem := range doc.Paths() {
@@ -70,10 +102,14 @@ func (t *PerformanceTester) TestPerformance(ctx context.Context) (*types.Validat
 			if method == "DELETE" || method == "PATCH" {
 				continue
 			}
-			targets = append(targets, vegeta.Target{
+			target := vegeta.Target{
 				Method: method,
 				URL:    fmt.Sprintf("%s%s", t.config.BaseURL, path),
-			})
+			}
+			if authHeader != nil {
+				target.Header = authHeader
+			}
+			targets = append(targets, target)
 		}
 	}
 
@@ -91,27 +127,47 @@ func (t *PerformanceTester) TestPerformance(ctx context.Context) (*types.Validat
 		duration = 5 * time.Minute // Default duration
 	}
 
-	attacker := vegeta.NewAttacker()
+	timeout := t.config.Timeout
+	if timeout == 0 {
+		timeout = 30 * time.Second
+	}
+	attacker := vegeta.NewAttacker(
+		vegeta.Timeout(timeout),
+		vegeta.Workers(uint64(t.config.PerformanceTarget.ConcurrentUsers)),
+	)
 	targeter := vegeta.NewStaticTargeter(targets...)
 
-	// Run the attack with context cancellation
+	// Run the attack — collect results until channel closes
+	results := attacker.Attack(targeter, rate, duration, "DriveBy Load Test")
+
+	// Hard deadline: duration + 10s grace. If vegeta is still draining, stop and use what we have.
+	hardDeadline := time.NewTimer(duration + 10*time.Second)
+	defer hardDeadline.Stop()
+
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for res := range attacker.Attack(targeter, rate, duration, "DriveBy Load Test") {
+		for res := range results {
 			t.mu.Lock()
 			t.metrics.Add(res)
 			t.mu.Unlock()
 		}
 	}()
 
-	// Wait for either context cancellation or attack completion
 	select {
 	case <-ctx.Done():
 		attacker.Stop()
-		return nil, ctx.Err()
+	case <-hardDeadline.C:
+		logrus.Warn("Load test exceeded hard deadline, stopping attack")
+		attacker.Stop()
 	case <-done:
 		// Attack completed normally
+	}
+	// Give goroutine 5s to finish draining after Stop, then proceed with whatever we collected
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		logrus.Warn("Timed out waiting for attack goroutine to drain, proceeding with collected metrics")
 	}
 
 	t.mu.Lock()

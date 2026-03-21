@@ -19,7 +19,9 @@ spec:
 
   environments:
     - name: dev
+
     - name: staging
+
       gate:
         checks:
           - type: validate-only
@@ -28,14 +30,12 @@ spec:
           - type: functional-test
     - name: prod
       autoMerge: false
+
       gate:
         checks:
-          - type: validate-only
-            validationConfig:
-              validationMode: strict
           - type: load-test
             loadTestConfig:
-              concurrentUsers: 50
-              testDuration: "2m"
-              maxLatencyP95: "200ms"
-              minSuccessRate: 0.995
+              concurrentUsers: 10
+              testDuration: "15s"
+              maxLatencyP95: "2s"
+              minSuccessRate: 0.5

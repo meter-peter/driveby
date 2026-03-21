@@ -191,14 +191,23 @@ spec:
                   scmProviderRef:
                     name: {{`{{ $appName }}`}}-github
 
+          {{`{{/* Per-environment PromotionStrategies — one per env so there is no  */}}`}}
+          {{`{{/* "previous environment" chain. With per-env hydration, each env     */}}`}}
+          {{`{{/* hydrates independently from main — no sequential dependency.       */}}`}}
+          {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) }}`}}
+          {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
+          {{`{{- $hasGate := $env.gate | default false }}`}}
+          {{`{{- $hasHealthCheck := $env.argocdHealthCheck | default false }}`}}
+          {{`{{- $idxStr := printf "%d" $idx }}`}}
           ---
-          # PromotionStrategy -- built from full environments array (app-level, once)
+          # PromotionStrategy (env {{`{{ $idx }}`}}: {{`{{ $env.name }}`}})
           apiVersion: kubernetes.crossplane.io/v1alpha2
           kind: Object
           metadata:
-            name: {{`{{ $xrName }}`}}-promotionstrategy
+            name: {{`{{ $xrName }}`}}-promotionstrategy-{{`{{ $idxStr }}`}}
             annotations:
-              gotemplating.fn.crossplane.io/composition-resource-name: promotionstrategy
+              gotemplating.fn.crossplane.io/composition-resource-name: promotionstrategy-{{`{{ $idxStr }}`}}
           spec:
             deletionPolicy: Delete
             providerConfigRef:
@@ -208,19 +217,15 @@ spec:
                 apiVersion: promoter.argoproj.io/v1alpha1
                 kind: PromotionStrategy
                 metadata:
-                  name: {{`{{ $appName }}`}}-promotion
+                  name: {{`{{ $appName }}`}}-{{`{{ $env.name }}`}}-promotion
                   namespace: {{`{{ $appNamespace }}`}}
                   labels:
                     driveby.io/app: {{`{{ $appName | quote }}`}}
+                    driveby.io/environment: {{`{{ $env.name | quote }}`}}
                 spec:
                   gitRepositoryRef:
                     name: {{`{{ $appName }}`}}-gitops
                   environments:
-                  {{`{{- range $idx, $env := $envs }}`}}
-                  {{`{{- $branch := $env.branch | default (printf "environment/%s" $env.name) }}`}}
-                  {{`{{- $autoMerge := hasKey $env "autoMerge" | ternary $env.autoMerge true }}`}}
-                  {{`{{- $hasGate := $env.gate | default false }}`}}
-                  {{`{{- $hasHealthCheck := $env.argocdHealthCheck | default false }}`}}
                     - branch: {{`{{ $branch }}`}}
                       autoMerge: {{`{{ $autoMerge }}`}}
                       {{`{{- if or $hasGate $hasHealthCheck }}`}}
@@ -240,7 +245,7 @@ spec:
                         - key: {{`{{ $commitStatusKey }}`}}
                         {{`{{- end }}`}}
                       {{`{{- end }}`}}
-                  {{`{{- end }}`}}
+          {{`{{- end }}`}}
 
           {{`{{/* ArgoCDCommitStatus — only for environments with argocdHealthCheck: true */}}`}}
           {{`{{- $hasAnyHealthCheck := false }}`}}
@@ -873,7 +878,7 @@ spec:
                             echo "=== Health-checking source environment ==="
                             echo "Target: http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
                             ATTEMPTS=0
-                            MAX_ATTEMPTS=24
+                            MAX_ATTEMPTS=60
                             while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
                               ATTEMPTS=$((ATTEMPTS + 1))
                               HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
@@ -885,7 +890,7 @@ spec:
                               echo "Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s..."
                               sleep 5
                             done
-                            echo "ERROR: Source environment not ready after 2 minutes"
+                            echo "ERROR: Source environment not ready after 5 minutes"
                             exit 1
 
                     - name: driveby-validate
