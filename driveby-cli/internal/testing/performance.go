@@ -129,45 +129,39 @@ func (t *PerformanceTester) TestPerformance(ctx context.Context) (*types.Validat
 
 	timeout := t.config.Timeout
 	if timeout == 0 {
-		timeout = 30 * time.Second
+		timeout = 5 * time.Second
 	}
 	attacker := vegeta.NewAttacker(
 		vegeta.Timeout(timeout),
-		vegeta.Workers(uint64(t.config.PerformanceTarget.ConcurrentUsers)),
+		vegeta.KeepAlive(false),
+		vegeta.Connections(t.config.PerformanceTarget.ConcurrentUsers),
 	)
 	targeter := vegeta.NewStaticTargeter(targets...)
 
-	// Run the attack — collect results until channel closes
-	results := attacker.Attack(targeter, rate, duration, "DriveBy Load Test")
+	logrus.Infof("[loadtest] Starting: %d req/s for %s against %d targets", rate.Freq, duration, len(targets))
 
-	// Hard deadline: duration + 10s grace. If vegeta is still draining, stop and use what we have.
-	hardDeadline := time.NewTimer(duration + 10*time.Second)
-	defer hardDeadline.Stop()
-
+	// Run the attack with context-based cancellation
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for res := range results {
+		for res := range attacker.Attack(targeter, rate, duration, "DriveBy Load Test") {
 			t.mu.Lock()
 			t.metrics.Add(res)
 			t.mu.Unlock()
 		}
 	}()
 
+	// Wait for completion or hard deadline (duration + 15s)
 	select {
+	case <-done:
+		logrus.Info("[loadtest] Attack completed normally")
+	case <-time.After(duration + 15*time.Second):
+		logrus.Warn("[loadtest] Hard deadline reached, stopping attack")
+		attacker.Stop()
+		<-done
 	case <-ctx.Done():
 		attacker.Stop()
-	case <-hardDeadline.C:
-		logrus.Warn("Load test exceeded hard deadline, stopping attack")
-		attacker.Stop()
-	case <-done:
-		// Attack completed normally
-	}
-	// Give goroutine 5s to finish draining after Stop, then proceed with whatever we collected
-	select {
-	case <-done:
-	case <-time.After(5 * time.Second):
-		logrus.Warn("Timed out waiting for attack goroutine to drain, proceeding with collected metrics")
+		<-done
 	}
 
 	t.mu.Lock()

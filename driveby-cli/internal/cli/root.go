@@ -127,17 +127,16 @@ func init() {
 	viper.BindPFlag("github-private-key", rootCmd.PersistentFlags().Lookup("github-private-key"))
 	viper.BindPFlag("github-app-slug", rootCmd.PersistentFlags().Lookup("github-app-slug"))
 
-	// Bind load test flags (bind from loadOnlyCmd — testOnlyCmd has same flags)
-	viper.BindPFlag("max-latency-p95", loadOnlyCmd.Flags().Lookup("max-latency-p95"))
-	viper.BindPFlag("min-success-rate", loadOnlyCmd.Flags().Lookup("min-success-rate"))
-	viper.BindPFlag("concurrent-users", loadOnlyCmd.Flags().Lookup("concurrent-users"))
-	viper.BindPFlag("test-duration", loadOnlyCmd.Flags().Lookup("test-duration"))
-
-	// Also bind from testOnlyCmd so test-only picks up CLI values
-	viper.BindPFlag("max-latency-p95", testOnlyCmd.Flags().Lookup("max-latency-p95"))
-	viper.BindPFlag("min-success-rate", testOnlyCmd.Flags().Lookup("min-success-rate"))
-	viper.BindPFlag("concurrent-users", testOnlyCmd.Flags().Lookup("concurrent-users"))
-	viper.BindPFlag("test-duration", testOnlyCmd.Flags().Lookup("test-duration"))
+	// Bind load test flags per-command via PreRunE to avoid cross-command overwrites
+	bindPerfFlags := func(cmd *cobra.Command, args []string) error {
+		viper.BindPFlag("max-latency-p95", cmd.Flags().Lookup("max-latency-p95"))
+		viper.BindPFlag("min-success-rate", cmd.Flags().Lookup("min-success-rate"))
+		viper.BindPFlag("concurrent-users", cmd.Flags().Lookup("concurrent-users"))
+		viper.BindPFlag("test-duration", cmd.Flags().Lookup("test-duration"))
+		return nil
+	}
+	loadOnlyCmd.PreRunE = bindPerfFlags
+	testOnlyCmd.PreRunE = bindPerfFlags
 
 	// Add commands
 	rootCmd.AddCommand(validateOnlyCmd)
