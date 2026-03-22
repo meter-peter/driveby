@@ -1,0 +1,30 @@
+{
+  "test_name": "health-check-timeout",
+  "description": "Test health-check-source behavior when API deployment is scaled to zero. Expected: workflow fails at health-check. Actual: ArgoCD selfHeal restored the deployment before the health check could detect the outage.",
+  "timestamp": "2026-03-22T18:14:45.303434+00:00",
+  "method": "Scale bad-docs-api in bad-docs-api-dev to 0 replicas, close/reopen PR #1 on bad-docs-api-gitops, wait for workflow completion",
+  "expected": "Workflow should fail at health-check-source (wait-for-source-ready) due to deployment being unavailable",
+  "actual": "ArgoCD selfHeal (automated.selfHeal=true) restored the deployment to 1 replica before the health check ran. The workflow passed health-check (wait-for-source-ready: Succeeded) but failed at check-0-validate-only as expected for bad-docs-api. The health-check timeout scenario cannot be reliably triggered when selfHeal is enabled.",
+  "evidence": {
+    "workflow_name": "bad-docs-api-staging-gate-pipeline-hhsf9",
+    "workflow_phase": "Failed",
+    "dag_steps": {
+      "set-pending-status": "Succeeded",
+      "update-commitstatus-pending": "Succeeded",
+      "wait-for-source-ready": "Succeeded",
+      "check-0-validate-only": "Failed (exit code 1)",
+      "update-commitstatus-failure": "Succeeded",
+      "report-failure-github": "Succeeded",
+      "comment-pr-failure": "Succeeded"
+    },
+    "argocd_sync_policy": {
+      "automated": {
+        "prune": true,
+        "selfHeal": true
+      }
+    },
+    "deployment_restored_to": "1/1 ready",
+    "observation": "selfHeal restores state faster than the EventSource->Sensor->Workflow pipeline can trigger, making it difficult to test health-check timeouts in the current setup"
+  },
+  "pass": false
+}

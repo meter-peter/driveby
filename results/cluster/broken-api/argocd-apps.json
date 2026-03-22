@@ -1,0 +1,486 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"broken-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:48Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 65,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "broken-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "245885669",
+                "uid": "5341ff58-0e8d-4a96-86cf-d84c94e1e062"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T18:26:51Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-21T18:26:49Z",
+                        "deployedAt": "2026-03-21T18:26:49Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "9193de7a8c157f2e49785c4d7efce8bffc69f2d9",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-21T18:26:50Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "kind": "Service",
+                                    "name": "broken-api"
+                                },
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "broken-api"
+                                }
+                            ],
+                            "revision": "9193de7a8c157f2e49785c4d7efce8bffc69f2d9",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-21T18:26:49Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/broken-api unchanged",
+                                "name": "broken-api",
+                                "namespace": "broken-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/broken-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/broken-api unchanged",
+                                "name": "broken-api",
+                                "namespace": "broken-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "9193de7a8c157f2e49785c4d7efce8bffc69f2d9",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-21T19:45:19Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "broken-api",
+                        "namespace": "broken-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "broken-api",
+                        "namespace": "broken-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "finishedAt": "2026-03-21T17:59:41Z",
+                        "hydratedSHA": "1e6879a5ab5cb93aece9452c11d7fa134940b9c1",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:41Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "hydratedSHA": "1e6879a5ab5cb93aece9452c11d7fa134940b9c1",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/broken-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "9193de7a8c157f2e49785c4d7efce8bffc69f2d9",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"broken-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:49Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 55,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "broken-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "245885307",
+                "uid": "558be1aa-33ff-40bb-9f06-c090cbf594dc"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T18:53:12Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:49Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:44:51Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "finishedAt": "2026-03-21T17:59:45Z",
+                        "hydratedSHA": "2a77bedb978d8952e181482a43afe18390be52c2",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:45Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "hydratedSHA": "2a77bedb978d8952e181482a43afe18390be52c2",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"broken-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:48Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 54,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "broken-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "245885984",
+                "uid": "19de5567-4515-46d4-bf07-8165700d01dd"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T18:55:29Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:48Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:45:42Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "finishedAt": "2026-03-21T17:59:44Z",
+                        "hydratedSHA": "79534963f7cfa25500a2c82d00a7f8c0b35f3997",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:44Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c9ef60cd6eee81efacdf4132f9901d56aed8709e",
+                        "hydratedSHA": "79534963f7cfa25500a2c82d00a7f8c0b35f3997",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        }
+    ],
+    "kind": "List"
+}

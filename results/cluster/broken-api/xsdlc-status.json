@@ -1,0 +1,318 @@
+{
+    "apiVersion": "driveby.io/v1alpha1",
+    "kind": "XSDLC",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"driveby.io/v1alpha1\",\"kind\":\"XSDLC\",\"metadata\":{\"annotations\":{},\"name\":\"broken-api\"},\"spec\":{\"apiConfig\":{\"openapiEndpoint\":\"/openapi.json\",\"port\":8000},\"environments\":[{\"name\":\"dev\"},{\"gate\":{\"checks\":[{\"type\":\"validate-only\",\"validationConfig\":{\"validationMode\":\"strict\"}},{\"type\":\"functional-test\"}]},\"name\":\"staging\"},{\"autoMerge\":false,\"gate\":{\"checks\":[{\"type\":\"validate-only\"},{\"type\":\"load-test\"}]},\"name\":\"prod\"}],\"gitopsRepository\":{\"name\":\"broken-api-gitops\",\"owner\":\"novelcore\"},\"validationDefaults\":{\"validationMode\":\"strict\"}}}\n"
+        },
+        "creationTimestamp": "2026-03-21T17:38:47Z",
+        "finalizers": [
+            "composite.apiextensions.crossplane.io"
+        ],
+        "generation": 4,
+        "labels": {
+            "crossplane.io/composite": "broken-api"
+        },
+        "name": "broken-api",
+        "resourceVersion": "245821455",
+        "uid": "5a3f7b2b-7bfa-4116-aff4-9870561856cc"
+    },
+    "spec": {
+        "apiConfig": {
+            "openapiEndpoint": "/openapi.json",
+            "port": 8000
+        },
+        "compositionRef": {
+            "name": "xsdlcs.driveby.io"
+        },
+        "compositionRevisionRef": {
+            "name": "xsdlcs.driveby.io-3adb323"
+        },
+        "compositionUpdatePolicy": "Automatic",
+        "environments": [
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": true,
+                "name": "dev"
+            },
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": true,
+                "gate": {
+                    "checks": [
+                        {
+                            "type": "validate-only",
+                            "validationConfig": {
+                                "validationMode": "strict"
+                            }
+                        },
+                        {
+                            "type": "functional-test"
+                        }
+                    ]
+                },
+                "name": "staging"
+            },
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": false,
+                "gate": {
+                    "checks": [
+                        {
+                            "type": "validate-only"
+                        },
+                        {
+                            "type": "load-test"
+                        }
+                    ]
+                },
+                "name": "prod"
+            }
+        ],
+        "gitopsRepository": {
+            "name": "broken-api-gitops",
+            "owner": "novelcore"
+        },
+        "resourceRefs": [
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-argocd-app-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-argocd-app-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-argocd-app-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-argocd-push-secret"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-eventbus"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-eventsource-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-eventsource-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-eventsource-svc-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-eventsource-svc-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-ghcr-creds-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-ghcr-creds-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-ghcr-creds-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-gitrepository"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-ingress-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-ingress-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-promotionstrategy-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-promotionstrategy-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-promotionstrategy-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-role-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-role-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-rolebinding-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-rolebinding-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-scmprovider"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-sensor-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-sensor-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-serviceaccount"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-workflow-template-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "broken-api-workflow-template-2"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "broken-api-branch-protection-1"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "broken-api-branch-protection-2"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "broken-api-next-branches-protection"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-dev"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-dev-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-prod"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-prod-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-staging"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "broken-api-branch-staging-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-base-deployment"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-base-kustomization"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-base-service"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-overlay-dev"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-overlay-prod"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "broken-api-boilerplate-overlay-staging"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Repository",
+                "name": "broken-api-gitops-repository"
+            }
+        ],
+        "validationDefaults": {
+            "validationMode": "strict"
+        }
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-03-21T17:38:49Z",
+                "reason": "ReconcileSuccess",
+                "status": "True",
+                "type": "Synced"
+            },
+            {
+                "lastTransitionTime": "2026-03-21T17:41:00Z",
+                "reason": "Available",
+                "status": "True",
+                "type": "Ready"
+            }
+        ]
+    }
+}

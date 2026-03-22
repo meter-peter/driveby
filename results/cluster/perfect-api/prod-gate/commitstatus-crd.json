@@ -1,0 +1,45 @@
+{
+    "apiVersion": "promoter.argoproj.io/v1alpha1",
+    "kind": "CommitStatus",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-94d152bd39920937ba6fada5f67ee360aa6a89c7\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"94d152bd39920937ba6fada5f67ee360aa6a89c7\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+        },
+        "creationTimestamp": "2026-03-21T17:53:43Z",
+        "generation": 2,
+        "labels": {
+            "driveby.io/app": "perfect-api",
+            "driveby.io/gate": "prod-gate",
+            "promoter.argoproj.io/commit-status": "prod-gate"
+        },
+        "name": "prod-gate-94d152bd39920937ba6fada5f67ee360aa6a89c7",
+        "namespace": "driveby",
+        "resourceVersion": "245816767",
+        "uid": "bdfb213c-62b6-4873-9562-cabbd83d4934"
+    },
+    "spec": {
+        "description": "All checks passed, safe to promote to prod",
+        "gitRepositoryRef": {
+            "name": "perfect-api-gitops"
+        },
+        "name": "prod-gate",
+        "phase": "success",
+        "sha": "94d152bd39920937ba6fada5f67ee360aa6a89c7",
+        "url": "https://argo.private.novelcore.org/workflows"
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-03-21T18:20:54Z",
+                "message": "Reconciliation successful",
+                "observedGeneration": 2,
+                "reason": "ReconciliationSuccess",
+                "status": "True",
+                "type": "Ready"
+            }
+        ],
+        "id": "68032525299",
+        "phase": "success",
+        "sha": "94d152bd39920937ba6fada5f67ee360aa6a89c7"
+    }
+}

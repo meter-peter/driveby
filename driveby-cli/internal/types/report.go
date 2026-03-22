@@ -325,6 +325,17 @@ var CorePrinciples = []Principle{
 	},
 }
 
+// GateContext provides quality gate metadata for PR comments in XSDLC workflows.
+// When present, comments include gate-specific headers, check details, and "How to Pass" guidance.
+type GateContext struct {
+	GateName       string `json:"gate_name"`       // e.g., "staging-gate"
+	Environment    string `json:"environment"`      // e.g., "staging"
+	AppName        string `json:"app_name"`         // e.g., "perfect-api"
+	CheckTypes     string `json:"check_types"`      // e.g., "validate-only,functional-test"
+	ValidationMode string `json:"validation_mode"`  // e.g., "strict"
+	WorkflowURL    string `json:"workflow_url"`      // full URL to the specific Argo Workflow run
+}
+
 // ValidatorConfig holds configuration for the validator
 type ValidatorConfig struct {
 	BaseURL           string

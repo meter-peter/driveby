@@ -57,8 +57,8 @@
 % Artifacts
 \node[artifact=blue] (bins) at (11,2.0) {6 platform binaries\\+ SHA256 checksums};
 \node[artifact=blue] (release) at (11,1.0) {GitHub Release};
-\node[artifact=teal] (image) at (11,0) {ghcr.io/.../driveby\\:0.4.0, :0.4, :latest};
-\node[artifact=orange] (chart) at (11,-1.5) {oci://ghcr.io/.../\\charts/driveby:0.4.0};
+\node[artifact=teal] (image) at (11,0) {ghcr.io/.../driveby\\:3.0.0, :3.0, :latest};
+\node[artifact=orange] (chart) at (11,-1.5) {oci://ghcr.io/.../\\charts/driveby:3.0.0};
 
 \draw[->,thick,blue!50!black] (goreleaser) -- (bins);
 \draw[->,thick,blue!50!black] (goreleaser) -- (release);

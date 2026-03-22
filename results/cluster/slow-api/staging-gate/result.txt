@@ -1,1 +1,1 @@
-PASS — Workflow Succeeded. validate-only passed (3/6 checks: P001, P005, P008 passed; P002, P003, P004 failed with warnings only), functional-test passed (8/8 endpoints, avg ~501ms response time due to artificial delay). CommitStatus: success.
+PASS — validate-only (strict: passed, warnings only) + functional-test (all endpoints passed)

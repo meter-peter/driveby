@@ -1,0 +1,81 @@
+{
+  "test_name": "branch-protection",
+  "description": "Verify XSDLC-provisioned branch protection rules on environment/staging and environment/prod branches",
+  "timestamp": "2026-03-22T18:15:15.165175+00:00",
+  "method": "Query GitHub API for branch protection on perfect-api-gitops staging and prod branches; list BranchProtection CRDs in driveby namespace",
+  "expected": "Branch protection rules require status checks (staging-gate, prod-gate) and prod requires PR reviews. BranchProtection CRDs should be Synced/Ready.",
+  "actual": "Both branches have protection rules. Staging requires staging-gate check with strict status. Prod requires prod-gate check + 1 approving review with stale review dismissal. All 15 BranchProtection CRDs across 5 APIs are Synced=True, Ready=True.",
+  "evidence": {
+    "staging_protection": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "staging-gate"
+        ],
+        "checks": [
+          {
+            "context": "staging-gate",
+            "app_id": 3133001
+          }
+        ]
+      },
+      "enforce_admins": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false
+    },
+    "prod_protection": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "prod-gate"
+        ],
+        "checks": [
+          {
+            "context": "prod-gate",
+            "app_id": 3133001
+          }
+        ]
+      },
+      "required_pull_request_reviews": {
+        "dismiss_stale_reviews": true,
+        "required_approving_review_count": 1
+      },
+      "enforce_admins": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false
+    },
+    "branchprotection_crds": {
+      "total": 15,
+      "per_api": {
+        "perfect-api": [
+          "branch-protection-1 (staging)",
+          "branch-protection-2 (prod)",
+          "next-branches-protection"
+        ],
+        "bad-docs-api": [
+          "branch-protection-1 (staging)",
+          "branch-protection-2 (prod)",
+          "next-branches-protection"
+        ],
+        "no-auth-api": [
+          "branch-protection-1 (staging)",
+          "branch-protection-2 (prod)",
+          "next-branches-protection"
+        ],
+        "slow-api": [
+          "branch-protection-1 (staging)",
+          "branch-protection-2 (prod)",
+          "next-branches-protection"
+        ],
+        "broken-api": [
+          "branch-protection-1 (staging)",
+          "branch-protection-2 (prod)",
+          "next-branches-protection"
+        ]
+      },
+      "all_synced": true,
+      "all_ready": true
+    }
+  },
+  "pass": true
+}

@@ -86,7 +86,7 @@ var testOnlyCmd = &cobra.Command{
 
 		// GitHub integration
 		if viper.GetBool("github-comment") {
-			if err := handleGitHubComment(combinedReport, "test-only"); err != nil {
+			if err := handleGitHubComment(combinedReport, "test-only", nil); err != nil {
 				logrus.WithError(err).Warn("Failed to comment on GitHub PR")
 			}
 		}

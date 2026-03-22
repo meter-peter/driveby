@@ -1,0 +1,44 @@
+{
+  "test_name": "argocd-sync-after-merge",
+  "description": "Verify ArgoCD applications are Synced/Healthy after promotion merges for staging environments",
+  "timestamp": "2026-03-22T18:16:11.291411+00:00",
+  "method": "kubectl get application perfect-api-staging slow-api-staging -n argocd; kubectl get pods in staging namespaces",
+  "expected": "Both apps should be Synced/Healthy with running pods after staging PRs were merged",
+  "actual": "Both perfect-api-staging and slow-api-staging are Synced/Healthy with Succeeded operations. Pods are Running 1/1 in their respective namespaces.",
+  "evidence": {
+    "applications": [
+      {
+        "app": "perfect-api-staging",
+        "sync_status": "Synced",
+        "health_status": "Healthy",
+        "operation_phase": "Succeeded",
+        "finished_at": "2026-03-22T18:03:27Z",
+        "message": "successfully synced (all tasks run)"
+      },
+      {
+        "app": "slow-api-staging",
+        "sync_status": "Synced",
+        "health_status": "Healthy",
+        "operation_phase": "Succeeded",
+        "finished_at": "2026-03-22T18:00:28Z",
+        "message": "successfully synced (all tasks run)"
+      }
+    ],
+    "pods": {
+      "perfect-api-staging": {
+        "pod": "perfect-api-786c8b689c-pc7h7",
+        "status": "Running",
+        "ready": "1/1",
+        "node": "private-hood-node-1"
+      },
+      "slow-api-staging": {
+        "pod": "slow-api-869df7869-xkpjc",
+        "status": "Running",
+        "ready": "1/1",
+        "node": "private-hood-node-1"
+      }
+    },
+    "observation": "ArgoCD Source Hydrator + autoSync with selfHeal ensures apps converge to desired state within seconds of branch merge"
+  },
+  "pass": true
+}

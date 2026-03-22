@@ -1,0 +1,31 @@
+{
+  "test_name": "manual-approval",
+  "description": "Verify that perfect-api prod PR remains open despite passing quality gates (autoMerge: false requires manual approval)",
+  "timestamp": "2026-03-22T18:15:00.984499+00:00",
+  "method": "Check perfect-api-gitops PR #11 state and commit status",
+  "expected": "PR is OPEN, commit status is success, but PR is NOT merged (autoMerge: false means manual merge required)",
+  "actual": "PR #11 is open, mergeable=true, merged=false. Commit status shows prod-gate=success with description \"All checks passed, safe to promote to prod\". Manual approval workflow confirmed.",
+  "evidence": {
+    "pr": {
+      "number": 11,
+      "state": "open",
+      "title": "Promote c8c7e to `environment/prod`",
+      "mergeable": true,
+      "merged": false,
+      "html_url": "https://github.com/novelcore/perfect-api-gitops/pull/11"
+    },
+    "commit_status": {
+      "state": "success",
+      "total_count": 1,
+      "statuses": [
+        {
+          "context": "prod-gate",
+          "state": "success",
+          "description": "All checks passed, safe to promote to prod"
+        }
+      ]
+    },
+    "explanation": "autoMerge: false in the PromotionStrategy means the Promoter sets the commit status but does not auto-merge. A human must review and merge the PR to promote to prod."
+  },
+  "pass": true
+}

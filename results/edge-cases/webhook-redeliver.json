@@ -1,0 +1,32 @@
+{
+  "test_name": "webhook-redeliver",
+  "description": "Verify webhook redelivery on bad-docs-api-gitops triggers event processing",
+  "timestamp": "2026-03-22T18:10:19.456216+00:00",
+  "method": "gh api redeliver webhook delivery via POST to /hooks/{id}/deliveries/{delivery_id}/attempts",
+  "expected": "Webhook redelivery succeeds (HTTP 200) and new delivery appears with redelivery=true",
+  "actual": "Redelivery succeeded. New delivery created with redelivery=true, status=OK, status_code=200",
+  "evidence": {
+    "webhook_id": 601970995,
+    "original_delivery": {
+      "id": 3810070923694833664,
+      "delivered_at": "2026-03-22T18:02:11.064Z",
+      "redelivery": false,
+      "status": "OK",
+      "status_code": 200,
+      "event": "pull_request",
+      "action": "reopened"
+    },
+    "redelivered_delivery": {
+      "id": 3810071934675190000,
+      "delivered_at": "2026-03-22T18:10:01.896Z",
+      "redelivery": true,
+      "status": "OK",
+      "status_code": 200,
+      "event": "pull_request",
+      "action": "reopened",
+      "guid": "3e3eb190-2619-11f1-85d5-75f065941bfa"
+    },
+    "second_webhook_id": 601970996
+  },
+  "pass": true
+}

@@ -1,1 +1,1 @@
-PASS — Workflow Succeeded. validate-only passed (3/3 checks: P001, P004, P009), functional-test passed (8/8 endpoints). CommitStatus: success.
+PASS — validate-only (test-ready: 3/3) + functional-test (all endpoints passed)

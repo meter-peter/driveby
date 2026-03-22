@@ -340,6 +340,7 @@ spec:
           ---
           # GitHub Repository: auto-create dedicated gitops repo
           # crossplane.io/external-name set so re-applying XSDLC adopts existing repo
+          # deletionPolicy: Delete — removing XSDLC removes the gitops repo + all branches
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: Repository
           metadata:
@@ -348,7 +349,7 @@ spec:
               gotemplating.fn.crossplane.io/composition-resource-name: gitops-repository
               crossplane.io/external-name: {{`{{ $gitopsRepoName }}`}}
           spec:
-            deletionPolicy: Orphan
+            deletionPolicy: Delete
             providerConfigRef:
               name: {{`{{ $githubProviderConfigName }}`}}
             forProvider:
@@ -368,7 +369,7 @@ spec:
 
           {{- if .Values.githubProvider.enabled }}
           ---
-          # Boilerplate: dry/base/kustomization.yaml (base resources)
+          # Boilerplate: dry/base/kustomization.yaml (base resources — composition-managed)
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: RepositoryFile
           metadata:
@@ -383,7 +384,7 @@ spec:
               repository: {{`{{ $gitopsRepoName }}`}}
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/kustomization.yaml
-              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              commitMessage: "chore: update base manifests [driveby-managed]"
               overwriteOnCreate: true
               content: |
                 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -393,7 +394,7 @@ spec:
                   - service.yaml
 
           ---
-          # Boilerplate: dry/base/deployment.yaml (base deployment)
+          # Boilerplate: dry/base/deployment.yaml (base deployment — composition-managed)
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: RepositoryFile
           metadata:
@@ -408,7 +409,7 @@ spec:
               repository: {{`{{ $gitopsRepoName }}`}}
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/deployment.yaml
-              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              commitMessage: "chore: update base manifests [driveby-managed]"
               overwriteOnCreate: true
               content: |
                 apiVersion: apps/v1
@@ -439,7 +440,7 @@ spec:
                               value: "{{`{{ $appPort }}`}}"
 
           ---
-          # Boilerplate: dry/base/service.yaml (base service)
+          # Boilerplate: dry/base/service.yaml (base service — composition-managed)
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: RepositoryFile
           metadata:
@@ -454,7 +455,7 @@ spec:
               repository: {{`{{ $gitopsRepoName }}`}}
               branch: main
               file: {{`{{ $drySourcePath }}`}}/base/service.yaml
-              commitMessage: "chore: seed dry manifests [driveby-managed]"
+              commitMessage: "chore: update base manifests [driveby-managed]"
               overwriteOnCreate: true
               content: |
                 apiVersion: v1
@@ -474,8 +475,13 @@ spec:
           {{`{{/* Per-environment overlay kustomizations — Delete policy so removing */}}`}}
           {{`{{/* an environment from the XSDLC spec also removes its overlay file.   */}}`}}
           {{`{{- range $idx, $env := $envs }}`}}
+          {{`{{- $envNamespace := $env.namespaceOverride | default (printf "%s-%s" $appName $env.name) }}`}}
           ---
-          # Boilerplate: dry/overlays/{{`{{ $env.name }}`}}/kustomization.yaml (env overlay)
+          # Boilerplate: dry/overlays/{{`{{ $env.name }}`}}/kustomization.yaml (env overlay — composition-managed)
+          # Composition-managed: ensures overlays stay in sync with base changes.
+          # The namespace field forces Hydrator re-render when the base changes,
+          # since the overlay content includes the target namespace.
+          # Developers customize via additional patch files in the overlay dir.
           apiVersion: repo.github.upbound.io/v1alpha1
           kind: RepositoryFile
           metadata:
@@ -490,11 +496,11 @@ spec:
               repository: {{`{{ $gitopsRepoName }}`}}
               branch: main
               file: {{`{{ printf "%s/overlays/%s/kustomization.yaml" $drySourcePath $env.name }}`}}
-              commitMessage: "chore: seed dry manifests [driveby-managed]"
-              overwriteOnCreate: true
+              commitMessage: "chore: update overlay manifests [driveby-managed]"
               content: |
                 apiVersion: kustomize.config.k8s.io/v1beta1
                 kind: Kustomization
+                namespace: {{`{{ $envNamespace }}`}}
                 resources:
                   - ../../base
           {{`{{- end }}`}}
@@ -694,6 +700,17 @@ spec:
           {{`{{-   if ne $check.type "validate-only" }}{{ $sortedChecks = append $sortedChecks $check }}{{ end -}}`}}
           {{`{{- end -}}`}}
           {{`{{- $checks = $sortedChecks -}}`}}
+
+          {{`{{/* Build comma-separated check types string + extract gate validation mode */}}`}}
+          {{`{{- $checkTypesList := list -}}`}}
+          {{`{{- $gateValidationMode := $defaultValidationMode -}}`}}
+          {{`{{- range $check := $checks -}}`}}
+          {{`{{-   $checkTypesList = append $checkTypesList $check.type -}}`}}
+          {{`{{-   if eq $check.type "validate-only" -}}`}}
+          {{`{{-     $gateValidationMode = ($check.validationConfig | default dict).validationMode | default $defaultValidationMode -}}`}}
+          {{`{{-   end -}}`}}
+          {{`{{- end -}}`}}
+          {{`{{- $checkTypesStr := join "," $checkTypesList -}}`}}
 
           {{`{{/* Commit status key */}}`}}
           {{`{{- $commitStatusKey := "" -}}`}}
@@ -988,7 +1005,7 @@ spec:
                           - "--context"
                           - "{{`{{ $commitStatusKey }}`}}"
                           - "--target-url"
-                          - "{{`{{ $workflowsUrl }}`}}"
+                          - "{{`{{ $workflowsUrl }}`}}/{{`{{ $appNamespace }}`}}/{{`{{ "{{" }}workflow.name{{ "}}" }}`}}"
 
                     - name: health-check-source
                       container:
@@ -999,7 +1016,12 @@ spec:
                             echo "=== Health-checking source environment ==="
                             echo "Target: http://{{`{{ "{{" }}workflow.parameters.service-name{{ "}}" }}`}}.{{`{{ "{{" }}workflow.parameters.source-namespace{{ "}}" }}`}}:{{`{{ "{{" }}workflow.parameters.app-port{{ "}}" }}`}}{{`{{ "{{" }}workflow.parameters.openapi-endpoint{{ "}}" }}`}}"
                             ATTEMPTS=0
+                            {{`{{- if $prevEnvName }}`}}
+                            MAX_ATTEMPTS=120
+                            echo "Extended timeout (10 min): waiting for upstream gate to deploy source environment"
+                            {{`{{- else }}`}}
                             MAX_ATTEMPTS=60
+                            {{`{{- end }}`}}
                             while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
                               ATTEMPTS=$((ATTEMPTS + 1))
                               HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
@@ -1011,7 +1033,7 @@ spec:
                               echo "Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s..."
                               sleep 5
                             done
-                            echo "ERROR: Source environment not ready after 5 minutes"
+                            echo "ERROR: Source environment not ready after timeout"
                             exit 1
 
                     - name: driveby-validate
@@ -1121,6 +1143,10 @@ spec:
                     {{`{{- end }}`}}
 
                     - name: github-pr-comment
+                      inputs:
+                        parameters:
+                          - name: overall-status
+                            default: ""
                       container:
                         image: {{`{{ $drivebyImage }}`}}
                         imagePullPolicy: Always
@@ -1157,6 +1183,20 @@ spec:
                           - "{{`{{ "{{" }}workflow.parameters.github-repo{{ "}}" }}`}}"
                           - "--github-pr-number"
                           - "{{`{{ "{{" }}workflow.parameters.pr-number{{ "}}" }}`}}"
+                          - "--validation-mode"
+                          - "{{`{{ $gateValidationMode }}`}}"
+                          - "--gate-name"
+                          - "{{`{{ $gateName }}`}}"
+                          - "--gate-environment"
+                          - "{{`{{ $env.name }}`}}"
+                          - "--gate-app-name"
+                          - "{{`{{ $appName }}`}}"
+                          - "--check-types"
+                          - "{{`{{ $checkTypesStr }}`}}"
+                          - "--workflow-url"
+                          - "{{`{{ $workflowsUrl }}`}}/{{`{{ $appNamespace }}`}}/{{`{{ "{{" }}workflow.name{{ "}}" }}`}}"
+                          - "--overall-status"
+                          - "{{`{{ "{{" }}inputs.parameters.overall-status{{ "}}" }}`}}"
                         volumeMounts:
                           - name: reports
                             mountPath: /tmp/reports
@@ -1179,6 +1219,10 @@ spec:
                           - name: comment-pr-failure
                             when: "{{`{{ "{{" }}workflow.status{{ "}}" }}`}} != Succeeded"
                             template: github-pr-comment
+                            arguments:
+                              parameters:
+                                - name: overall-status
+                                  value: "Failed"
 
                     - name: exit-handler-github
                       container:
@@ -1222,7 +1266,7 @@ spec:
                           - "--context"
                           - "{{`{{ $commitStatusKey }}`}}"
                           - "--target-url"
-                          - "{{`{{ $workflowsUrl }}`}}"
+                          - "{{`{{ $workflowsUrl }}`}}/{{`{{ $appNamespace }}`}}/{{`{{ "{{" }}workflow.name{{ "}}" }}`}}"
 
                     - name: update-commitstatus
                       inputs:
@@ -1248,7 +1292,7 @@ spec:
                             name: {{`{{ $commitStatusKey }}`}}
                             description: {{`{{ "{{" }}inputs.parameters.description{{ "}}" }}`}}
                             phase: {{`{{ "{{" }}inputs.parameters.phase{{ "}}" }}`}}
-                            url: {{`{{ $workflowsUrl }}`}}
+                            url: {{`{{ $workflowsUrl }}`}}/{{`{{ $appNamespace }}`}}
 
           ---
           # EventSource -- GitHub webhook receiver on gitops repo (gate {{`{{ $idx }}`}}: {{`{{ $gateName }}`}})

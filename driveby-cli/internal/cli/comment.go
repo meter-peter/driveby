@@ -11,6 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	githubCommentCmd.Flags().String("gate-name", "", "Quality gate name (e.g., staging-gate)")
+	githubCommentCmd.Flags().String("gate-environment", "", "Target environment (e.g., staging)")
+	githubCommentCmd.Flags().String("gate-app-name", "", "Application name (e.g., perfect-api)")
+	githubCommentCmd.Flags().String("check-types", "", "Comma-separated check types (e.g., validate-only,functional-test)")
+	githubCommentCmd.Flags().String("workflow-url", "", "URL to the specific Argo Workflow run")
+	githubCommentCmd.Flags().String("overall-status", "", "Overall workflow status (Succeeded/Failed) — overrides report status for header icon")
+}
+
 var githubCommentCmd = &cobra.Command{
 	Use:   "github-comment",
 	Short: "Post a combined PR comment from pre-saved report files",
@@ -79,7 +88,31 @@ func runGitHubComment(cmd *cobra.Command, args []string) error {
 		validationMode = m
 	}
 
-	return handleGitHubComment(report, validationMode)
+	// Override report status if workflow-level status is provided
+	if overallStatus, _ := cmd.Flags().GetString("overall-status"); overallStatus != "" {
+		if overallStatus == "Failed" {
+			report.Status = "failed"
+		}
+	}
+
+	// Build gate context if gate flags are provided (XSDLC workflow mode)
+	var gateCtx *types.GateContext
+	if gateName, _ := cmd.Flags().GetString("gate-name"); gateName != "" {
+		env, _ := cmd.Flags().GetString("gate-environment")
+		appName, _ := cmd.Flags().GetString("gate-app-name")
+		checkTypes, _ := cmd.Flags().GetString("check-types")
+		workflowURL, _ := cmd.Flags().GetString("workflow-url")
+		gateCtx = &types.GateContext{
+			GateName:       gateName,
+			Environment:    env,
+			AppName:        appName,
+			CheckTypes:     checkTypes,
+			ValidationMode: validationMode,
+			WorkflowURL:    workflowURL,
+		}
+	}
+
+	return handleGitHubComment(report, validationMode, gateCtx)
 }
 
 func inferValidationMode(r *types.ValidationReport) string {

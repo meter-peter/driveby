@@ -1,0 +1,96 @@
+{
+    "baseRefName": "environment/prod",
+    "body": "This PR is promoting the environment branch `environment/prod` which is currently on dry sha  to dry sha 5a253921809a609bf64f431242b2168da680f212.",
+    "commits": [
+        {
+            "authoredDate": "2026-03-21T03:19:01Z",
+            "authors": [
+                {
+                    "email": "argo-cd@example.com",
+                    "id": "",
+                    "login": "",
+                    "name": "Argo CD"
+                },
+                {
+                    "email": "40340025+meter-peter@users.noreply.github.com",
+                    "id": "MDQ6VXNlcjQwMzQwMDI1",
+                    "login": "meter-peter",
+                    "name": "Petros Evangelos Triantafyllis"
+                }
+            ],
+            "committedDate": "2026-03-21T03:19:01Z",
+            "messageBody": "Co-authored-by: Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+            "messageHeadline": "77a97ff: chore: seed dry manifests [driveby-managed]",
+            "oid": "41bbe35f7f7df59b6efc45d8480a778d8d864c5e"
+        },
+        {
+            "authoredDate": "2026-03-21T15:48:49Z",
+            "authors": [
+                {
+                    "email": "argo-cd@example.com",
+                    "id": "",
+                    "login": "",
+                    "name": "Argo CD"
+                },
+                {
+                    "email": "metrospa@hotmail.com",
+                    "id": "MDQ6VXNlcjQwMzQwMDI1",
+                    "login": "meter-peter",
+                    "name": "meter-peter"
+                }
+            ],
+            "committedDate": "2026-03-21T15:48:49Z",
+            "messageBody": "Co-authored-by: meter-peter <metrospa@hotmail.com>",
+            "messageHeadline": "3efe2c5: test: deploy broken-api to ALL environments via base",
+            "oid": "e14ce96964d2dff09bb6021275e9199489057fb9"
+        },
+        {
+            "authoredDate": "2026-03-21T17:53:35Z",
+            "authors": [
+                {
+                    "email": "argo-cd@example.com",
+                    "id": "",
+                    "login": "",
+                    "name": "Argo CD"
+                },
+                {
+                    "email": "40340025+meter-peter@users.noreply.github.com",
+                    "id": "MDQ6VXNlcjQwMzQwMDI1",
+                    "login": "meter-peter",
+                    "name": "Petros Evangelos Triantafyllis"
+                }
+            ],
+            "committedDate": "2026-03-21T17:53:35Z",
+            "messageBody": "Co-authored-by: Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+            "messageHeadline": "5a25392: chore: seed dry manifests [driveby-managed]",
+            "oid": "94d152bd39920937ba6fada5f67ee360aa6a89c7"
+        }
+    ],
+    "createdAt": "2026-03-21T16:29:27Z",
+    "headRefName": "environment/prod-next",
+    "labels": [],
+    "number": 11,
+    "state": "OPEN",
+    "statusCheckRollup": [
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-03-21T18:20:53Z",
+            "conclusion": "SUCCESS",
+            "detailsUrl": "https://argo.private.novelcore.org/workflows",
+            "name": "prod-gate",
+            "startedAt": "2026-03-21T18:20:53Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+        },
+        {
+            "__typename": "StatusContext",
+            "context": "prod-gate",
+            "startedAt": "2026-03-21T17:54:42Z",
+            "state": "SUCCESS",
+            "targetUrl": "https://argo.private.novelcore.org/workflows"
+        }
+    ],
+    "title": "Promote 5a253 to `environment/prod`",
+    "updatedAt": "2026-03-21T18:20:57Z",
+    "url": "https://github.com/novelcore/perfect-api-gitops/pull/11"
+}

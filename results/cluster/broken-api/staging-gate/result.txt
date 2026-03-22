@@ -1,1 +1,1 @@
-FAIL — Workflow Failed at functional-test step. validate-only passed (2/6 checks: P001, P005; 4 warnings: P002, P003, P004, P008), but functional-test failed (2/5 endpoints failed: GET /widgets returned 500, POST /widgets request body error after retries). CommitStatus: failure.
+FAIL — validate-only passed, functional-test failed: P006 - GET /widgets returned 500, POST /widgets body error. 2/5 endpoints failed.

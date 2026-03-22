@@ -1,0 +1,2618 @@
+{
+    "apiVersion": "v1",
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    },
+    "items": [
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"bad-docs-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:50:40Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 27,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "bad-docs-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "246866974",
+                "uid": "07273339-06da-4c7e-91fe-fcdd42c256cb"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:55:05Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:50:40Z",
+                        "deployedAt": "2026-03-22T17:50:41Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "81d870d84b1ecd737bb6aac4cb47d1e1c2d6d089",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T17:55:02Z",
+                        "deployedAt": "2026-03-22T17:55:03Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "d8666742123e3b2b9c0881c5fdaf4ec4aa25d777",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T17:55:03Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "bad-docs-api"
+                                }
+                            ],
+                            "revision": "d8666742123e3b2b9c0881c5fdaf4ec4aa25d777",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T17:55:03Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/bad-docs-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/bad-docs-api unchanged",
+                                "name": "bad-docs-api",
+                                "namespace": "bad-docs-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "d8666742123e3b2b9c0881c5fdaf4ec4aa25d777",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:05:12Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "bad-docs-api",
+                        "namespace": "bad-docs-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "bad-docs-api",
+                        "namespace": "bad-docs-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "finishedAt": "2026-03-22T17:50:45Z",
+                        "hydratedSHA": "f6bccd71386cc9b9245f4b99d3631018d55dfd03",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:50:40Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "hydratedSHA": "f6bccd71386cc9b9245f4b99d3631018d55dfd03",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/bad-docs-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "d8666742123e3b2b9c0881c5fdaf4ec4aa25d777",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"bad-docs-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:47Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 10,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "bad-docs-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "246866844",
+                "uid": "bd215f92-48ac-4473-a4b1-1072ce8f919b"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:01:25Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:47Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:05:05Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "finishedAt": "2026-03-22T17:54:56Z",
+                        "hydratedSHA": "0441fafb4830ff80749070b4822820e8ba1bb39b",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:47Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "hydratedSHA": "0441fafb4830ff80749070b4822820e8ba1bb39b",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"bad-docs-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:46Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 10,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "bad-docs-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "246866842",
+                "uid": "09f4c151-8882-4304-81c4-e415624c9e3a"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:01:28Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:46Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:05:05Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "finishedAt": "2026-03-22T17:54:51Z",
+                        "hydratedSHA": "139c309fd446d6b954ceae4ea45637d592856d64",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:46Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "985af85764f7d996308fc7f839e5df7cc725ec1e",
+                        "hydratedSHA": "139c309fd446d6b954ceae4ea45637d592856d64",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"broken-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:52Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 32,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "broken-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "246868795",
+                "uid": "69882579-2605-4478-a800-e20ac86cdb75"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:59:11Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:53Z",
+                        "deployedAt": "2026-03-22T17:54:53Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "9193de7a8c157f2e49785c4d7efce8bffc69f2d9",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T17:59:09Z",
+                        "deployedAt": "2026-03-22T17:59:09Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "e7db13cb021742a9e09cd4b16b4c7df6fcd64d2d",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T17:59:10Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "broken-api"
+                                }
+                            ],
+                            "revision": "e7db13cb021742a9e09cd4b16b4c7df6fcd64d2d",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T17:59:10Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/broken-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/broken-api unchanged",
+                                "name": "broken-api",
+                                "namespace": "broken-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "e7db13cb021742a9e09cd4b16b4c7df6fcd64d2d",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:07:16Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "broken-api",
+                        "namespace": "broken-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "broken-api",
+                        "namespace": "broken-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "finishedAt": "2026-03-22T17:55:30Z",
+                        "hydratedSHA": "799e900c6a5fbcece5a21827740fd41b46aa28c9",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:53Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "hydratedSHA": "799e900c6a5fbcece5a21827740fd41b46aa28c9",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/broken-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "e7db13cb021742a9e09cd4b16b4c7df6fcd64d2d",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"broken-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:54Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 10,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "broken-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "246868389",
+                "uid": "b77e4583-faf4-49a0-b3de-bac66c78b54e"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:03:12Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:54Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:06:42Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "finishedAt": "2026-03-22T17:55:40Z",
+                        "hydratedSHA": "0a7307b748e8d2610b04ca46c0134518a1eda8e5",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:54Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "hydratedSHA": "0a7307b748e8d2610b04ca46c0134518a1eda8e5",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"broken-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"broken-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/broken-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:53Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 11,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "broken-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "246868608",
+                "uid": "e494f490-c3b6-46c2-9ada-c791e6e8abd4"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "broken-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:01:21Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:53Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:07:01Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "finishedAt": "2026-03-22T17:55:35Z",
+                        "hydratedSHA": "4d2f7130201f5d497b6af8e1339059285f1830f9",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:53Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "dae48cea73e9828a8e5a03a35e710265599ba2b2",
+                        "hydratedSHA": "4d2f7130201f5d497b6af8e1339059285f1830f9",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "broken-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/broken-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"no-auth-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:47Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 30,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "no-auth-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "246866853",
+                "uid": "fc9f09fa-fd61-4951-bd73-297412ec5277"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:59:27Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:47Z",
+                        "deployedAt": "2026-03-22T17:54:48Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "14f4fb705641ffb76606d32bb6c7079cd14f2182",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T17:59:24Z",
+                        "deployedAt": "2026-03-22T17:59:25Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "e7c9fdcc987d324e8714f596277a3dbad6bbdaf8",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T17:59:26Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "no-auth-api"
+                                }
+                            ],
+                            "revision": "e7c9fdcc987d324e8714f596277a3dbad6bbdaf8",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T17:59:25Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/no-auth-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/no-auth-api unchanged",
+                                "name": "no-auth-api",
+                                "namespace": "no-auth-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "e7c9fdcc987d324e8714f596277a3dbad6bbdaf8",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:05:06Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "no-auth-api",
+                        "namespace": "no-auth-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "no-auth-api",
+                        "namespace": "no-auth-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "finishedAt": "2026-03-22T17:55:01Z",
+                        "hydratedSHA": "47a4e34c04acb9da9747a6c24da62fd4fece886e",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:47Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "hydratedSHA": "47a4e34c04acb9da9747a6c24da62fd4fece886e",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/no-auth-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "e7c9fdcc987d324e8714f596277a3dbad6bbdaf8",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"no-auth-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:49Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 12,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "no-auth-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "246868857",
+                "uid": "769ba158-5a64-4698-be3a-8242f6878816"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:07:22Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:50Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:07:22Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "finishedAt": "2026-03-22T17:55:10Z",
+                        "hydratedSHA": "d6b7f6f8c5b432aae06c281a64d3784384c3d78a",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:50Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "hydratedSHA": "d6b7f6f8c5b432aae06c281a64d3784384c3d78a",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"no-auth-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:48Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 11,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "no-auth-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "246868840",
+                "uid": "63789cad-28d2-4cb5-8c5f-76b52bff1ba6"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:24Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:48Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:07:20Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "finishedAt": "2026-03-22T17:55:06Z",
+                        "hydratedSHA": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:48Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "94dcf1aa7b296dab924f2840e33015e140ff4a45",
+                        "hydratedSHA": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"perfect-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:54Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 23,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "perfect-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "246867238",
+                "uid": "e0b9ac57-1313-46b8-8553-bccbd128a7c2"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "perfect-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:59:21Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:55Z",
+                        "deployedAt": "2026-03-22T17:54:55Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "300a570b15956aa09f6e7d0856d55bc8db6bf2ed",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T17:59:19Z",
+                        "deployedAt": "2026-03-22T17:59:19Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "3e0c102ee28abc170f5bcec4a8c90b33d08f3f15",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T17:59:19Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "prune": true,
+                            "revision": "3e0c102ee28abc170f5bcec4a8c90b33d08f3f15",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T17:59:19Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/perfect-api unchanged",
+                                "name": "perfect-api",
+                                "namespace": "perfect-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/perfect-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/perfect-api configured",
+                                "name": "perfect-api",
+                                "namespace": "perfect-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "3e0c102ee28abc170f5bcec4a8c90b33d08f3f15",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:05:27Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "perfect-api",
+                        "namespace": "perfect-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "perfect-api",
+                        "namespace": "perfect-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "finishedAt": "2026-03-22T17:55:45Z",
+                        "hydratedSHA": "df237daa8cafd00b6571c5604099cdbd0102b406",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:55Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "hydratedSHA": "df237daa8cafd00b6571c5604099cdbd0102b406",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/perfect-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "perfect-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "3e0c102ee28abc170f5bcec4a8c90b33d08f3f15",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"perfect-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:56Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 12,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "perfect-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "246867139",
+                "uid": "fb428195-1c05-4526-8255-40c9a64f4fb5"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "perfect-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:05:21Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:56Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:05:21Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "finishedAt": "2026-03-22T17:55:55Z",
+                        "hydratedSHA": "41e041ef4b4f1070e076dd5414a32c9b736dbd39",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:56Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "hydratedSHA": "41e041ef4b4f1070e076dd5414a32c9b736dbd39",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "perfect-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"perfect-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"perfect-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/perfect-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:55Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 31,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "perfect-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "246868461",
+                "uid": "46dd2e51-1c8d-40f4-86ef-aa759602f0d6"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "perfect-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T18:03:29Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:55Z",
+                        "deployedAt": "2026-03-22T17:54:56Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "5c12145c56ddd97034fc65d57ca5dedbc17fcff3",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T18:03:26Z",
+                        "deployedAt": "2026-03-22T18:03:26Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "e07841327df3033207191396734f28a1c0c99d97",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T18:03:27Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "perfect-api"
+                                }
+                            ],
+                            "revision": "e07841327df3033207191396734f28a1c0c99d97",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "environment/staging"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T18:03:26Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/perfect-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/perfect-api unchanged",
+                                "name": "perfect-api",
+                                "namespace": "perfect-api-staging",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "e07841327df3033207191396734f28a1c0c99d97",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:06:48Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "perfect-api",
+                        "namespace": "perfect-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "perfect-api",
+                        "namespace": "perfect-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "finishedAt": "2026-03-22T17:55:50Z",
+                        "hydratedSHA": "94be36c5d066ab0789a1ea411c8d7fe505f0486d",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:55Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "c8c7e66eb29dffa1364fa81ab143f008cfbcf569",
+                        "hydratedSHA": "94be36c5d066ab0789a1ea411c8d7fe505f0486d",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/perfect-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "perfect-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/perfect-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "e07841327df3033207191396734f28a1c0c99d97",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"slow-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:50Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 23,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "slow-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "246868321",
+                "uid": "911047be-693f-4783-a923-be29541a2b0a"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:59:25Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:50Z",
+                        "deployedAt": "2026-03-22T17:54:51Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "08be108160d2b1ffebc939365c5bbec53068b896",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T17:59:23Z",
+                        "deployedAt": "2026-03-22T17:59:23Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "b197cac4d764d01c550ea3528f99b2a980542786",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T17:59:23Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "prune": true,
+                            "revision": "b197cac4d764d01c550ea3528f99b2a980542786",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T17:59:23Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/slow-api unchanged",
+                                "name": "slow-api",
+                                "namespace": "slow-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/slow-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/slow-api configured",
+                                "name": "slow-api",
+                                "namespace": "slow-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "b197cac4d764d01c550ea3528f99b2a980542786",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:06:36Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "slow-api",
+                        "namespace": "slow-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "slow-api",
+                        "namespace": "slow-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "finishedAt": "2026-03-22T17:55:15Z",
+                        "hydratedSHA": "c6a126e924c33991cadc1207f74cc7c6848ef0b4",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:50Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "hydratedSHA": "c6a126e924c33991cadc1207f74cc7c6848ef0b4",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/slow-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "b197cac4d764d01c550ea3528f99b2a980542786",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"slow-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:52Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 11,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "slow-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "246868851",
+                "uid": "3254c946-e05d-4bd0-ae06-4b99898b5d08"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:00:38Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T17:54:52Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-22T18:07:22Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "finishedAt": "2026-03-22T17:55:25Z",
+                        "hydratedSHA": "f1938e69e61966621b4635618d7c72c91d8adb2a",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:52Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "hydratedSHA": "f1938e69e61966621b4635618d7c72c91d8adb2a",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"slow-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-22T17:54:51Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 34,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "slow-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "246867159",
+                "uid": "58593d8a-c6d9-42fe-b152-a6f0fc11dddb"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-22T18:00:43Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-22T17:54:51Z",
+                        "deployedAt": "2026-03-22T17:54:51Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "1be73425ad876189cdc0470856b06ddd60fb6c50",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    {
+                        "deployStartedAt": "2026-03-22T18:00:26Z",
+                        "deployedAt": "2026-03-22T18:00:27Z",
+                        "id": 1,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "564f27e05621c53cca29cf25ea6bbbcb14528652",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-22T18:00:28Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "slow-api"
+                                }
+                            ],
+                            "revision": "564f27e05621c53cca29cf25ea6bbbcb14528652",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "environment/staging"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-22T18:00:27Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/slow-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/slow-api unchanged",
+                                "name": "slow-api",
+                                "namespace": "slow-api-staging",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "564f27e05621c53cca29cf25ea6bbbcb14528652",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-22T18:05:22Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "slow-api",
+                        "namespace": "slow-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "slow-api",
+                        "namespace": "slow-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "finishedAt": "2026-03-22T17:55:20Z",
+                        "hydratedSHA": "c7ece86b5be0402fabe17d8ee7de3a00d4b20be0",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-22T17:54:51Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "0f794c591501744fe695b884ae7f2ad9d3af0161",
+                        "hydratedSHA": "c7ece86b5be0402fabe17d8ee7de3a00d4b20be0",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/slow-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "564f27e05621c53cca29cf25ea6bbbcb14528652",
+                    "status": "Synced"
+                }
+            }
+        }
+    ]
+}

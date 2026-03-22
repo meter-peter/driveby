@@ -91,7 +91,7 @@ When writing Crossplane resources:
 
 ## Crossplane Quality Gates (XSDLC)
 - **XSDLC** (`driveby.io/v1alpha1`) — fully turnkey GitOps delivery pipeline. One CR provisions a dedicated gitops repo, branches, ArgoCD apps, promoter, and quality gates
-- A single XSDLC CR generates: GitOps Repository, ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection rules
+- A single XSDLC CR generates: GitOps Repository, ServiceAccount, EventBus, RBAC, WorkflowTemplates, EventSources, Sensors, Ingresses, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, BranchProtection rules, ArgoCD push secrets, per-namespace ghcr-creds
 - **Two-repo model with Source Hydrator** (v3.0.0): XSDLC auto-creates a dedicated gitops repo per app (via `provider-upjet-github` Repository). The software repo is untouched. The gitops repo's `main` branch holds dry manifests in `dry/base/` + `dry/overlays/<env>/` (Kustomize). ArgoCD Source Hydrator renders each overlay and writes hydrated output (with `hydrator.metadata`) to `environment/<env>-next` branches. The Promoter creates PRs from `-next` to active branches; gates fire on those PRs.
 - **Per-environment overlays**: Each environment has its own Kustomize overlay (`dry/overlays/<env>/`), enabling per-env customization (replicas, env vars, images). Each ArgoCD Application uses `sourceHydrator` pointing to its overlay — no linear propagation between environments.
 - **BYOCI boundary**: Developers update dry manifests on `main` in the gitops repo. The hydrator + Promoter handle the rest. XSDLC does NOT generate any CI/CD workflows.

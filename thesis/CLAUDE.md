@@ -175,14 +175,15 @@ thesis/
 - [DONE] Pipeline diagram: GitOps event-driven workflow (Ch.5) — `figures/workflow-pipeline.tex`, `fig:gitops-pipeline`
 - [DONE] Staging promotion DAG (Ch.5) — `figures/staging-promotion-dag.tex`, `fig:staging-dag`
 - [DONE] Evaluation framework (Ch.6) — `figures/evaluation-methodology.tex`, `fig:eval-methodology`
-- [REMOVED] Provider architecture (Ch.5) — `figures/provider-architecture.tex` — figure cut, text kept inline
+- [DONE] Provider architecture (Ch.5) — `figures/provider-architecture.tex`, `fig:provider-architecture`
+- [DONE] Kubernetes system context (Ch.5) — `figures/k8s-system-context.tex`, `fig:k8s-system-context`
 - [DONE] Crossplane reconciliation loop (Ch.5) — `figures/crossplane-reconciliation-loop.tex`, `fig:crossplane-reconciliation-loop`
 - [DONE] Declarative lifecycle (Ch.5) — `figures/declarative-lifecycle.tex`, `fig:declarative-lifecycle`
 - [DONE] Two-repo branch flow (Ch.6) — `figures/single-repo-branch-flow.tex`, `fig:single-repo-branch-flow`
 - [DONE] Human-in-the-loop (Ch.6) — `figures/human-in-the-loop.tex`, `fig:human-in-the-loop`
 - [DONE] Quality control loop (Ch.6) — `figures/quality-control-loop.tex`, `fig:quality-control-loop`
-- Bar chart: per-principle pass rates across APIs.guru dataset (Ch.6) — TODO (requires evaluation data)
-- Table: perfect-api validation results (Ch.6) — TODO (requires evaluation data)
+- [DONE] Bar chart: per-principle pass rates across five evaluation APIs (Ch.7) — `figures/per-principle-pass-rates.tex`, `fig:pass-rates`
+- [REMOVED] Three-tier config (Ch.5) — `figures/three-tier-config.tex` — deleted, obsolete (two-tier model is current)
 - All figures are TikZ vector diagrams (inline LaTeX, no external image files needed)
 
 ## Writing Rules

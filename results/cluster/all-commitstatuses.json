@@ -1,0 +1,1449 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-0441fafb4830ff80749070b4822820e8ba1bb39b\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"bad-docs-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"0441fafb4830ff80749070b4822820e8ba1bb39b\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:01Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-0441fafb4830ff80749070b4822820e8ba1bb39b",
+                "namespace": "driveby",
+                "resourceVersion": "246860273",
+                "uid": "52778f49-e15c-4c18-8ee0-85fb30f04839"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "bad-docs-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "0441fafb4830ff80749070b4822820e8ba1bb39b",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:00:24Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092688814",
+                "phase": "failure",
+                "sha": "0441fafb4830ff80749070b4822820e8ba1bb39b"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-0a7307b748e8d2610b04ca46c0134518a1eda8e5\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"broken-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"0a7307b748e8d2610b04ca46c0134518a1eda8e5\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:45Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-0a7307b748e8d2610b04ca46c0134518a1eda8e5",
+                "namespace": "driveby",
+                "resourceVersion": "246861731",
+                "uid": "8281a920-7ff1-41b7-a819-3daad37c1e38"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "broken-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "0a7307b748e8d2610b04ca46c0134518a1eda8e5",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:01:09Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092721088",
+                "phase": "failure",
+                "sha": "0a7307b748e8d2610b04ca46c0134518a1eda8e5"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-2167cc3260f87bd75ed7b5dc17f2bb5c17380359\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"2167cc3260f87bd75ed7b5dc17f2bb5c17380359\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T02:11:48Z",
+                "generation": 8,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-2167cc3260f87bd75ed7b5dc17f2bb5c17380359",
+                "namespace": "driveby",
+                "resourceVersion": "246858827",
+                "uid": "077acadb-a77e-4e29-9a3a-41b91fcc85de"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to prod",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "success",
+                "sha": "2167cc3260f87bd75ed7b5dc17f2bb5c17380359",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:27Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"prod-gate-2167cc3260f87bd75ed7b5dc17f2bb5c17380359\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: 2167cc3260f87bd75ed7b5dc17f2bb5c17380359 []",
+                        "observedGeneration": 8,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67992332125",
+                "phase": "success",
+                "sha": "2167cc3260f87bd75ed7b5dc17f2bb5c17380359"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-2a77bedb978d8952e181482a43afe18390be52c2\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"broken-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"2a77bedb978d8952e181482a43afe18390be52c2\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:15Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-2a77bedb978d8952e181482a43afe18390be52c2",
+                "namespace": "driveby",
+                "resourceVersion": "246850099",
+                "uid": "b0b4ad4f-2af9-4473-a95a-a1d19588e65d"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "broken-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "2a77bedb978d8952e181482a43afe18390be52c2",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:17Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68032543624",
+                "phase": "failure",
+                "sha": "2a77bedb978d8952e181482a43afe18390be52c2"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-41bbe35f7f7df59b6efc45d8480a778d8d864c5e\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"41bbe35f7f7df59b6efc45d8480a778d8d864c5e\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T03:21:48Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-41bbe35f7f7df59b6efc45d8480a778d8d864c5e",
+                "namespace": "driveby",
+                "resourceVersion": "246849889",
+                "uid": "d659bd21-efbd-490e-b345-469e348726ae"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to prod",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "success",
+                "sha": "41bbe35f7f7df59b6efc45d8480a778d8d864c5e",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:06Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67995766783",
+                "phase": "success",
+                "sha": "41bbe35f7f7df59b6efc45d8480a778d8d864c5e"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-41e041ef4b4f1070e076dd5414a32c9b736dbd39\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"41e041ef4b4f1070e076dd5414a32c9b736dbd39\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:58Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-41e041ef4b4f1070e076dd5414a32c9b736dbd39",
+                "namespace": "driveby",
+                "resourceVersion": "246855404",
+                "uid": "1d5383f3-39a8-4417-99de-1b8873fbb722"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to prod",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "success",
+                "sha": "41e041ef4b4f1070e076dd5414a32c9b736dbd39",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:56:58Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092731452",
+                "phase": "success",
+                "sha": "41e041ef4b4f1070e076dd5414a32c9b736dbd39"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-77d61990b5e5538fb5d0a5ae20218b2889a3a189\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"no-auth-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"77d61990b5e5538fb5d0a5ae20218b2889a3a189\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:03Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-77d61990b5e5538fb5d0a5ae20218b2889a3a189",
+                "namespace": "driveby",
+                "resourceVersion": "246850112",
+                "uid": "a7e10797-d47f-4a89-9ca0-4f56874ba728"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "no-auth-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "77d61990b5e5538fb5d0a5ae20218b2889a3a189",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:18Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68032533252",
+                "phase": "failure",
+                "sha": "77d61990b5e5538fb5d0a5ae20218b2889a3a189"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-7ecc0d37f321217a2025120f6a8c6e3159645212\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"bad-docs-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"7ecc0d37f321217a2025120f6a8c6e3159645212\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T17:43:45Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-7ecc0d37f321217a2025120f6a8c6e3159645212",
+                "namespace": "driveby",
+                "resourceVersion": "246849920",
+                "uid": "a8961261-bf35-4a31-bfd8-da25b2f15bb6"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "bad-docs-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "7ecc0d37f321217a2025120f6a8c6e3159645212",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:08Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68030811457",
+                "phase": "failure",
+                "sha": "7ecc0d37f321217a2025120f6a8c6e3159645212"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-949b9a9f9c93500b4c9cb7c7628990d20fe6386d\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"slow-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"949b9a9f9c93500b4c9cb7c7628990d20fe6386d\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:03Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-949b9a9f9c93500b4c9cb7c7628990d20fe6386d",
+                "namespace": "driveby",
+                "resourceVersion": "246849992",
+                "uid": "6c05420d-13dc-4495-8c90-1258122863f8"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "slow-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "949b9a9f9c93500b4c9cb7c7628990d20fe6386d",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:13Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68036085563",
+                "phase": "failure",
+                "sha": "949b9a9f9c93500b4c9cb7c7628990d20fe6386d"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-94d152bd39920937ba6fada5f67ee360aa6a89c7\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"94d152bd39920937ba6fada5f67ee360aa6a89c7\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T17:53:43Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-94d152bd39920937ba6fada5f67ee360aa6a89c7",
+                "namespace": "driveby",
+                "resourceVersion": "246850132",
+                "uid": "bdfb213c-62b6-4873-9562-cabbd83d4934"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to prod",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "success",
+                "sha": "94d152bd39920937ba6fada5f67ee360aa6a89c7",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:19Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68032525299",
+                "phase": "success",
+                "sha": "94d152bd39920937ba6fada5f67ee360aa6a89c7"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-d6b7f6f8c5b432aae06c281a64d3784384c3d78a\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"no-auth-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"d6b7f6f8c5b432aae06c281a64d3784384c3d78a\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:15Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-d6b7f6f8c5b432aae06c281a64d3784384c3d78a",
+                "namespace": "driveby",
+                "resourceVersion": "246860813",
+                "uid": "257c97a4-7a25-40b0-ab92-77dff90b25bc"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "no-auth-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "d6b7f6f8c5b432aae06c281a64d3784384c3d78a",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:00:40Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092698258",
+                "phase": "failure",
+                "sha": "d6b7f6f8c5b432aae06c281a64d3784384c3d78a"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-e118890b4d57ae3c6f0c2bf89dd265508c9275d1\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Running quality checks for prod environment...\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"pending\",\"sha\":\"e118890b4d57ae3c6f0c2bf89dd265508c9275d1\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T03:09:05Z",
+                "generation": 1,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-e118890b4d57ae3c6f0c2bf89dd265508c9275d1",
+                "namespace": "driveby",
+                "resourceVersion": "246858863",
+                "uid": "303c0762-3499-4b9e-8650-70a9489378aa"
+            },
+            "spec": {
+                "description": "Running quality checks for prod environment...",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "pending",
+                "sha": "e118890b4d57ae3c6f0c2bf89dd265508c9275d1",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:28Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"prod-gate-e118890b4d57ae3c6f0c2bf89dd265508c9275d1\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: e118890b4d57ae3c6f0c2bf89dd265508c9275d1 []",
+                        "observedGeneration": 1,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67993829979",
+                "phase": "pending",
+                "sha": "e118890b4d57ae3c6f0c2bf89dd265508c9275d1"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-e14ce96964d2dff09bb6021275e9199489057fb9\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to prod\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"success\",\"sha\":\"e14ce96964d2dff09bb6021275e9199489057fb9\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T15:48:56Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-e14ce96964d2dff09bb6021275e9199489057fb9",
+                "namespace": "driveby",
+                "resourceVersion": "246849999",
+                "uid": "315b6eea-31a9-460f-927a-869663a0b5a1"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to prod",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "success",
+                "sha": "e14ce96964d2dff09bb6021275e9199489057fb9",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:13Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68027486727",
+                "phase": "success",
+                "sha": "e14ce96964d2dff09bb6021275e9199489057fb9"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-f1938e69e61966621b4635618d7c72c91d8adb2a\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"slow-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"f1938e69e61966621b4635618d7c72c91d8adb2a\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:30Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-f1938e69e61966621b4635618d7c72c91d8adb2a",
+                "namespace": "driveby",
+                "resourceVersion": "246865154",
+                "uid": "79c517a1-33d0-4181-897f-5908c64297fc"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "slow-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "f1938e69e61966621b4635618d7c72c91d8adb2a",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:03:31Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68093049852",
+                "phase": "failure",
+                "sha": "f1938e69e61966621b4635618d7c72c91d8adb2a"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"prod-gate\",\"promoter.argoproj.io/commit-status\":\"prod-gate\"},\"name\":\"prod-gate-fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to prod blocked\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"prod-gate\",\"phase\":\"failure\",\"sha\":\"fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T02:49:53Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "prod-gate",
+                    "promoter.argoproj.io/commit-status": "prod-gate"
+                },
+                "name": "prod-gate-fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d",
+                "namespace": "driveby",
+                "resourceVersion": "246858879",
+                "uid": "19ace3fa-306a-4ed2-81d6-50d8c5057525"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to prod blocked",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "prod-gate",
+                "phase": "failure",
+                "sha": "fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:29Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"prod-gate-fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d []",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67993334765",
+                "phase": "failure",
+                "sha": "fe4caf05e5d61cdc25a99330e6eaf2c6eb7e227d"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-097769388d598d35c0e3441c8eedaad8db2e3c34\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"bad-docs-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"097769388d598d35c0e3441c8eedaad8db2e3c34\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T17:43:44Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-097769388d598d35c0e3441c8eedaad8db2e3c34",
+                "namespace": "driveby",
+                "resourceVersion": "246849947",
+                "uid": "e3155d8e-4fe3-425c-8248-56f7fe6fd209"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "bad-docs-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "097769388d598d35c0e3441c8eedaad8db2e3c34",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:10Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68036700515",
+                "phase": "failure",
+                "sha": "097769388d598d35c0e3441c8eedaad8db2e3c34"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-0a7a0a3a15baf21b90334a67fcd7e3699deb6d9c\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"0a7a0a3a15baf21b90334a67fcd7e3699deb6d9c\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T17:59:58Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-0a7a0a3a15baf21b90334a67fcd7e3699deb6d9c",
+                "namespace": "driveby",
+                "resourceVersion": "246850018",
+                "uid": "c266a941-dafc-4f90-ba2e-edf6fa705a30"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "0a7a0a3a15baf21b90334a67fcd7e3699deb6d9c",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:14Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68033114264",
+                "phase": "success",
+                "sha": "0a7a0a3a15baf21b90334a67fcd7e3699deb6d9c"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-139c309fd446d6b954ceae4ea45637d592856d64\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"bad-docs-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"139c309fd446d6b954ceae4ea45637d592856d64\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:54:55Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-139c309fd446d6b954ceae4ea45637d592856d64",
+                "namespace": "driveby",
+                "resourceVersion": "246863952",
+                "uid": "75b0f999-fd4d-4ff6-ba29-fbdf6c38e244"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "bad-docs-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "139c309fd446d6b954ceae4ea45637d592856d64",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:02:44Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68093035466",
+                "phase": "failure",
+                "sha": "139c309fd446d6b954ceae4ea45637d592856d64"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-3b5b32a552c4c530f119ce398d595537a09874c9\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"3b5b32a552c4c530f119ce398d595537a09874c9\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T03:21:48Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-3b5b32a552c4c530f119ce398d595537a09874c9",
+                "namespace": "driveby",
+                "resourceVersion": "246850046",
+                "uid": "827315a8-8da5-434f-b506-e04b05e7fc22"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "3b5b32a552c4c530f119ce398d595537a09874c9",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:15Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67994413203",
+                "phase": "success",
+                "sha": "3b5b32a552c4c530f119ce398d595537a09874c9"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-4d2f7130201f5d497b6af8e1339059285f1830f9\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"broken-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"4d2f7130201f5d497b6af8e1339059285f1830f9\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:41Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-4d2f7130201f5d497b6af8e1339059285f1830f9",
+                "namespace": "driveby",
+                "resourceVersion": "246864829",
+                "uid": "c2756a42-8e76-4803-86da-4cea974f562d"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "broken-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "4d2f7130201f5d497b6af8e1339059285f1830f9",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:03:23Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68093044989",
+                "phase": "failure",
+                "sha": "4d2f7130201f5d497b6af8e1339059285f1830f9"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-50b47ffb90aaa5d7316d3f0cb10421b53d7906a1\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"50b47ffb90aaa5d7316d3f0cb10421b53d7906a1\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T17:53:37Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-50b47ffb90aaa5d7316d3f0cb10421b53d7906a1",
+                "namespace": "driveby",
+                "resourceVersion": "246850148",
+                "uid": "f6302576-d9eb-46fc-88d5-cf2d72e923ab"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "50b47ffb90aaa5d7316d3f0cb10421b53d7906a1",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:19Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68032290180",
+                "phase": "failure",
+                "sha": "50b47ffb90aaa5d7316d3f0cb10421b53d7906a1"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"no-auth-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:55:10Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a",
+                "namespace": "driveby",
+                "resourceVersion": "246864163",
+                "uid": "d8f99dd3-d3f0-4de1-b6be-df9b56497994"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "no-auth-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:02:50Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68093040979",
+                "phase": "failure",
+                "sha": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-730fd138bda535932fc5d702f2ce04c93a59f540\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"730fd138bda535932fc5d702f2ce04c93a59f540\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T03:09:19Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-730fd138bda535932fc5d702f2ce04c93a59f540",
+                "namespace": "driveby",
+                "resourceVersion": "246858795",
+                "uid": "f88f0142-1ee7-4077-82bb-4ef6af4d2013"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "730fd138bda535932fc5d702f2ce04c93a59f540",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:26Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"staging-gate-730fd138bda535932fc5d702f2ce04c93a59f540\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: 730fd138bda535932fc5d702f2ce04c93a59f540 []",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67993845337",
+                "phase": "success",
+                "sha": "730fd138bda535932fc5d702f2ce04c93a59f540"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"broken-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-79534963f7cfa25500a2c82d00a7f8c0b35f3997\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"broken-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"79534963f7cfa25500a2c82d00a7f8c0b35f3997\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:12Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "broken-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-79534963f7cfa25500a2c82d00a7f8c0b35f3997",
+                "namespace": "driveby",
+                "resourceVersion": "246849899",
+                "uid": "b6a2886f-a4de-45f5-9c1c-01edba5fb20c"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "broken-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "79534963f7cfa25500a2c82d00a7f8c0b35f3997",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:07Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68033104356",
+                "phase": "failure",
+                "sha": "79534963f7cfa25500a2c82d00a7f8c0b35f3997"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-83fa8c577dae696d43305c2e3924d0d1025850b6\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"83fa8c577dae696d43305c2e3924d0d1025850b6\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T15:48:58Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-83fa8c577dae696d43305c2e3924d0d1025850b6",
+                "namespace": "driveby",
+                "resourceVersion": "246850063",
+                "uid": "e9d2754e-6553-4b20-8182-91ad6a47e0a4"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "83fa8c577dae696d43305c2e3924d0d1025850b6",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:16Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68027485759",
+                "phase": "failure",
+                "sha": "83fa8c577dae696d43305c2e3924d0d1025850b6"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-94be36c5d066ab0789a1ea411c8d7fe505f0486d\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"94be36c5d066ab0789a1ea411c8d7fe505f0486d\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:58:33Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-94be36c5d066ab0789a1ea411c8d7fe505f0486d",
+                "namespace": "driveby",
+                "resourceVersion": "246858384",
+                "uid": "ea935d17-1d71-4fcc-9d40-c663c09075c4"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "94be36c5d066ab0789a1ea411c8d7fe505f0486d",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:14Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092849660",
+                "phase": "success",
+                "sha": "94be36c5d066ab0789a1ea411c8d7fe505f0486d"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-97e1f104584fa725f6bad944da5273e147756a0f\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"bad-docs-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"97e1f104584fa725f6bad944da5273e147756a0f\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T19:58:46Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-97e1f104584fa725f6bad944da5273e147756a0f",
+                "namespace": "driveby",
+                "resourceVersion": "246850080",
+                "uid": "57a0088c-9aa1-4f67-9848-7706db2c0be1"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "bad-docs-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "97e1f104584fa725f6bad944da5273e147756a0f",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:16Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68036860975",
+                "phase": "failure",
+                "sha": "97e1f104584fa725f6bad944da5273e147756a0f"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-c7ece86b5be0402fabe17d8ee7de3a00d4b20be0\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"slow-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"c7ece86b5be0402fabe17d8ee7de3a00d4b20be0\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-22T17:58:32Z",
+                "generation": 2,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-c7ece86b5be0402fabe17d8ee7de3a00d4b20be0",
+                "namespace": "driveby",
+                "resourceVersion": "246859604",
+                "uid": "e56c499e-7edb-4385-bbbb-64ff495137c2"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "slow-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "c7ece86b5be0402fabe17d8ee7de3a00d4b20be0",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T18:00:02Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 2,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68092849080",
+                "phase": "success",
+                "sha": "c7ece86b5be0402fabe17d8ee7de3a00d4b20be0"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-d0f453a45e71ca50afb5a97c8fef31d9e9bbd750\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"d0f453a45e71ca50afb5a97c8fef31d9e9bbd750\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T02:11:49Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-d0f453a45e71ca50afb5a97c8fef31d9e9bbd750",
+                "namespace": "driveby",
+                "resourceVersion": "246858890",
+                "uid": "71ace4b5-a326-4da0-8e91-5acab866efeb"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "d0f453a45e71ca50afb5a97c8fef31d9e9bbd750",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:30Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"staging-gate-d0f453a45e71ca50afb5a97c8fef31d9e9bbd750\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: d0f453a45e71ca50afb5a97c8fef31d9e9bbd750 []",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67991735883",
+                "phase": "success",
+                "sha": "d0f453a45e71ca50afb5a97c8fef31d9e9bbd750"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"Quality checks failed, promotion to staging blocked\",\"gitRepositoryRef\":{\"name\":\"no-auth-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"failure\",\"sha\":\"d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:02Z",
+                "generation": 6,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+                "namespace": "driveby",
+                "resourceVersion": "246849961",
+                "uid": "8dbf237f-a0ae-4f4b-8c81-28e9ca9cd3a0"
+            },
+            "spec": {
+                "description": "Quality checks failed, promotion to staging blocked",
+                "gitRepositoryRef": {
+                    "name": "no-auth-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "failure",
+                "sha": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:12Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 6,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68036518117",
+                "phase": "failure",
+                "sha": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-ec344c33c12870c6025ededc62497ec915c6009d\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"slow-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"ec344c33c12870c6025ededc62497ec915c6009d\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T18:21:04Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-ec344c33c12870c6025ededc62497ec915c6009d",
+                "namespace": "driveby",
+                "resourceVersion": "246849976",
+                "uid": "fbab9a8c-0bcf-477e-a492-8f3f52b62a9f"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "slow-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "ec344c33c12870c6025ededc62497ec915c6009d",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:53:12Z",
+                        "message": "Reconciliation successful",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationSuccess",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "68033099681",
+                "phase": "success",
+                "sha": "ec344c33c12870c6025ededc62497ec915c6009d"
+            }
+        },
+        {
+            "apiVersion": "promoter.argoproj.io/v1alpha1",
+            "kind": "CommitStatus",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"promoter.argoproj.io/v1alpha1\",\"kind\":\"CommitStatus\",\"metadata\":{\"annotations\":{},\"labels\":{\"driveby.io/app\":\"perfect-api\",\"driveby.io/gate\":\"staging-gate\",\"promoter.argoproj.io/commit-status\":\"staging-gate\"},\"name\":\"staging-gate-fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56\",\"namespace\":\"driveby\"},\"spec\":{\"description\":\"All checks passed, safe to promote to staging\",\"gitRepositoryRef\":{\"name\":\"perfect-api-gitops\"},\"name\":\"staging-gate\",\"phase\":\"success\",\"sha\":\"fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56\",\"url\":\"https://argo.private.novelcore.org/workflows\"}}\n"
+                },
+                "creationTimestamp": "2026-03-21T02:50:06Z",
+                "generation": 4,
+                "labels": {
+                    "driveby.io/app": "perfect-api",
+                    "driveby.io/gate": "staging-gate",
+                    "promoter.argoproj.io/commit-status": "staging-gate"
+                },
+                "name": "staging-gate-fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56",
+                "namespace": "driveby",
+                "resourceVersion": "246858899",
+                "uid": "799b20f8-c674-4d7b-9bda-75d9716e27b9"
+            },
+            "spec": {
+                "description": "All checks passed, safe to promote to staging",
+                "gitRepositoryRef": {
+                    "name": "perfect-api-gitops"
+                },
+                "name": "staging-gate",
+                "phase": "success",
+                "sha": "fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56",
+                "url": "https://argo.private.novelcore.org/workflows"
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-22T17:59:30Z",
+                        "message": "Reconciliation failed: failed to set CommitStatus state for \"staging-gate-fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56\": failed to create check run: POST https://api.github.com/repos/novelcore/perfect-api-gitops/check-runs: 422 No commit found for SHA: fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56 []",
+                        "observedGeneration": 4,
+                        "reason": "ReconciliationError",
+                        "status": "False",
+                        "type": "Ready"
+                    }
+                ],
+                "id": "67993243995",
+                "phase": "success",
+                "sha": "fe4db4f72990ae7d7aa698f9709a6e5e14ae9b56"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

@@ -1,0 +1,18 @@
+{
+  "test_name": "workflow-rerun",
+  "description": "Verify that closing and reopening a PR retriggers the quality gate workflow via EventSource/Sensor",
+  "timestamp": "2026-03-22T18:14:12.064636+00:00",
+  "method": "Close PR #1 on novelcore/no-auth-api-gitops, wait 3s, reopen, wait 60s, count workflows",
+  "expected": "A new Argo Workflow is created for no-auth-api-staging after PR reopen",
+  "actual": "Workflow count increased from 5 to 6. New workflow no-auth-api-staging-gate-pipeline-hf6xm created and completed (Failed, as expected for no-auth-api)",
+  "evidence": {
+    "workflows_before": 5,
+    "workflows_after": 6,
+    "newest_workflow": "no-auth-api-staging-gate-pipeline-hf6xm",
+    "newest_workflow_phase": "Failed",
+    "newest_workflow_age": "~2m37s at time of check",
+    "pr_url": "https://github.com/novelcore/no-auth-api-gitops/pull/1",
+    "note": "Failed status is correct \u2014 no-auth-api lacks security definitions, so validation gates reject it"
+  },
+  "pass": true
+}

@@ -1,0 +1,474 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"bad-docs-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:27Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 60,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "bad-docs-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "245885854",
+                "uid": "7f06c55e-a831-4734-9fd0-69b42300d201"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:45:18Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-21T17:45:16Z",
+                        "deployedAt": "2026-03-21T17:45:16Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "81d870d84b1ecd737bb6aac4cb47d1e1c2d6d089",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-21T17:45:16Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "prune": true,
+                            "revision": "81d870d84b1ecd737bb6aac4cb47d1e1c2d6d089",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-21T17:45:16Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/bad-docs-api created",
+                                "name": "bad-docs-api",
+                                "namespace": "bad-docs-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/bad-docs-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/bad-docs-api created",
+                                "name": "bad-docs-api",
+                                "namespace": "bad-docs-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "81d870d84b1ecd737bb6aac4cb47d1e1c2d6d089",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-21T19:45:34Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "bad-docs-api",
+                        "namespace": "bad-docs-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "bad-docs-api",
+                        "namespace": "bad-docs-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "finishedAt": "2026-03-21T17:59:39Z",
+                        "hydratedSHA": "5de12da1fab73c846b53a0ebcc37a955a015b5b0",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:39Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "hydratedSHA": "5de12da1fab73c846b53a0ebcc37a955a015b5b0",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/bad-docs-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "81d870d84b1ecd737bb6aac4cb47d1e1c2d6d089",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"bad-docs-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:27Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 58,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "bad-docs-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "245885316",
+                "uid": "36a61da1-23c0-4395-8533-5f27d51faca0"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T19:44:51Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:27Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:44:51Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "finishedAt": "2026-03-21T17:59:40Z",
+                        "hydratedSHA": "7ecc0d37f321217a2025120f6a8c6e3159645212",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:39Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "hydratedSHA": "7ecc0d37f321217a2025120f6a8c6e3159645212",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"bad-docs-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"bad-docs-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"bad-docs-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/bad-docs-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:26Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 58,
+                "labels": {
+                    "driveby.io/app": "bad-docs-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "bad-docs-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "245885294",
+                "uid": "a16c94a5-f065-4ee7-873c-be35db0b6638"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "bad-docs-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T19:41:14Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:27Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:44:49Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "finishedAt": "2026-03-21T17:59:41Z",
+                        "hydratedSHA": "097769388d598d35c0e3441c8eedaad8db2e3c34",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:40Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "ec9805fa5981d92999879b485ec7f130eca6aeb1",
+                        "hydratedSHA": "097769388d598d35c0e3441c8eedaad8db2e3c34",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "bad-docs-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/bad-docs-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        }
+    ],
+    "kind": "List"
+}

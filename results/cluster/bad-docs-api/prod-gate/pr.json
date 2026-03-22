@@ -1,0 +1,54 @@
+{
+    "baseRefName": "environment/prod",
+    "body": "This PR is promoting the environment branch `environment/prod` which is currently on dry sha  to dry sha ec9805fa5981d92999879b485ec7f130eca6aeb1.",
+    "commits": [
+        {
+            "authoredDate": "2026-03-21T17:41:22Z",
+            "authors": [
+                {
+                    "email": "argo-cd@example.com",
+                    "id": "",
+                    "login": "",
+                    "name": "Argo CD"
+                },
+                {
+                    "email": "40340025+meter-peter@users.noreply.github.com",
+                    "id": "MDQ6VXNlcjQwMzQwMDI1",
+                    "login": "meter-peter",
+                    "name": "Petros Evangelos Triantafyllis"
+                }
+            ],
+            "committedDate": "2026-03-21T17:41:22Z",
+            "messageBody": "Co-authored-by: Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+            "messageHeadline": "ec9805f: chore: seed dry manifests [driveby-managed]",
+            "oid": "7ecc0d37f321217a2025120f6a8c6e3159645212"
+        }
+    ],
+    "createdAt": "2026-03-21T17:43:39Z",
+    "headRefName": "environment/prod-next",
+    "labels": [],
+    "number": 3,
+    "state": "OPEN",
+    "statusCheckRollup": [
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-03-21T18:20:56Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://argo.private.novelcore.org/workflows",
+            "name": "prod-gate",
+            "startedAt": "2026-03-21T17:44:03Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+        },
+        {
+            "__typename": "StatusContext",
+            "context": "prod-gate",
+            "startedAt": "2026-03-21T17:49:09Z",
+            "state": "FAILURE",
+            "targetUrl": "https://argo.private.novelcore.org/workflows"
+        }
+    ],
+    "title": "Promote ec980 to `environment/prod`",
+    "updatedAt": "2026-03-21T17:49:10Z",
+    "url": "https://github.com/novelcore/bad-docs-api-gitops/pull/3"
+}

@@ -153,32 +153,29 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
 
 ## Cluster State
 
-### Namespaces
+### Namespaces (5 APIs × 3 environments = 15 app namespaces + 1 control plane)
 | Namespace | Purpose | Managed By |
 |-----------|---------|------------|
-| `driveby` | Workflow infrastructure (WorkflowTemplates, ServiceAccount, Sensors, Promoter resources) | Helm chart + Crossplane |
-| `perfect-api-dev` | Dev environment for perfect-api (autoSync) | ArgoCD |
-| `perfect-api-staging` | Staging environment for perfect-api (autoSync) | ArgoCD |
-| `perfect-api-prod` | Production environment for perfect-api (autoSync — `autoMerge: false` only controls Promoter PR merge) | ArgoCD |
+| `driveby` | Control plane (WorkflowTemplates, ServiceAccount, Sensors, Promoter resources) | Helm chart + Crossplane |
+| `<api>-dev` | Dev environment (autoSync, no gate) | ArgoCD |
+| `<api>-staging` | Staging environment (autoSync, staging gate) | ArgoCD |
+| `<api>-prod` | Production environment (autoSync, prod gate, `autoMerge: false`) | ArgoCD |
 
-### ArgoCD Resources (Crossplane-managed via XSDLC — always generated)
-| Resource | Namespace | Details |
-|----------|-----------|---------|
-| AppProject `driveby` | argocd | Sources: `*`, Destinations: `*` namespace (Helm chart) |
-| Application `perfect-api-dev` | argocd | sourceHydrator: drySource=main:dry/overlays/dev, syncSource=env/dev:manifests/, hydrateTo=env/dev-next; autoSync + selfHeal (XSDLC) |
-| Application `perfect-api-staging` | argocd | sourceHydrator: drySource=main:dry/overlays/staging, syncSource=env/staging:manifests/, hydrateTo=env/staging-next; autoSync + selfHeal (XSDLC) |
-| Application `perfect-api-prod` | argocd | sourceHydrator: drySource=main:dry/overlays/prod, syncSource=env/prod:manifests/, hydrateTo=env/prod-next; autoSync + selfHeal (XSDLC) — `autoMerge: false` only controls Promoter PR merge, not ArgoCD sync |
+Currently deployed: perfect-api, bad-docs-api, no-auth-api, slow-api, broken-api (5 APIs × 3 envs = 15 namespaces)
 
-### Argo Events (Crossplane-managed via XSDLC)
-| Resource | Name | Namespace | Details |
-|----------|------|-----------|---------|
-| EventBus | `default` | driveby | 1-replica JetStream (NATS v2.10.10) |
-| EventSource | `perfect-api-staging-gate-eventsource` | driveby | GitHub webhook on port 12000 |
-| EventSource | `perfect-api-prod-gate-eventsource` | driveby | GitHub webhook on port 12000 |
-| Sensor | `perfect-api-staging-gate-sensor` | driveby | Triggers workflow on PR to `environment/staging` in gitops repo |
-| Sensor | `perfect-api-prod-gate-sensor` | driveby | Triggers workflow on PR to `environment/prod` in gitops repo |
-| Ingress | `perfect-api-staging-gate-webhook-ingress` | driveby | TLS webhook endpoint |
-| Ingress | `perfect-api-prod-gate-webhook-ingress` | driveby | TLS webhook endpoint |
+### ArgoCD Resources (15 Applications — 3 per API, Crossplane-managed)
+Each API gets 3 ArgoCD Applications using sourceHydrator:
+- `<api>-dev`: drySource=main:dry/overlays/dev, syncSource=env/dev, hydrateTo=env/dev-next
+- `<api>-staging`: drySource=main:dry/overlays/staging, syncSource=env/staging, hydrateTo=env/staging-next
+- `<api>-prod`: drySource=main:dry/overlays/prod, syncSource=env/prod, hydrateTo=env/prod-next
+
+All apps use autoSync + selfHeal. `autoMerge: false` on prod controls Promoter PR merge only.
+
+### Argo Events (10 EventSources + 10 Sensors — 2 per API for staging + prod gates)
+Each gated environment gets: EventSource (GitHub webhook), Sensor (workflow trigger), Service, Ingress (TLS webhook endpoint)
+
+### Argo Workflows (10 WorkflowTemplates — 2 per API for staging + prod gates)
+Each gate's WorkflowTemplate defines a DAG with: health-check → validate → functional/load-test → commit-status + PR comment
 
 ### Secrets
 | Secret | Namespace(s) | Keys | Managed By |
@@ -190,19 +187,15 @@ Developer updates dry manifests on main branch (dry/base/ or dry/overlays/<env>/
 | `github-app-credentials` | driveby | `githubAppID`, `githubInstallationID`, `githubAppPrivateKey` | Helm chart |
 
 ### GitOps Promoter Resources (Crossplane-managed via XSDLC)
-| Resource | Name | Namespace | Details |
-|----------|------|-----------|---------|
-| ScmProvider | `perfect-api-github` | driveby | GitHub App auth for promoter SCM access |
-| GitRepository | `perfect-api` | driveby | Points promoter to the gitops repository via ScmProvider |
-| PromotionStrategy | `perfect-api-promotion` | driveby | Environment chain: dev → staging → prod, with commit status gates |
-| ArgoCDCommitStatus | `perfect-api-argocd-health` | driveby | Aggregates ArgoCD app health into CommitStatus |
-| ChangeTransferPolicy | (auto-created) | driveby | Auto-created by PromotionStrategy controller per environment |
+Per API: ScmProvider, GitRepository, 3× PromotionStrategy (one per env), 3× ChangeTransferPolicy (auto-created)
+- Total: 5 ScmProviders, 5 GitRepositories, 15 PromotionStrategies, 15 CTPs
 
-### External Repos
-| Repo | Purpose |
-|------|---------|
-| `novelcore/perfect-api` | Software repo — source code + Dockerfile (untouched by XSDLC) |
-| `novelcore/perfect-api-gitops` | GitOps repo — auto-created by XSDLC, holds manifests on per-environment branches |
+### External Repos (5 gitops repos, auto-created by XSDLC)
+| Repo | Purpose | Branches |
+|------|---------|----------|
+| `novelcore/<api>-gitops` | GitOps repo (auto-created) | main, env/{dev,staging,prod}, env/{dev,staging,prod}-next |
+
+Currently: perfect-api-gitops, bad-docs-api-gitops, no-auth-api-gitops, slow-api-gitops, broken-api-gitops
 
 ## Helm Chart (`helm/driveby/`)
 Production Helm chart (v3.0.0) that installs the full DriveBy quality gate system:

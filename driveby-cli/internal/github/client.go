@@ -178,13 +178,14 @@ func (c *Client) CommentOnPR(ctx context.Context, prNumber int, comment string) 
 	return nil
 }
 
-// CreateValidationComment creates a formatted Markdown comment for validation results
-func (c *Client) CreateValidationComment(report interface{}, validationMode string) string {
+// CreateValidationComment creates a formatted Markdown comment for validation results.
+// gateCtx is optional — nil for standalone CLI, non-nil for XSDLC workflow mode.
+func (c *Client) CreateValidationComment(report interface{}, validationMode string, gateCtx *types.GateContext) string {
 	var sb strings.Builder
 
 	switch r := report.(type) {
 	case *types.ValidationReport:
-		writeValidationReportComment(&sb, r, validationMode)
+		writeValidationReportComment(&sb, r, validationMode, gateCtx)
 	default:
 		sb.WriteString("## DriveBy API Validation Report\n\n")
 		sb.WriteString(fmt.Sprintf("**Validation Mode:** `%s`\n\n", validationMode))
@@ -202,19 +203,49 @@ func (c *Client) CreateValidationComment(report interface{}, validationMode stri
 }
 
 // writeValidationReportComment writes the full enhanced validation report as a GitHub PR comment.
-func writeValidationReportComment(sb *strings.Builder, r *types.ValidationReport, validationMode string) {
+// When gateCtx is non-nil, the comment includes gate-specific headers, details, and "How to Pass" guidance.
+func writeValidationReportComment(sb *strings.Builder, r *types.ValidationReport, validationMode string, gateCtx *types.GateContext) {
 	// --- Header with score badge ---
+	// Status reflects ALL checks: validation principles + functional + performance
+	overallFailed := r.Status == "failed"
+	if r.TestResults != nil {
+		if r.TestResults.Functional != nil && r.TestResults.Functional.FailedEndpoints > 0 {
+			overallFailed = true
+		}
+	}
+	// Check if load test failed via P007 principle result or performance metrics
+	for _, p := range r.Principles {
+		if p.Principle.ID == "P007" && !p.Passed {
+			overallFailed = true
+		}
+	}
+	if r.TestResults != nil && r.TestResults.Performance != nil && r.TestResults.Performance.ErrorCount > 0 {
+		// Also check if error rate is significant
+		if r.TestResults.Performance.ErrorRate > 0.01 {
+			overallFailed = true
+		}
+	}
 	statusIcon := "🟢"
-	if r.Status == "failed" {
+	if overallFailed {
 		statusIcon = "🔴"
 	}
 	score := 0
 	if r.TotalChecks > 0 {
 		score = r.PassedChecks * 100 / r.TotalChecks
 	}
-	sb.WriteString(fmt.Sprintf("## %s DriveBy API Validation Report\n\n", statusIcon))
-	sb.WriteString(fmt.Sprintf("**%d/%d principles passed (%d%%)** | Mode: `%s`",
-		r.PassedChecks, r.TotalChecks, score, validationMode))
+
+	if gateCtx != nil {
+		// Gate-aware header
+		sb.WriteString(fmt.Sprintf("## %s %s — %s\n\n",
+			statusIcon, humanizeGateName(gateCtx.GateName), gateCtx.AppName))
+		sb.WriteString(fmt.Sprintf("**%d/%d principles passed (%d%%)** | Mode: `%s` | Checks: `%s`",
+			r.PassedChecks, r.TotalChecks, score, validationMode, gateCtx.CheckTypes))
+	} else {
+		// Standalone header
+		sb.WriteString(fmt.Sprintf("## %s DriveBy API Validation Report\n\n", statusIcon))
+		sb.WriteString(fmt.Sprintf("**%d/%d principles passed (%d%%)** | Mode: `%s`",
+			r.PassedChecks, r.TotalChecks, score, validationMode))
+	}
 	if r.Version != "" {
 		sb.WriteString(fmt.Sprintf(" | Version: `%s`", r.Version))
 	}
@@ -225,6 +256,14 @@ func writeValidationReportComment(sb *strings.Builder, r *types.ValidationReport
 
 	// --- Severity breakdown ---
 	writeSeverityBreakdown(sb, r)
+
+	// --- Gate details + How to Pass (only in gate mode) ---
+	if gateCtx != nil {
+		writeGateDetails(sb, gateCtx)
+		if overallFailed {
+			writeHowToPass(sb, r)
+		}
+	}
 
 	// --- Principle results: passed summary + failed details ---
 	writePrincipleResults(sb, r)
@@ -245,6 +284,86 @@ func writeValidationReportComment(sb *strings.Builder, r *types.ValidationReport
 		if pr := extractPerformanceFromPrinciples(r); pr != nil {
 			writePerformanceResults(sb, pr)
 		}
+	}
+}
+
+// humanizeGateName converts "staging-gate" to "Staging Gate".
+func humanizeGateName(name string) string {
+	parts := strings.Split(name, "-")
+	for i, p := range parts {
+		parts[i] = capitalizeFirst(p)
+	}
+	return strings.Join(parts, " ")
+}
+
+// writeGateDetails renders a table with quality gate metadata.
+func writeGateDetails(sb *strings.Builder, ctx *types.GateContext) {
+	sb.WriteString("### Gate Details\n\n")
+	sb.WriteString("| Property | Value |\n")
+	sb.WriteString("|----------|-------|\n")
+	sb.WriteString(fmt.Sprintf("| Environment | `%s` |\n", ctx.Environment))
+	sb.WriteString(fmt.Sprintf("| Checks | `%s` |\n", ctx.CheckTypes))
+	sb.WriteString(fmt.Sprintf("| Validation Mode | `%s` |\n", ctx.ValidationMode))
+	if ctx.WorkflowURL != "" {
+		sb.WriteString(fmt.Sprintf("| Workflow | [View Run](%s) |\n", ctx.WorkflowURL))
+	}
+	sb.WriteString("\n")
+}
+
+// writeHowToPass renders actionable guidance for failing gates.
+func writeHowToPass(sb *strings.Builder, r *types.ValidationReport) {
+	sb.WriteString("### How to Pass This Gate\n\n")
+
+	// Identify critical blockers
+	var blockers []string
+	for _, p := range r.Principles {
+		if !p.Passed && p.Principle.Severity == "critical" {
+			fix := p.SuggestedFix
+			if fix == "" {
+				fix = p.Message
+			}
+			blockers = append(blockers, fmt.Sprintf("**%s: %s** — %s",
+				p.Principle.ID, p.Principle.Name, fix))
+		}
+	}
+
+	if len(blockers) > 0 {
+		sb.WriteString("**Critical blockers** (must fix to unblock promotion):\n\n")
+		for _, b := range blockers {
+			sb.WriteString(fmt.Sprintf("- 🚨 %s\n", b))
+		}
+		sb.WriteString("\n")
+	}
+
+	// Show warning-level failures (informational, don't block)
+	var warnings []string
+	for _, p := range r.Principles {
+		if !p.Passed && p.Principle.Severity != "critical" {
+			warnings = append(warnings, fmt.Sprintf("**%s: %s**", p.Principle.ID, p.Principle.Name))
+		}
+	}
+	if len(warnings) > 0 {
+		sb.WriteString("**Warnings** (do not block promotion, but should be addressed):\n\n")
+		for _, w := range warnings {
+			sb.WriteString(fmt.Sprintf("- ⚠️ %s\n", w))
+		}
+		sb.WriteString("\n")
+	}
+
+	// Check functional/load test failures
+	if r.TestResults != nil {
+		if r.TestResults.Functional != nil && r.TestResults.Functional.FailedEndpoints > 0 {
+			sb.WriteString(fmt.Sprintf("**Functional test failure** (P006): %d/%d endpoints failed — fix implementation to match specification.\n\n",
+				r.TestResults.Functional.FailedEndpoints, r.TestResults.Functional.TestedEndpoints))
+		}
+		if r.TestResults.Performance != nil && r.TestResults.Performance.Status == types.TestStatusFailed {
+			sb.WriteString(fmt.Sprintf("**Load test failure** (P007): P95 latency %s exceeded target — optimize API performance.\n\n",
+				r.TestResults.Performance.LatencyP95))
+		}
+	}
+
+	if len(blockers) == 0 && (r.TestResults == nil || (r.TestResults.Functional == nil && r.TestResults.Performance == nil)) {
+		sb.WriteString("> Check test results above for specific failures.\n\n")
 	}
 }
 

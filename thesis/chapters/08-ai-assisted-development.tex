@@ -22,7 +22,7 @@ The distinction matters because it shapes the kind of knowledge infrastructure t
 \label{subsec:scale}
 % ----------------------------------------------------------------------------
 
-The DriveBy project was developed across 57 Claude Code sessions. Of 33 total commits in the repository, 11 (33\%) carry the \texttt{Co-Authored-By: Claude} trailer, indicating substantial AI involvement in the implementation. The co-authored commits span the entire later development phase---from the monorepo restructuring through the XSDLC composition redesign, CLI enhancements, multi-API evaluation, and thesis writing.
+The DriveBy project was developed across 57 Claude Code sessions. Of 41 total commits in the repository, 17 (41\%) carry the \texttt{Co-Authored-By: Claude} trailer, indicating substantial AI involvement in the implementation. The co-authored commits span the entire later development phase---from the monorepo restructuring through the XSDLC composition redesign, CLI enhancements, multi-API evaluation, and thesis writing.
 
 The git history reveals a visible phase transition. Early commits are human-only with informal messages (``fix dockerfile'', ``push'', ``lesse''). Later commits are AI-assisted with structured, multi-section messages describing changes across code, documentation, Kubernetes resources, and thesis chapters simultaneously. This transition corresponds to the adoption of the CLAUDE.md knowledge protocol described in Section~\ref{sec:claudemd-protocol}: once the agent had structured context about the project's architecture, conventions, and thesis mapping, it could operate on multiple dimensions of the project simultaneously rather than making isolated, narrow changes.
 
@@ -40,7 +40,7 @@ The central enabling infrastructure for agentic development in this project is a
 \label{subsec:hierarchy}
 % ----------------------------------------------------------------------------
 
-The DriveBy project contains eleven CLAUDE.md files organized in a tree that mirrors the monorepo structure:
+The DriveBy project contains sixteen CLAUDE.md files organized in a tree that mirrors the monorepo structure:
 
 \begin{table}[htbp]
 \centering
@@ -58,10 +58,15 @@ The DriveBy project contains eleven CLAUDE.md files organized in a tree that mir
 \texttt{kubernetes/CLAUDE.md}                       & Helm chart structure, XSDLC schema, cluster state, template escaping \\
 \texttt{apis/CLAUDE.md}                            & API inventory, evaluation purpose \\
 \texttt{apis/perfect-api/CLAUDE.md}                 & Endpoints, security model, expected pass/fail results \\
+\texttt{apis/bad-docs-api/CLAUDE.md}               & Endpoints, deliberate documentation/security gaps, expected failures \\
+\texttt{apis/broken-api/CLAUDE.md}                  & Endpoints, implementation divergences from spec, expected P006 failures \\
+\texttt{apis/no-auth-api/CLAUDE.md}                 & Endpoints, deliberate security omissions, expected P005 failures \\
+\texttt{apis/slow-api/CLAUDE.md}                    & Endpoints, artificial latency injection, expected P007 failures \\
 \texttt{thesis/CLAUDE.md}                          & Chapter specifications, source-to-code feed map, figure checklist, LaTeX conventions \\
 \texttt{docs/CLAUDE.md}                            & Documentation index, diagram coverage \\
 \texttt{.github/CLAUDE.md}                         & CI/CD workflow descriptions \\
 \texttt{tools/CLAUDE.md}                           & Batch testing workflow, CSV formats \\
+\texttt{results/CLAUDE.md}                         & Result directory structure, gate outcome format, verification matrix \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -108,7 +113,7 @@ This CI enforcement closes the loop. The CLAUDE.md protocol tells agents what to
 
 Beyond the per-directory CLAUDE.md files, the project maintains a persistent memory system that survives across agent sessions. This memory captures information that cannot be derived from the codebase: user preferences, learned corrections, project decisions, and external references.
 
-The memory system contains nine entries organized by type:
+The memory system contains eleven entries organized by type:
 
 \begin{itemize}
     \item \textbf{User profile}: the developer's role (diploma thesis student), expertise (deep Go and Kubernetes, new to LaTeX), and communication preferences.
@@ -227,7 +232,7 @@ The experience of building DriveBy with AI agents over 57 sessions yields severa
 \label{sec:ai-summary}
 % ============================================================================
 
-This chapter examined the AI-assisted development methodology used to build DriveBy, the XSDLC pipeline, and this thesis. The central enabling infrastructure is the CLAUDE.md knowledge protocol---a hierarchical system of eleven machine-first documentation files, enforced by CI, that provides AI agents with the persistent, structured context needed for effective cross-session collaboration. The persistent memory system extends this with user preferences, learned corrections, and project decisions that shape agent behavior over time.
+This chapter examined the AI-assisted development methodology used to build DriveBy, the XSDLC pipeline, and this thesis. The central enabling infrastructure is the CLAUDE.md knowledge protocol---a hierarchical system of sixteen machine-first documentation files, enforced by CI, that provides AI agents with the persistent, structured context needed for effective cross-session collaboration. The persistent memory system extends this with user preferences, learned corrections, and project decisions that shape agent behavior over time.
 
 The multi-API evaluation (Chapter~\ref{ch:evaluation}) was conducted through an agentic workflow in which the agent developed the tooling, executed the experiments, and analyzed the results. DDT's structured output---a direct consequence of the Axiom of Observability---enabled the agent to parse validation reports, identify cross-API patterns, and generate comparative analysis without human intervention.
 

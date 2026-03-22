@@ -1,0 +1,315 @@
+{
+    "apiVersion": "driveby.io/v1alpha1",
+    "kind": "XSDLC",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"driveby.io/v1alpha1\",\"kind\":\"XSDLC\",\"metadata\":{\"annotations\":{},\"name\":\"bad-docs-api\"},\"spec\":{\"apiConfig\":{\"openapiEndpoint\":\"/openapi.json\",\"port\":8000},\"environments\":[{\"name\":\"dev\"},{\"gate\":{\"checks\":[{\"type\":\"validate-only\",\"validationConfig\":{\"validationMode\":\"strict\"}}]},\"name\":\"staging\"},{\"autoMerge\":false,\"gate\":{\"checks\":[{\"type\":\"validate-only\"},{\"type\":\"load-test\"}]},\"name\":\"prod\"}],\"gitopsRepository\":{\"name\":\"bad-docs-api-gitops\",\"owner\":\"novelcore\"},\"validationDefaults\":{\"validationMode\":\"strict\"}}}\n"
+        },
+        "creationTimestamp": "2026-03-21T17:38:26Z",
+        "finalizers": [
+            "composite.apiextensions.crossplane.io"
+        ],
+        "generation": 4,
+        "labels": {
+            "crossplane.io/composite": "bad-docs-api"
+        },
+        "name": "bad-docs-api",
+        "resourceVersion": "245821457",
+        "uid": "1d9a7a8b-7483-4d0b-a5b7-e07f6a2b6f8d"
+    },
+    "spec": {
+        "apiConfig": {
+            "openapiEndpoint": "/openapi.json",
+            "port": 8000
+        },
+        "compositionRef": {
+            "name": "xsdlcs.driveby.io"
+        },
+        "compositionRevisionRef": {
+            "name": "xsdlcs.driveby.io-3adb323"
+        },
+        "compositionUpdatePolicy": "Automatic",
+        "environments": [
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": true,
+                "name": "dev"
+            },
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": true,
+                "gate": {
+                    "checks": [
+                        {
+                            "type": "validate-only",
+                            "validationConfig": {
+                                "validationMode": "strict"
+                            }
+                        }
+                    ]
+                },
+                "name": "staging"
+            },
+            {
+                "argocdHealthCheck": false,
+                "autoMerge": false,
+                "gate": {
+                    "checks": [
+                        {
+                            "type": "validate-only"
+                        },
+                        {
+                            "type": "load-test"
+                        }
+                    ]
+                },
+                "name": "prod"
+            }
+        ],
+        "gitopsRepository": {
+            "name": "bad-docs-api-gitops",
+            "owner": "novelcore"
+        },
+        "resourceRefs": [
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-argocd-app-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-argocd-app-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-argocd-app-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-argocd-push-secret"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-eventbus"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-eventsource-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-eventsource-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-eventsource-svc-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-eventsource-svc-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-ghcr-creds-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-ghcr-creds-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-ghcr-creds-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-gitrepository"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-ingress-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-ingress-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-promotionstrategy-0"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-promotionstrategy-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-promotionstrategy-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-role-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-role-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-rolebinding-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-rolebinding-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-scmprovider"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-sensor-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-sensor-2"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-serviceaccount"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-workflow-template-1"
+            },
+            {
+                "apiVersion": "kubernetes.crossplane.io/v1alpha2",
+                "kind": "Object",
+                "name": "bad-docs-api-workflow-template-2"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "bad-docs-api-branch-protection-1"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "bad-docs-api-branch-protection-2"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "BranchProtection",
+                "name": "bad-docs-api-next-branches-protection"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-dev"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-dev-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-prod"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-prod-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-staging"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Branch",
+                "name": "bad-docs-api-branch-staging-next"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-base-deployment"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-base-kustomization"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-base-service"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-overlay-dev"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-overlay-prod"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "RepositoryFile",
+                "name": "bad-docs-api-boilerplate-overlay-staging"
+            },
+            {
+                "apiVersion": "repo.github.upbound.io/v1alpha1",
+                "kind": "Repository",
+                "name": "bad-docs-api-gitops-repository"
+            }
+        ],
+        "validationDefaults": {
+            "validationMode": "strict"
+        }
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-03-21T17:38:28Z",
+                "reason": "ReconcileSuccess",
+                "status": "True",
+                "type": "Synced"
+            },
+            {
+                "lastTransitionTime": "2026-03-21T17:40:38Z",
+                "reason": "Available",
+                "status": "True",
+                "type": "Ready"
+            }
+        ]
+    }
+}

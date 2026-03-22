@@ -1,1 +1,1 @@
-FAIL — Workflow Failed at validate-only step. validate-only failed (2/6 checks passed: P001, P008; 4 failed: P002, P003, P004, P005 critical). P005 Security Standards failed critically: no security schemes defined, no global security requirements. Functional-test was never reached. CommitStatus: failure.
+FAIL — validate-only failed: P005 Security Standards (critical) - no security schemes defined. 2/6 passed.

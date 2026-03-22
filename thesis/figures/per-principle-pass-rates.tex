@@ -1,39 +1,66 @@
 % Per-Principle Pass Rates — Chapter 7
-% Bar chart showing pass rates across APIs.guru dataset
-% Note: Values are placeholders (marked with TODO) pending actual evaluation data
-\begin{tikzpicture}
-\begin{axis}[
-    ybar,
-    bar width=0.6cm,
-    width=12cm,
-    height=6cm,
-    ylabel={Pass Rate (\%)},
-    xlabel={Validation Principle},
-    ymin=0, ymax=100,
-    symbolic x coords={P001,P002,P003,P004,P005,P008},
-    xtick=data,
-    nodes near coords,
-    nodes near coords align={vertical},
-    every node near coord/.append style={font=\scriptsize},
-    enlarge x limits=0.15,
-    legend style={at={(0.5,1.05)},anchor=south,legend columns=2,font=\small},
-    tick label style={font=\small},
-    label style={font=\small},
-    ymajorgrids=true,
-    grid style=dashed,
+% Bar chart showing pass rates across the five evaluation APIs (strict mode)
+% Data source: results/local/*-validate-strict.json (perfect-api, bad-docs-api, no-auth-api, slow-api, broken-api)
+%
+% P001: 5/5 pass (100%) — all APIs have valid OpenAPI 3.x specs
+% P002: 0/5 pass (0%)   — all fail (missing examples, enum descriptions, contact/license)
+% P003: 0/5 pass (0%)   — all fail (missing 5xx docs, error detail schemas, no components)
+% P004: 0/5 pass (0%)   — all fail (missing data types or string length constraints)
+% P005: 4/5 pass (80%)  — no-auth-api fails (no security schemes defined)
+% P008: 4/5 pass (80%)  — bad-docs-api fails (missing deprecation notice details)
+\begin{tikzpicture}[
+    bar/.style={fill=teal!60, draw=teal!80!black, minimum width=1.2cm},
+    label/.style={font=\small, anchor=north},
+    value/.style={font=\scriptsize\bfseries, anchor=south},
 ]
 
-% Strict mode pass rates (placeholder values — TODO: replace with actual data)
-\addplot[fill=teal!60,draw=teal!80!black] coordinates {
-    (P001,85) (P002,12) (P003,8) (P004,15) (P005,20) (P008,5)
-};
+% Y-axis
+\draw[->] (0,0) -- (0,5.5) node[above, font=\small] {Pass Rate (\%)};
+% Grid lines
+\foreach \y/\lbl in {0/0, 1/20, 2/40, 3/60, 4/80, 5/100} {
+    \draw[gray!40, dashed] (0,\y) -- (11,\y);
+    \node[left, font=\scriptsize] at (0,\y) {\lbl};
+}
+% X-axis
+\draw[->] (0,0) -- (11.5,0) node[right, font=\small] {};
 
-% Minimal mode pass rates (placeholder values — TODO: replace with actual data)
-\addplot[fill=blue!40,draw=blue!60!black] coordinates {
-    (P001,85) (P002,100) (P003,100) (P004,100) (P005,100) (P008,100)
-};
+% Bars (height = pass_rate / 20)
+% P001: 100%
+\fill[teal!60, draw=teal!80!black] (0.5,0) rectangle (1.7,5);
+\node[value] at (1.1,5) {100\%};
+\node[label] at (1.1,-0.1) {P001};
 
-\legend{Strict Mode, Minimal Mode (P001 only)}
+% P002: 0%
+\fill[teal!60, draw=teal!80!black] (2.3,0) rectangle (3.5,0.05);
+\node[value] at (2.9,0.15) {0\%};
+\node[label] at (2.9,-0.1) {P002};
 
-\end{axis}
+% P003: 0%
+\fill[teal!60, draw=teal!80!black] (4.1,0) rectangle (5.3,0.05);
+\node[value] at (4.7,0.15) {0\%};
+\node[label] at (4.7,-0.1) {P003};
+
+% P004: 0%
+\fill[teal!60, draw=teal!80!black] (5.9,0) rectangle (7.1,0.05);
+\node[value] at (6.5,0.15) {0\%};
+\node[label] at (6.5,-0.1) {P004};
+
+% P005: 80%
+\fill[teal!60, draw=teal!80!black] (7.7,0) rectangle (8.9,4);
+\node[value] at (8.3,4) {80\%};
+\node[label] at (8.3,-0.1) {P005};
+
+% P008: 80%
+\fill[teal!60, draw=teal!80!black] (9.5,0) rectangle (10.7,4);
+\node[value] at (10.1,4) {80\%};
+\node[label] at (10.1,-0.1) {P008};
+
+% Severity annotations
+\node[font=\tiny, teal!80!black] at (1.1,-0.6) {Critical};
+\node[font=\tiny, gray] at (2.9,-0.6) {Warning};
+\node[font=\tiny, gray] at (4.7,-0.6) {Warning};
+\node[font=\tiny, gray] at (6.5,-0.6) {Warning};
+\node[font=\tiny, teal!80!black] at (8.3,-0.6) {Critical};
+\node[font=\tiny, gray] at (10.1,-0.6) {Warning};
+
 \end{tikzpicture}

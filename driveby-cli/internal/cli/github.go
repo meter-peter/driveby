@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/meter-peter/driveby/driveby-cli/internal/github"
+	"github.com/meter-peter/driveby/driveby-cli/internal/types"
 	"github.com/spf13/viper"
 )
 
@@ -20,7 +21,8 @@ func logAndReturnError(err error) error {
 }
 
 // handleGitHubComment handles GitHub PR commenting.
-func handleGitHubComment(report interface{}, validationMode string) error {
+// gateCtx is optional — nil for standalone CLI, non-nil for XSDLC workflow mode.
+func handleGitHubComment(report interface{}, validationMode string, gateCtx *types.GateContext) error {
 	owner := viper.GetString("github-owner")
 	repo := viper.GetString("github-repo")
 	prNumber := viper.GetInt("github-pr-number")
@@ -72,7 +74,7 @@ func handleGitHubComment(report interface{}, validationMode string) error {
 	}
 
 	// Create comment
-	comment := client.CreateValidationComment(report, validationMode)
+	comment := client.CreateValidationComment(report, validationMode, gateCtx)
 
 	// Post comment
 	return client.CommentOnPR(context.Background(), prNumber, comment)

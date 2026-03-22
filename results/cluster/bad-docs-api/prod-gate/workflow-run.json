@@ -1,0 +1,1593 @@
+{
+    "apiVersion": "argoproj.io/v1alpha1",
+    "kind": "Workflow",
+    "metadata": {
+        "annotations": {
+            "workflows.argoproj.io/pod-name-format": "v2"
+        },
+        "creationTimestamp": "2026-03-22T17:54:59Z",
+        "generateName": "bad-docs-api-prod-gate-pipeline-",
+        "generation": 12,
+        "labels": {
+            "driveby.io/app": "bad-docs-api",
+            "driveby.io/gate": "prod-gate",
+            "driveby.io/trigger": "pr-trigger",
+            "events.argoproj.io/action-timestamp": "1774202098176",
+            "events.argoproj.io/sensor": "bad-docs-api-prod-gate-sensor",
+            "events.argoproj.io/trigger": "pr-trigger-workflow-trigger",
+            "workflows.argoproj.io/completed": "true",
+            "workflows.argoproj.io/creator": "system-serviceaccount-driveby-default",
+            "workflows.argoproj.io/phase": "Failed"
+        },
+        "name": "bad-docs-api-prod-gate-pipeline-vh96h",
+        "namespace": "driveby",
+        "resourceVersion": "246860556",
+        "uid": "e2d93e1b-44ba-44af-aef6-f30c5be81149"
+    },
+    "spec": {
+        "arguments": {
+            "parameters": [
+                {
+                    "name": "pr-number",
+                    "value": "3"
+                },
+                {
+                    "name": "head-sha",
+                    "value": "0441fafb4830ff80749070b4822820e8ba1bb39b"
+                },
+                {
+                    "name": "github-owner",
+                    "value": "novelcore"
+                },
+                {
+                    "name": "github-repo",
+                    "value": "bad-docs-api-gitops"
+                },
+                {
+                    "name": "app-name",
+                    "value": "bad-docs-api"
+                },
+                {
+                    "name": "app-port",
+                    "value": "8000"
+                },
+                {
+                    "name": "source-namespace",
+                    "value": "bad-docs-api-staging"
+                },
+                {
+                    "name": "target-namespace",
+                    "value": "bad-docs-api-prod"
+                },
+                {
+                    "name": "service-name",
+                    "value": "bad-docs-api"
+                },
+                {
+                    "name": "openapi-endpoint",
+                    "value": "/openapi.json"
+                }
+            ]
+        },
+        "workflowTemplateRef": {
+            "name": "bad-docs-api-prod-gate"
+        }
+    },
+    "status": {
+        "artifactGCStatus": {
+            "notSpecified": true
+        },
+        "artifactRepositoryRef": {
+            "artifactRepository": {},
+            "default": true
+        },
+        "conditions": [
+            {
+                "status": "False",
+                "type": "PodRunning"
+            },
+            {
+                "status": "True",
+                "type": "Completed"
+            }
+        ],
+        "finishedAt": "2026-03-22T18:00:31Z",
+        "nodes": {
+            "bad-docs-api-prod-gate-pipeline-vh96h": {
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1750728859",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1300364341"
+                ],
+                "displayName": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "outboundNodes": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-787229862",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-4147596440",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1300364341",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1673598229"
+                ],
+                "phase": "Failed",
+                "progress": "2/3",
+                "resourcesDuration": {
+                    "cpu": 60,
+                    "memory": 609
+                },
+                "startedAt": "2026-03-22T17:54:59Z",
+                "templateName": "promotion-pipeline",
+                "templateScope": "local/",
+                "type": "DAG"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-1300364341": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "displayName": "update-commitstatus-pending",
+                "finishedAt": "2026-03-22T17:55:02Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-1300364341",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for prod environment..."
+                        }
+                    ]
+                },
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.update-commitstatus-pending",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 2
+                },
+                "startedAt": "2026-03-22T17:54:59Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-1301977581": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-3912301459"
+                ],
+                "displayName": "wait-for-source-ready",
+                "finishedAt": "2026-03-22T18:00:12Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-1301977581",
+                "message": "Error (exit code 1)",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.wait-for-source-ready",
+                "outputs": {
+                    "exitCode": "1"
+                },
+                "phase": "Failed",
+                "progress": "0/1",
+                "resourcesDuration": {
+                    "cpu": 60,
+                    "memory": 603
+                },
+                "startedAt": "2026-03-22T17:55:09Z",
+                "templateName": "health-check-source",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-1673598229": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "displayName": "update-commitstatus-success",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-1673598229",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.update-commitstatus-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-1750728859": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1301977581"
+                ],
+                "displayName": "set-pending-status",
+                "finishedAt": "2026-03-22T17:55:03Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-1750728859",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "state",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for prod environment..."
+                        }
+                    ]
+                },
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.set-pending-status",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 4
+                },
+                "startedAt": "2026-03-22T17:54:59Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-259218945": {
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-3962241416",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-2661781324",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-931328155"
+                ],
+                "displayName": "bad-docs-api-prod-gate-pipeline-vh96h.onExit",
+                "finishedAt": "2026-03-22T18:00:31Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-259218945",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.onExit",
+                "nodeFlag": {
+                    "hooked": true
+                },
+                "outboundNodes": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-3962241416",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-2661781324",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-931328155"
+                ],
+                "phase": "Succeeded",
+                "progress": "3/3",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 16
+                },
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "exit-handler",
+                "templateScope": "local/",
+                "type": "DAG"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-2661781324": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h-259218945",
+                "displayName": "report-failure-github",
+                "finishedAt": "2026-03-22T18:00:27Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-2661781324",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.onExit.report-failure-github",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 6
+                },
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "exit-handler-github",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-3528118992": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-787229862",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-4147596440",
+                    "bad-docs-api-prod-gate-pipeline-vh96h-1673598229"
+                ],
+                "displayName": "check-1-load-test",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-3528118992",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.check-1-load-test",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "driveby-loadtest",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-3912301459": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "children": [
+                    "bad-docs-api-prod-gate-pipeline-vh96h-3528118992"
+                ],
+                "displayName": "check-0-validate-only",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-3912301459",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.check-0-validate-only",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "driveby-validate",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-3962241416": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h-259218945",
+                "displayName": "comment-pr-failure",
+                "finishedAt": "2026-03-22T18:00:29Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-3962241416",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.onExit.comment-pr-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 8
+                },
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "github-pr-comment",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-4147596440": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "displayName": "report-success",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-4147596440",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.report-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-787229862": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h",
+                "displayName": "comment-pr",
+                "finishedAt": "2026-03-22T18:00:21Z",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-787229862",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.comment-pr",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "github-pr-comment",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-prod-gate-pipeline-vh96h-931328155": {
+                "boundaryID": "bad-docs-api-prod-gate-pipeline-vh96h-259218945",
+                "displayName": "update-commitstatus-failure",
+                "finishedAt": "2026-03-22T18:00:24Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-prod-gate-pipeline-vh96h-931328155",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "failure"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Quality checks failed, promotion to prod blocked"
+                        }
+                    ]
+                },
+                "name": "bad-docs-api-prod-gate-pipeline-vh96h.onExit.update-commitstatus-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 2
+                },
+                "startedAt": "2026-03-22T18:00:21Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            }
+        },
+        "persistentVolumeClaims": [
+            {
+                "name": "reports",
+                "persistentVolumeClaim": {
+                    "claimName": "bad-docs-api-prod-gate-pipeline-vh96h-reports"
+                }
+            }
+        ],
+        "phase": "Failed",
+        "progress": "5/6",
+        "resourcesDuration": {
+            "cpu": 60,
+            "memory": 625
+        },
+        "startedAt": "2026-03-22T17:54:59Z",
+        "storedTemplates": {
+            "namespaced/bad-docs-api-prod-gate/driveby-loadtest": {
+                "container": {
+                    "args": [
+                        "load-only",
+                        "--openapi",
+                        "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                        "--host",
+                        "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                        "--port",
+                        "{{workflow.parameters.app-port}}",
+                        "--auth-api-key",
+                        "$(API_KEY)",
+                        "--auth-api-key-header",
+                        "X-API-Key",
+                        "--concurrent-users",
+                        "{{inputs.parameters.concurrent-users}}",
+                        "--test-duration",
+                        "{{inputs.parameters.test-duration}}",
+                        "--max-latency-p95",
+                        "{{inputs.parameters.max-latency-p95}}",
+                        "--min-success-rate",
+                        "{{inputs.parameters.min-success-rate}}",
+                        "--report-dir",
+                        "/tmp/reports"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "API_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "api-key",
+                                    "name": "driveby-api-auth"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/tmp/reports",
+                            "name": "reports"
+                        }
+                    ]
+                },
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "concurrent-users"
+                        },
+                        {
+                            "name": "test-duration"
+                        },
+                        {
+                            "name": "max-latency-p95"
+                        },
+                        {
+                            "name": "min-success-rate"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "driveby-loadtest",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/driveby-validate": {
+                "container": {
+                    "args": [
+                        "validate-only",
+                        "--openapi",
+                        "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                        "--host",
+                        "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                        "--port",
+                        "{{workflow.parameters.app-port}}",
+                        "--validation-mode",
+                        "{{inputs.parameters.validation-mode}}",
+                        "--report-dir",
+                        "/tmp/reports"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "API_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "api-key",
+                                    "name": "driveby-api-auth"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/tmp/reports",
+                            "name": "reports"
+                        }
+                    ]
+                },
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "validation-mode"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "driveby-validate",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/exit-handler": {
+                "dag": {
+                    "tasks": [
+                        {
+                            "arguments": {},
+                            "name": "report-failure-github",
+                            "template": "exit-handler-github",
+                            "when": "{{workflow.status}} != Succeeded"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "failure"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Quality checks failed, promotion to prod blocked"
+                                    }
+                                ]
+                            },
+                            "name": "update-commitstatus-failure",
+                            "template": "update-commitstatus",
+                            "when": "{{workflow.status}} != Succeeded"
+                        },
+                        {
+                            "arguments": {},
+                            "name": "comment-pr-failure",
+                            "template": "github-pr-comment",
+                            "when": "{{workflow.status}} != Succeeded"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "exit-handler",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/exit-handler-github": {
+                "container": {
+                    "args": [
+                        "github-status",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--sha",
+                        "{{workflow.parameters.head-sha}}",
+                        "--state",
+                        "failure",
+                        "--description",
+                        "Quality checks failed, promotion to prod blocked",
+                        "--context",
+                        "prod-gate",
+                        "--target-url",
+                        "https://argo.private.novelcore.org/workflows"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "exit-handler-github",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/github-commit-status": {
+                "container": {
+                    "args": [
+                        "github-status",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--sha",
+                        "{{workflow.parameters.head-sha}}",
+                        "--state",
+                        "{{inputs.parameters.state}}",
+                        "--description",
+                        "{{inputs.parameters.description}}",
+                        "--context",
+                        "prod-gate",
+                        "--target-url",
+                        "https://argo.private.novelcore.org/workflows"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "state"
+                        },
+                        {
+                            "name": "description"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "github-commit-status",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/github-pr-comment": {
+                "container": {
+                    "args": [
+                        "github-comment",
+                        "--report-dir",
+                        "/tmp/reports",
+                        "--github-app-id",
+                        "$(GITHUB_APP_ID)",
+                        "--github-installation-id",
+                        "$(GITHUB_INSTALLATION_ID)",
+                        "--github-private-key",
+                        "$(GITHUB_PRIVATE_KEY)",
+                        "--github-owner",
+                        "{{workflow.parameters.github-owner}}",
+                        "--github-repo",
+                        "{{workflow.parameters.github-repo}}",
+                        "--github-pr-number",
+                        "{{workflow.parameters.pr-number}}"
+                    ],
+                    "command": [
+                        "/driveby"
+                    ],
+                    "env": [
+                        {
+                            "name": "GITHUB_APP_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_INSTALLATION_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubInstallationID",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        },
+                        {
+                            "name": "GITHUB_PRIVATE_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "key": "githubAppPrivateKey",
+                                    "name": "github-app-credentials"
+                                }
+                            }
+                        }
+                    ],
+                    "image": "ghcr.io/meter-peter/driveby:latest",
+                    "imagePullPolicy": "Always",
+                    "name": "",
+                    "resources": {},
+                    "volumeMounts": [
+                        {
+                            "mountPath": "/tmp/reports",
+                            "name": "reports"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "github-pr-comment",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/health-check-source": {
+                "container": {
+                    "args": [
+                        "echo \"=== Health-checking source environment ===\"\necho \"Target: http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\"\nATTEMPTS=0\nMAX_ATTEMPTS=60\nwhile [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do\n  ATTEMPTS=$((ATTEMPTS + 1))\n  HTTP_CODE=$(curl -sf -o /dev/null -w \"%{http_code}\" \\\n    \"http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\" 2>/dev/null || echo \"000\")\n  if [ \"$HTTP_CODE\" = \"200\" ]; then\n    echo \"Source environment is ready (attempt $ATTEMPTS)\"\n    exit 0\n  fi\n  echo \"Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s...\"\n  sleep 5\ndone\necho \"ERROR: Source environment not ready after 5 minutes\"\nexit 1\n"
+                    ],
+                    "command": [
+                        "sh",
+                        "-c"
+                    ],
+                    "image": "curlimages/curl:8.7.1",
+                    "name": "",
+                    "resources": {}
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "health-check-source",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/promotion-pipeline": {
+                "dag": {
+                    "tasks": [
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "state",
+                                        "value": "pending"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Running quality checks for prod environment..."
+                                    }
+                                ]
+                            },
+                            "name": "set-pending-status",
+                            "template": "github-commit-status"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "pending"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "Running quality checks for prod environment..."
+                                    }
+                                ]
+                            },
+                            "name": "update-commitstatus-pending",
+                            "template": "update-commitstatus"
+                        },
+                        {
+                            "arguments": {},
+                            "dependencies": [
+                                "set-pending-status"
+                            ],
+                            "name": "wait-for-source-ready",
+                            "template": "health-check-source"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "validation-mode",
+                                        "value": "strict"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "wait-for-source-ready"
+                            ],
+                            "name": "check-0-validate-only",
+                            "template": "driveby-validate"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "concurrent-users",
+                                        "value": "10"
+                                    },
+                                    {
+                                        "name": "test-duration",
+                                        "value": "5m"
+                                    },
+                                    {
+                                        "name": "max-latency-p95",
+                                        "value": "500ms"
+                                    },
+                                    {
+                                        "name": "min-success-rate",
+                                        "value": "0.99"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "check-0-validate-only"
+                            ],
+                            "name": "check-1-load-test",
+                            "template": "driveby-loadtest"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "state",
+                                        "value": "success"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "All checks passed, safe to promote to prod"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "check-1-load-test"
+                            ],
+                            "name": "report-success",
+                            "template": "github-commit-status"
+                        },
+                        {
+                            "arguments": {},
+                            "dependencies": [
+                                "check-1-load-test"
+                            ],
+                            "name": "comment-pr",
+                            "template": "github-pr-comment"
+                        },
+                        {
+                            "arguments": {
+                                "parameters": [
+                                    {
+                                        "name": "phase",
+                                        "value": "success"
+                                    },
+                                    {
+                                        "name": "description",
+                                        "value": "All checks passed, safe to promote to prod"
+                                    }
+                                ]
+                            },
+                            "dependencies": [
+                                "check-1-load-test"
+                            ],
+                            "name": "update-commitstatus-success",
+                            "template": "update-commitstatus"
+                        }
+                    ]
+                },
+                "inputs": {},
+                "metadata": {},
+                "name": "promotion-pipeline",
+                "outputs": {}
+            },
+            "namespaced/bad-docs-api-prod-gate/update-commitstatus": {
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase"
+                        },
+                        {
+                            "name": "description"
+                        }
+                    ]
+                },
+                "metadata": {},
+                "name": "update-commitstatus",
+                "outputs": {},
+                "resource": {
+                    "action": "apply",
+                    "manifest": "apiVersion: promoter.argoproj.io/v1alpha1\nkind: CommitStatus\nmetadata:\n  name: prod-gate-{{workflow.parameters.head-sha}}\n  namespace: driveby\n  labels:\n    promoter.argoproj.io/commit-status: prod-gate\n    driveby.io/app: bad-docs-api\n    driveby.io/gate: prod-gate\nspec:\n  gitRepositoryRef:\n    name: {{workflow.parameters.app-name}}-gitops\n  sha: {{workflow.parameters.head-sha}}\n  name: prod-gate\n  description: {{inputs.parameters.description}}\n  phase: {{inputs.parameters.phase}}\n  url: https://argo.private.novelcore.org/workflows\n"
+                }
+            }
+        },
+        "storedWorkflowTemplateSpec": {
+            "arguments": {
+                "parameters": [
+                    {
+                        "name": "pr-number",
+                        "value": "3"
+                    },
+                    {
+                        "name": "head-sha",
+                        "value": "0441fafb4830ff80749070b4822820e8ba1bb39b"
+                    },
+                    {
+                        "name": "github-owner",
+                        "value": "novelcore"
+                    },
+                    {
+                        "name": "github-repo",
+                        "value": "bad-docs-api-gitops"
+                    },
+                    {
+                        "name": "app-name",
+                        "value": "bad-docs-api"
+                    },
+                    {
+                        "default": "8000",
+                        "name": "app-port",
+                        "value": "8000"
+                    },
+                    {
+                        "default": "bad-docs-api-staging",
+                        "name": "source-namespace",
+                        "value": "bad-docs-api-staging"
+                    },
+                    {
+                        "default": "bad-docs-api-prod",
+                        "name": "target-namespace",
+                        "value": "bad-docs-api-prod"
+                    },
+                    {
+                        "default": "bad-docs-api",
+                        "name": "service-name",
+                        "value": "bad-docs-api"
+                    },
+                    {
+                        "default": "/openapi.json",
+                        "name": "openapi-endpoint",
+                        "value": "/openapi.json"
+                    }
+                ]
+            },
+            "entrypoint": "promotion-pipeline",
+            "onExit": "exit-handler",
+            "serviceAccountName": "driveby",
+            "templates": [
+                {
+                    "dag": {
+                        "tasks": [
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "state",
+                                            "value": "pending"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Running quality checks for prod environment..."
+                                        }
+                                    ]
+                                },
+                                "name": "set-pending-status",
+                                "template": "github-commit-status"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "pending"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Running quality checks for prod environment..."
+                                        }
+                                    ]
+                                },
+                                "name": "update-commitstatus-pending",
+                                "template": "update-commitstatus"
+                            },
+                            {
+                                "arguments": {},
+                                "dependencies": [
+                                    "set-pending-status"
+                                ],
+                                "name": "wait-for-source-ready",
+                                "template": "health-check-source"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "validation-mode",
+                                            "value": "strict"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "wait-for-source-ready"
+                                ],
+                                "name": "check-0-validate-only",
+                                "template": "driveby-validate"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "concurrent-users",
+                                            "value": "10"
+                                        },
+                                        {
+                                            "name": "test-duration",
+                                            "value": "5m"
+                                        },
+                                        {
+                                            "name": "max-latency-p95",
+                                            "value": "500ms"
+                                        },
+                                        {
+                                            "name": "min-success-rate",
+                                            "value": "0.99"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "check-0-validate-only"
+                                ],
+                                "name": "check-1-load-test",
+                                "template": "driveby-loadtest"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "state",
+                                            "value": "success"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "All checks passed, safe to promote to prod"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "check-1-load-test"
+                                ],
+                                "name": "report-success",
+                                "template": "github-commit-status"
+                            },
+                            {
+                                "arguments": {},
+                                "dependencies": [
+                                    "check-1-load-test"
+                                ],
+                                "name": "comment-pr",
+                                "template": "github-pr-comment"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "success"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "All checks passed, safe to promote to prod"
+                                        }
+                                    ]
+                                },
+                                "dependencies": [
+                                    "check-1-load-test"
+                                ],
+                                "name": "update-commitstatus-success",
+                                "template": "update-commitstatus"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "promotion-pipeline",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-status",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--sha",
+                            "{{workflow.parameters.head-sha}}",
+                            "--state",
+                            "{{inputs.parameters.state}}",
+                            "--description",
+                            "{{inputs.parameters.description}}",
+                            "--context",
+                            "prod-gate",
+                            "--target-url",
+                            "https://argo.private.novelcore.org/workflows"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "state"
+                            },
+                            {
+                                "name": "description"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "github-commit-status",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "echo \"=== Health-checking source environment ===\"\necho \"Target: http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\"\nATTEMPTS=0\nMAX_ATTEMPTS=60\nwhile [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do\n  ATTEMPTS=$((ATTEMPTS + 1))\n  HTTP_CODE=$(curl -sf -o /dev/null -w \"%{http_code}\" \\\n    \"http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}\" 2>/dev/null || echo \"000\")\n  if [ \"$HTTP_CODE\" = \"200\" ]; then\n    echo \"Source environment is ready (attempt $ATTEMPTS)\"\n    exit 0\n  fi\n  echo \"Attempt $ATTEMPTS/$MAX_ATTEMPTS -- HTTP $HTTP_CODE, retrying in 5s...\"\n  sleep 5\ndone\necho \"ERROR: Source environment not ready after 5 minutes\"\nexit 1\n"
+                        ],
+                        "command": [
+                            "sh",
+                            "-c"
+                        ],
+                        "image": "curlimages/curl:8.7.1",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "health-check-source",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "validate-only",
+                            "--openapi",
+                            "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                            "--host",
+                            "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                            "--port",
+                            "{{workflow.parameters.app-port}}",
+                            "--validation-mode",
+                            "{{inputs.parameters.validation-mode}}",
+                            "--report-dir",
+                            "/tmp/reports"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "API_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "api-key",
+                                        "name": "driveby-api-auth"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/reports",
+                                "name": "reports"
+                            }
+                        ]
+                    },
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "validation-mode"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "driveby-validate",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "load-only",
+                            "--openapi",
+                            "http://{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}:{{workflow.parameters.app-port}}{{workflow.parameters.openapi-endpoint}}",
+                            "--host",
+                            "{{workflow.parameters.service-name}}.{{workflow.parameters.source-namespace}}",
+                            "--port",
+                            "{{workflow.parameters.app-port}}",
+                            "--auth-api-key",
+                            "$(API_KEY)",
+                            "--auth-api-key-header",
+                            "X-API-Key",
+                            "--concurrent-users",
+                            "{{inputs.parameters.concurrent-users}}",
+                            "--test-duration",
+                            "{{inputs.parameters.test-duration}}",
+                            "--max-latency-p95",
+                            "{{inputs.parameters.max-latency-p95}}",
+                            "--min-success-rate",
+                            "{{inputs.parameters.min-success-rate}}",
+                            "--report-dir",
+                            "/tmp/reports"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "API_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "api-key",
+                                        "name": "driveby-api-auth"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/reports",
+                                "name": "reports"
+                            }
+                        ]
+                    },
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "concurrent-users"
+                            },
+                            {
+                                "name": "test-duration"
+                            },
+                            {
+                                "name": "max-latency-p95"
+                            },
+                            {
+                                "name": "min-success-rate"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "driveby-loadtest",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-comment",
+                            "--report-dir",
+                            "/tmp/reports",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--github-pr-number",
+                            "{{workflow.parameters.pr-number}}"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {},
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/tmp/reports",
+                                "name": "reports"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "github-pr-comment",
+                    "outputs": {}
+                },
+                {
+                    "dag": {
+                        "tasks": [
+                            {
+                                "arguments": {},
+                                "name": "report-failure-github",
+                                "template": "exit-handler-github",
+                                "when": "{{workflow.status}} != Succeeded"
+                            },
+                            {
+                                "arguments": {
+                                    "parameters": [
+                                        {
+                                            "name": "phase",
+                                            "value": "failure"
+                                        },
+                                        {
+                                            "name": "description",
+                                            "value": "Quality checks failed, promotion to prod blocked"
+                                        }
+                                    ]
+                                },
+                                "name": "update-commitstatus-failure",
+                                "template": "update-commitstatus",
+                                "when": "{{workflow.status}} != Succeeded"
+                            },
+                            {
+                                "arguments": {},
+                                "name": "comment-pr-failure",
+                                "template": "github-pr-comment",
+                                "when": "{{workflow.status}} != Succeeded"
+                            }
+                        ]
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "exit-handler",
+                    "outputs": {}
+                },
+                {
+                    "container": {
+                        "args": [
+                            "github-status",
+                            "--github-app-id",
+                            "$(GITHUB_APP_ID)",
+                            "--github-installation-id",
+                            "$(GITHUB_INSTALLATION_ID)",
+                            "--github-private-key",
+                            "$(GITHUB_PRIVATE_KEY)",
+                            "--github-owner",
+                            "{{workflow.parameters.github-owner}}",
+                            "--github-repo",
+                            "{{workflow.parameters.github-repo}}",
+                            "--sha",
+                            "{{workflow.parameters.head-sha}}",
+                            "--state",
+                            "failure",
+                            "--description",
+                            "Quality checks failed, promotion to prod blocked",
+                            "--context",
+                            "prod-gate",
+                            "--target-url",
+                            "https://argo.private.novelcore.org/workflows"
+                        ],
+                        "command": [
+                            "/driveby"
+                        ],
+                        "env": [
+                            {
+                                "name": "GITHUB_APP_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_INSTALLATION_ID",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubInstallationID",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "GITHUB_PRIVATE_KEY",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "githubAppPrivateKey",
+                                        "name": "github-app-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "ghcr.io/meter-peter/driveby:latest",
+                        "imagePullPolicy": "Always",
+                        "name": "",
+                        "resources": {}
+                    },
+                    "inputs": {},
+                    "metadata": {},
+                    "name": "exit-handler-github",
+                    "outputs": {}
+                },
+                {
+                    "inputs": {
+                        "parameters": [
+                            {
+                                "name": "phase"
+                            },
+                            {
+                                "name": "description"
+                            }
+                        ]
+                    },
+                    "metadata": {},
+                    "name": "update-commitstatus",
+                    "outputs": {},
+                    "resource": {
+                        "action": "apply",
+                        "manifest": "apiVersion: promoter.argoproj.io/v1alpha1\nkind: CommitStatus\nmetadata:\n  name: prod-gate-{{workflow.parameters.head-sha}}\n  namespace: driveby\n  labels:\n    promoter.argoproj.io/commit-status: prod-gate\n    driveby.io/app: bad-docs-api\n    driveby.io/gate: prod-gate\nspec:\n  gitRepositoryRef:\n    name: {{workflow.parameters.app-name}}-gitops\n  sha: {{workflow.parameters.head-sha}}\n  name: prod-gate\n  description: {{inputs.parameters.description}}\n  phase: {{inputs.parameters.phase}}\n  url: https://argo.private.novelcore.org/workflows\n"
+                    }
+                }
+            ],
+            "volumeClaimTemplates": [
+                {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "name": "reports"
+                    },
+                    "spec": {
+                        "accessModes": [
+                            "ReadWriteOnce"
+                        ],
+                        "resources": {
+                            "requests": {
+                                "storage": "64Mi"
+                            }
+                        }
+                    },
+                    "status": {}
+                }
+            ],
+            "workflowTemplateRef": {
+                "name": "bad-docs-api-prod-gate"
+            }
+        },
+        "taskResultsCompletionStatus": {
+            "bad-docs-api-prod-gate-pipeline-vh96h-1300364341": true,
+            "bad-docs-api-prod-gate-pipeline-vh96h-1301977581": true,
+            "bad-docs-api-prod-gate-pipeline-vh96h-1750728859": true,
+            "bad-docs-api-prod-gate-pipeline-vh96h-2661781324": true,
+            "bad-docs-api-prod-gate-pipeline-vh96h-3962241416": true,
+            "bad-docs-api-prod-gate-pipeline-vh96h-931328155": true
+        }
+    }
+}

@@ -5,24 +5,24 @@
         "annotations": {
             "workflows.argoproj.io/pod-name-format": "v2"
         },
-        "creationTimestamp": "2026-03-21T18:33:19Z",
+        "creationTimestamp": "2026-03-22T18:02:18Z",
         "generateName": "no-auth-api-staging-gate-pipeline-",
-        "generation": 15,
+        "generation": 14,
         "labels": {
             "driveby.io/app": "no-auth-api",
             "driveby.io/gate": "staging-gate",
             "driveby.io/trigger": "pr-trigger",
-            "events.argoproj.io/action-timestamp": "1774117998944",
+            "events.argoproj.io/action-timestamp": "1774202537340",
             "events.argoproj.io/sensor": "no-auth-api-staging-gate-sensor",
             "events.argoproj.io/trigger": "pr-trigger-workflow-trigger",
             "workflows.argoproj.io/completed": "true",
             "workflows.argoproj.io/creator": "system-serviceaccount-driveby-default",
             "workflows.argoproj.io/phase": "Failed"
         },
-        "name": "no-auth-api-staging-gate-pipeline-pf7nc",
+        "name": "no-auth-api-staging-gate-pipeline-8ksbl",
         "namespace": "driveby",
-        "resourceVersion": "245831374",
-        "uid": "169d9699-cb83-440f-a706-9524de85fb81"
+        "resourceVersion": "246864369",
+        "uid": "533320cc-4aa5-490d-887f-2b7728f3afed"
     },
     "spec": {
         "arguments": {
@@ -33,7 +33,7 @@
                 },
                 {
                     "name": "head-sha",
-                    "value": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+                    "value": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a"
                 },
                 {
                     "name": "github-owner",
@@ -91,131 +91,44 @@
                 "type": "Completed"
             }
         ],
-        "finishedAt": "2026-03-21T18:33:59Z",
+        "finishedAt": "2026-03-22T18:02:58Z",
         "nodes": {
-            "no-auth-api-staging-gate-pipeline-pf7nc": {
+            "no-auth-api-staging-gate-pipeline-8ksbl": {
                 "children": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-346919383",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-1566510713"
+                    "no-auth-api-staging-gate-pipeline-8ksbl-1777786155",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-3083032421"
                 ],
-                "displayName": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "finishedAt": "2026-03-21T18:33:49Z",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc",
+                "displayName": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "finishedAt": "2026-03-22T18:02:48Z",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl",
                 "outboundNodes": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-1566510713",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-1732634785"
+                    "no-auth-api-staging-gate-pipeline-8ksbl-1448167446",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-386766312",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-3083032421",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-827023205"
                 ],
                 "phase": "Failed",
                 "progress": "3/4",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 12
+                    "memory": 11
                 },
-                "startedAt": "2026-03-21T18:33:19Z",
+                "startedAt": "2026-03-22T18:02:18Z",
                 "templateName": "promotion-pipeline",
                 "templateScope": "local/",
                 "type": "DAG"
             },
-            "no-auth-api-staging-gate-pipeline-pf7nc-1566510713": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "displayName": "update-commitstatus-pending",
-                "finishedAt": "2026-03-21T18:33:22Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1566510713",
-                "inputs": {
-                    "parameters": [
-                        {
-                            "name": "phase",
-                            "value": "pending"
-                        },
-                        {
-                            "name": "description",
-                            "value": "Running quality checks for staging environment..."
-                        }
-                    ]
-                },
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.update-commitstatus-pending",
-                "outputs": {
-                    "exitCode": "0"
-                },
-                "phase": "Succeeded",
-                "progress": "1/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 1
-                },
-                "startedAt": "2026-03-21T18:33:19Z",
-                "templateName": "update-commitstatus",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-1732634785": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "displayName": "update-commitstatus-success",
-                "finishedAt": "2026-03-21T18:33:49Z",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1732634785",
-                "message": "omitted: depends condition not met",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.update-commitstatus-success",
-                "nodeFlag": {},
-                "phase": "Omitted",
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "update-commitstatus",
-                "templateScope": "local/",
-                "type": "Skipped"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-1783911245": {
+            "no-auth-api-staging-gate-pipeline-8ksbl-1333451293": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
                 "children": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-3150777415"
+                    "no-auth-api-staging-gate-pipeline-8ksbl-812829315"
                 ],
-                "displayName": "no-auth-api-staging-gate-pipeline-pf7nc.onExit",
-                "finishedAt": "2026-03-21T18:33:59Z",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit",
-                "nodeFlag": {
-                    "hooked": true
-                },
-                "outboundNodes": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-3150777415"
-                ],
-                "phase": "Succeeded",
-                "progress": "3/3",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 13
-                },
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "exit-handler",
-                "templateScope": "local/",
-                "type": "DAG"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-2097497908": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "displayName": "report-success",
-                "finishedAt": "2026-03-21T18:33:49Z",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
-                "message": "omitted: depends condition not met",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.report-success",
-                "nodeFlag": {},
-                "phase": "Omitted",
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "github-commit-status",
-                "templateScope": "local/",
-                "type": "Skipped"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-2639104640": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
-                "displayName": "report-failure-github",
-                "finishedAt": "2026-03-21T18:33:55Z",
+                "displayName": "wait-for-source-ready",
+                "finishedAt": "2026-03-22T18:02:31Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2639104640",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.report-failure-github",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-1333451293",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.wait-for-source-ready",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -223,111 +136,36 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 6
+                    "memory": 3
                 },
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "exit-handler-github",
+                "startedAt": "2026-03-22T18:02:28Z",
+                "templateName": "health-check-source",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "no-auth-api-staging-gate-pipeline-pf7nc-2965375668": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
-                "displayName": "comment-pr-failure",
-                "finishedAt": "2026-03-21T18:33:54Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-2965375668",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.comment-pr-failure",
-                "outputs": {
-                    "exitCode": "0"
-                },
-                "phase": "Succeeded",
-                "progress": "1/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 5
-                },
-                "startedAt": "2026-03-21T18:33:49Z",
+            "no-auth-api-staging-gate-pipeline-8ksbl-1448167446": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "displayName": "comment-pr",
+                "finishedAt": "2026-03-22T18:02:48Z",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-1448167446",
+                "message": "omitted: depends condition not met",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.comment-pr",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:02:48Z",
                 "templateName": "github-pr-comment",
                 "templateScope": "local/",
-                "type": "Pod"
+                "type": "Skipped"
             },
-            "no-auth-api-staging-gate-pipeline-pf7nc-3150777415": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc-1783911245",
-                "displayName": "update-commitstatus-failure",
-                "finishedAt": "2026-03-21T18:33:53Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3150777415",
-                "inputs": {
-                    "parameters": [
-                        {
-                            "name": "phase",
-                            "value": "failure"
-                        },
-                        {
-                            "name": "description",
-                            "value": "Quality checks failed, promotion to staging blocked"
-                        }
-                    ]
-                },
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.onExit.update-commitstatus-failure",
-                "outputs": {
-                    "exitCode": "0"
-                },
-                "phase": "Succeeded",
-                "progress": "1/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 2
-                },
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "update-commitstatus",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-3174179847": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
+            "no-auth-api-staging-gate-pipeline-8ksbl-1777786155": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
                 "children": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-2097497908",
-                    "no-auth-api-staging-gate-pipeline-pf7nc-1732634785"
-                ],
-                "displayName": "check-0-validate-only",
-                "finishedAt": "2026-03-21T18:33:44Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3174179847",
-                "inputs": {
-                    "parameters": [
-                        {
-                            "name": "validation-mode",
-                            "value": "strict"
-                        }
-                    ]
-                },
-                "message": "Error (exit code 1)",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.check-0-validate-only",
-                "outputs": {
-                    "exitCode": "1"
-                },
-                "phase": "Failed",
-                "progress": "0/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 4
-                },
-                "startedAt": "2026-03-21T18:33:39Z",
-                "templateName": "driveby-validate",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-346919383": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "children": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-3830857553"
+                    "no-auth-api-staging-gate-pipeline-8ksbl-1333451293"
                 ],
                 "displayName": "set-pending-status",
-                "finishedAt": "2026-03-21T18:33:24Z",
+                "finishedAt": "2026-03-22T18:02:21Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-346919383",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-1777786155",
                 "inputs": {
                     "parameters": [
                         {
@@ -340,31 +178,7 @@
                         }
                     ]
                 },
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.set-pending-status",
-                "outputs": {
-                    "exitCode": "0"
-                },
-                "phase": "Succeeded",
-                "progress": "1/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 4
-                },
-                "startedAt": "2026-03-21T18:33:19Z",
-                "templateName": "github-commit-status",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "no-auth-api-staging-gate-pipeline-pf7nc-3830857553": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "children": [
-                    "no-auth-api-staging-gate-pipeline-pf7nc-3174179847"
-                ],
-                "displayName": "wait-for-source-ready",
-                "finishedAt": "2026-03-21T18:33:33Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-3830857553",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.wait-for-source-ready",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.set-pending-status",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -374,22 +188,208 @@
                     "cpu": 0,
                     "memory": 3
                 },
-                "startedAt": "2026-03-21T18:33:29Z",
-                "templateName": "health-check-source",
+                "startedAt": "2026-03-22T18:02:18Z",
+                "templateName": "github-commit-status",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "no-auth-api-staging-gate-pipeline-pf7nc-62065626": {
-                "boundaryID": "no-auth-api-staging-gate-pipeline-pf7nc",
-                "displayName": "comment-pr",
-                "finishedAt": "2026-03-21T18:33:49Z",
-                "id": "no-auth-api-staging-gate-pipeline-pf7nc-62065626",
+            "no-auth-api-staging-gate-pipeline-8ksbl-183666520": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl-3313554961",
+                "displayName": "comment-pr-failure",
+                "finishedAt": "2026-03-22T18:02:51Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-183666520",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.onExit.comment-pr-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 3
+                },
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "github-pr-comment",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-2093592459": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl-3313554961",
+                "displayName": "update-commitstatus-failure",
+                "finishedAt": "2026-03-22T18:02:50Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-2093592459",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "failure"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Quality checks failed, promotion to staging blocked"
+                        }
+                    ]
+                },
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.onExit.update-commitstatus-failure",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 2
+                },
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-2370754140": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl-3313554961",
+                "displayName": "report-failure-github",
+                "finishedAt": "2026-03-22T18:02:51Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-2370754140",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.onExit.report-failure-github",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 4
+                },
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "exit-handler-github",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-3083032421": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "displayName": "update-commitstatus-pending",
+                "finishedAt": "2026-03-22T18:02:20Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-3083032421",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "phase",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for staging environment..."
+                        }
+                    ]
+                },
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.update-commitstatus-pending",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 2
+                },
+                "startedAt": "2026-03-22T18:02:18Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-3313554961": {
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-8ksbl-183666520",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-2370754140",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-2093592459"
+                ],
+                "displayName": "no-auth-api-staging-gate-pipeline-8ksbl.onExit",
+                "finishedAt": "2026-03-22T18:02:58Z",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-3313554961",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.onExit",
+                "nodeFlag": {
+                    "hooked": true
+                },
+                "outboundNodes": [
+                    "no-auth-api-staging-gate-pipeline-8ksbl-183666520",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-2370754140",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-2093592459"
+                ],
+                "phase": "Succeeded",
+                "progress": "3/3",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 9
+                },
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "exit-handler",
+                "templateScope": "local/",
+                "type": "DAG"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-386766312": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "displayName": "report-success",
+                "finishedAt": "2026-03-22T18:02:48Z",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-386766312",
                 "message": "omitted: depends condition not met",
-                "name": "no-auth-api-staging-gate-pipeline-pf7nc.comment-pr",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.report-success",
                 "nodeFlag": {},
                 "phase": "Omitted",
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "github-pr-comment",
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-812829315": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "children": [
+                    "no-auth-api-staging-gate-pipeline-8ksbl-1448167446",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-386766312",
+                    "no-auth-api-staging-gate-pipeline-8ksbl-827023205"
+                ],
+                "displayName": "check-0-validate-only",
+                "finishedAt": "2026-03-22T18:02:41Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-812829315",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "validation-mode",
+                            "value": "strict"
+                        }
+                    ]
+                },
+                "message": "Error (exit code 1)",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.check-0-validate-only",
+                "outputs": {
+                    "exitCode": "1"
+                },
+                "phase": "Failed",
+                "progress": "0/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 3
+                },
+                "startedAt": "2026-03-22T18:02:38Z",
+                "templateName": "driveby-validate",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "no-auth-api-staging-gate-pipeline-8ksbl-827023205": {
+                "boundaryID": "no-auth-api-staging-gate-pipeline-8ksbl",
+                "displayName": "update-commitstatus-success",
+                "finishedAt": "2026-03-22T18:02:48Z",
+                "id": "no-auth-api-staging-gate-pipeline-8ksbl-827023205",
+                "message": "omitted: depends condition not met",
+                "name": "no-auth-api-staging-gate-pipeline-8ksbl.update-commitstatus-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:02:48Z",
+                "templateName": "update-commitstatus",
                 "templateScope": "local/",
                 "type": "Skipped"
             }
@@ -398,7 +398,7 @@
             {
                 "name": "reports",
                 "persistentVolumeClaim": {
-                    "claimName": "no-auth-api-staging-gate-pipeline-pf7nc-reports"
+                    "claimName": "no-auth-api-staging-gate-pipeline-8ksbl-reports"
                 }
             }
         ],
@@ -406,9 +406,9 @@
         "progress": "6/7",
         "resourcesDuration": {
             "cpu": 0,
-            "memory": 25
+            "memory": 20
         },
-        "startedAt": "2026-03-21T18:33:19Z",
+        "startedAt": "2026-03-22T18:02:18Z",
         "storedTemplates": {
             "namespaced/no-auth-api-staging-gate/driveby-validate": {
                 "container": {
@@ -868,7 +868,7 @@
                     },
                     {
                         "name": "head-sha",
-                        "value": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88"
+                        "value": "6e75b2d7b5d63f46b1c8a0189775f3319d9ef10a"
                     },
                     {
                         "name": "github-owner",
@@ -1386,13 +1386,13 @@
             }
         },
         "taskResultsCompletionStatus": {
-            "no-auth-api-staging-gate-pipeline-pf7nc-1566510713": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-2639104640": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-2965375668": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-3150777415": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-3174179847": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-346919383": true,
-            "no-auth-api-staging-gate-pipeline-pf7nc-3830857553": true
+            "no-auth-api-staging-gate-pipeline-8ksbl-1333451293": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-1777786155": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-183666520": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-2093592459": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-2370754140": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-3083032421": true,
+            "no-auth-api-staging-gate-pipeline-8ksbl-812829315": true
         }
     }
 }

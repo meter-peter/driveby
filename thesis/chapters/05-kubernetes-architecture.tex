@@ -112,6 +112,16 @@ The Kubernetes architecture is shaped by four design goals:
     \item \textbf{Platform inheritance.} The system assumes the existence of shared platform capabilities---ArgoCD, Crossplane, Argo Events, Argo Workflows, Traefik, cert-manager---and references them rather than installing them. The application developer never configures TLS certificates, ingress controllers, or event buses directly; these are managed by the platform team and inherited by every \texttt{XSDLC} resource that references them.
 \end{enumerate}
 
+Figure~\ref{fig:k8s-system-context} shows the system context: the \texttt{driveby} namespace hosts the control plane (XRDs, Argo Events, Argo Workflows, GitOps Promoter), per-application namespaces host API deployments, and shared platform infrastructure (ArgoCD, Crossplane, Traefik, cert-manager) is inherited rather than installed.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/k8s-system-context.tex}%
+}
+\caption{Kubernetes system context. The \texttt{driveby} namespace hosts the quality gate control plane. Per-application namespaces host API deployments across environments. Shared platform infrastructure is inherited, not installed.}
+\label{fig:k8s-system-context}
+\end{figure}
 
 % ============================================================================
 \section{The Kubernetes Controller Pattern}
@@ -149,9 +159,9 @@ This property connects directly to the ontological state reconciliation pattern 
 
 Crossplane~\cite{crossplane} extends the Kubernetes controller pattern by allowing custom resources to declare not just in-cluster objects but any resource reachable through a provider API. A standard Kubernetes controller manages Pods, Services, and ConfigMaps. A Crossplane-managed composition can manage those same resources \textit{plus} cloud databases, DNS records, GitHub branches, and any other resource for which a Crossplane provider exists~\cite{crossplane-compositions}.
 
-The \texttt{XSDLC} composition leverages this extension to manage resources across two control planes simultaneously. In-cluster resources (ServiceAccount, EventBus, WorkflowTemplate, ArgoCD Application) are provisioned through \texttt{provider-kubernetes}. GitHub resources (Repository, Branch, BranchProtection) are provisioned through \texttt{provider-upjet-github}. From the operator's perspective, this distinction is invisible: one \texttt{XSDLC} custom resource declares the entire pipeline, and the composition delegates each child resource to the appropriate provider.
+The \texttt{XSDLC} composition leverages this extension to manage resources across two control planes simultaneously. In-cluster resources (ServiceAccount, EventBus, WorkflowTemplate, ArgoCD Application, secrets) are provisioned through \texttt{provider-kubernetes}. GitHub resources (Repository, RepositoryFile, Branch, BranchProtection) are provisioned through \texttt{provider-upjet-github}. From the operator's perspective, this distinction is invisible: one \texttt{XSDLC} custom resource declares the entire pipeline, and the composition delegates each child resource to the appropriate provider.
 
-Crossplane compositions function as \textit{meta-controllers}. A standard controller watches one resource type and reconciles its state directly. A Crossplane composition watches a composite resource (the XRD) and generates \textit{desired state for other controllers}. The composition's \texttt{function-go-templating} step renders the desired children; \texttt{function-auto-ready} aggregates their readiness. Each generated child is then reconciled by its own provider controller. This two-level reconciliation---composition generates desired children, providers reconcile each child against its target system---is what enables a single 25-line YAML declaration to produce and maintain a pipeline of approximately 34 managed resources.
+Crossplane compositions function as \textit{meta-controllers}. A standard controller watches one resource type and reconciles its state directly. A Crossplane composition watches a composite resource (the XRD) and generates \textit{desired state for other controllers}. The composition's \texttt{function-go-templating} step renders the desired children; \texttt{function-auto-ready} aggregates their readiness. Each generated child is then reconciled by its own provider controller. This two-level reconciliation---composition generates desired children, providers reconcile each child against its target system---is what enables a single 25-line YAML declaration to produce and maintain a pipeline of approximately 44 managed resources.
 
 % ----------------------------------------------------------------------------
 \subsection{Provider Architecture}
@@ -160,11 +170,22 @@ Crossplane compositions function as \textit{meta-controllers}. A standard contro
 
 The \texttt{XSDLC} composition delegates resource management to two Crossplane providers:
 
-\textbf{\texttt{provider-kubernetes}} (v0.14.1) manages all in-cluster resources. It uses \texttt{InjectedIdentity} for authentication, meaning it inherits the permissions of the Crossplane pod's service account. Every in-cluster resource generated by the composition---ServiceAccount, EventBus, Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress, PromotionStrategy, GitRepository, ScmProvider, ArgoCDCommitStatus, and ArgoCD Application---is wrapped in a \texttt{provider-kubernetes} \texttt{Object} resource. The provider reconciles each \texttt{Object} by applying the embedded manifest to the cluster.
+\textbf{\texttt{provider-kubernetes}} (v0.14.1) manages all in-cluster resources. It uses \texttt{InjectedIdentity} for authentication, meaning it inherits the permissions of the Crossplane pod's service account. Every in-cluster resource generated by the composition---ServiceAccount, EventBus, Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress, PromotionStrategy, GitRepository, ScmProvider, ArgoCD Application, ArgoCD push secret, and per-namespace ghcr-creds secrets---is wrapped in a \texttt{provider-kubernetes} \texttt{Object} resource. The provider reconciles each \texttt{Object} by applying the embedded manifest to the cluster.
 
-\textbf{\texttt{provider-upjet-github}} (v0.18.0) manages GitHub API resources. It authenticates via a GitHub personal access token stored in a Kubernetes secret. The provider exposes GitHub resources as Kubernetes custom resources: \texttt{Repository}, \texttt{Branch}, and \texttt{BranchProtection}. The composition generates these resources to auto-create a dedicated GitOps repository, provision environment branches within it, and enforce branch protection rules.
+\textbf{\texttt{provider-upjet-github}} (v0.18.0) manages GitHub API resources. It authenticates via a GitHub personal access token stored in a Kubernetes secret. The provider exposes GitHub resources as Kubernetes custom resources: \texttt{Repository}, \texttt{Branch}, \texttt{BranchProtection}, and \texttt{RepositoryFile}. The composition generates these resources to auto-create a dedicated GitOps repository, seed it with boilerplate dry manifests, provision environment branches within it, and enforce branch protection rules.
 
 The single-composition, dual-provider model means that the operator interacts with one Kubernetes API (\texttt{driveby.io/v1alpha1 XSDLC}) while the system manages resources across two distinct control planes---the Kubernetes cluster and the GitHub API---from a single custom resource declaration.
+
+Figure~\ref{fig:provider-architecture} illustrates the dual-provider model.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.85\textwidth}{!}{%
+\input{figures/provider-architecture.tex}%
+}
+\caption{Dual-provider architecture. The XSDLC composition delegates in-cluster resources to \texttt{provider-kubernetes} and GitHub resources to \texttt{provider-upjet-github}.}
+\label{fig:provider-architecture}
+\end{figure}
 
 % ============================================================================
 \section{Crossplane XRD Design}
@@ -180,15 +201,27 @@ The quality gate infrastructure is provisioned through a single Crossplane Compo
 
 The \texttt{XSDLC} XRD requires only two fields: \texttt{gitopsRepository} (the GitHub owner and gitops repository name) and \texttt{environments} (the ordered list of environments in the promotion chain). The software repository is never referenced---XSDLC manages only the gitops repo. From these two inputs, the composition generates all resources needed for the full software delivery lifecycle pipeline.
 
-A single \texttt{XSDLC} custom resource generates two categories of resources. \textit{App-level shared resources} are created once per CR:
+A single \texttt{XSDLC} custom resource generates three categories of resources. \textit{App-level shared resources} are created once per CR:
 
 \begin{enumerate}
     \item A \textbf{ServiceAccount} with image pull credentials for accessing the DriveBy container image from the GitHub Container Registry.
     \item An \textbf{EventBus} backed by NATS JetStream~\cite{nats-jetstream} for reliable event delivery between EventSources and Sensors.
     \item A \textbf{ScmProvider} authenticating to GitHub via a GitHub App.
     \item A \textbf{GitRepository} pointing to the GitOps repository.
-    \item A \textbf{PromotionStrategy} defining the environment chain with per-environment auto-merge policies and commit status gates.
-    \item An \textbf{ArgoCDCommitStatus} resource for each environment transition that has a quality gate.
+    \item A \textbf{GitHub Repository} auto-creating a dedicated gitops repository.
+    \item \textbf{RepositoryFiles} seeding the gitops repository with boilerplate dry manifests (base deployment, service, and kustomization).
+    \item An \textbf{ArgoCD push secret} granting the Source Hydrator write access to the gitops repository.
+    \item A \textbf{BranchProtection} rule protecting all \texttt{*-next} branches in the gitops repository.
+\end{enumerate}
+
+\textit{Per-environment resources} are created for each environment in the promotion chain:
+
+\begin{enumerate}
+    \item A \textbf{PromotionStrategy} defining the environment's auto-merge policy and commit status gates.
+    \item Two \textbf{Branches} in the gitops repository (the environment branch and its \texttt{-next} counterpart).
+    \item A \textbf{RepositoryFile} seeding the per-environment Kustomize overlay.
+    \item A \textbf{ghcr-creds} secret copied into the environment namespace for image pull authentication.
+    \item An \textbf{ArgoCD Application} using Source Hydrator to render the environment's overlay.
 \end{enumerate}
 
 \textit{Per-gate resources} are created for each environment that defines a \texttt{gate}:
@@ -201,6 +234,7 @@ A single \texttt{XSDLC} custom resource generates two categories of resources. \
     \item A \textbf{Sensor} that filters events (e.g., only \texttt{pull\_request} events with actions \texttt{opened}, \texttt{reopened}, or \texttt{synchronize}) and submits workflow runs with extracted parameters.
     \item A \textbf{Service} exposing the EventSource webhook.
     \item An \textbf{Ingress} with TLS termination (via cert-manager) routing external webhook traffic to the EventSource service.
+    \item A \textbf{BranchProtection} rule requiring the gate's commit status check before merging into the environment branch.
 \end{enumerate}
 
 % ----------------------------------------------------------------------------
@@ -280,7 +314,7 @@ Figure~\ref{fig:xrd-resource-hierarchy} visualizes the resource hierarchy genera
 \begin{figure}[htbp]
 \centering
 \input{figures/xrd-resource-hierarchy.tex}
-\caption{Resources generated by the \texttt{XSDLC} XRD. App-level shared resources (ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy) are created once per CR. Per-gate resources (RBAC, WorkflowTemplate, EventSource, Sensor, Service, Ingress) are created for each environment that defines a quality gate.}
+\caption{Resources generated by the \texttt{XSDLC} XRD. App-level shared resources (ServiceAccount, EventBus, ScmProvider, GitRepository, Repository, RepositoryFiles, push secret) are created once per CR. Per-environment resources (PromotionStrategy, Branches, overlay RepositoryFile, ghcr-creds, ArgoCD Application) are created for each environment. Per-gate resources (RBAC, WorkflowTemplate, EventSource, Sensor, Service, Ingress, BranchProtection) are created for each environment that defines a quality gate.}
 \label{fig:xrd-resource-hierarchy}
 \end{figure}
 
@@ -307,7 +341,7 @@ This separation between platform installation and pipeline creation is deliberat
 \label{subsec:day1}
 % ----------------------------------------------------------------------------
 
-When an operator applies an \texttt{XSDLC} custom resource, the Crossplane composition controller detects the new resource on its next reconciliation cycle and begins generating child resources. For the reference deployment (\texttt{perfect-api} with three environments and two quality gates), the composition generates approximately 34 child resources: the GitOps Repository, ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus, three ArgoCD Applications, six Branches (in the gitops repo), and the per-gate resources (Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress) for each gated environment.
+When an operator applies an \texttt{XSDLC} custom resource, the Crossplane composition controller detects the new resource on its next reconciliation cycle and begins generating child resources. For the reference deployment (\texttt{perfect-api} with three environments and two quality gates), the composition generates approximately 44 child resources: the GitOps Repository, ServiceAccount, EventBus, ScmProvider, GitRepository, ArgoCD push secret, three PromotionStrategies, three ArgoCD Applications, six Branches, four RepositoryFiles (base manifests and per-environment overlays), three ghcr-creds secrets, BranchProtection rules, and the per-gate resources (Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress) for each gated environment.
 
 Each child resource is itself subject to its provider's reconciliation loop. The \texttt{provider-kubernetes} controller applies each in-cluster manifest; the \texttt{provider-upjet-github} controller creates the gitops repository and its branches. The \texttt{function-auto-ready} function monitors all children and marks the \texttt{XSDLC} composite as \texttt{READY=True} only when every child has reached its own ready state.
 
@@ -333,7 +367,7 @@ Once the pipeline is created, the controller pattern ensures continuous reconcil
 
 \textbf{Self-healing.} If a managed resource is deleted---for example, \texttt{kubectl delete sensor perfect-api-staging-gate-sensor}---the composition controller detects the missing child and re-creates it. The provider reconciles the re-created resource against the cluster, and the pipeline returns to its declared state without human intervention.
 
-The composition uses two deletion policies to distinguish shared and per-pipeline resources. \textit{Shared resources} (ServiceAccount, EventBus) use \texttt{deletionPolicy: Orphan}. If the \texttt{XSDLC} CR is deleted, these resources are left in place because other \texttt{XSDLC} instances in the same namespace may depend on them. \textit{Per-pipeline resources} (ScmProvider, GitRepository, PromotionStrategy, WorkflowTemplate, EventSource, Sensor, and all per-gate resources) use \texttt{deletionPolicy: Delete}. When the \texttt{XSDLC} CR is deleted, these resources are cascade-deleted because they are specific to the pipeline being decommissioned. Similarly, GitHub \texttt{Branch} resources use \texttt{deletionPolicy: Orphan} to preserve branch history even when the pipeline is removed.
+The composition uses two deletion policies to distinguish shared and per-pipeline resources. \textit{Shared resources} (ServiceAccount, EventBus) use \texttt{deletionPolicy: Orphan}. If the \texttt{XSDLC} CR is deleted, these resources are left in place because other \texttt{XSDLC} instances in the same namespace may depend on them. \textit{Per-pipeline resources} (ScmProvider, GitRepository, PromotionStrategy, WorkflowTemplate, EventSource, Sensor, ghcr-creds secrets, ArgoCD push secret, and all per-gate resources) use \texttt{deletionPolicy: Delete}. When the \texttt{XSDLC} CR is deleted, these resources are cascade-deleted because they are specific to the pipeline being decommissioned. Similarly, GitHub \texttt{Branch} and \texttt{RepositoryFile} resources use \texttt{deletionPolicy: Orphan} to preserve branch history and manifest content even when the pipeline is removed.
 
 % ----------------------------------------------------------------------------
 \subsection{Day N: Updates and Deletion}
@@ -579,7 +613,7 @@ The DAG follows a fixed preamble, a dynamic checks section, and a fixed postambl
 \begin{enumerate}
     \item \textbf{set-pending-status}: Posts a ``pending'' commit status to the PR's head SHA via the GitHub API. A parallel step (\textbf{update-commitstatus-pending}) creates a CommitStatus custom resource with phase \texttt{pending} for the GitOps Promoter.
 
-    \item \textbf{wait-for-source-ready}: Polls the source environment (e.g., \texttt{perfect-api-dev}) to verify that the API deployment is healthy. The step performs up to 24 health checks at 5-second intervals (2 minutes maximum), using \texttt{curl} to probe the API's OpenAPI endpoint. This wait ensures that validation does not run against a partially deployed or restarting instance.
+    \item \textbf{wait-for-source-ready}: Polls the source environment (e.g., \texttt{perfect-api-dev}) to verify that the API deployment is healthy. The step performs up to 60 health checks at 5-second intervals (5 minutes maximum), using \texttt{curl} to probe the API's OpenAPI endpoint. This wait ensures that validation does not run against a partially deployed or restarting instance.
 \end{enumerate}
 
 \textbf{Dynamic checks (from \texttt{checks[]} array):}

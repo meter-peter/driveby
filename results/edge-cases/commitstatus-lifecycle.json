@@ -1,0 +1,268 @@
+{
+  "test_name": "commitstatus-lifecycle",
+  "description": "Analyze CommitStatus CRD lifecycle across all APIs \u2014 phases, gates, and reconciliation state",
+  "timestamp": "2026-03-22T18:15:59.298934+00:00",
+  "method": "kubectl get commitstatus -n driveby -o json, grouped by driveby.io/app label",
+  "expected": "CommitStatus CRDs exist for each API with correct phase reflecting gate results. CRDs accumulate per SHA (one per commit per gate).",
+  "actual": "Found 32 CommitStatus CRDs across 5 APIs. Phase distribution: {'failure': 18, 'success': 13, 'pending': 1}. perfect-api shows full lifecycle: pending -> failure -> success across multiple commits. bad-docs-api, broken-api, no-auth-api all show consistent failure. slow-api staging passes (P007 load-test in staging only) but prod fails.",
+  "evidence": {
+    "total_commitstatus_crds": 32,
+    "phase_distribution": {
+      "failure": 18,
+      "success": 13,
+      "pending": 1
+    },
+    "per_api_count": {
+      "bad-docs-api": 5,
+      "broken-api": 4,
+      "perfect-api": 15,
+      "no-auth-api": 4,
+      "slow-api": 4
+    },
+    "per_api_details": {
+      "bad-docs-api": [
+        {
+          "name": "prod-gate-0441fafb4830",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:01Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-7ecc0d37f321",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-21T17:43:45Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-097769388d59",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T17:43:44Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-139c309fd446",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:54:55Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-97e1f104584f",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T19:58:46Z",
+          "ready": true
+        }
+      ],
+      "broken-api": [
+        {
+          "name": "prod-gate-0a7307b748e8",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:45Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-2a77bedb978d",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-21T18:21:15Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-4d2f7130201f",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:41Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-79534963f7cf",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T18:21:12Z",
+          "ready": true
+        }
+      ],
+      "perfect-api": [
+        {
+          "name": "prod-gate-41e041ef4b4f",
+          "gate": "prod-gate",
+          "phase": "success",
+          "created": "2026-03-22T17:55:58Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-94d152bd3992",
+          "gate": "prod-gate",
+          "phase": "success",
+          "created": "2026-03-21T17:53:43Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-e14ce96964d2",
+          "gate": "prod-gate",
+          "phase": "success",
+          "created": "2026-03-21T15:48:56Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-41bbe35f7f7d",
+          "gate": "prod-gate",
+          "phase": "success",
+          "created": "2026-03-21T03:21:48Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-2167cc3260f8",
+          "gate": "prod-gate",
+          "phase": "success",
+          "created": "2026-03-21T02:11:48Z",
+          "ready": false
+        },
+        {
+          "name": "prod-gate-e118890b4d57",
+          "gate": "prod-gate",
+          "phase": "pending",
+          "created": "2026-03-21T03:09:05Z",
+          "ready": false
+        },
+        {
+          "name": "prod-gate-fe4caf05e5d6",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-21T02:49:53Z",
+          "ready": false
+        },
+        {
+          "name": "staging-gate-94be36c5d066",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-22T17:58:33Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-0a7a0a3a15ba",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T17:59:58Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-3b5b32a552c4",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T03:21:48Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-50b47ffb90aa",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T17:53:37Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-83fa8c577dae",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T15:48:58Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-730fd138bda5",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T03:09:19Z",
+          "ready": false
+        },
+        {
+          "name": "staging-gate-d0f453a45e71",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T02:11:49Z",
+          "ready": false
+        },
+        {
+          "name": "staging-gate-fe4db4f72990",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T02:50:06Z",
+          "ready": false
+        }
+      ],
+      "no-auth-api": [
+        {
+          "name": "prod-gate-d6b7f6f8c5b4",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:15Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-77d61990b5e5",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-21T18:21:03Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-6e75b2d7b5d6",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:10Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-d24f88e4ed08",
+          "gate": "staging-gate",
+          "phase": "failure",
+          "created": "2026-03-21T18:21:02Z",
+          "ready": true
+        }
+      ],
+      "slow-api": [
+        {
+          "name": "prod-gate-f1938e69e619",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-22T17:55:30Z",
+          "ready": true
+        },
+        {
+          "name": "prod-gate-949b9a9f9c93",
+          "gate": "prod-gate",
+          "phase": "failure",
+          "created": "2026-03-21T18:21:03Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-c7ece86b5be0",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-22T17:58:32Z",
+          "ready": true
+        },
+        {
+          "name": "staging-gate-ec344c33c128",
+          "gate": "staging-gate",
+          "phase": "success",
+          "created": "2026-03-21T18:21:04Z",
+          "ready": true
+        }
+      ]
+    },
+    "lifecycle_observations": [
+      "Each commit SHA gets its own CommitStatus CRD (naming: {gate}-{sha})",
+      "perfect-api has the most CRDs (15) showing iterative development history",
+      "perfect-api shows lifecycle: pending -> failure -> success as gate definition evolved",
+      "bad-docs-api, broken-api, no-auth-api: all phases are failure (correctly identified quality issues)",
+      "slow-api: staging=success (passes validation), prod=failure (load test thresholds not met)",
+      "Some older CRDs have ready=False due to SHA no longer existing on the branch (reconciliation error)"
+    ]
+  },
+  "pass": true
+}

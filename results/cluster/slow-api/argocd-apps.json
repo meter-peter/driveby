@@ -1,0 +1,564 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"slow-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:41Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 62,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "slow-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "245885539",
+                "uid": "e8929192-acb8-44e7-859a-5446d0f18c4c"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T18:32:04Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-21T18:23:44Z",
+                        "deployedAt": "2026-03-21T18:23:44Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "08be108160d2b1ffebc939365c5bbec53068b896",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-21T18:23:45Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "autoHealAttemptsCount": 1,
+                            "prune": true,
+                            "resources": [
+                                {
+                                    "group": "apps",
+                                    "kind": "Deployment",
+                                    "name": "slow-api"
+                                }
+                            ],
+                            "revision": "08be108160d2b1ffebc939365c5bbec53068b896",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-21T18:23:44Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/slow-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/slow-api unchanged",
+                                "name": "slow-api",
+                                "namespace": "slow-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "08be108160d2b1ffebc939365c5bbec53068b896",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-21T19:45:09Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "slow-api",
+                        "namespace": "slow-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "slow-api",
+                        "namespace": "slow-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "finishedAt": "2026-03-21T17:41:04Z",
+                        "hydratedSHA": "4aa66f49261c1ea6585101a66a6a89eb424aa0c7",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:40:47Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "hydratedSHA": "4aa66f49261c1ea6585101a66a6a89eb424aa0c7",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/slow-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "08be108160d2b1ffebc939365c5bbec53068b896",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"slow-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:40Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 53,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "slow-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "245885900",
+                "uid": "f0499a3d-7069-4779-bfd4-38b97e4f6410"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T19:43:14Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:41Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:45:37Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "finishedAt": "2026-03-21T17:40:59Z",
+                        "hydratedSHA": "949b9a9f9c93500b4c9cb7c7628990d20fe6386d",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:40:47Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "hydratedSHA": "949b9a9f9c93500b4c9cb7c7628990d20fe6386d",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"slow-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"slow-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"slow-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/slow-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:41Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 60,
+                "labels": {
+                    "driveby.io/app": "slow-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "slow-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "245884559",
+                "uid": "fc78ae85-29c0-4777-8244-1f7161343dab"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "slow-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T19:35:48Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-21T18:35:08Z",
+                        "deployedAt": "2026-03-21T18:35:08Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "1be73425ad876189cdc0470856b06ddd60fb6c50",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-21T18:35:08Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "prune": true,
+                            "revision": "1be73425ad876189cdc0470856b06ddd60fb6c50",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "environment/staging"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-21T18:35:08Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/slow-api created",
+                                "name": "slow-api",
+                                "namespace": "slow-api-staging",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/slow-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/slow-api created",
+                                "name": "slow-api",
+                                "namespace": "slow-api-staging",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "1be73425ad876189cdc0470856b06ddd60fb6c50",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-21T19:43:46Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "slow-api",
+                        "namespace": "slow-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "slow-api",
+                        "namespace": "slow-api-staging",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "finishedAt": "2026-03-21T17:41:30Z",
+                        "hydratedSHA": "ec344c33c12870c6025ededc62497ec915c6009d",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:40:47Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "432f0d8064bba520d51e3051c14ebf8e45f4279f",
+                        "hydratedSHA": "ec344c33c12870c6025ededc62497ec915c6009d",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/slow-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "slow-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/slow-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "1be73425ad876189cdc0470856b06ddd60fb6c50",
+                    "status": "Synced"
+                }
+            }
+        }
+    ],
+    "kind": "List"
+}

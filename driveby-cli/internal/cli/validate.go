@@ -51,7 +51,7 @@ var validateOnlyCmd = &cobra.Command{
 		json.NewEncoder(os.Stdout).Encode(result)
 
 		if viper.GetBool("github-comment") {
-			if err := handleGitHubComment(result, viper.GetString("validation-mode")); err != nil {
+			if err := handleGitHubComment(result, viper.GetString("validation-mode"), nil); err != nil {
 				logrus.WithError(err).Warn("Failed to comment on GitHub PR")
 			}
 		}

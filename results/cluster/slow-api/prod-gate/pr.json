@@ -1,0 +1,54 @@
+{
+    "baseRefName": "environment/prod",
+    "body": "This PR is promoting the environment branch `environment/prod` which is currently on dry sha  to dry sha 432f0d8064bba520d51e3051c14ebf8e45f4279f.",
+    "commits": [
+        {
+            "authoredDate": "2026-03-21T17:40:57Z",
+            "authors": [
+                {
+                    "email": "argo-cd@example.com",
+                    "id": "",
+                    "login": "",
+                    "name": "Argo CD"
+                },
+                {
+                    "email": "40340025+meter-peter@users.noreply.github.com",
+                    "id": "MDQ6VXNlcjQwMzQwMDI1",
+                    "login": "meter-peter",
+                    "name": "Petros Evangelos Triantafyllis"
+                }
+            ],
+            "committedDate": "2026-03-21T17:40:57Z",
+            "messageBody": "Co-authored-by: Petros Evangelos Triantafyllis <40340025+meter-peter@users.noreply.github.com>",
+            "messageHeadline": "432f0d8: chore: seed dry manifests [driveby-managed]",
+            "oid": "949b9a9f9c93500b4c9cb7c7628990d20fe6386d"
+        }
+    ],
+    "createdAt": "2026-03-21T18:20:57Z",
+    "headRefName": "environment/prod-next",
+    "labels": [],
+    "number": 3,
+    "state": "OPEN",
+    "statusCheckRollup": [
+        {
+            "__typename": "CheckRun",
+            "completedAt": "2026-03-21T19:41:15Z",
+            "conclusion": "FAILURE",
+            "detailsUrl": "https://argo.private.novelcore.org/workflows",
+            "name": "prod-gate",
+            "startedAt": "2026-03-21T19:40:25Z",
+            "status": "COMPLETED",
+            "workflowName": ""
+        },
+        {
+            "__typename": "StatusContext",
+            "context": "prod-gate",
+            "startedAt": "2026-03-21T19:41:16Z",
+            "state": "FAILURE",
+            "targetUrl": "https://argo.private.novelcore.org/workflows"
+        }
+    ],
+    "title": "Promote 432f0 to `environment/prod`",
+    "updatedAt": "2026-03-21T19:41:16Z",
+    "url": "https://github.com/novelcore/slow-api-gitops/pull/3"
+}

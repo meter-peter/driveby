@@ -5,24 +5,24 @@
         "annotations": {
             "workflows.argoproj.io/pod-name-format": "v2"
         },
-        "creationTimestamp": "2026-03-21T18:33:49Z",
+        "creationTimestamp": "2026-03-22T18:02:11Z",
         "generateName": "bad-docs-api-staging-gate-pipeline-",
         "generation": 13,
         "labels": {
             "driveby.io/app": "bad-docs-api",
             "driveby.io/gate": "staging-gate",
             "driveby.io/trigger": "pr-trigger",
-            "events.argoproj.io/action-timestamp": "1774118028362",
+            "events.argoproj.io/action-timestamp": "1774202530939",
             "events.argoproj.io/sensor": "bad-docs-api-staging-gate-sensor",
             "events.argoproj.io/trigger": "pr-trigger-workflow-trigger",
             "workflows.argoproj.io/completed": "true",
             "workflows.argoproj.io/creator": "system-serviceaccount-driveby-default",
             "workflows.argoproj.io/phase": "Failed"
         },
-        "name": "bad-docs-api-staging-gate-pipeline-k4q4g",
+        "name": "bad-docs-api-staging-gate-pipeline-jcjm5",
         "namespace": "driveby",
-        "resourceVersion": "245832298",
-        "uid": "64f2b87b-dbcb-4fb7-8118-3aa2b87faa4a"
+        "resourceVersion": "246864203",
+        "uid": "68bef8c1-8d4f-42f1-9f81-1ed12db76537"
     },
     "spec": {
         "arguments": {
@@ -33,7 +33,7 @@
                 },
                 {
                     "name": "head-sha",
-                    "value": "097769388d598d35c0e3441c8eedaad8db2e3c34"
+                    "value": "139c309fd446d6b954ceae4ea45637d592856d64"
                 },
                 {
                     "name": "github-owner",
@@ -91,41 +91,44 @@
                 "type": "Completed"
             }
         ],
-        "finishedAt": "2026-03-21T18:34:29Z",
+        "finishedAt": "2026-03-22T18:02:51Z",
         "nodes": {
-            "bad-docs-api-staging-gate-pipeline-k4q4g": {
+            "bad-docs-api-staging-gate-pipeline-jcjm5": {
                 "children": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2312676639",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-3761126865"
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-822828329",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-905615259"
                 ],
-                "displayName": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "finishedAt": "2026-03-21T18:34:19Z",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g",
+                "displayName": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "finishedAt": "2026-03-22T18:02:41Z",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5",
                 "outboundNodes": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-4259366146",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-1596282028",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-3761126865",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2296212297"
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-1744911460",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2604571502",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-905615259",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-3878923059"
                 ],
                 "phase": "Failed",
                 "progress": "3/4",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 13
+                    "memory": 11
                 },
-                "startedAt": "2026-03-21T18:33:49Z",
+                "startedAt": "2026-03-22T18:02:11Z",
                 "templateName": "promotion-pipeline",
                 "templateScope": "local/",
                 "type": "DAG"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-1544048940": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g-3308957957",
-                "displayName": "comment-pr-failure",
-                "finishedAt": "2026-03-21T18:34:23Z",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-1110711403": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "children": [
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2095651757"
+                ],
+                "displayName": "wait-for-source-ready",
+                "finishedAt": "2026-03-22T18:02:25Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-1544048940",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.onExit.comment-pr-failure",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-1110711403",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.wait-for-source-ready",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -133,63 +136,69 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 4
+                    "memory": 3
                 },
-                "startedAt": "2026-03-21T18:34:19Z",
-                "templateName": "github-pr-comment",
+                "startedAt": "2026-03-22T18:02:21Z",
+                "templateName": "health-check-source",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-1596282028": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "displayName": "report-success",
-                "finishedAt": "2026-03-21T18:34:19Z",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-1596282028",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-1744911460": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "displayName": "comment-pr",
+                "finishedAt": "2026-03-22T18:02:41Z",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-1744911460",
                 "message": "omitted: depends condition not met",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.report-success",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.comment-pr",
                 "nodeFlag": {},
                 "phase": "Omitted",
-                "startedAt": "2026-03-21T18:34:19Z",
-                "templateName": "github-commit-status",
+                "startedAt": "2026-03-22T18:02:41Z",
+                "templateName": "github-pr-comment",
                 "templateScope": "local/",
                 "type": "Skipped"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2296212297": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "displayName": "update-commitstatus-success",
-                "finishedAt": "2026-03-21T18:34:19Z",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-2296212297",
-                "message": "omitted: depends condition not met",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.update-commitstatus-success",
-                "nodeFlag": {},
-                "phase": "Omitted",
-                "startedAt": "2026-03-21T18:34:19Z",
-                "templateName": "update-commitstatus",
-                "templateScope": "local/",
-                "type": "Skipped"
-            },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2312676639": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2095651757": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
                 "children": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-687636137"
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-1744911460",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2604571502",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-3878923059"
                 ],
-                "displayName": "set-pending-status",
-                "finishedAt": "2026-03-21T18:33:53Z",
+                "displayName": "check-0-validate-only",
+                "finishedAt": "2026-03-22T18:02:35Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-2312676639",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-2095651757",
                 "inputs": {
                     "parameters": [
                         {
-                            "name": "state",
-                            "value": "pending"
-                        },
-                        {
-                            "name": "description",
-                            "value": "Running quality checks for staging environment..."
+                            "name": "validation-mode",
+                            "value": "strict"
                         }
                     ]
                 },
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.set-pending-status",
+                "message": "Error (exit code 1)",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.check-0-validate-only",
+                "outputs": {
+                    "exitCode": "1"
+                },
+                "phase": "Failed",
+                "progress": "0/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 4
+                },
+                "startedAt": "2026-03-22T18:02:31Z",
+                "templateName": "driveby-validate",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2602885602": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5-3356858071",
+                "displayName": "report-failure-github",
+                "finishedAt": "2026-03-22T18:02:45Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-2602885602",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.onExit.report-failure-github",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -197,19 +206,33 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 4
+                    "memory": 3
                 },
-                "startedAt": "2026-03-21T18:33:49Z",
-                "templateName": "github-commit-status",
+                "startedAt": "2026-03-22T18:02:41Z",
+                "templateName": "exit-handler-github",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2388611023": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g-3308957957",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2604571502": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "displayName": "report-success",
+                "finishedAt": "2026-03-22T18:02:41Z",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-2604571502",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.report-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:02:41Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2634279765": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5-3356858071",
                 "displayName": "update-commitstatus-failure",
-                "finishedAt": "2026-03-21T18:34:21Z",
+                "finishedAt": "2026-03-22T18:02:44Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-2388611023",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-2634279765",
                 "inputs": {
                     "parameters": [
                         {
@@ -222,7 +245,7 @@
                         }
                     ]
                 },
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.onExit.update-commitstatus-failure",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.onExit.update-commitstatus-failure",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -230,20 +253,20 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 2
+                    "memory": 1
                 },
-                "startedAt": "2026-03-21T18:34:19Z",
+                "startedAt": "2026-03-22T18:02:41Z",
                 "templateName": "update-commitstatus",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2865081688": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g-3308957957",
-                "displayName": "report-failure-github",
-                "finishedAt": "2026-03-21T18:34:23Z",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2687614654": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5-3356858071",
+                "displayName": "comment-pr-failure",
+                "finishedAt": "2026-03-22T18:02:45Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-2865081688",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.onExit.report-failure-github",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-2687614654",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.onExit.comment-pr-failure",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -251,48 +274,98 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 5
+                    "memory": 3
                 },
-                "startedAt": "2026-03-21T18:34:19Z",
-                "templateName": "exit-handler-github",
+                "startedAt": "2026-03-22T18:02:41Z",
+                "templateName": "github-pr-comment",
                 "templateScope": "local/",
                 "type": "Pod"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-3308957957": {
+            "bad-docs-api-staging-gate-pipeline-jcjm5-3356858071": {
                 "children": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-1544048940",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2865081688",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2388611023"
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2687614654",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2602885602",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2634279765"
                 ],
-                "displayName": "bad-docs-api-staging-gate-pipeline-k4q4g.onExit",
-                "finishedAt": "2026-03-21T18:34:29Z",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-3308957957",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.onExit",
+                "displayName": "bad-docs-api-staging-gate-pipeline-jcjm5.onExit",
+                "finishedAt": "2026-03-22T18:02:51Z",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-3356858071",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.onExit",
                 "nodeFlag": {
                     "hooked": true
                 },
                 "outboundNodes": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-1544048940",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2865081688",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2388611023"
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2687614654",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2602885602",
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-2634279765"
                 ],
                 "phase": "Succeeded",
                 "progress": "3/3",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 11
+                    "memory": 7
                 },
-                "startedAt": "2026-03-21T18:34:19Z",
+                "startedAt": "2026-03-22T18:02:41Z",
                 "templateName": "exit-handler",
                 "templateScope": "local/",
                 "type": "DAG"
             },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-3761126865": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "displayName": "update-commitstatus-pending",
-                "finishedAt": "2026-03-21T18:33:51Z",
+            "bad-docs-api-staging-gate-pipeline-jcjm5-3878923059": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "displayName": "update-commitstatus-success",
+                "finishedAt": "2026-03-22T18:02:41Z",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-3878923059",
+                "message": "omitted: depends condition not met",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.update-commitstatus-success",
+                "nodeFlag": {},
+                "phase": "Omitted",
+                "startedAt": "2026-03-22T18:02:41Z",
+                "templateName": "update-commitstatus",
+                "templateScope": "local/",
+                "type": "Skipped"
+            },
+            "bad-docs-api-staging-gate-pipeline-jcjm5-822828329": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "children": [
+                    "bad-docs-api-staging-gate-pipeline-jcjm5-1110711403"
+                ],
+                "displayName": "set-pending-status",
+                "finishedAt": "2026-03-22T18:02:15Z",
                 "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-3761126865",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-822828329",
+                "inputs": {
+                    "parameters": [
+                        {
+                            "name": "state",
+                            "value": "pending"
+                        },
+                        {
+                            "name": "description",
+                            "value": "Running quality checks for staging environment..."
+                        }
+                    ]
+                },
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.set-pending-status",
+                "outputs": {
+                    "exitCode": "0"
+                },
+                "phase": "Succeeded",
+                "progress": "1/1",
+                "resourcesDuration": {
+                    "cpu": 0,
+                    "memory": 3
+                },
+                "startedAt": "2026-03-22T18:02:11Z",
+                "templateName": "github-commit-status",
+                "templateScope": "local/",
+                "type": "Pod"
+            },
+            "bad-docs-api-staging-gate-pipeline-jcjm5-905615259": {
+                "boundaryID": "bad-docs-api-staging-gate-pipeline-jcjm5",
+                "displayName": "update-commitstatus-pending",
+                "finishedAt": "2026-03-22T18:02:14Z",
+                "hostNodeName": "private-hood-node-1",
+                "id": "bad-docs-api-staging-gate-pipeline-jcjm5-905615259",
                 "inputs": {
                     "parameters": [
                         {
@@ -305,7 +378,7 @@
                         }
                     ]
                 },
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.update-commitstatus-pending",
+                "name": "bad-docs-api-staging-gate-pipeline-jcjm5.update-commitstatus-pending",
                 "outputs": {
                     "exitCode": "0"
                 },
@@ -313,83 +386,10 @@
                 "progress": "1/1",
                 "resourcesDuration": {
                     "cpu": 0,
-                    "memory": 2
+                    "memory": 1
                 },
-                "startedAt": "2026-03-21T18:33:49Z",
+                "startedAt": "2026-03-22T18:02:11Z",
                 "templateName": "update-commitstatus",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-4259366146": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "displayName": "comment-pr",
-                "finishedAt": "2026-03-21T18:34:19Z",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-4259366146",
-                "message": "omitted: depends condition not met",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.comment-pr",
-                "nodeFlag": {},
-                "phase": "Omitted",
-                "startedAt": "2026-03-21T18:34:19Z",
-                "templateName": "github-pr-comment",
-                "templateScope": "local/",
-                "type": "Skipped"
-            },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-687636137": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "children": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-988834911"
-                ],
-                "displayName": "wait-for-source-ready",
-                "finishedAt": "2026-03-21T18:34:02Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-687636137",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.wait-for-source-ready",
-                "outputs": {
-                    "exitCode": "0"
-                },
-                "phase": "Succeeded",
-                "progress": "1/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 3
-                },
-                "startedAt": "2026-03-21T18:33:59Z",
-                "templateName": "health-check-source",
-                "templateScope": "local/",
-                "type": "Pod"
-            },
-            "bad-docs-api-staging-gate-pipeline-k4q4g-988834911": {
-                "boundaryID": "bad-docs-api-staging-gate-pipeline-k4q4g",
-                "children": [
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-4259366146",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-1596282028",
-                    "bad-docs-api-staging-gate-pipeline-k4q4g-2296212297"
-                ],
-                "displayName": "check-0-validate-only",
-                "finishedAt": "2026-03-21T18:34:13Z",
-                "hostNodeName": "private-hood-node-1",
-                "id": "bad-docs-api-staging-gate-pipeline-k4q4g-988834911",
-                "inputs": {
-                    "parameters": [
-                        {
-                            "name": "validation-mode",
-                            "value": "strict"
-                        }
-                    ]
-                },
-                "message": "Error (exit code 1)",
-                "name": "bad-docs-api-staging-gate-pipeline-k4q4g.check-0-validate-only",
-                "outputs": {
-                    "exitCode": "1"
-                },
-                "phase": "Failed",
-                "progress": "0/1",
-                "resourcesDuration": {
-                    "cpu": 0,
-                    "memory": 4
-                },
-                "startedAt": "2026-03-21T18:34:09Z",
-                "templateName": "driveby-validate",
                 "templateScope": "local/",
                 "type": "Pod"
             }
@@ -398,7 +398,7 @@
             {
                 "name": "reports",
                 "persistentVolumeClaim": {
-                    "claimName": "bad-docs-api-staging-gate-pipeline-k4q4g-reports"
+                    "claimName": "bad-docs-api-staging-gate-pipeline-jcjm5-reports"
                 }
             }
         ],
@@ -406,9 +406,9 @@
         "progress": "6/7",
         "resourcesDuration": {
             "cpu": 0,
-            "memory": 24
+            "memory": 18
         },
-        "startedAt": "2026-03-21T18:33:49Z",
+        "startedAt": "2026-03-22T18:02:11Z",
         "storedTemplates": {
             "namespaced/bad-docs-api-staging-gate/driveby-validate": {
                 "container": {
@@ -868,7 +868,7 @@
                     },
                     {
                         "name": "head-sha",
-                        "value": "097769388d598d35c0e3441c8eedaad8db2e3c34"
+                        "value": "139c309fd446d6b954ceae4ea45637d592856d64"
                     },
                     {
                         "name": "github-owner",
@@ -1386,13 +1386,13 @@
             }
         },
         "taskResultsCompletionStatus": {
-            "bad-docs-api-staging-gate-pipeline-k4q4g-1544048940": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2312676639": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2388611023": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-2865081688": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-3761126865": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-687636137": true,
-            "bad-docs-api-staging-gate-pipeline-k4q4g-988834911": true
+            "bad-docs-api-staging-gate-pipeline-jcjm5-1110711403": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2095651757": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2602885602": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2634279765": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-2687614654": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-822828329": true,
+            "bad-docs-api-staging-gate-pipeline-jcjm5-905615259": true
         }
     }
 }

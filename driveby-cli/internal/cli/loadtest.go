@@ -6,6 +6,7 @@ import (
 
 	"github.com/meter-peter/driveby/driveby-cli/internal/report"
 	"github.com/meter-peter/driveby/driveby-cli/internal/testing"
+	"github.com/meter-peter/driveby/driveby-cli/internal/types"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -45,9 +46,13 @@ var loadOnlyCmd = &cobra.Command{
 		json.NewEncoder(os.Stdout).Encode(result)
 
 		if viper.GetBool("github-comment") {
-			if err := handleGitHubComment(result, "load-testing"); err != nil {
+			if err := handleGitHubComment(result, "load-testing", nil); err != nil {
 				logrus.WithError(err).Warn("Failed to comment on GitHub PR")
 			}
+		}
+
+		if result.Status == "failed" {
+			return &types.ExitError{Code: types.ExitValidationFailed, Message: "load testing failed: performance targets not met"}
 		}
 		return nil
 	},

@@ -1,0 +1,474 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"dev\"},\"name\":\"no-auth-api-dev\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-dev\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/dev\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/dev-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/dev\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:34Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 62,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "dev"
+                },
+                "name": "no-auth-api-dev",
+                "namespace": "argocd",
+                "resourceVersion": "245885868",
+                "uid": "06c48df3-62d5-4ef9-a663-a4d926d282e4"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-dev",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/dev",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/dev-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/dev"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T18:32:06Z",
+                    "status": "Healthy"
+                },
+                "history": [
+                    {
+                        "deployStartedAt": "2026-03-21T18:25:08Z",
+                        "deployedAt": "2026-03-21T18:25:08Z",
+                        "id": 0,
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "revision": "14f4fb705641ffb76606d32bb6c7079cd14f2182",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                ],
+                "operationState": {
+                    "finishedAt": "2026-03-21T18:25:08Z",
+                    "message": "successfully synced (all tasks run)",
+                    "operation": {
+                        "initiatedBy": {
+                            "automated": true
+                        },
+                        "retry": {
+                            "limit": 5
+                        },
+                        "sync": {
+                            "prune": true,
+                            "revision": "14f4fb705641ffb76606d32bb6c7079cd14f2182",
+                            "source": {
+                                "path": "manifests",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "environment/dev"
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        }
+                    },
+                    "phase": "Succeeded",
+                    "startedAt": "2026-03-21T18:25:08Z",
+                    "syncResult": {
+                        "resources": [
+                            {
+                                "group": "",
+                                "hookPhase": "Running",
+                                "kind": "Service",
+                                "message": "service/no-auth-api created",
+                                "name": "no-auth-api",
+                                "namespace": "no-auth-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "apps",
+                                "hookPhase": "Running",
+                                "images": [
+                                    "ghcr.io/novelcore/no-auth-api:latest"
+                                ],
+                                "kind": "Deployment",
+                                "message": "deployment.apps/no-auth-api created",
+                                "name": "no-auth-api",
+                                "namespace": "no-auth-api-dev",
+                                "status": "Synced",
+                                "syncPhase": "Sync",
+                                "version": "v1"
+                            }
+                        ],
+                        "revision": "14f4fb705641ffb76606d32bb6c7079cd14f2182",
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    }
+                },
+                "reconciledAt": "2026-03-21T19:45:35Z",
+                "resourceHealthSource": "appTree",
+                "resources": [
+                    {
+                        "kind": "Service",
+                        "name": "no-auth-api",
+                        "namespace": "no-auth-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    },
+                    {
+                        "group": "apps",
+                        "kind": "Deployment",
+                        "name": "no-auth-api",
+                        "namespace": "no-auth-api-dev",
+                        "status": "Synced",
+                        "version": "v1"
+                    }
+                ],
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "finishedAt": "2026-03-21T17:59:44Z",
+                        "hydratedSHA": "b9b7374676e11f5fc76eb990ce085408552e6f4a",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:43Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "hydratedSHA": "b9b7374676e11f5fc76eb990ce085408552e6f4a",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/dev",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/dev-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/dev"
+                            }
+                        }
+                    }
+                },
+                "sourceType": "Directory",
+                "summary": {
+                    "images": [
+                        "ghcr.io/novelcore/no-auth-api:latest"
+                    ]
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-dev",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/dev"
+                        }
+                    },
+                    "revision": "14f4fb705641ffb76606d32bb6c7079cd14f2182",
+                    "status": "Synced"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"prod\"},\"name\":\"no-auth-api-prod\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-prod\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/prod\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/prod-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/prod\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:33Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 57,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "prod"
+                },
+                "name": "no-auth-api-prod",
+                "namespace": "argocd",
+                "resourceVersion": "245884474",
+                "uid": "7f2a69df-53f5-4fed-85eb-c4e85af71e6d"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-prod",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/prod",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/prod-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/prod"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T19:43:40Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:33Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:43:40Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "finishedAt": "2026-03-21T17:59:42Z",
+                        "hydratedSHA": "77d61990b5e5538fb5d0a5ae20218b2889a3a189",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:42Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "hydratedSHA": "77d61990b5e5538fb5d0a5ae20218b2889a3a189",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/prod",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/prod-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/prod"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-prod",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/prod"
+                        }
+                    },
+                    "revision": "environment/prod",
+                    "status": "Unknown"
+                }
+            }
+        },
+        {
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Application",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"argoproj.io/v1alpha1\",\"kind\":\"Application\",\"metadata\":{\"finalizers\":[\"resources-finalizer.argocd.argoproj.io\"],\"labels\":{\"driveby.io/app\":\"no-auth-api\",\"driveby.io/environment\":\"staging\"},\"name\":\"no-auth-api-staging\",\"namespace\":\"argocd\"},\"spec\":{\"destination\":{\"namespace\":\"no-auth-api-staging\",\"server\":\"https://kubernetes.default.svc\"},\"project\":\"driveby\",\"sourceHydrator\":{\"drySource\":{\"path\":\"dry/overlays/staging\",\"repoURL\":\"https://github.com/novelcore/no-auth-api-gitops.git\",\"targetRevision\":\"main\"},\"hydrateTo\":{\"targetBranch\":\"environment/staging-next\"},\"syncSource\":{\"path\":\"manifests\",\"targetBranch\":\"environment/staging\"}},\"syncPolicy\":{\"automated\":{\"prune\":true,\"selfHeal\":true},\"syncOptions\":[\"CreateNamespace=true\"]}}}"
+                },
+                "creationTimestamp": "2026-03-21T17:38:34Z",
+                "finalizers": [
+                    "resources-finalizer.argocd.argoproj.io"
+                ],
+                "generation": 59,
+                "labels": {
+                    "driveby.io/app": "no-auth-api",
+                    "driveby.io/environment": "staging"
+                },
+                "name": "no-auth-api-staging",
+                "namespace": "argocd",
+                "resourceVersion": "245884465",
+                "uid": "ea6a9d4e-f114-4252-8dca-63c2fba9ab84"
+            },
+            "spec": {
+                "destination": {
+                    "namespace": "no-auth-api-staging",
+                    "server": "https://kubernetes.default.svc"
+                },
+                "project": "driveby",
+                "sourceHydrator": {
+                    "drySource": {
+                        "path": "dry/overlays/staging",
+                        "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                        "targetRevision": "main"
+                    },
+                    "hydrateTo": {
+                        "targetBranch": "environment/staging-next"
+                    },
+                    "syncSource": {
+                        "path": "manifests",
+                        "targetBranch": "environment/staging"
+                    }
+                },
+                "syncPolicy": {
+                    "automated": {
+                        "prune": true,
+                        "selfHeal": true
+                    },
+                    "syncOptions": [
+                        "CreateNamespace=true"
+                    ]
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-03-21T19:43:39Z",
+                        "message": "Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = manifests: app path does not exist",
+                        "type": "ComparisonError"
+                    }
+                ],
+                "controllerNamespace": "argocd",
+                "health": {
+                    "lastTransitionTime": "2026-03-21T17:38:34Z",
+                    "status": "Healthy"
+                },
+                "reconciledAt": "2026-03-21T19:43:39Z",
+                "resourceHealthSource": "appTree",
+                "sourceHydrator": {
+                    "currentOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "finishedAt": "2026-03-21T17:59:46Z",
+                        "hydratedSHA": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+                        "message": "",
+                        "phase": "Hydrated",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        },
+                        "startedAt": "2026-03-21T17:59:46Z"
+                    },
+                    "lastSuccessfulOperation": {
+                        "drySHA": "6b3f74a56e3e5cba6e33713b828b7282d83875bc",
+                        "hydratedSHA": "d24f88e4ed08f500e2b3aa3ff2cfe18e7b4dec88",
+                        "sourceHydrator": {
+                            "drySource": {
+                                "path": "dry/overlays/staging",
+                                "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                                "targetRevision": "main"
+                            },
+                            "hydrateTo": {
+                                "targetBranch": "environment/staging-next"
+                            },
+                            "syncSource": {
+                                "path": "manifests",
+                                "targetBranch": "environment/staging"
+                            }
+                        }
+                    }
+                },
+                "sync": {
+                    "comparedTo": {
+                        "destination": {
+                            "namespace": "no-auth-api-staging",
+                            "server": "https://kubernetes.default.svc"
+                        },
+                        "source": {
+                            "path": "manifests",
+                            "repoURL": "https://github.com/novelcore/no-auth-api-gitops.git",
+                            "targetRevision": "environment/staging"
+                        }
+                    },
+                    "revision": "environment/staging",
+                    "status": "Unknown"
+                }
+            }
+        }
+    ],
+    "kind": "List"
+}

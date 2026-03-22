@@ -1,5 +1,5 @@
 % Axiom-to-Principle Mapping — Chapter 3
-% Shows: 3 axioms at top, 8 principles below, with governance lines
+% Shows: 3 axioms at top, 9 principles below, with governance lines
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     axiom/.style={
@@ -40,8 +40,9 @@
 \node[principle] (p003) at (1.5,-2.5)  {P003\\Errors};
 \node[principle] (p004) at (3,-2.5)    {P004\\Schema};
 
-% Principle row — Determinism principle
-\node[principle] (p006) at (5,-2.5)    {P006\\Functional};
+% Principle row — Determinism principles
+\node[principle] (p006) at (4.5,-2.5)    {P006\\Functional};
+\node[principle] (p009) at (6,-2.5)    {P009\\Test Readiness};
 
 % Principle row — Observability principles
 \node[principle] (p005) at (8.5,-2.5)  {P005\\Security};
@@ -55,6 +56,7 @@
 \draw[governance=blue]   (completeness.south)  -- (p004.north);
 
 \draw[governance=teal]   (determinism.south)   -- (p006.north);
+\draw[governance=teal]   (determinism.south)   -- (p009.north);
 
 \draw[governance=orange] (observability.south)  -- (p005.north);
 \draw[governance=orange] (observability.south)  -- (p007.north);
@@ -66,6 +68,7 @@
 \node[font=\tiny,orange!70!black] at ($(p003.south)+(0,-0.25)$) {Warning};
 \node[font=\tiny,orange!70!black] at ($(p004.south)+(0,-0.25)$) {Warning};
 \node[font=\tiny,red!70!black]   at ($(p006.south)+(0,-0.25)$) {Critical};
+\node[font=\tiny,orange!70!black] at ($(p009.south)+(0,-0.25)$) {Warning};
 \node[font=\tiny,red!70!black]   at ($(p005.south)+(0,-0.25)$) {Critical};
 \node[font=\tiny,orange!70!black] at ($(p007.south)+(0,-0.25)$) {Warning};
 \node[font=\tiny,orange!70!black] at ($(p008.south)+(0,-0.25)$) {Warning};
@@ -73,7 +76,7 @@
 % Grouping brackets via fit
 \begin{scope}[on background layer]
     \node[draw=blue!30, fill=blue!5, rounded corners=6pt, fit=(p001)(p004), inner sep=5pt] {};
-    \node[draw=teal!30, fill=teal!5, rounded corners=6pt, fit=(p006), inner sep=5pt] {};
+    \node[draw=teal!30, fill=teal!5, rounded corners=6pt, fit=(p006)(p009), inner sep=5pt] {};
     \node[draw=orange!30, fill=orange!5, rounded corners=6pt, fit=(p005)(p008), inner sep=5pt] {};
 \end{scope}
 

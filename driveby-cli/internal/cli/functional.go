@@ -49,7 +49,7 @@ var functionOnlyCmd = &cobra.Command{
 		json.NewEncoder(os.Stdout).Encode(result)
 
 		if viper.GetBool("github-comment") {
-			if err := handleGitHubComment(result, "functional-testing"); err != nil {
+			if err := handleGitHubComment(result, "functional-testing", nil); err != nil {
 				logrus.WithError(err).Warn("Failed to comment on GitHub PR")
 			}
 		}
