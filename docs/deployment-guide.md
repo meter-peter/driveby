@@ -406,17 +406,32 @@ kubectl apply -f kubernetes/examples/novelcore-perfect-api/xsdlc-perfect-api.yam
 This single CR generates all resources:
 - **GitOps repo**: Dedicated repository via `provider-upjet-github` (e.g., `perfect-api-gitops`)
 - **App-level**: ServiceAccount, EventBus, ScmProvider, GitRepository, PromotionStrategy, ArgoCDCommitStatus
-- **Per-environment**: ArgoCD Application (using sourceHydrator to render per-env Kustomize overlay, always autoSync), environment branches in GitOps repo (env + env-next)
+- **Per-environment**: ArgoCD Application (using sourceHydrator), environment branches (env + env-next), ghcr-creds secret
 - **Per-gate**: Role, RoleBinding, WorkflowTemplate, EventSource, Sensor, Service, Ingress, BranchProtection
+- **ArgoCD**: Push secret (repository-write) for the gitops repo
 
 Verify:
 
 ```bash
-kubectl get xsdlcs -n driveby                          # XSDLC status
-kubectl get workflowtemplates -n driveby               # 2 WorkflowTemplates
+kubectl get xsdlcs -n driveby                          # XSDLC status (ENVIRONMENTS=3, GATES=2)
+kubectl get workflowtemplates -n driveby               # 2 WorkflowTemplates per API
 kubectl get eventbus,eventsources,sensors -n driveby   # Event infrastructure
-kubectl get ingress -n driveby                         # 2 webhook Ingresses
+kubectl get ingress -n driveby                         # 2 webhook Ingresses per API
 kubectl get scmproviders,gitrepositories.promoter,promotionstrategy -n driveby
+```
+
+**Important: Restart ArgoCD commit-server** after the first XSDLC is applied, so it picks up the new push secrets:
+
+```bash
+kubectl delete pod -n argocd -l app.kubernetes.io/name=argocd-commit-server
+```
+
+**Important: Hard-refresh all ArgoCD apps** to trigger the Source Hydrator immediately (otherwise it may take up to 3 minutes per app):
+
+```bash
+for app in $(kubectl get applications -n argocd -o name | grep -E 'perfect-api|bad-docs|no-auth|slow-api|broken'); do
+  kubectl patch $app -n argocd --type=merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}'
+done
 ```
 
 Check that the GitOps repository was created:
@@ -634,4 +649,46 @@ kubectl get scmproviders,gitrepositories.promoter,promotionstrategy --all-namesp
 3. Common failures:
    - `github-commit-status`: GitHub App credentials invalid or missing
    - `driveby-validate`: API not reachable from source namespace
-   - `health-check-source`: Source environment not ready within 2 minutes
+   - `health-check-source`: Source environment not ready (5 min for first gates, 10 min for downstream gates)
+
+## Teardown
+
+### Remove individual XSDLCs
+
+```bash
+kubectl delete xsdlc <name> -n driveby
+```
+
+This deletes all managed resources including the gitops repository on GitHub (`deletionPolicy: Delete`).
+
+### Full uninstall
+
+```bash
+# 1. Delete all XSDLCs first (cascade deletes managed resources + gitops repos)
+kubectl delete xsdlc --all -n driveby
+
+# 2. Wait for Crossplane cleanup
+kubectl get object --no-headers | wc -l  # should be 0
+
+# 3. If namespace gets stuck in Terminating (Promoter finalizers):
+kubectl get pullrequests.promoter.argoproj.io -n driveby --no-headers | \
+  awk '{print $1}' | xargs -I{} kubectl patch pullrequest.promoter.argoproj.io {} \
+  -n driveby --type=merge -p '{"metadata":{"finalizers":null}}'
+
+# 4. Helm uninstall
+helm uninstall driveby -n driveby
+```
+
+**Known issue**: The GitOps Promoter's PullRequest CRDs have finalizers that can block namespace deletion. If the namespace gets stuck in `Terminating`, remove the finalizers manually (step 3 above).
+
+### Reinstall after teardown
+
+When reinstalling after a full teardown, the `driveby` namespace needs Helm ownership labels:
+
+```bash
+kubectl create namespace driveby --dry-run=client -o yaml | kubectl apply -f -
+kubectl label namespace driveby app.kubernetes.io/managed-by=Helm --overwrite
+kubectl annotate namespace driveby meta.helm.sh/release-name=driveby meta.helm.sh/release-namespace=driveby --overwrite
+```
+
+Then run the full install command from Section 2.

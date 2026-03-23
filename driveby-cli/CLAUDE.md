@@ -20,9 +20,9 @@ No package may import a package to its left. `types` has zero internal dependenc
 | spec | `internal/spec/` | `APISpec` interface + adapters for OpenAPI 3.x and Swagger 2.x |
 | loader | `internal/loader/` | Loads OpenAPI specs from local file or remote URL, auto-detects OpenAPI 3.x vs Swagger 2.0 |
 | testing | `internal/testing/` | Runtime testing: `auth.go` (auth probing), `functional.go` (endpoint testing), `performance.go` (load testing) |
-| types | `internal/types/` | Standalone types: `ValidationMode`, `PrincipleResult`, `Report`, error types, metrics, logger config |
+| types | `internal/types/` | Standalone types: `ValidationMode`, `PrincipleResult`, `Report`, `GateContext`, error types, metrics, logger config |
 | report | `internal/report/` | Report generation: `generator.go` (orchestrator), `markdown.go` (Markdown renderer) |
-| github | `internal/github/client.go` | GitHub API client for PR comment posting |
+| github | `internal/github/client.go` | GitHub API client for PR comment posting. Gate-aware comments with `GateContext`: gate-specific headers, "How to Pass" section, workflow links |
 | logger | `internal/logger/logger.go` | Structured logging setup |
 | util | `internal/util/util.go` | Shared helper functions |
 

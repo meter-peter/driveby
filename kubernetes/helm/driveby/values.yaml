@@ -56,7 +56,7 @@ crossplane:
 # Override per-CR via XRD spec fields. No EnvironmentConfig layer — 2-tier only.
 defaults:
   # URL shown in GitHub commit status (link to Argo Workflows UI)
-  argoWorkflowsUrl: "https://argo.private.novelcore.org/workflows"
+  argoWorkflowsUrl: "https://workflow.private.novelcore.org/"
 
   # Ingress configuration for webhook endpoints
   ingress:

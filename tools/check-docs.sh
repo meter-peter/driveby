@@ -25,7 +25,6 @@ required_dirs=(
     "apis"
     "apis/perfect-api"
     "kubernetes"
-    "samples"
     "tools"
     "docs"
     ".github"

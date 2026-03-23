@@ -1568,6 +1568,49 @@ spec:
               allowsDeletions: false
           {{- end }}
 
+          {{`{{/* ============================================================ */}}`}}
+          {{`{{/* Composite status — populate environmentCount, gateCount, gates */}}`}}
+          {{`{{/* ============================================================ */}}`}}
+          ---
+          apiVersion: meta.gotemplating.fn.crossplane.io/v1alpha1
+          kind: CompositeConnectionDetails
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: xr-status
+          {{ `{{- $gateCount := 0 -}}` }}
+          {{ `{{- $gateList := list -}}` }}
+          {{ `{{- range $idx, $env := $envs -}}` }}
+          {{ `{{-   if $env.gate -}}` }}
+          {{ `{{-     $gateCount = add $gateCount 1 -}}` }}
+          {{ `{{-     $commitStatusKey := "" -}}` }}
+          {{ `{{-     if $env.gate.commitStatusKey -}}` }}
+          {{ `{{-       $commitStatusKey = $env.gate.commitStatusKey -}}` }}
+          {{ `{{-     else -}}` }}
+          {{ `{{-       $commitStatusKey = printf "%s-gate" $env.name -}}` }}
+          {{ `{{-     end -}}` }}
+          {{ `{{-     $checkTypes := list -}}` }}
+          {{ `{{-     range $check := ($env.gate.checks | default list) -}}` }}
+          {{ `{{-       $checkTypes = append $checkTypes $check.type -}}` }}
+          {{ `{{-     end -}}` }}
+          {{ `{{-     $gateList = append $gateList (dict "environment" $env.name "gateType" (join "," $checkTypes) "commitStatusKey" $commitStatusKey) -}}` }}
+          {{ `{{-   end -}}` }}
+          {{ `{{- end }}` }}
+          ---
+          apiVersion: {{`{{ $xr.apiVersion }}`}}
+          kind: {{`{{ $xr.kind }}`}}
+          metadata:
+            name: {{`{{ $xr.metadata.name }}`}}
+            namespace: {{`{{ $xrNamespace }}`}}
+          status:
+            environmentCount: {{`{{ len $envs }}`}}
+            gateCount: {{`{{ $gateCount }}`}}
+            gates:
+            {{`{{- range $gate := $gateList }}`}}
+              - environment: {{`{{ $gate.environment }}`}}
+                gateType: {{`{{ $gate.gateType }}`}}
+                commitStatusKey: {{`{{ $gate.commitStatusKey }}`}}
+            {{`{{- end }}`}}
+
   # Step 2: Auto-ready
   - step: detect-readiness
     functionRef:
