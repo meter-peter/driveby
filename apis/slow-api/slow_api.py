@@ -982,92 +982,18 @@ def patch_exclusive_min_max(schema):
         for item in schema:
             patch_exclusive_min_max(item)
 
-# Custom OpenAPI schema generator
-original_openapi = app.openapi
+# Custom OpenAPI schema: serve the hand-crafted openapi.json (identical to
+# perfect-api). The spec passes all validation principles — the only defect
+# in slow-api is the 500ms latency, which is invisible to static validation
+# and only caught by load testing (P007).
+import json, os
 
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        description=app.description,
-        routes=app.routes,
-    )
-
-    # Add security schemes
-    openapi_schema["components"]["securitySchemes"] = {
-        "ApiKeyAuth": {
-            "type": "apiKey",
-            "in": "header",
-            "name": "X-API-Key",
-            "description": "API key for authentication. Provision keys via the admin dashboard."
-        },
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "description": "JWT token for authentication. Obtain tokens via the /auth/login endpoint."
-        }
-    }
-
-    # Add ErrorResponse schema
-    openapi_schema["components"]["schemas"]["ErrorResponse"] = {
-        "type": "object",
-        "description": "Standard error response model used across all endpoints.",
-        "required": ["error", "code"],
-        "properties": {
-            "error": {
-                "type": "string",
-                "description": "Human-readable error message",
-                "example": "Invalid request data"
-            },
-            "code": {
-                "type": "integer",
-                "description": "HTTP status code",
-                "example": 400
-            },
-            "details": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Additional error details",
-                "example": ["Field 'name' is required"]
-            }
-        }
-    }
-
-    # Add global security requirement
-    openapi_schema["security"] = [
-        {"ApiKeyAuth": []},
-        {"BearerAuth": []}
-    ]
-
-    # Ensure versioning info in description
-    if "Versioning Strategy" not in openapi_schema.get("info", {}).get("description", ""):
-        openapi_schema["info"]["description"] += (
-            "\n\n## Versioning Strategy\n"
-            "This API follows semantic versioning (SemVer). Breaking changes are introduced only in major version bumps.\n"
-            "For backward compatibility, deprecated endpoints remain available for one major version cycle.\n"
-            "Migration guide: see the changelog at /docs/changelog for upgrade instructions between versions.\n"
-        )
-
-    # Remap per-operation security names to match our custom scheme names
-    # FastAPI generates APIKeyHeader/HTTPBearer from dependency names,
-    # but we define ApiKeyAuth/BearerAuth in securitySchemes.
-    scheme_remap = {
-        "APIKeyHeader": "ApiKeyAuth",
-        "HTTPBearer": "BearerAuth",
-    }
-    for path_item in openapi_schema.get("paths", {}).values():
-        for operation in path_item.values():
-            if isinstance(operation, dict) and "security" in operation:
-                operation["security"] = [
-                    {scheme_remap.get(k, k): v for k, v in req.items()}
-                    for req in operation["security"]
-                ]
-
-    patch_exclusive_min_max(openapi_schema)
-    app.openapi_schema = openapi_schema
+    spec_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "openapi.json")
+    with open(spec_path) as f:
+        app.openapi_schema = json.load(f)
     return app.openapi_schema
 
 app.openapi = custom_openapi
