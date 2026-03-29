@@ -312,16 +312,16 @@ Across the APIs.guru dataset, per-principle pass rates reveal a consistent patte
 \textbf{ID} & \textbf{Principle} & \textbf{Approximate Pass Rate} & \textbf{Severity} \\
 \midrule
 P001 & OpenAPI Compliance     & High   & Critical \\
-P002 & Documentation Quality  & Low    & Warning  \\
-P003 & Error Handling         & Low    & Warning  \\
-P004 & Schema Definitions     & Low    & Warning  \\
+P002 & Documentation Quality  & Low    & Critical \\
+P003 & Error Handling         & Low    & Critical \\
+P004 & Schema Definitions     & Low    & Critical \\
 P005 & Security Standards     & Medium & Critical \\
 P008 & Versioning Strategy    & Low    & Warning  \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The gap between P001 (high pass rate) and P002--P004 (low pass rates) confirms that existing tooling validates specification \textit{form} (structural compliance) but not \textit{substance} (documentation completeness, schema precision). DDT's warning-severity principles (P002, P003, P004, P008) target precisely this gap.
+The gap between P001 (high pass rate) and P002--P004 (low pass rates) confirms that existing tooling validates specification \textit{form} (structural compliance) but not \textit{substance} (documentation completeness, schema precision). DDT's completeness principles (P002, P003, P004---all critical severity) target precisely this gap: an API that passes P001 but fails P002--P004 has a structurally valid but substantively incomplete specification that cannot support meaningful functional testing.
 
 The five-API controlled evaluation (Section~\ref{sec:multi-api-eval}) corroborates this pattern with exact numbers: P001 passed for all five APIs (100\%), while P002, P003, and P004 passed for zero of five (0\%). P005 and P008 showed intermediate rates (80\% each), reflecting the deliberate defect injection in \texttt{no-auth-api} and \texttt{bad-docs-api} respectively. Figure~\ref{fig:pass-rates} visualizes these per-principle pass rates.
 

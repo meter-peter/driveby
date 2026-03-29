@@ -41,12 +41,12 @@ The DriveBy CLI is the execution core. It mandates explicit flag-based configura
 The engine must enforce the following principles, executing specific checks derived from the validation-report.md:
 P001: OpenAPI Specification Compliance (Critical)
 Checks: Validates OpenAPI 3.0.x/3.1.0 versioning, presence of required info fields (title, version), resolvable references, and absence of duplicate operationIds.
-P002: API Documentation Quality (Warning)
-Checks: Verifies all operations have summaries/descriptions, parameters/schemas have descriptions, and all request/response bodies contain examples.
-P003: Error Handling Standards (Warning)
-Checks: Documents 4xx and 5xx responses for all operations; ensures error responses include standard error codes, messages, and detail schemas.
-P004: Request Schema Definitions (Warning)
-Checks: Validates data types for all schemas, length constraints for string fields, and min/max values for numeric fields.
+P002: API Documentation Quality (Critical)
+Checks: Verifies all operations have summaries/descriptions, parameters/schemas have descriptions, and all request/response bodies contain examples. Critical because functional test generators need examples and descriptions to produce valid payloads.
+P003: Error Handling Standards (Critical)
+Checks: Documents 4xx and 5xx responses for all operations; ensures error responses include standard error codes, messages, and detail schemas. Critical because negative test assertions require documented error schemas.
+P004: Request Schema Definitions (Critical)
+Checks: Validates data types for all schemas, length constraints for string fields, and min/max values for numeric fields. Critical because type-less schemas produce invalid test data.
 P005: Security Standards (Critical)
 Checks: Ensures security schemes are defined in components.securitySchemes, global/operation-level security requirements are set, and OAuth2 scopes are documented.
 P006: Endpoint Functional Testing

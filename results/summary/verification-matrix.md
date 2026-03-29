@@ -22,7 +22,7 @@ Notes on modes:
 
 ### Staging Gate
 
-| API | P001 Compliance (critical) | P002 Docs (warning) | P003 Errors (warning) | P004 Schema (warning) | P005 Security (critical) | P006 Functional (critical) | P008 Versioning (warning) | P009 Test Readiness (warning) | Score | Gate Result |
+| API | P001 Compliance (critical) | P002 Docs (critical) | P003 Errors (critical) | P004 Schema (critical) | P005 Security (critical) | P006 Functional (critical) | P008 Versioning (warning) | P009 Test Readiness (warning) | Score | Gate Result |
 |-----|---------------------------|--------------------|--------------------|---------------------|------------------------|--------------------------|-------------------------|------------------------------|-------|------------|
 | perfect-api | PASS | FAIL (warning)* | FAIL (warning)* | PASS | N/A (test-ready) | PASS (8/8 endpoints) | N/A (test-ready) | PASS | 3/5 | **PASS** |
 | slow-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | PASS (8/8 endpoints) | PASS | N/A (strict) | 3/6 | **PASS** |
@@ -34,7 +34,7 @@ Notes on modes:
 
 ### Production Gate
 
-| API | P001 Compliance (critical) | P002 Docs (warning) | P003 Errors (warning) | P004 Schema (warning) | P005 Security (critical) | P007 Performance (warning) | P008 Versioning (warning) | Score | Gate Result |
+| API | P001 Compliance (critical) | P002 Docs (critical) | P003 Errors (critical) | P004 Schema (critical) | P005 Security (critical) | P007 Performance (warning) | P008 Versioning (warning) | Score | Gate Result |
 |-----|---------------------------|--------------------|--------------------|---------------------|------------------------|--------------------------|-------------------------|-------|------------|
 | perfect-api | PASS | FAIL (warning)* | FAIL (warning)* | FAIL (warning)* | PASS | PASS (P95: ~2ms) | PASS | 3/6 | **PASS** (manual merge) |
 | slow-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | **FAIL** (P95: >200ms) | PASS | 3/6 | **FAIL** |

@@ -259,6 +259,25 @@ The design philosophy is: \textit{automate objective assessments, preserve human
 
 The \texttt{autoMerge: false} setting is a deliberate architectural choice, not a limitation. It reflects the principle that the final decision to deploy to production should be an affirmative human act, even when all automated checks have passed. The quality gate provides confidence; the human provides authorization.
 
+% ----------------------------------------------------------------------------
+\subsection{Auditability and Compliance}
+\label{subsec:auditability}
+% ----------------------------------------------------------------------------
+
+A consequence of the PR-based promotion model is that every quality gate decision produces a complete, immutable audit trail. Each promotion---whether approved, rejected, or pending---is recorded through multiple complementary artifacts:
+
+\begin{enumerate}
+    \item \textbf{Promotion PRs.} Every environment transition is a GitHub pull request. The PR records the proposed change (hydrated manifests on the \texttt{-next} branch), the target branch, the timestamp, and the actor who created it (the Promoter). For \texttt{autoMerge: false} environments, the PR also records who approved and merged it.
+    \item \textbf{Commit status checks.} Each gate writes a GitHub commit status (\texttt{success} or \texttt{failure}) on the PR's head SHA. Branch protection rules require these checks to pass before merge is permitted. The commit status persists as a permanent record of the gate verdict.
+    \item \textbf{PR comments.} The exit handler posts a structured DriveBy report as a PR comment: per-principle pass/fail, severity breakdown, remediation guidance (``How to Pass This Gate''), and a link to the Argo Workflow run. Failed gates explain which principles blocked promotion and why.
+    \item \textbf{CommitStatus CRDs.} The Kubernetes-native \texttt{CommitStatus} custom resource (managed by the GitOps Promoter) records the gate phase (\texttt{pending}, \texttt{success}, \texttt{failure}) for each SHA. These CRDs persist in the cluster and can be queried for historical gate decisions.
+    \item \textbf{Workflow logs.} Argo Workflow archives contain the full execution trace: health check attempts, DriveBy validation output (JSON), functional test endpoint results, and load test metrics. These logs are accessible via the Argo Workflows UI and persist according to the cluster's retention policy.
+\end{enumerate}
+
+This multi-layer audit trail is not a separate observability system bolted onto the pipeline---it is an intrinsic byproduct of the GitOps promotion model. The PR is the unit of change, the commit status is the gate verdict, the comment is the evidence, and the workflow log is the execution trace. Together, they provide the traceability required for compliance audits: for any deployment in any environment, an auditor can trace back to the exact PR, the exact validation results, and the exact human (or automated) decision that approved the promotion.
+
+The \texttt{autoMerge: false} setting on production environments adds an explicit human authorization step to this trail. The PR comment provides the evidence (``6/6 principles passed, load test P95: 1.8ms''); the human reviews the evidence and makes the merge decision. This pattern satisfies the separation-of-duties requirement common in regulated environments: the automated system assesses quality, but a human authorizes deployment.
+
 % ============================================================================
 \section{Quality Gate as Control Loop}
 \label{sec:control-loop}

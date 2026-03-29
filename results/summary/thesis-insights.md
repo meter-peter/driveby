@@ -32,7 +32,7 @@ Each of the three DDT axioms is validated by specific evidence from the test res
 *"The API specification must fully describe the API contract."*
 
 - **P005 failure on bad-docs-api and no-auth-api:** Both APIs had no `securitySchemes` in their OpenAPI spec. The spec was structurally valid (P001 passed) but contractually incomplete -- it did not describe how clients should authenticate. The gate correctly rejected these APIs at the specification level.
-- **P002/P003/P004 warnings across all APIs:** Even perfect-api fails P002 (missing contact/license info, enum descriptions), P003 (missing 5xx docs, error detail schemas), and P004 (some missing data types) in strict mode. This shows that "completeness" is a spectrum -- the severity model acknowledges that some documentation gaps are informational (warnings) while authentication gaps are blocking (critical).
+- **P002/P003/P004 failures block promotion:** As of v3.2.0, P002, P003, P004 are critical severity — incomplete documentation, missing error schemas, and type-less schemas all block the gate. Only perfect-api (with a hand-crafted, complete specification) passes all principles. The four defect APIs are blocked at validation before reaching functional/load testing. This enforces the DDT axiom: an incomplete specification cannot produce meaningful test results.
 
 ### Axiom 2: Determinism
 *"Same specification + same API = same validation results."*
@@ -61,12 +61,10 @@ The severity model creates an intentional asymmetry: most principles produce war
 
 | Severity | Principles | Effect on Gate | Occurrence in Results |
 |----------|-----------|---------------|----------------------|
-| Critical | P001, P005 (validate-only); P006 (functional); P007 (load-test via exit code) | Blocks promotion | P005 blocked 2 APIs, P006 blocked 1, P007 blocked 1 |
-| Warning | P002, P003, P004, P008, P009 | Feedback only | Failed across all 5 APIs in strict mode -- never blocked |
+| Critical | P001, P002, P003, P004, P005 (validate-only); P006 (functional); P007 (load-test via exit code) | Blocks promotion | P002+P003+P004 blocked 4 APIs, P005 blocked 1 (additive with P002-P004) |
+| Warning | P008, P009 | Feedback only | P008 failed on bad-docs-api only |
 
-**Counter-factual analysis:**
-- If ALL failures were critical: no API in the test suite except perfect-api (in test-ready mode, 3/3) would pass any gate. Even perfect-api fails 3/6 in strict mode (P002, P003, P004).
-- If NO failures were critical: bad-docs-api and no-auth-api (with zero authentication) would reach production. broken-api (returning 500 on GET /widgets) would pass staging.
+**Design rationale:** P002/P003/P004 are critical because validation gates functional testing — if the spec lacks examples, error schemas, or typed fields, test generators produce meaningless results. Only perfect-api (with a complete specification) passes all gates and reaches functional/load testing.
 
 **Thesis argument:** The severity model balances two competing goals:
 1. **Safety** -- security violations (P005) and contract mismatches (P006) must block promotion because they represent runtime risk

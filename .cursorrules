@@ -25,9 +25,9 @@ driveby/
 
 ## Validation Principles (P001-P008)
 - **P001**: OpenAPI Specification Compliance (critical)
-- **P002**: API Documentation Quality (warning)
-- **P003**: Error Handling Standards (warning)
-- **P004**: Request Schema Definitions (warning)
+- **P002**: API Documentation Quality (critical)
+- **P003**: Error Handling Standards (critical)
+- **P004**: Request Schema Definitions (critical)
 - **P005**: Security Standards (critical)
 - **P006**: API Contract Testing (critical)
 - **P007**: Performance Requirements (warning)
