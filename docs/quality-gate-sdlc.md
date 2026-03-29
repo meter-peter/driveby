@@ -287,7 +287,7 @@ The `validationMode` field controls which DDT principles are evaluated:
 |---|---|---|
 | `minimal` | P001 only | Quick feedback on OpenAPI compliance |
 | `strict` | P001-P005, P008 | Full static analysis |
-| `test-ready` | P001, P004, P009 | Validates spec is ready for testing |
+| `test-ready` | P001, P002, P003, P004, P009 | Validates spec is ready for testing |
 | `test-only` | P006 | Functional testing only |
 
 Configure via `validationDefaults.validationMode` (applies to all validation gates) or per-gate `gate.validationConfig.validationMode` in the XSDLC spec.

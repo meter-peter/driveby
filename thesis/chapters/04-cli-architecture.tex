@@ -425,7 +425,7 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
     case types.ValidationModeMinimal:
         return []PrincipleChecker{r.Get("P001")}
     case types.ValidationModeTestReady:
-        return []PrincipleChecker{r.Get("P001"), r.Get("P004"), r.Get("P009")}
+        return []PrincipleChecker{r.Get("P001"), r.Get("P002"), r.Get("P003"), r.Get("P004"), r.Get("P009")}
     case types.ValidationModeStrict:
         return []PrincipleChecker{
             r.Get("P001"), r.Get("P002"), r.Get("P003"),
@@ -437,7 +437,7 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
 }
 \end{lstlisting}
 
-The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P004 (type checks only), and P009; strict mode evaluates all six static principles (P001--P005, P008); test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
+The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P002 (test-critical documentation, excluding contact/license), P003 (error schemas for 4xx responses), P004 (type checks only), and P009; strict mode evaluates all six static principles (P001--P005, P008); test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
 
 % ============================================================================
 \section{The Validation Engine}

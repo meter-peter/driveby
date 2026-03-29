@@ -262,7 +262,7 @@ Table~\ref{tab:validation-modes} presents the mode-to-principle mapping.
 \textbf{Mode} & \textbf{P001} & \textbf{P002} & \textbf{P003} & \textbf{P004} & \textbf{P005} & \textbf{P006} & \textbf{P007} & \textbf{P008} & \textbf{P009} \\
 \midrule
 Minimal    & \cmark & & & & & & & & \\
-Test-ready & \cmark & & & \cmark$^\dagger$ & & & & & \cmark \\
+Test-ready & \cmark & \cmark$^\ddagger$ & \cmark$^\S$ & \cmark$^\dagger$ & & & & & \cmark \\
 Strict     & \cmark & \cmark & \cmark & \cmark & \cmark & & & \cmark & \\
 Test-only  &        &        &        &        &        & $\circ$ & $\circ$ & & \\
 \bottomrule
@@ -270,7 +270,9 @@ Test-only  &        &        &        &        &        & $\circ$ & $\circ$ & & 
 
 \vspace{2mm}
 \noindent\small{$\circ$ P006 and P007 are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers. In the current implementation, \texttt{ForMode(test-only)} returns no static checkers; the mode instead triggers the runtime testing pipeline (functional and load tests) directly via separate CLI commands.}\\
-\noindent\small{$^\dagger$ P004 in test-ready mode checks schema existence and type specifications only, without constraint validation.}
+\noindent\small{$^\dagger$ P004 in test-ready mode checks schema existence and type specifications only, without constraint validation.}\\
+\noindent\small{$^\ddagger$ P002 in test-ready mode checks examples, schema descriptions, enum descriptions, and operation documentation, but skips contact and license information.}\\
+\noindent\small{$^\S$ P003 in test-ready mode checks that operations document 4xx error responses and that error schemas include structured fields (message, code, details), but skips 5xx requirements, component-level reuse, and format consistency.}
 \end{table}
 
 \textbf{Minimal mode} evaluates only P001 (OpenAPI Specification Compliance). It serves as a fast quality gate suitable for pull request pipelines where rapid feedback is prioritized over exhaustive validation. A specification that passes minimal mode is structurally valid and safe for code generation, but its documentation quality, error handling, and security definitions are unchecked.
@@ -279,7 +281,7 @@ Test-only  &        &        &        &        &        & $\circ$ & $\circ$ & & 
 
 \textbf{Test-only mode} skips all static validation. The principle registry returns no checkers for this mode; instead, the CLI's \texttt{test-only} command triggers the runtime testing pipeline directly---functional endpoint testing and load testing---against a live API instance. In the current implementation, this runtime logic is not yet wrapped as P006 and P007 \texttt{PrincipleChecker} instances, but it is fully operational via the \texttt{function-only} and \texttt{load-only} CLI commands. Test-only mode is designed for scenarios where the specification has already been validated statically and the focus is on verifying that the live API conforms to it, decoupling static and runtime validation into separate pipeline stages.
 
-\textbf{Test-ready mode} evaluates P001, P004 (in an intermediate form that checks schema types without constraints), and P009 (Test Readiness). It serves as a fast pre-flight check that answers the question: \textit{is this specification good enough to produce meaningful test results?} Without this mode, functional tests send placeholder values that are rejected by API validation, and load tests run for minutes before revealing that the specification was incomplete. Test-ready mode runs in seconds and gates whether testing is worth executing.
+\textbf{Test-ready mode} evaluates P001, P002 (test-critical documentation, excluding contact and license metadata), P003 (4xx error response documentation and error schema structure), P004 (schema types without constraints), and P009 (Test Readiness). It serves as a fast pre-flight check that answers the question: \textit{is this specification good enough to produce meaningful test results?} The inclusion of P002 and P003 ensures that functional tests have the examples needed for request generation and the error schemas needed for negative test assertions. Without this mode, functional tests send placeholder values that are rejected by API validation, and load tests run for minutes before revealing that the specification was incomplete. Test-ready mode runs in seconds and gates whether testing is worth executing.
 
 The four modes form a progression. A team might begin with \textit{minimal} mode for initial CI gates, add \textit{test-ready} as a pre-flight check before functional testing pipelines, adopt \textit{strict} for release pipelines, and layer in \textit{test-only} for runtime verification once P006 and P007 are available. This incremental path lowers the barrier to adoption while preserving a clear trajectory toward comprehensive validation.
 

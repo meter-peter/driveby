@@ -49,7 +49,7 @@ Tests live in `test/`, not alongside source files:
 - **minimal** — P001 (compliance) only; fast CI gate
 - **strict** — P001-P005, P008; comprehensive static analysis
 - **test-only** — Skips static validation, runs runtime tests only (P006/P007 when implemented)
-- **test-ready** — P001 + P004 (types only) + P009 (new); pre-flight check for meaningful testing
+- **test-ready** — P001 + P002 (no contact/license) + P003 (4xx + error schemas) + P004 (types only) + P009; pre-flight check for meaningful testing
 
 ## Thesis Mapping
 - **Chapter 3 (Methodology)**: Principles P001-P008 map directly to `internal/principles/`

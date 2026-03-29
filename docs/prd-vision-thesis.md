@@ -76,7 +76,7 @@ P001-P005, P008
 < 5m
 test-ready
 Pre-flight for functional testing
-P001, P004, P009
+P001, P002, P003, P004, P009
 < 30s
 3.3 CLI Interface and Requirements
 The CLI must support the following interface. If required flags are missing or conflicting auth methods are provided, the CLI must exit with Exit Code 3 (Invalid Arguments).
@@ -272,7 +272,7 @@ Behavior: The production quality gate. It enforces all static validation princip
 Performance: Executes in ~2-5 minutes, designed for production-readiness checks
 .
 Test-Ready Mode (--validation-mode=test-ready):
-Behavior: Pre-flight check that validates the specification provides sufficient data for meaningful functional testing. Runs P001, P004, and P009 (Test Readiness)
+Behavior: Pre-flight check that validates the specification provides sufficient data for meaningful functional testing. Runs P001, P002 (test-critical docs), P003 (error schemas), P004, and P009 (Test Readiness)
 .
 Performance: Executes in ~10-30 seconds. Use as a gate before functional-test checks to catch under-documented specs early
 .

@@ -14,12 +14,16 @@ type P002Documentation struct{}
 
 func (p *P002Documentation) ID() string { return "P002" }
 
-func (p *P002Documentation) Check(_ context.Context, doc spec.APISpec, _ types.ValidationMode) types.PrincipleResult {
+func (p *P002Documentation) Check(_ context.Context, doc spec.APISpec, mode types.ValidationMode) types.PrincipleResult {
 	result := types.PrincipleResult{
 		Principle: types.CorePrinciples[1],
 		Passed:    true,
 		Details:   make(map[string]interface{}),
 	}
+
+	// Test-ready mode: only check what functional/load tests need
+	// (examples, schema docs, enum docs, operation docs — not contact/license)
+	isTestReady := mode == types.ValidationModeTestReady
 
 	checks := make(map[string]bool)
 	messages := make(map[string]string)
@@ -37,27 +41,29 @@ func (p *P002Documentation) Check(_ context.Context, doc spec.APISpec, _ types.V
 		checks["API has a general description"] = true
 	}
 
-	// Check contact information
-	if info == nil || info.Contact == nil {
-		checks["Contact information is provided"] = false
-		messages["Contact information is provided"] = "Contact information is missing"
-	} else {
-		hasContact := info.Contact.Name != "" || info.Contact.Email != "" || info.Contact.URL != ""
-		checks["Contact information is provided"] = hasContact
-		if !hasContact {
-			messages["Contact information is provided"] = "Contact information is empty"
+	// Check contact information (strict only — not needed for testing)
+	if !isTestReady {
+		if info == nil || info.Contact == nil {
+			checks["Contact information is provided"] = false
+			messages["Contact information is provided"] = "Contact information is missing"
+		} else {
+			hasContact := info.Contact.Name != "" || info.Contact.Email != "" || info.Contact.URL != ""
+			checks["Contact information is provided"] = hasContact
+			if !hasContact {
+				messages["Contact information is provided"] = "Contact information is empty"
+			}
 		}
-	}
 
-	// Check license information
-	if info == nil || info.License == nil {
-		checks["License information is provided"] = false
-		messages["License information is provided"] = "License information is missing"
-	} else if info.License.Name == "" {
-		checks["License information is provided"] = false
-		messages["License information is provided"] = "License name is missing"
-	} else {
-		checks["License information is provided"] = true
+		// Check license information (strict only — not needed for testing)
+		if info == nil || info.License == nil {
+			checks["License information is provided"] = false
+			messages["License information is provided"] = "License information is missing"
+		} else if info.License.Name == "" {
+			checks["License information is provided"] = false
+			messages["License information is provided"] = "License name is missing"
+		} else {
+			checks["License information is provided"] = true
+		}
 	}
 
 	// Check operation documentation

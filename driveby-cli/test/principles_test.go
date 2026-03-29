@@ -50,8 +50,8 @@ func TestRegistryForMode(t *testing.T) {
 	}
 
 	testReady := registry.ForMode(types.ValidationModeTestReady)
-	if len(testReady) != 3 {
-		t.Errorf("expected 3 checkers for test-ready mode, got %d", len(testReady))
+	if len(testReady) != 5 {
+		t.Errorf("expected 5 checkers for test-ready mode, got %d", len(testReady))
 	}
 
 	testOnly := registry.ForMode(types.ValidationModeTestOnly)

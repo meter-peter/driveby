@@ -184,7 +184,7 @@ The validation report is emitted as JSON to stdout by default. This enables:
 Each principle checker receives the `ValidatorConfig` including the validation mode. Checkers adjust their strictness:
 - **Minimal:** P001 only — quick structural compliance, no network calls
 - **Strict:** P001-P005, P008 — full static analysis, strict thresholds
-- **Test-ready:** P001, P004, P009 — pre-flight for functional testing
+- **Test-ready:** P001, P002, P003, P004, P009 — pre-flight for functional testing
 - **Test-only:** P006 (functional) and P007 (performance) — requires live API
 
 ## Deployment Architecture

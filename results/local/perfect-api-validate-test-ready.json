@@ -3,7 +3,7 @@
     "exit_code": 0,
     "version": "1.0.0",
     "environment": "production",
-    "timestamp": "2026-03-29T21:10:16.022660119+03:00",
+    "timestamp": "2026-03-29T21:10:16.073036683+03:00",
     "principles": [
         {
             "Principle": {
@@ -76,9 +76,7 @@
             "Message": "API documentation is comprehensive and high quality",
             "Details": {
                 "checks": {
-                    "API has a general description": true,
-                    "Contact information is provided": true,
-                    "License information is provided": true
+                    "API has a general description": true
                 },
                 "messages": {},
                 "missing_docs": {}
@@ -115,9 +113,6 @@
             "Details": {
                 "checks": {
                     "All operations document 4xx error responses": true,
-                    "All operations document 5xx error responses": true,
-                    "Common error responses are defined in components": true,
-                    "Error responses follow consistent format": true,
                     "Error responses include error details schema": true
                 },
                 "messages": {},
@@ -154,112 +149,52 @@
                 ]
             },
             "Passed": true,
-            "Message": "All requests have comprehensive schema definitions with proper validation rules",
-            "Details": {
-                "checks": {
-                    "All enums have valid values": true,
-                    "All header parameters have schemas": true,
-                    "All numeric fields have min/max values": true,
-                    "All path parameters have schemas": true,
-                    "All query parameters have schemas": true,
-                    "All request bodies have content schemas": true,
-                    "All required fields are marked": true,
-                    "All schemas have appropriate constraints": true,
-                    "All schemas specify data types": true,
-                    "All string fields have length constraints": true
-                },
-                "messages": {},
-                "missing_validation": {}
-            },
+            "Message": "All requests have schema definitions with type specifications",
+            "Details": {},
             "Explanation": "",
             "SuggestedFix": "",
             "TestImpact": null
         },
         {
             "Principle": {
-                "id": "P005",
-                "name": "Security Standards",
-                "description": "Validates comprehensive security requirements and authentication mechanisms",
-                "category": "Security",
-                "severity": "critical",
+                "id": "P009",
+                "name": "Test Readiness",
+                "description": "Validates that the specification provides enough detail for meaningful functional and load testing",
+                "category": "Testing",
+                "severity": "warning",
                 "tags": [
-                    "security",
-                    "authentication",
-                    "authorization"
+                    "testing",
+                    "readiness",
+                    "examples",
+                    "schemas"
                 ],
                 "auto_fixable": false,
                 "checks": [
-                    "Security schemes are defined",
-                    "Global security requirements are set",
-                    "Operation-level security is defined",
-                    "OAuth2 scopes are documented",
-                    "API keys are properly described",
-                    "Authentication headers are specified",
-                    "Security requirements are consistent"
+                    "Path parameters have examples or typed schemas",
+                    "Request bodies have examples or typed schema properties",
+                    "2xx responses have schemas defined",
+                    "2xx responses have examples defined"
                 ]
             },
             "Passed": true,
-            "Message": "All security requirements are properly defined and consistent",
+            "Message": "Specification is ready for meaningful functional and load testing",
             "Details": {
                 "checks": {
-                    "API keys are properly described": true,
-                    "Authentication headers are specified": true,
-                    "Global security requirements are set": true,
-                    "OAuth2 scopes are documented": true,
-                    "Operation-level security is defined": true,
-                    "Security requirements are consistent": true,
-                    "Security schemes are defined": true
+                    "2xx responses have examples defined": true,
+                    "2xx responses have schemas defined": true,
+                    "Path parameters have examples or typed schemas": true,
+                    "Request bodies have examples or typed schema properties": true
                 },
-                "messages": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
-        },
-        {
-            "Principle": {
-                "id": "P008",
-                "name": "API Versioning Strategy",
-                "description": "Validates proper API versioning implementation and documentation",
-                "category": "Versioning",
-                "severity": "warning",
-                "tags": [
-                    "versioning",
-                    "compatibility",
-                    "lifecycle"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "API version is specified",
-                    "Version follows semantic versioning",
-                    "Versioning strategy is documented",
-                    "Deprecation notices are present",
-                    "Breaking changes are documented",
-                    "Version compatibility is specified",
-                    "Migration guides are referenced"
-                ]
-            },
-            "Passed": true,
-            "Message": "API versioning strategy is properly documented",
-            "Details": {
-                "checks": {
-                    "API version is specified": true,
-                    "Breaking changes are documented": true,
-                    "Deprecation notices are present": true,
-                    "Migration guides are referenced": true,
-                    "Version compatibility is specified": true,
-                    "Version follows semantic versioning": true,
-                    "Versioning strategy is documented": true
-                },
-                "messages": {}
+                "issues": {},
+                "warnings": null
             },
             "Explanation": "",
             "SuggestedFix": "",
             "TestImpact": null
         }
     ],
-    "total_checks": 6,
-    "passed_checks": 6,
+    "total_checks": 5,
+    "passed_checks": 5,
     "failed_checks": 0,
     "summary": {
         "CriticalIssues": 0,

@@ -3,7 +3,16 @@
     "info": {
         "title": "Product API",
         "description": "\n    A fully documented Product API that demonstrates documentation-driven testing.\n    \n    This API allows you to:\n    * Create new products\n    * Retrieve product information\n    * Update existing products\n    * Delete products\n    * Search for products by various criteria\n    \n    ## Documentation-Driven Testing\n    This API is designed for automated testing directly from the OpenAPI specification.\n    Each endpoint includes complete request and response examples that can be used for:\n    \n    * Generating test cases\n    * Validating responses\n    * Performing load testing\n    * Creating mock servers\n    \n    ## Test Automation\n    The OpenAPI schema is designed to be consumed by automated test tools that can:\n    1. Parse the schema to discover endpoints\n    2. Extract example data for requests\n    3. Validate responses against the defined schemas\n    4. Generate load test scenarios\n    \n\n## Versioning Strategy\nThis API follows semantic versioning (SemVer). Breaking changes are introduced only in major version bumps.\nFor backward compatibility, deprecated endpoints remain available for one major version cycle.\nMigration guide: see the changelog at /docs/changelog for upgrade instructions between versions.\n",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "contact": {
+            "name": "Product API Team",
+            "email": "api-support@example.com",
+            "url": "https://example.com/support"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
     },
     "paths": {
         "/tasks": {
@@ -15,9 +24,11 @@
                 "description": "Creates a task with title and description",
                 "operationId": "create_task_tasks_post",
                 "requestBody": {
+                    "description": "Task object to create",
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/TaskCreate"
@@ -54,6 +65,9 @@
                         "description": "Bad Request",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Invalid request data",
                                     "code": 400,
@@ -68,6 +82,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -82,16 +99,14 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "body",
-                                                "price"
-                                            ],
-                                            "msg": "ensure this value is greater than 0",
-                                            "type": "value_error.number.not_gt"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "body.price: ensure this value is greater than 0"
                                     ]
                                 }
                             }
@@ -101,6 +116,9 @@
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Internal server error",
                                     "code": 500,
@@ -265,6 +283,9 @@
                         "description": "Bad Request",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Invalid request data",
                                     "code": 400,
@@ -279,6 +300,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -293,16 +317,14 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "body",
-                                                "price"
-                                            ],
-                                            "msg": "ensure this value is greater than 0",
-                                            "type": "value_error.number.not_gt"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "body.price: ensure this value is greater than 0"
                                     ]
                                 }
                             }
@@ -312,6 +334,9 @@
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Internal server error",
                                     "code": 500,
@@ -340,10 +365,12 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Product object to create",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/ProductCreate"
@@ -397,6 +424,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -411,16 +441,31 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "body",
-                                                "price"
-                                            ],
-                                            "msg": "ensure this value is greater than 0",
-                                            "type": "value_error.number.not_gt"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "body.price: ensure this value is greater than 0"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "error": "Internal server error",
+                                    "code": 500,
+                                    "details": [
+                                        "An unexpected error occurred"
                                     ]
                                 }
                             }
@@ -492,9 +537,13 @@
                         "description": "Product not found",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Product not found",
-                                    "code": 404
+                                    "code": 404,
+                                    "details": []
                                 }
                             }
                         }
@@ -503,6 +552,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -517,16 +569,31 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "path",
-                                                "product_id"
-                                            ],
-                                            "msg": "invalid uuid format",
-                                            "type": "value_error.uuid"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "path.product_id: invalid uuid format"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "error": "Internal server error",
+                                    "code": 500,
+                                    "details": [
+                                        "An unexpected error occurred"
                                     ]
                                 }
                             }
@@ -567,10 +634,12 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Updated product data",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "type": "object",
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/ProductBase"
@@ -626,9 +695,13 @@
                         "description": "Product not found",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Product not found",
-                                    "code": 404
+                                    "code": 404,
+                                    "details": []
                                 }
                             }
                         }
@@ -637,6 +710,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -651,16 +727,31 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "body",
-                                                "price"
-                                            ],
-                                            "msg": "ensure this value is greater than 0",
-                                            "type": "value_error.number.not_gt"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "body.price: ensure this value is greater than 0"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "error": "Internal server error",
+                                    "code": 500,
+                                    "details": [
+                                        "An unexpected error occurred"
                                     ]
                                 }
                             }
@@ -708,9 +799,13 @@
                         "description": "Product not found",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Product not found",
-                                    "code": 404
+                                    "code": 404,
+                                    "details": []
                                 }
                             }
                         }
@@ -719,6 +814,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -733,16 +831,31 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "path",
-                                                "product_id"
-                                            ],
-                                            "msg": "invalid uuid format",
-                                            "type": "value_error.uuid"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "path.product_id: invalid uuid format"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "error": "Internal server error",
+                                    "code": 500,
+                                    "details": [
+                                        "An unexpected error occurred"
                                     ]
                                 }
                             }
@@ -778,6 +891,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -792,6 +908,9 @@
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Internal server error",
                                     "code": 500,
@@ -840,6 +959,9 @@
                         "description": "Bad Request",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Invalid request data",
                                     "code": 400,
@@ -854,6 +976,9 @@
                         "description": "Not Found",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Resource not found",
                                     "code": 404,
@@ -868,6 +993,9 @@
                         "description": "Internal Server Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Internal server error",
                                     "code": 500,
@@ -890,11 +1018,13 @@
                 "description": "Return the request body as-is for testing request/response handling",
                 "operationId": "echo_test_test_echo_post",
                 "requestBody": {
+                    "description": "Arbitrary JSON object to echo back",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "title": "Data"
+                                "title": "Data",
+                                "description": "Arbitrary JSON payload for echo testing"
                             },
                             "example": {
                                 "message": "Test message",
@@ -923,6 +1053,9 @@
                         "description": "Unauthorized",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
                                     "error": "Authentication required",
                                     "code": 401,
@@ -937,15 +1070,31 @@
                         "description": "Validation Error",
                         "content": {
                             "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
                                 "example": {
-                                    "detail": [
-                                        {
-                                            "loc": [
-                                                "body"
-                                            ],
-                                            "msg": "value is not a valid dict",
-                                            "type": "type_error.dict"
-                                        }
+                                    "error": "Validation failed",
+                                    "code": 422,
+                                    "details": [
+                                        "body: value is not a valid dict"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "error": "Internal server error",
+                                    "code": 500,
+                                    "details": [
+                                        "An unexpected error occurred"
                                     ]
                                 }
                             }
@@ -1143,7 +1292,7 @@
                     "other"
                 ],
                 "title": "ProductCategory",
-                "description": "Product category enumeration."
+                "description": "Product category enumeration. Valid values: electronics (consumer electronic devices and accessories), clothing (apparel and wearable items), food (consumable food and beverage products), books (printed and digital publications), other (products that do not fit other categories)."
             },
             "ProductCreate": {
                 "properties": {
@@ -1294,6 +1443,58 @@
                         "example": [
                             "Field 'name' is required"
                         ]
+                    }
+                }
+            }
+        },
+        "responses": {
+            "400": {
+                "description": "Bad Request",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "401": {
+                "description": "Unauthorized",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "403": {
+                "description": "Forbidden",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "404": {
+                "description": "Not Found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "500": {
+                "description": "Internal Server Error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
                     }
                 }
             }

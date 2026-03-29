@@ -513,7 +513,7 @@ DriveBy uses a **two-tier configuration model**:
 Control strictness via per-check `validationConfig.validationMode` or top-level `validationDefaults.validationMode`:
 - `minimal` — Basic OpenAPI compliance only (P001)
 - `strict` — All static validation principles (P001-P005, P008)
-- `test-ready` — Validates spec is ready for testing (P001, P004, P009)
+- `test-ready` — Validates spec is ready for testing (P001, P002, P003, P004, P009)
 - `test-only` — Functional testing only (P006)
 
 ### Multiple APIs

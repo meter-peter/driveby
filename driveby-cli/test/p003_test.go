@@ -27,6 +27,18 @@ func TestP003ErrorsMissingErrorsMinimalMode(t *testing.T) {
 	}
 }
 
+func TestP003ErrorsTestReadyMode(t *testing.T) {
+	// In test-ready mode, P003 skips: common components check, 5xx requirement, format consistency
+	// But still checks: 4xx responses exist, error schemas have message/code/details
+	l := loadTestDoc(t, "testdata/missing-errors-api.json")
+	checker := &principles.P003Errors{}
+	result := checker.Check(context.Background(), l.GetDocument(), types.ValidationModeTestReady)
+	// Missing errors API has no 4xx responses, so should still fail in test-ready
+	if result.Passed {
+		t.Error("expected P003 test-ready to fail for API with no error responses")
+	}
+}
+
 func TestP003ErrorsPetstoreHasErrors(t *testing.T) {
 	l := loadTestDoc(t, "testdata/real-world-petstore.json")
 	checker := &principles.P003Errors{}

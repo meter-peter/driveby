@@ -14,8 +14,8 @@ Defined in `checker.go`. Every principle checker must implement this interface. 
 | File | Principle | Description | Status | LOC |
 |------|-----------|-------------|--------|-----|
 | `p001_compliance.go` | P001 | OpenAPI Compliance — validates spec structure, required fields, valid HTTP methods | Complete | ~180 |
-| `p002_documentation.go` | P002 | Documentation Quality — checks descriptions, summaries, examples on operations/schemas | Complete | ~197 |
-| `p003_errors.go` | P003 | Error Handling — verifies error response definitions (4xx/5xx), consistent error schemas | Complete | ~234 |
+| `p002_documentation.go` | P002 | Documentation Quality — checks descriptions, summaries, examples on operations/schemas. Test-ready mode skips contact/license | Complete | ~205 |
+| `p003_errors.go` | P003 | Error Handling — verifies error response definitions (4xx/5xx), consistent error schemas. Test-ready mode: 4xx + error schemas only | Complete | ~240 |
 | `p004_schema.go` | P004 | Schema Definitions — validates request/response schemas, type coverage, allOf flattening | Complete | ~353 |
 | `p005_security.go` | P005 | Security Standards — checks security schemes, global security, HTTPS enforcement | Complete | ~221 |
 | `p008_versioning.go` | P008 | Versioning Strategy — validates API versioning in paths/headers, deprecation markers | Complete | ~163 |
