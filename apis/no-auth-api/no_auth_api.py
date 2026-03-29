@@ -913,58 +913,18 @@ def patch_exclusive_min_max(schema):
         for item in schema:
             patch_exclusive_min_max(item)
 
-# Custom OpenAPI schema generator
-original_openapi = app.openapi
+# Custom OpenAPI schema: serve the hand-crafted openapi.json (derived from
+# perfect-api but with all security definitions stripped). The spec is complete
+# in every other way — the ONLY defect is missing securitySchemes/security,
+# which causes P005 (Security Standards) to fail.
+import json, os
 
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        description=app.description,
-        routes=app.routes,
-    )
-
-    # Add ErrorResponse schema
-    openapi_schema["components"]["schemas"]["ErrorResponse"] = {
-        "type": "object",
-        "description": "Standard error response model used across all endpoints.",
-        "required": ["error", "code"],
-        "properties": {
-            "error": {
-                "type": "string",
-                "description": "Human-readable error message",
-                "example": "Invalid request data"
-            },
-            "code": {
-                "type": "integer",
-                "description": "HTTP status code",
-                "example": 400
-            },
-            "details": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Additional error details",
-                "example": ["Field 'name' is required"]
-            }
-        }
-    }
-
-    # Ensure versioning info in description
-    if "Versioning Strategy" not in openapi_schema.get("info", {}).get("description", ""):
-        openapi_schema["info"]["description"] += (
-            "\n\n## Versioning Strategy\n"
-            "This API follows semantic versioning (SemVer). Breaking changes are introduced only in major version bumps.\n"
-            "For backward compatibility, deprecated endpoints remain available for one major version cycle.\n"
-            "Migration guide: see the changelog at /docs/changelog for upgrade instructions between versions.\n"
-        )
-
-    # NOTE: No securitySchemes, no global security, no per-operation security remap.
-    # This API deliberately omits all authentication to fail DriveBy P005 (Security Standards).
-
-    patch_exclusive_min_max(openapi_schema)
-    app.openapi_schema = openapi_schema
+    spec_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "openapi.json")
+    with open(spec_path) as f:
+        app.openapi_schema = json.load(f)
     return app.openapi_schema
 
 app.openapi = custom_openapi
