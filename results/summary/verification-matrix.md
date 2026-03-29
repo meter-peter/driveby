@@ -246,21 +246,21 @@ PR on staging --> |    (strict/test-ready)|  ----------->  |    (auto-injected) 
 Total CommitStatus CRDs in cluster: 32 (across all test iterations).
 Phase distribution: 18 failure, 13 success, 1 pending (stale from earlier iteration).
 
-## Summary Statistics (v3.1.0)
+## Summary Statistics (v3.2.0)
 
 | Metric | Value |
 |--------|-------|
 | Total APIs tested | 5 |
-| Staging gates passed | 3 (perfect-api, slow-api, bad-docs-api) |
-| Staging gates failed | 2 (no-auth-api, broken-api) |
-| Prod gates reached | 3 (perfect-api, slow-api, bad-docs-api) |
-| Prod gates passed | 2 (perfect-api, bad-docs-api) |
-| Prod gates failed | 1 (slow-api — load-test P95 exceeded target) |
-| Full pipeline passed | 2/5 (40%) — perfect-api and bad-docs-api |
-| Blocked by P005 Security (critical) | 1 (no-auth-api) |
-| Blocked by P006 Functional (critical) | 1 (broken-api) |
-| Blocked by P007 Performance | 1 (slow-api) |
-| Warning-only failures that did NOT block | P002, P003, P004, P008 across all APIs |
-| Prod gates NOT_REACHED (health-check timeout) | 2 (no-auth-api, broken-api) |
+| Staging gates passed | 1 (perfect-api) |
+| Staging gates failed | 4 (bad-docs-api, no-auth-api, slow-api, broken-api) |
+| Prod gates reached | 1 (perfect-api) |
+| Prod gates passed | 1 (perfect-api) |
+| Full pipeline passed | 1/5 (20%) — perfect-api only |
+| Blocked by P002+P003+P004 (critical) | 4 (bad-docs-api, no-auth-api, slow-api, broken-api) |
+| Blocked by P005 Security (critical) | 1 (no-auth-api — also blocked by P002+P003+P004) |
+| Blocked by P006 Functional (critical) | 0 (broken-api never reaches functional due to P002+P003+P004) |
+| Blocked by P007 Performance | 0 (slow-api never reaches load-test due to P002+P003+P004) |
+| Warning-only failures | P008 (Versioning) on bad-docs-api only |
+| Prod gates NOT_REACHED | 4 (all except perfect-api) |
 
-Key change from v3.0.x: bad-docs-api staging now PASSES because P005 (Security) correctly passes — bad-docs-api has security schemes. Only documentation/error handling (warning-severity) fails. This demonstrates DDT's graduated severity model: missing docs don't block promotion, missing security does.
+Key change in v3.2.0: P002, P003, P004 severity changed from **warning** to **critical**. Validation now blocks incomplete specs from proceeding to functional/load testing. This is the correct DDT behavior — if the spec is incomplete, test generators produce meaningless results. Only the perfect-api (with a hand-crafted, complete specification) passes all gates.

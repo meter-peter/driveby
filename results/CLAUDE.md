@@ -41,20 +41,21 @@ results/
     └── thesis-insights.md
 ```
 
-## Gate Results Summary (2026-03-29, v3.1.0)
+## Gate Results Summary (2026-03-30, v3.2.0)
 
 | API | Staging Gate | Staging Result | Prod Gate | Prod Result |
 |-----|-------------|---------------|-----------|-------------|
-| perfect-api | validate-only (test-ready) + functional-test | **PASS** | load-test (auto-injected validate) | **PASS** (manual merge) |
-| slow-api | validate-only (strict) + functional-test | **PASS** | validate-only + load-test (10u/15s/200ms) | **FAIL** (P95>200ms) |
-| bad-docs-api | validate-only (strict) | **PASS** (0 critical, 4 warnings) | validate-only + load-test | **PASS** |
-| no-auth-api | validate-only (strict) | **FAIL** (P005 critical) | N/A | NOT_REACHED |
-| broken-api | validate-only (strict) + functional-test | **FAIL** (P006 functional) | N/A | NOT_REACHED |
+| perfect-api | validate-only (test-ready) + functional-test | **PASS** (5/5 + 8/8 endpoints) | load-test (auto-injected validate strict) | **PASS** (6/6 + load PASS) |
+| slow-api | validate-only (strict) + functional-test | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
+| bad-docs-api | validate-only (strict) | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
+| no-auth-api | validate-only (strict) | **FAIL** (P005+P002+P003+P004 critical) | N/A | NOT_REACHED |
+| broken-api | validate-only (strict) + functional-test | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
 
 Notes:
+- **v3.2.0**: P002, P003, P004 severity changed from warning to **critical** — validation now blocks incomplete specs from proceeding to functional/load testing
 - **test-ready** mode checks P001, P002 (no contact/license), P003 (4xx + error schemas), P004, P009 — 5 principles
 - **strict** mode checks P001, P002, P003, P004, P005, P008 — 6 principles
-- bad-docs-api staging now PASSES (v3.1.0 confirms P005 passes — security schemes are present)
+- Only **perfect-api** passes all gates — it is the only API with a complete, hand-crafted specification
 
 ## Local CLI Results (in `local/`)
 
@@ -64,11 +65,11 @@ Notes:
 | `perfect-api-validate-test-ready.json` | perfect-api | validate-only (test-ready) | passed (5/5) |
 | `perfect-api-functional.json` | perfect-api | function-only | passed (8/8 endpoints) |
 | `perfect-api-loadtest.json` | perfect-api | load-only | passed (P95: ~7ms) |
-| `bad-docs-api-validate-strict.json` | bad-docs-api | validate-only (strict) | passed (2/6, warnings only) |
-| `no-auth-api-validate-strict.json` | no-auth-api | validate-only (strict) | **failed** (P005 critical) |
-| `slow-api-validate-strict.json` | slow-api | validate-only (strict) | passed (3/6) |
+| `bad-docs-api-validate-strict.json` | bad-docs-api | validate-only (strict) | **failed** (P002+P003+P004 critical) |
+| `no-auth-api-validate-strict.json` | no-auth-api | validate-only (strict) | **failed** (P005+P002+P003+P004 critical) |
+| `slow-api-validate-strict.json` | slow-api | validate-only (strict) | **failed** (P002+P003+P004 critical) |
 | `slow-api-loadtest.json` | slow-api | load-only | **failed** (P95: ~505ms) |
-| `broken-api-validate-strict.json` | broken-api | validate-only (strict) | passed (3/6) |
+| `broken-api-validate-strict.json` | broken-api | validate-only (strict) | **failed** (P002+P003+P004 critical) |
 | `broken-api-functional.json` | broken-api | function-only | **failed** (2/8 endpoints) |
 
 ## Rules

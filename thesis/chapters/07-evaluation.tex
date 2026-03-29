@@ -250,17 +250,17 @@ The progression through layers followed a strict ordering: \texttt{bad-docs-api}
 \label{subsec:severity-model}
 % ----------------------------------------------------------------------------
 
-The severity model created an intentional asymmetry between blocking and non-blocking failures. Of the nine DDT principles, two are classified as critical in static validation (P001 and P005), while P006 and P007 are inherently critical in their respective check types (functional and load testing). The remaining five principles (P002, P003, P004, P008, P009) carry warning severity.
+The severity model reflects DDT's core design principle: \textit{validation gates functional testing}. Of the nine principles, five are classified as critical in static validation (P001, P002, P003, P004, P005), while P006 and P007 are inherently critical in their respective check types (functional and load testing). Only versioning (P008) and test readiness advisory checks (P009) carry warning severity.
 
-This 2/9 critical ratio had observable consequences:
+This 5/9 critical ratio reflects the gatekeeping function of static validation:
 
 \begin{itemize}
-    \item \texttt{slow-api} passed the staging gate with 3/6 principles failing (P002, P003, P004---all warnings), because no critical-severity principle failed. Without the severity model, \texttt{slow-api} would have been blocked at staging, preventing the load test from executing and the performance defect from being detected.
-    \item \texttt{perfect-api} passed the production gate with 3/6 strict-mode principles failing (same warning-severity failures), confirming that even the reference API does not achieve a perfect strict-mode score.
-    \item If all failures had been treated as critical, no API except \texttt{perfect-api} in test-ready mode (3/3) would have passed any gate. If no failures had been critical, \texttt{bad-docs-api} and \texttt{no-auth-api}---APIs with no authentication---would have reached production.
+    \item P002 (Documentation) is critical because functional test generators require examples and operation descriptions to produce valid request payloads; without them, test data is generic and rejected by API validation.
+    \item P003 (Error Handling) is critical because negative test assertions require documented error schemas; without them, tests cannot verify error response shapes.
+    \item P004 (Schema Definitions) is critical because type-less schemas force test generators to fall back on untyped placeholder values.
+    \item As a result, only \texttt{perfect-api}---the reference API with a complete, hand-crafted specification---passes all gates. The four defect APIs (\texttt{bad-docs-api}, \texttt{no-auth-api}, \texttt{slow-api}, \texttt{broken-api}) are all blocked at the validation stage because their specifications are incomplete. This is the correct behavior: an incomplete specification should not proceed to functional testing.
+    \item The only warning-severity principles (P008, P009) represent quality dimensions that degrade gracefully---versioning metadata and response-example advisories---without preventing test execution.
 \end{itemize}
-
-The severity model thus balanced two competing goals: \textit{safety} (security violations and contract mismatches must block promotion) and \textit{practicality} (documentation gaps and schema imprecisions should inform developers through PR comments without blocking delivery).
 
 % ============================================================================
 \section{Large-Scale Evaluation: APIs.guru}

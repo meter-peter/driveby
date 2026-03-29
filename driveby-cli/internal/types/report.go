@@ -181,7 +181,7 @@ var CorePrinciples = []Principle{
 		Name:        "API Documentation Quality",
 		Description: "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
 		Category:    "Documentation",
-		Severity:    "warning",
+		Severity:    "critical",
 		Tags:        []string{"documentation", "quality", "usability"},
 		AutoFixable: true,
 		Checks: []string{
@@ -202,7 +202,7 @@ var CorePrinciples = []Principle{
 		Name:        "Error Handling Standards",
 		Description: "Validates comprehensive error response documentation and consistent error handling patterns",
 		Category:    "Error Handling",
-		Severity:    "warning",
+		Severity:    "critical",
 		Tags:        []string{"errors", "responses", "standards"},
 		AutoFixable: true,
 		Checks: []string{
@@ -220,7 +220,7 @@ var CorePrinciples = []Principle{
 		Name:        "Request Schema Definitions",
 		Description: "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
 		Category:    "Schema",
-		Severity:    "warning",
+		Severity:    "critical",
 		Tags:        []string{"schema", "validation", "request"},
 		AutoFixable: true,
 		Checks: []string{

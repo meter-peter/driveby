@@ -3,7 +3,7 @@
     "exit_code": 1,
     "version": "1.0.0",
     "environment": "production",
-    "timestamp": "2026-03-29T22:29:02.912761727+03:00",
+    "timestamp": "2026-03-30T00:12:07.849581211+03:00",
     "principles": [
         {
             "Principle": {
@@ -52,7 +52,7 @@
                 "name": "API Documentation Quality",
                 "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
                 "category": "Documentation",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "documentation",
                     "quality",
@@ -73,7 +73,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Documentation quality issues found: All request/response bodies have examples: POST /test/echo: request body, POST /products: request body, PUT /products/{product_id}: request body, POST /tasks: request body; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other",
+            "Message": "Documentation quality issues found: All request/response bodies have examples: POST /tasks: request body, POST /test/echo: request body, POST /products: request body, PUT /products/{product_id}: request body; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other",
             "Details": {
                 "checks": {
                     "API has a general description": true,
@@ -95,10 +95,10 @@
                         "ProductCategory: enum value other"
                     ],
                     "All request/response bodies have examples": [
+                        "POST /tasks: request body",
                         "POST /test/echo: request body",
                         "POST /products: request body",
-                        "PUT /products/{product_id}: request body",
-                        "POST /tasks: request body"
+                        "PUT /products/{product_id}: request body"
                     ]
                 }
             },
@@ -112,7 +112,7 @@
                 "name": "Error Handling Standards",
                 "description": "Validates comprehensive error response documentation and consistent error handling patterns",
                 "category": "Error Handling",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "errors",
                     "responses",
@@ -130,11 +130,11 @@
                 ]
             },
             "Passed": false,
-            "Message": "Error handling issues found: Error responses include error details schema: GET /products: 500 response, GET /products: 400 response, GET /products: 422 response, POST /products: 422 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, POST /tasks: 422 response, POST /tasks: 500 response, POST /tasks: 400 response, POST /test/echo: 422 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /test/health: 500 response, GET /legacy/products: 500 response; All operations document 5xx error responses: POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /test/echo; All operations document 4xx error responses: GET /legacy/products",
+            "Message": "Error handling issues found: Error responses include error details schema: POST /tasks: 400 response, POST /tasks: 422 response, POST /tasks: 500 response, POST /test/echo: 422 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /test/health: 500 response, GET /legacy/products: 500 response, GET /products: 500 response, GET /products: 400 response, GET /products: 422 response, POST /products: 422 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response; All operations document 5xx error responses: POST /test/echo, POST /products, PUT /products/{product_id}, DELETE /products/{product_id}, GET /products/{product_id}; All operations document 4xx error responses: GET /legacy/products",
             "Details": {
                 "checks": {
-                    "All operations document 4xx error responses": false,
-                    "All operations document 5xx error responses": true,
+                    "All operations document 4xx error responses": true,
+                    "All operations document 5xx error responses": false,
                     "Common error responses are defined in components": false,
                     "Error responses follow consistent format": true,
                     "Error responses include error details schema": false
@@ -147,31 +147,31 @@
                         "GET /legacy/products"
                     ],
                     "All operations document 5xx error responses": [
+                        "POST /test/echo",
                         "POST /products",
-                        "DELETE /products/{product_id}",
-                        "GET /products/{product_id}",
                         "PUT /products/{product_id}",
-                        "POST /test/echo"
+                        "DELETE /products/{product_id}",
+                        "GET /products/{product_id}"
                     ],
                     "Error responses include error details schema": [
-                        "GET /products: 500 response",
-                        "GET /products: 400 response",
-                        "GET /products: 422 response",
-                        "POST /products: 422 response",
-                        "DELETE /products/{product_id}: 404 response",
-                        "DELETE /products/{product_id}: 422 response",
-                        "GET /products/{product_id}: 404 response",
-                        "GET /products/{product_id}: 422 response",
-                        "PUT /products/{product_id}: 404 response",
-                        "PUT /products/{product_id}: 422 response",
+                        "POST /tasks: 400 response",
                         "POST /tasks: 422 response",
                         "POST /tasks: 500 response",
-                        "POST /tasks: 400 response",
                         "POST /test/echo: 422 response",
                         "GET /test/health: 400 response",
                         "GET /test/health: 404 response",
                         "GET /test/health: 500 response",
-                        "GET /legacy/products: 500 response"
+                        "GET /legacy/products: 500 response",
+                        "GET /products: 500 response",
+                        "GET /products: 400 response",
+                        "GET /products: 422 response",
+                        "POST /products: 422 response",
+                        "PUT /products/{product_id}: 404 response",
+                        "PUT /products/{product_id}: 422 response",
+                        "DELETE /products/{product_id}: 404 response",
+                        "DELETE /products/{product_id}: 422 response",
+                        "GET /products/{product_id}: 404 response",
+                        "GET /products/{product_id}: 422 response"
                     ]
                 }
             },
@@ -185,7 +185,7 @@
                 "name": "Request Schema Definitions",
                 "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
                 "category": "Schema",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "schema",
                     "validation",
@@ -206,7 +206,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Request validation issues found: All schemas specify data types: POST /products: application/json schema, PUT /products/{product_id}: application/json schema, POST /tasks: application/json schema",
+            "Message": "Request validation issues found: All schemas specify data types: PUT /products/{product_id}: application/json schema, POST /tasks: application/json schema, POST /products: application/json schema",
             "Details": {
                 "checks": {
                     "All enums have valid values": true,
@@ -223,9 +223,9 @@
                 "messages": {},
                 "missing_validation": {
                     "All schemas specify data types": [
-                        "POST /products: application/json schema",
                         "PUT /products/{product_id}: application/json schema",
-                        "POST /tasks: application/json schema"
+                        "POST /tasks: application/json schema",
+                        "POST /products: application/json schema"
                     ]
                 }
             },
@@ -257,7 +257,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Security validation failed: Global security requirements are set: No top-level security requirements defined; Operation-level security is defined: Endpoints without security: GET /test/health, GET /legacy/products, GET /products, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo; Security schemes are defined: No security schemes defined in components.securitySchemes",
+            "Message": "Security validation failed: Global security requirements are set: No top-level security requirements defined; Operation-level security is defined: Endpoints without security: DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health, GET /legacy/products, GET /products, POST /products; Security schemes are defined: No security schemes defined in components.securitySchemes",
             "Details": {
                 "checks": {
                     "API keys are properly described": true,
@@ -270,7 +270,7 @@
                 },
                 "messages": {
                     "Global security requirements are set": "No top-level security requirements defined",
-                    "Operation-level security is defined": "Endpoints without security: GET /test/health, GET /legacy/products, GET /products, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo",
+                    "Operation-level security is defined": "Endpoints without security: DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health, GET /legacy/products, GET /products, POST /products",
                     "Security schemes are defined": "No security schemes defined in components.securitySchemes"
                 }
             },
@@ -324,8 +324,8 @@
     "passed_checks": 2,
     "failed_checks": 4,
     "summary": {
-        "CriticalIssues": 1,
-        "Warnings": 3,
+        "CriticalIssues": 4,
+        "Warnings": 0,
         "Info": 0,
         "Categories": [
             "Documentation",
@@ -334,18 +334,18 @@
             "Security"
         ],
         "FailedTags": [
-            "quality",
-            "standards",
-            "schema",
-            "validation",
-            "request",
-            "security",
-            "authentication",
             "authorization",
             "documentation",
+            "quality",
             "usability",
+            "standards",
+            "request",
             "errors",
-            "responses"
+            "responses",
+            "schema",
+            "validation",
+            "security",
+            "authentication"
         ],
         "TestSummary": null
     }

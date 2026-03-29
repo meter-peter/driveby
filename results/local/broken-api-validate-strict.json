@@ -1,9 +1,9 @@
 {
-    "status": "passed",
-    "exit_code": 0,
+    "status": "failed",
+    "exit_code": 1,
     "version": "1.0.0",
     "environment": "production",
-    "timestamp": "2026-03-29T22:29:05.356695283+03:00",
+    "timestamp": "2026-03-30T00:12:07.921428106+03:00",
     "principles": [
         {
             "Principle": {
@@ -52,7 +52,7 @@
                 "name": "API Documentation Quality",
                 "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
                 "category": "Documentation",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "documentation",
                     "quality",
@@ -73,7 +73,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Documentation quality issues found: All request/response bodies have examples: POST /products: request body, PUT /products/{product_id}: request body, POST /tasks: request body, POST /test/echo: request body; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other",
+            "Message": "Documentation quality issues found: All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other; All request/response bodies have examples: POST /products: request body, PUT /products/{product_id}: request body, POST /tasks: request body, POST /test/echo: request body",
             "Details": {
                 "checks": {
                     "API has a general description": true,
@@ -112,7 +112,7 @@
                 "name": "Error Handling Standards",
                 "description": "Validates comprehensive error response documentation and consistent error handling patterns",
                 "category": "Error Handling",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "errors",
                     "responses",
@@ -130,11 +130,11 @@
                 ]
             },
             "Passed": false,
-            "Message": "Error handling issues found: All operations document 5xx error responses: POST /test/echo, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}; Error responses include error details schema: POST /test/echo: 422 response, POST /test/echo: 401 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /test/health: 500 response, GET /legacy/products: 401 response, GET /legacy/products: 500 response, POST /products: 401 response, POST /products: 422 response, GET /products: 500 response, GET /products: 400 response, GET /products: 401 response, GET /products: 422 response, DELETE /products/{product_id}: 401 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 401 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 401 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, POST /tasks: 422 response, POST /tasks: 500 response, POST /tasks: 400 response, POST /tasks: 401 response",
+            "Message": "Error handling issues found: Error responses include error details schema: GET /test/health: 500 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /legacy/products: 500 response, GET /legacy/products: 401 response, GET /products: 500 response, GET /products: 400 response, GET /products: 401 response, GET /products: 422 response, POST /products: 401 response, POST /products: 422 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, DELETE /products/{product_id}: 401 response, GET /products/{product_id}: 401 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 401 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, POST /tasks: 422 response, POST /tasks: 500 response, POST /tasks: 400 response, POST /tasks: 401 response, POST /test/echo: 401 response, POST /test/echo: 422 response; All operations document 5xx error responses: POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /test/echo",
             "Details": {
                 "checks": {
                     "All operations document 4xx error responses": true,
-                    "All operations document 5xx error responses": true,
+                    "All operations document 5xx error responses": false,
                     "Common error responses are defined in components": false,
                     "Error responses follow consistent format": true,
                     "Error responses include error details schema": false
@@ -144,29 +144,27 @@
                 },
                 "missing_errors": {
                     "All operations document 5xx error responses": [
-                        "POST /test/echo",
                         "POST /products",
                         "DELETE /products/{product_id}",
                         "GET /products/{product_id}",
-                        "PUT /products/{product_id}"
+                        "PUT /products/{product_id}",
+                        "POST /test/echo"
                     ],
                     "Error responses include error details schema": [
-                        "POST /test/echo: 422 response",
-                        "POST /test/echo: 401 response",
+                        "GET /test/health: 500 response",
                         "GET /test/health: 400 response",
                         "GET /test/health: 404 response",
-                        "GET /test/health: 500 response",
-                        "GET /legacy/products: 401 response",
                         "GET /legacy/products: 500 response",
-                        "POST /products: 401 response",
-                        "POST /products: 422 response",
+                        "GET /legacy/products: 401 response",
                         "GET /products: 500 response",
                         "GET /products: 400 response",
                         "GET /products: 401 response",
                         "GET /products: 422 response",
-                        "DELETE /products/{product_id}: 401 response",
+                        "POST /products: 401 response",
+                        "POST /products: 422 response",
                         "DELETE /products/{product_id}: 404 response",
                         "DELETE /products/{product_id}: 422 response",
+                        "DELETE /products/{product_id}: 401 response",
                         "GET /products/{product_id}: 401 response",
                         "GET /products/{product_id}: 404 response",
                         "GET /products/{product_id}: 422 response",
@@ -176,7 +174,9 @@
                         "POST /tasks: 422 response",
                         "POST /tasks: 500 response",
                         "POST /tasks: 400 response",
-                        "POST /tasks: 401 response"
+                        "POST /tasks: 401 response",
+                        "POST /test/echo: 401 response",
+                        "POST /test/echo: 422 response"
                     ]
                 }
             },
@@ -190,7 +190,7 @@
                 "name": "Request Schema Definitions",
                 "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
                 "category": "Schema",
-                "severity": "warning",
+                "severity": "critical",
                 "tags": [
                     "schema",
                     "validation",
@@ -325,8 +325,8 @@
     "passed_checks": 3,
     "failed_checks": 3,
     "summary": {
-        "CriticalIssues": 0,
-        "Warnings": 3,
+        "CriticalIssues": 3,
+        "Warnings": 0,
         "Info": 0,
         "Categories": [
             "Documentation",
@@ -334,15 +334,15 @@
             "Schema"
         ],
         "FailedTags": [
-            "documentation",
-            "quality",
-            "usability",
             "responses",
-            "standards",
-            "request",
-            "errors",
             "schema",
-            "validation"
+            "request",
+            "documentation",
+            "usability",
+            "errors",
+            "standards",
+            "validation",
+            "quality"
         ],
         "TestSummary": null
     }
