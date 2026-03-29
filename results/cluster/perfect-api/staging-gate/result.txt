@@ -1,1 +1,1 @@
-PASS — validate-only (test-ready: 3/3) + functional-test (all endpoints passed)
+PASS — validate-only (test-ready: 3/5 with old spec, P002+P003 warnings) + functional-test (all endpoints passed). Note: API served pre-v3.1.0 spec; re-run with fixed spec expected to yield 5/5.

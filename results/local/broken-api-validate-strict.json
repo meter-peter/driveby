@@ -3,7 +3,7 @@
     "exit_code": 0,
     "version": "1.0.0",
     "environment": "production",
-    "timestamp": "2026-03-21T19:04:47.028189184+02:00",
+    "timestamp": "2026-03-29T22:29:05.356695283+03:00",
     "principles": [
         {
             "Principle": {
@@ -130,7 +130,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Error handling issues found: All operations document 5xx error responses: POST /test/echo, POST /products, PUT /products/{product_id}, DELETE /products/{product_id}, GET /products/{product_id}; Error responses include error details schema: POST /test/echo: 401 response, POST /test/echo: 422 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /test/health: 500 response, GET /legacy/products: 500 response, GET /legacy/products: 401 response, GET /products: 401 response, GET /products: 422 response, GET /products: 500 response, GET /products: 400 response, POST /products: 401 response, POST /products: 422 response, PUT /products/{product_id}: 401 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, DELETE /products/{product_id}: 401 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 422 response, GET /products/{product_id}: 401 response, GET /products/{product_id}: 404 response, POST /tasks: 500 response, POST /tasks: 400 response, POST /tasks: 401 response, POST /tasks: 422 response",
+            "Message": "Error handling issues found: All operations document 5xx error responses: POST /test/echo, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}; Error responses include error details schema: POST /test/echo: 422 response, POST /test/echo: 401 response, GET /test/health: 400 response, GET /test/health: 404 response, GET /test/health: 500 response, GET /legacy/products: 401 response, GET /legacy/products: 500 response, POST /products: 401 response, POST /products: 422 response, GET /products: 500 response, GET /products: 400 response, GET /products: 401 response, GET /products: 422 response, DELETE /products/{product_id}: 401 response, DELETE /products/{product_id}: 404 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 401 response, GET /products/{product_id}: 404 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 401 response, PUT /products/{product_id}: 404 response, PUT /products/{product_id}: 422 response, POST /tasks: 422 response, POST /tasks: 500 response, POST /tasks: 400 response, POST /tasks: 401 response",
             "Details": {
                 "checks": {
                     "All operations document 4xx error responses": true,
@@ -146,37 +146,37 @@
                     "All operations document 5xx error responses": [
                         "POST /test/echo",
                         "POST /products",
-                        "PUT /products/{product_id}",
                         "DELETE /products/{product_id}",
-                        "GET /products/{product_id}"
+                        "GET /products/{product_id}",
+                        "PUT /products/{product_id}"
                     ],
                     "Error responses include error details schema": [
-                        "POST /test/echo: 401 response",
                         "POST /test/echo: 422 response",
+                        "POST /test/echo: 401 response",
                         "GET /test/health: 400 response",
                         "GET /test/health: 404 response",
                         "GET /test/health: 500 response",
-                        "GET /legacy/products: 500 response",
                         "GET /legacy/products: 401 response",
-                        "GET /products: 401 response",
-                        "GET /products: 422 response",
-                        "GET /products: 500 response",
-                        "GET /products: 400 response",
+                        "GET /legacy/products: 500 response",
                         "POST /products: 401 response",
                         "POST /products: 422 response",
-                        "PUT /products/{product_id}: 401 response",
-                        "PUT /products/{product_id}: 404 response",
-                        "PUT /products/{product_id}: 422 response",
+                        "GET /products: 500 response",
+                        "GET /products: 400 response",
+                        "GET /products: 401 response",
+                        "GET /products: 422 response",
                         "DELETE /products/{product_id}: 401 response",
                         "DELETE /products/{product_id}: 404 response",
                         "DELETE /products/{product_id}: 422 response",
-                        "GET /products/{product_id}: 422 response",
                         "GET /products/{product_id}: 401 response",
                         "GET /products/{product_id}: 404 response",
+                        "GET /products/{product_id}: 422 response",
+                        "PUT /products/{product_id}: 401 response",
+                        "PUT /products/{product_id}: 404 response",
+                        "PUT /products/{product_id}: 422 response",
+                        "POST /tasks: 422 response",
                         "POST /tasks: 500 response",
                         "POST /tasks: 400 response",
-                        "POST /tasks: 401 response",
-                        "POST /tasks: 422 response"
+                        "POST /tasks: 401 response"
                     ]
                 }
             },
@@ -211,7 +211,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Request validation issues found: All schemas specify data types: POST /tasks: application/json schema, POST /products: application/json schema, PUT /products/{product_id}: application/json schema",
+            "Message": "Request validation issues found: All schemas specify data types: POST /products: application/json schema, PUT /products/{product_id}: application/json schema, POST /tasks: application/json schema",
             "Details": {
                 "checks": {
                     "All enums have valid values": true,
@@ -228,9 +228,9 @@
                 "messages": {},
                 "missing_validation": {
                     "All schemas specify data types": [
-                        "POST /tasks: application/json schema",
                         "POST /products: application/json schema",
-                        "PUT /products/{product_id}: application/json schema"
+                        "PUT /products/{product_id}: application/json schema",
+                        "POST /tasks: application/json schema"
                     ]
                 }
             },
@@ -335,14 +335,14 @@
         ],
         "FailedTags": [
             "documentation",
+            "quality",
             "usability",
-            "errors",
             "responses",
             "standards",
-            "schema",
-            "validation",
             "request",
-            "quality"
+            "errors",
+            "schema",
+            "validation"
         ],
         "TestSummary": null
     }

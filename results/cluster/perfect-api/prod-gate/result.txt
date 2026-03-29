@@ -1,1 +1,1 @@
-PASS — validate-only passed + load-test passed. PR stays open (autoMerge: false).
+PASS — validate-only (strict) + load-test passed. PR open (autoMerge: false).

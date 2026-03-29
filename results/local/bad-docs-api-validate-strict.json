@@ -3,7 +3,7 @@
     "exit_code": 0,
     "version": "1.0.0",
     "environment": "production",
-    "timestamp": "2026-03-21T19:04:43.029836853+02:00",
+    "timestamp": "2026-03-29T22:29:01.315657025+03:00",
     "principles": [
         {
             "Principle": {
@@ -73,7 +73,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Documentation quality issues found: All parameters have descriptions: GET /products: parameter category, GET /products: parameter min_price, GET /products: parameter max_price, GET /products: parameter in_stock, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, DELETE /products/{product_id}: parameter product_id; All schemas have descriptions: TaskCreate, HTTPValidationError, ProductCreate, ValidationError, ProductCategory, Task, Product, ProductBase; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other; All operations have detailed descriptions: GET /legacy/products, GET /products, POST /products, GET /products/{product_id}, PUT /products/{product_id}, DELETE /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health; All request/response bodies have examples: GET /legacy/products: 200 application/json response, GET /products: 422 application/json response, GET /products: 200 application/json response, POST /products: request body, POST /products: application/json request body, POST /products: 201 application/json response, POST /products: 422 application/json response, GET /products/{product_id}: 200 application/json response, GET /products/{product_id}: 422 application/json response, PUT /products/{product_id}: request body, PUT /products/{product_id}: application/json request body, PUT /products/{product_id}: 200 application/json response, PUT /products/{product_id}: 422 application/json response, DELETE /products/{product_id}: 422 application/json response, POST /tasks: request body, POST /tasks: application/json request body, POST /tasks: 422 application/json response, POST /tasks: 201 application/json response, POST /test/echo: request body, POST /test/echo: application/json request body, POST /test/echo: 200 application/json response, POST /test/echo: 422 application/json response, GET /test/health: 200 application/json response",
+            "Message": "Documentation quality issues found: All schemas have descriptions: ProductCreate, HTTPValidationError, Product, TaskCreate, ValidationError, ProductBase, ProductCategory, Task; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other; All operations have detailed descriptions: GET /test/health, GET /legacy/products, GET /products, POST /products, GET /products/{product_id}, PUT /products/{product_id}, DELETE /products/{product_id}, POST /tasks, POST /test/echo; All request/response bodies have examples: GET /test/health: 200 application/json response, GET /legacy/products: 200 application/json response, GET /products: 200 application/json response, GET /products: 422 application/json response, POST /products: request body, POST /products: application/json request body, POST /products: 201 application/json response, POST /products: 422 application/json response, GET /products/{product_id}: 200 application/json response, GET /products/{product_id}: 422 application/json response, PUT /products/{product_id}: request body, PUT /products/{product_id}: application/json request body, PUT /products/{product_id}: 200 application/json response, PUT /products/{product_id}: 422 application/json response, DELETE /products/{product_id}: 422 application/json response, POST /tasks: request body, POST /tasks: application/json request body, POST /tasks: 201 application/json response, POST /tasks: 422 application/json response, POST /test/echo: request body, POST /test/echo: application/json request body, POST /test/echo: 200 application/json response, POST /test/echo: 422 application/json response; All parameters have descriptions: GET /products: parameter category, GET /products: parameter min_price, GET /products: parameter max_price, GET /products: parameter in_stock, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, DELETE /products/{product_id}: parameter product_id",
             "Details": {
                 "checks": {
                     "API has a general description": true,
@@ -98,6 +98,7 @@
                         "ProductCategory: enum value other"
                     ],
                     "All operations have detailed descriptions": [
+                        "GET /test/health",
                         "GET /legacy/products",
                         "GET /products",
                         "POST /products",
@@ -105,8 +106,7 @@
                         "PUT /products/{product_id}",
                         "DELETE /products/{product_id}",
                         "POST /tasks",
-                        "POST /test/echo",
-                        "GET /test/health"
+                        "POST /test/echo"
                     ],
                     "All parameters have descriptions": [
                         "GET /products: parameter category",
@@ -118,9 +118,10 @@
                         "DELETE /products/{product_id}: parameter product_id"
                     ],
                     "All request/response bodies have examples": [
+                        "GET /test/health: 200 application/json response",
                         "GET /legacy/products: 200 application/json response",
-                        "GET /products: 422 application/json response",
                         "GET /products: 200 application/json response",
+                        "GET /products: 422 application/json response",
                         "POST /products: request body",
                         "POST /products: application/json request body",
                         "POST /products: 201 application/json response",
@@ -134,23 +135,22 @@
                         "DELETE /products/{product_id}: 422 application/json response",
                         "POST /tasks: request body",
                         "POST /tasks: application/json request body",
-                        "POST /tasks: 422 application/json response",
                         "POST /tasks: 201 application/json response",
+                        "POST /tasks: 422 application/json response",
                         "POST /test/echo: request body",
                         "POST /test/echo: application/json request body",
                         "POST /test/echo: 200 application/json response",
-                        "POST /test/echo: 422 application/json response",
-                        "GET /test/health: 200 application/json response"
+                        "POST /test/echo: 422 application/json response"
                     ],
                     "All schemas have descriptions": [
-                        "TaskCreate",
-                        "HTTPValidationError",
                         "ProductCreate",
-                        "ValidationError",
-                        "ProductCategory",
-                        "Task",
+                        "HTTPValidationError",
                         "Product",
-                        "ProductBase"
+                        "TaskCreate",
+                        "ValidationError",
+                        "ProductBase",
+                        "ProductCategory",
+                        "Task"
                     ]
                 }
             },
@@ -182,7 +182,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Error handling issues found: All operations document 4xx error responses: GET /legacy/products, GET /test/health; All operations document 5xx error responses: GET /legacy/products, GET /products, POST /products, GET /products/{product_id}, PUT /products/{product_id}, DELETE /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health; Error responses include error details schema: GET /products: 422 response, POST /products: 422 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 422 response, DELETE /products/{product_id}: 422 response, POST /tasks: 422 response, POST /test/echo: 422 response",
+            "Message": "Error handling issues found: All operations document 5xx error responses: GET /products, POST /products, DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health, GET /legacy/products; Error responses include error details schema: GET /products: 422 response, POST /products: 422 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 422 response, POST /tasks: 422 response, POST /test/echo: 422 response; All operations document 4xx error responses: GET /test/health, GET /legacy/products",
             "Details": {
                 "checks": {
                     "All operations document 4xx error responses": false,
@@ -196,26 +196,26 @@
                 },
                 "missing_errors": {
                     "All operations document 4xx error responses": [
-                        "GET /legacy/products",
-                        "GET /test/health"
+                        "GET /test/health",
+                        "GET /legacy/products"
                     ],
                     "All operations document 5xx error responses": [
-                        "GET /legacy/products",
                         "GET /products",
                         "POST /products",
+                        "DELETE /products/{product_id}",
                         "GET /products/{product_id}",
                         "PUT /products/{product_id}",
-                        "DELETE /products/{product_id}",
                         "POST /tasks",
                         "POST /test/echo",
-                        "GET /test/health"
+                        "GET /test/health",
+                        "GET /legacy/products"
                     ],
                     "Error responses include error details schema": [
                         "GET /products: 422 response",
                         "POST /products: 422 response",
+                        "DELETE /products/{product_id}: 422 response",
                         "GET /products/{product_id}: 422 response",
                         "PUT /products/{product_id}: 422 response",
-                        "DELETE /products/{product_id}: 422 response",
                         "POST /tasks: 422 response",
                         "POST /test/echo: 422 response"
                     ]
@@ -252,7 +252,7 @@
                 ]
             },
             "Passed": false,
-            "Message": "Request validation issues found: All string fields have length constraints: POST /products.tags[]: application/json schema, POST /products.category: application/json schema, POST /products.description: application/json schema, PUT /products/{product_id}.tags[]: application/json schema, PUT /products/{product_id}.category: application/json schema, PUT /products/{product_id}.description: application/json schema, POST /tasks.description: application/json schema",
+            "Message": "Request validation issues found: All string fields have length constraints: POST /products.tags[]: application/json schema, POST /products.category: application/json schema, POST /products.description: application/json schema, PUT /products/{product_id}.description: application/json schema, PUT /products/{product_id}.tags[]: application/json schema, PUT /products/{product_id}.category: application/json schema, POST /tasks.description: application/json schema",
             "Details": {
                 "checks": {
                     "All enums have valid values": true,
@@ -272,9 +272,9 @@
                         "POST /products.tags[]: application/json schema",
                         "POST /products.category: application/json schema",
                         "POST /products.description: application/json schema",
+                        "PUT /products/{product_id}.description: application/json schema",
                         "PUT /products/{product_id}.tags[]: application/json schema",
                         "PUT /products/{product_id}.category: application/json schema",
-                        "PUT /products/{product_id}.description: application/json schema",
                         "POST /tasks.description: application/json schema"
                     ]
                 }
@@ -382,18 +382,18 @@
             "Documentation"
         ],
         "FailedTags": [
-            "documentation",
-            "usability",
-            "standards",
-            "request",
-            "versioning",
             "compatibility",
             "lifecycle",
-            "quality",
+            "usability",
             "errors",
-            "responses",
+            "standards",
             "schema",
-            "validation"
+            "validation",
+            "request",
+            "versioning",
+            "documentation",
+            "quality",
+            "responses"
         ],
         "TestSummary": null
     }

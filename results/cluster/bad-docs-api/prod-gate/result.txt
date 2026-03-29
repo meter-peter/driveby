@@ -1,1 +1,1 @@
-NOT_REACHED — staging gate failed (P005 Security Standards), prod gate was never triggered.
+PASS — validate-only (strict) + load-test passed. bad-docs-api reaches prod for the first time because staging gate now correctly passes (P005 has security).

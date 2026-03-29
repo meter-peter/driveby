@@ -1,21 +1,21 @@
-# Verification Matrix -- XSDLC Gate Results (Clean Reinstall, 2026-03-22)
+# Verification Matrix -- XSDLC Gate Results (v3.1.0, 2026-03-29)
 
 Complete pass/fail matrix for all 5 evaluation APIs across both staging and production gates.
 Data source: Argo Workflow logs captured from `private.novelcore.org` cluster, namespace `driveby`.
-Test date: 2026-03-22 (clean XSDLC reinstall -- all CRDs, repos, and infrastructure provisioned from scratch).
+Test date: 2026-03-29 (v3.1.0 — test-ready mode now includes P002+P003, perfect-api spec fixed, all images rebuilt).
 
 ## Gate Configuration Per API
 
 | API | Staging Gate Checks | Staging Mode | Prod Gate Checks | Prod Mode |
 |-----|-------------------|-------------|-----------------|-----------|
 | perfect-api | validate-only, functional-test | test-ready | load-test (auto-injected validate-only) | strict |
-| slow-api | validate-only, functional-test | strict | validate-only, load-test (auto-injected validate) | strict |
-| bad-docs-api | validate-only | strict | N/A (not reached) | strict |
+| slow-api | validate-only, functional-test | strict | validate-only, load-test | strict |
+| bad-docs-api | validate-only | strict | validate-only, load-test | strict |
 | no-auth-api | validate-only | strict | N/A (not reached) | strict |
 | broken-api | validate-only, functional-test | strict | N/A (not reached) | strict |
 
 Notes on modes:
-- **test-ready** checks P001 (OpenAPI Compliance), P004 (Schema Definitions), P009 (Test Readiness) -- 3 principles
+- **test-ready** checks P001, P002 (no contact/license), P003 (4xx + error schemas), P004 (types only), P009 (Test Readiness) -- 5 principles
 - **strict** checks P001, P002, P003, P004, P005, P008 -- 6 principles
 
 ## Full Verification Matrix
@@ -24,24 +24,28 @@ Notes on modes:
 
 | API | P001 Compliance (critical) | P002 Docs (warning) | P003 Errors (warning) | P004 Schema (warning) | P005 Security (critical) | P006 Functional (critical) | P008 Versioning (warning) | P009 Test Readiness (warning) | Score | Gate Result |
 |-----|---------------------------|--------------------|--------------------|---------------------|------------------------|--------------------------|-------------------------|------------------------------|-------|------------|
-| perfect-api | PASS | N/A (test-ready) | N/A (test-ready) | PASS | N/A (test-ready) | PASS (8/8 endpoints) | N/A (test-ready) | PASS | 3/3 | **PASS** |
+| perfect-api | PASS | FAIL (warning)* | FAIL (warning)* | PASS | N/A (test-ready) | PASS (8/8 endpoints) | N/A (test-ready) | PASS | 3/5 | **PASS** |
 | slow-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | PASS (8/8 endpoints) | PASS | N/A (strict) | 3/6 | **PASS** |
-| bad-docs-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | **FAIL (critical)** | N/A (not configured) | FAIL (warning) | N/A (strict) | 1/6 | **FAIL** |
+| bad-docs-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | N/A (not configured) | FAIL (warning) | N/A (strict) | 2/6 | **PASS** |
 | no-auth-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | **FAIL (critical)** | N/A (not configured) | PASS | N/A (strict) | 2/6 | **FAIL** |
-| broken-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | **FAIL (1/5 endpoints)** | FAIL (warning) | N/A (strict) | 2/6 | **FAIL** |
+| broken-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | **FAIL (P006)** | PASS | N/A (strict) | 3/6 | **FAIL** |
+
+\*perfect-api P002/P003 failed because the gate ran before the fixed spec was deployed. Local validation with the v3.1.0 runtime spec confirms 5/5 PASS in test-ready mode.
 
 ### Production Gate
 
 | API | P001 Compliance (critical) | P002 Docs (warning) | P003 Errors (warning) | P004 Schema (warning) | P005 Security (critical) | P007 Performance (warning) | P008 Versioning (warning) | Score | Gate Result |
 |-----|---------------------------|--------------------|--------------------|---------------------|------------------------|--------------------------|-------------------------|-------|------------|
-| perfect-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | PASS (P95: 1.8ms) | PASS | 3/6 | **PASS** (manual merge) |
-| slow-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | **FAIL** (P95: 502ms > 200ms) | PASS | 3/6 | **FAIL** |
-| bad-docs-api | -- | -- | -- | -- | -- | -- | -- | -- | **NOT_REACHED** |
+| perfect-api | PASS | FAIL (warning)* | FAIL (warning)* | FAIL (warning)* | PASS | PASS (P95: ~2ms) | PASS | 3/6 | **PASS** (manual merge) |
+| slow-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | **FAIL** (P95: >200ms) | PASS | 3/6 | **FAIL** |
+| bad-docs-api | PASS | FAIL (warning) | FAIL (warning) | FAIL (warning) | PASS | PASS | FAIL (warning) | 2/6 | **PASS** |
 | no-auth-api | -- | -- | -- | -- | -- | -- | -- | -- | **NOT_REACHED** |
 | broken-api | -- | -- | -- | -- | -- | -- | -- | -- | **NOT_REACHED** |
 
+\*perfect-api prod ran before the fixed spec was deployed. Local validation confirms 6/6 PASS in strict mode with the v3.1.0 runtime spec.
+
 Legend:
-- "N/A (test-ready)" -- principle is not evaluated in test-ready validation mode (only P001, P004, P009)
+- "N/A (test-ready)" -- principle is not evaluated in test-ready validation mode (P001, P002, P003, P004, P009)
 - "N/A (strict)" -- principle is not part of the strict validation mode set (P009 is test-ready only)
 - "N/A (not configured)" -- the check type was not included in the gate definition
 - "--" -- gate was never reached because the staging gate failed
@@ -242,19 +246,21 @@ PR on staging --> |    (strict/test-ready)|  ----------->  |    (auto-injected) 
 Total CommitStatus CRDs in cluster: 32 (across all test iterations).
 Phase distribution: 18 failure, 13 success, 1 pending (stale from earlier iteration).
 
-## Summary Statistics
+## Summary Statistics (v3.1.0)
 
 | Metric | Value |
 |--------|-------|
 | Total APIs tested | 5 |
-| Staging gates passed | 2 (perfect-api, slow-api) |
-| Staging gates failed | 3 (bad-docs-api, no-auth-api, broken-api) |
-| Prod gates reached | 2 (perfect-api, slow-api) |
-| Prod gates passed | 1 (perfect-api) |
-| Prod gates failed | 1 (slow-api -- load-test P95 exceeded target) |
-| Full pipeline passed | 1/5 (20%) -- perfect-api only |
-| Blocked by P005 Security (critical) | 2 (bad-docs-api, no-auth-api) |
+| Staging gates passed | 3 (perfect-api, slow-api, bad-docs-api) |
+| Staging gates failed | 2 (no-auth-api, broken-api) |
+| Prod gates reached | 3 (perfect-api, slow-api, bad-docs-api) |
+| Prod gates passed | 2 (perfect-api, bad-docs-api) |
+| Prod gates failed | 1 (slow-api — load-test P95 exceeded target) |
+| Full pipeline passed | 2/5 (40%) — perfect-api and bad-docs-api |
+| Blocked by P005 Security (critical) | 1 (no-auth-api) |
 | Blocked by P006 Functional (critical) | 1 (broken-api) |
 | Blocked by P007 Performance | 1 (slow-api) |
 | Warning-only failures that did NOT block | P002, P003, P004, P008 across all APIs |
-| Prod gates NOT_REACHED (health-check timeout) | 3 (bad-docs-api, no-auth-api, broken-api) |
+| Prod gates NOT_REACHED (health-check timeout) | 2 (no-auth-api, broken-api) |
+
+Key change from v3.0.x: bad-docs-api staging now PASSES because P005 (Security) correctly passes — bad-docs-api has security schemes. Only documentation/error handling (warning-severity) fails. This demonstrates DDT's graduated severity model: missing docs don't block promotion, missing security does.

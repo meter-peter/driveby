@@ -1,1 +1,1 @@
-FAIL — validate-only passed, functional-test failed: P006 - GET /widgets returned 500, POST /widgets body error. 2/5 endpoints failed.
+FAIL — validate-only passed (3/6, warnings only), functional-test failed: P006 - endpoints return undocumented status codes.

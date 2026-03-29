@@ -23,7 +23,7 @@ results/
 │   │   ├── ingresses.json
 │   │   ├── staging-gate/          ← PASS (validate + functional)
 │   │   └── prod-gate/             ← PASS (validate + load-test, manual merge)
-│   ├── bad-docs-api/              ← FAIL staging (P005 critical)
+│   ├── bad-docs-api/              ← PASS staging (warnings only), PASS prod
 │   ├── no-auth-api/               ← FAIL staging (P005 critical)
 │   ├── slow-api/                  ← PASS staging, FAIL prod (load-test P95>200ms)
 │   └── broken-api/                ← FAIL staging (P006 functional)
@@ -41,21 +41,27 @@ results/
     └── thesis-insights.md
 ```
 
-## Gate Results Summary (2026-03-22)
+## Gate Results Summary (2026-03-29, v3.1.0)
 
 | API | Staging Gate | Staging Result | Prod Gate | Prod Result |
 |-----|-------------|---------------|-----------|-------------|
 | perfect-api | validate-only (test-ready) + functional-test | **PASS** | load-test (auto-injected validate) | **PASS** (manual merge) |
-| slow-api | validate-only (strict) + functional-test | **PASS** | validate-only + load-test (10u/15s/200ms) | **FAIL** (P95=502ms) |
-| bad-docs-api | validate-only (strict) | **FAIL** (P005 critical) | N/A | NOT_REACHED |
+| slow-api | validate-only (strict) + functional-test | **PASS** | validate-only + load-test (10u/15s/200ms) | **FAIL** (P95>200ms) |
+| bad-docs-api | validate-only (strict) | **PASS** (0 critical, 4 warnings) | validate-only + load-test | **PASS** |
 | no-auth-api | validate-only (strict) | **FAIL** (P005 critical) | N/A | NOT_REACHED |
-| broken-api | validate-only (strict) + functional-test | **FAIL** (P006) | N/A | NOT_REACHED |
+| broken-api | validate-only (strict) + functional-test | **FAIL** (P006 functional) | N/A | NOT_REACHED |
+
+Notes:
+- **test-ready** mode checks P001, P002 (no contact/license), P003 (4xx + error schemas), P004, P009 — 5 principles
+- **strict** mode checks P001, P002, P003, P004, P005, P008 — 6 principles
+- bad-docs-api staging now PASSES (v3.1.0 confirms P005 passes — security schemes are present)
 
 ## Local CLI Results (in `local/`)
 
 | File | API | Test | Result |
 |------|-----|------|--------|
-| `perfect-api-validate-strict.json` | perfect-api | validate-only (strict) | passed (3/6) |
+| `perfect-api-validate-strict.json` | perfect-api | validate-only (strict) | passed (6/6) |
+| `perfect-api-validate-test-ready.json` | perfect-api | validate-only (test-ready) | passed (5/5) |
 | `perfect-api-functional.json` | perfect-api | function-only | passed (8/8 endpoints) |
 | `perfect-api-loadtest.json` | perfect-api | load-only | passed (P95: ~7ms) |
 | `bad-docs-api-validate-strict.json` | bad-docs-api | validate-only (strict) | passed (2/6, warnings only) |
