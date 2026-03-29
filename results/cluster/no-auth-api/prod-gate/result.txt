@@ -1,1 +1,1 @@
-FAIL — NOT_REACHED: health-check timeout (no staging deployment because staging gate failed).
+FAIL — NOT_REACHED: staging gate failed, no staging deployment.

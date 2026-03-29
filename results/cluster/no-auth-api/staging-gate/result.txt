@@ -1,1 +1,1 @@
-FAIL — validate-only failed: P005 Security Standards (critical) - no security schemes defined. 2/6 passed.
+FAIL — validate-only failed: P005+P002+P003+P004 critical (2/6 passed). No security + incomplete docs.

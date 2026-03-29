@@ -1,1 +1,1 @@
-FAIL — validate-only passed (3/6, warnings only), functional-test failed: P006 - endpoints return undocumented status codes.
+FAIL — validate-only failed: P002+P003+P004 critical (3/6 passed). Never reaches functional-test.

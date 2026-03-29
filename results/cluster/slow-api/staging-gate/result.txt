@@ -1,1 +1,1 @@
-PASS — validate-only (strict: 3/6, 0 critical, 3 warnings) + functional-test (8/8 endpoints, ~501ms each due to 500ms delay).
+FAIL — validate-only failed: P002+P003+P004 critical (3/6 passed). Never reaches functional-test or load-test.

@@ -1,1 +1,1 @@
-PASS — validate-only (strict: 2/6, 0 critical, 4 warnings). P001+P005 pass. P002/P003/P004/P008 fail as warnings only. Gate passes because no critical failures.
+FAIL — validate-only failed: P002+P003+P004 critical (2/6 passed). Incomplete documentation blocks functional testing.

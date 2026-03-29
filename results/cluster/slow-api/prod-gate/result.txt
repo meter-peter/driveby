@@ -1,1 +1,1 @@
-FAIL — load-test failed: P95 latency exceeded target (501ms > 200ms). validate-only passed (3/6, warnings only).
+FAIL — NOT_REACHED: staging gate failed, no staging deployment.
