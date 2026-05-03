@@ -56,6 +56,8 @@ Your OpenAPI spec already describes your API contract. DriveBy treats it as the 
 
 DriveBy uses **a single Crossplane custom resource (XSDLC)** to manage the entire promotion pipeline declaratively:
 
+> **Naming convention:** the thesis text refers to `perfect-api` as `non-critical-api` — see thesis Chapter 7 §7.2. Source identifiers (this repo, namespaces, container images, CRs) keep the historical `perfect-api` name for stability; the rename is scheduled for v4.0.
+
 ```yaml
 apiVersion: driveby.io/v1alpha1
 kind: XSDLC

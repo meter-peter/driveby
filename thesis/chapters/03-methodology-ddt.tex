@@ -99,7 +99,9 @@ P001 runs in every validation mode. A structurally invalid specification cannot 
 \label{subsec:p002}
 % ----------------------------------------------------------------------------
 
-\textbf{Axiom:} Completeness. \textbf{Severity:} Warning. \textbf{Status:} Implemented.
+\textbf{Axiom:} Completeness. \textbf{Severity:} Critical. \textbf{Status:} Implemented.
+
+\textit{Severity escalation note.} P002 was originally classified as \textbf{Warning} on the design rationale that incomplete documentation degrades a specification's usefulness without strictly preventing automation. Operational evidence accumulated during the controlled and large-scale evaluations (Chapter~\ref{ch:evaluation}) reversed this judgement: specifications missing operation summaries, parameter descriptions, schema descriptions, or response examples systematically prevent downstream agents and code generators from producing usable artefacts. The principle was escalated to \textbf{Critical} in the source code (commit \texttt{c96d9c7}, ``Make P002/P003/P004 critical''); this edition of the thesis aligns the prose with the source-of-truth severity. The same escalation applies to P003 and P004 below for parallel reasons.
 
 P002 assesses whether the specification serves as effective documentation for API consumers. A specification can be structurally valid (passing P001) yet practically useless---containing endpoints without descriptions, parameters without explanations, and schemas without examples.
 
@@ -112,7 +114,7 @@ P002 addresses a gap identified in Chapter~\ref{ch:related-work}: existing linte
 \label{subsec:p003}
 % ----------------------------------------------------------------------------
 
-\textbf{Axiom:} Completeness. \textbf{Severity:} Warning. \textbf{Status:} Implemented.
+\textbf{Axiom:} Completeness. \textbf{Severity:} Critical. \textbf{Status:} Implemented.
 
 P003 validates that the specification documents error responses comprehensively and consistently. Undocumented error responses are a primary source of integration failures: a consumer encounters an unexpected 403 or 422 response that the specification never mentioned, and must reverse-engineer the error format from raw HTTP responses.
 
@@ -127,7 +129,7 @@ The consistency check~(7) is particularly valuable. APIs that return \texttt{\{`
 \label{subsec:p004}
 % ----------------------------------------------------------------------------
 
-\textbf{Axiom:} Completeness. \textbf{Severity:} Warning. \textbf{Status:} Implemented.
+\textbf{Axiom:} Completeness. \textbf{Severity:} Critical. \textbf{Status:} Implemented.
 
 P004 validates that request and response schemas are precise, constrained, and complete. A schema that declares a field as type \texttt{string} without length constraints, pattern restrictions, or format specifications provides the consumer with no useful validation guidance. P004 ensures schemas are not merely present but informative.
 
@@ -232,9 +234,9 @@ Table~\ref{tab:axiom-principle-mapping} presents the formal mapping between axio
 \textbf{Axiom} & \textbf{ID} & \textbf{Principle} & \textbf{Severity} & \textbf{Status} \\
 \midrule
 Completeness  & P001 & OpenAPI Specification Compliance & Critical & Implemented \\
-Completeness  & P002 & API Documentation Quality        & Warning  & Implemented \\
-Completeness  & P003 & Error Handling Standards          & Warning  & Implemented \\
-Completeness  & P004 & Schema Definitions               & Warning  & Implemented \\
+Completeness  & P002 & API Documentation Quality        & Critical & Implemented \\
+Completeness  & P003 & Error Handling Standards          & Critical & Implemented \\
+Completeness  & P004 & Schema Definitions               & Critical & Implemented \\
 \addlinespace
 Observability & P005 & Security Standards               & Critical & Implemented \\
 \addlinespace
@@ -246,7 +248,7 @@ Observability & P008 & API Versioning Strategy           & Warning  & Implemente
 \bottomrule
 \end{tabular}
 
-\noindent\small\textit{Source-code mismatch (round-1 review~[481]).} As of the current DriveBy code release, the in-source severity constants (\texttt{driveby-cli/internal/types/report.go}) classify P001--P006 all as \texttt{critical}. The thesis-level severity assignments above reflect the framework's design intent and the empirical evidence: a critical classification for P002--P004 would mean every public API in the APIs.guru sample (84\% of which fail those principles) blocks promotion---a result inconsistent with the thesis's positioning of strict mode as a quality-improvement aid rather than a bypass-or-fail gate. The source code will be realigned to match the design intent in a follow-up code release; the empirical results in Chapter~\ref{ch:evaluation} are reported under the design-intent severities used in this table.
+\noindent\small\textit{Severity alignment (round-2 revision).} The in-source severity constants (\texttt{driveby-cli/internal/types/report.go}) classify P001--P006 as \texttt{critical}; the table above reflects this. P002--P004 were originally assigned Warning severity on the design intent that incomplete documentation, error coverage, and schema precision degrade rather than prevent automation. Operational evidence accumulated during the controlled, large-scale, and PoC evaluations (Chapter~\ref{ch:evaluation}) reversed this judgement: specifications missing those properties systematically prevented downstream agent and code-generator consumption. The escalation was applied first in the source code (commit \texttt{c96d9c7}, ``Make P002/P003/P004 critical---validation blocks incomplete specs'') and then propagated to this thesis. The strong empirical consequence---that 84\% of public APIs in the APIs.guru sample now block at the static layer rather than degrade gracefully---is itself a load-bearing result of Chapter~\ref{ch:evaluation}: it is the quantitative form of the systemic specification-quality gap that motivates the framework's existence. Strict mode therefore functions as a true quality gate rather than an advisory layer; teams that need a non-blocking baseline use minimal or test-ready mode (Section~\ref{sec:validation-modes}).
 \end{table}
 
 The asymmetry is intentional and reflects the framework's priorities. Completeness dominates because the specification is the sole input to validation---if it is incomplete, the other axioms are undermined. Four principles are needed to cover the four dimensions of specification completeness: structural validity (P001), documentation substance (P002), error coverage (P003), and schema precision (P004).

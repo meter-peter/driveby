@@ -1,6 +1,8 @@
 \documentclass[12pt,a4paper]{report}
 \usepackage[utf8]{inputenc}
-% Uncomment after: sudo dnf install -y texlive-collection-langgreek
+% Greek language support — uncomment after installing texlive-collection-langgreek
+% (sudo dnf install -y texlive-collection-langgreek on Fedora) and uncomment the
+% \include{chapters/abstract-gr} line below.
 %\usepackage[T1,LGR]{fontenc}
 %\usepackage[greek,english]{babel}
 %\usepackage{alphabeta}
@@ -62,7 +64,9 @@ in the GitOps Era}\\[1cm]}
 \end{titlepage}
 
 \include{chapters/abstract-en}
-% Requires texlive-collection-langgreek: sudo dnf install -y texlive-collection-langgreek
+% Greek abstract (file ready in chapters/abstract-gr.tex) — uncomment after
+% installing texlive-collection-langgreek and uncommenting the babel/fontenc
+% lines in the preamble above.
 %\include{chapters/abstract-gr}
 
 \tableofcontents

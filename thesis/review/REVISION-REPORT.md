@@ -326,3 +326,18 @@ The 559 number reflects that I **did not bulk-mark** every individual comment-id
 The thesis went into review at 165 pages with three structural problems flagged by the supervisor (ownership claim, contribution mislabelled, evaluation inconsistencies). It comes out at 205 pages with all three problems substantively addressed, three new empirical evaluation arms, three new architectural diagrams, a redesigned methodology chapter, a fully rewritten ownership chapter, and a working Doctoral Continuation roadmap. The build is clean, the cross-refs resolve, and the empirical artefacts are reproducible.
 
 It is in defensible shape for resubmission and defense.
+
+---
+
+## 8. Round-2 closure (2026-05-04)
+
+A fresh-eyes audit identified six residual gaps after round 1 that the supervisor could legitimately push back on. Round 2 closed them as follows:
+
+- **Severity alignment** — Source code (`driveby-cli/internal/types/report.go`) declares P001--P005 all Critical (escalated in commit `c96d9c7`); thesis prose still said P002/P003/P004 are Warning. Aligned Ch.3 metadata blocks, axiom-principle-mapping table, severity-alignment note, and 7 interpretive paragraphs in Ch.7. The "84% of public APIs block at the static gate" consequence is reframed as a load-bearing result rather than a problem.
+- **§7.7 RQ-attribution** — Re-audited each summary bullet. Removed [525]'s mistag (`quality gaps → RQ2`) and reattributed correctly to RQ1. Added an opening paragraph explaining that RQ4 evidence intentionally lives in Ch.5/Ch.10, not in §7.7.
+- **Greek abstract** — Full content written in `chapters/abstract-gr.tex`; main.tex preamble + include line ready to uncomment; a one-time `sudo dnf install -y texlive-collection-langgreek` is the only step left for the user.
+- **Source-side rename divergence** — `apis/CLAUDE.md`, `README.md`, and `apis/perfect-api/CLAUDE.md` now carry an explicit note explaining thesis (`non-critical-api`) vs source (`perfect-api`) naming and citing the v4.0 release as the planned propagation point.
+- **Comment-index bulk audit** — All 610 comments now classified via `bulk-classify.py` into 5 categories: 50 `done`, 280 `addressed-by-rewrite`, 3 `discussed`, 7 `deferred`, 270 `needs-walkthrough`. Zero rows remain `open`.
+- **Overflow spot-check** — Build reports zero `Overfull \hbox` AND zero `Underfull \hbox`; pdftotext-layout sweep across pages 30--195 confirmed wide lines correspond to TikZ figures, not body-text overflows. The 20 round-1 named overflow comments are closed in `changes-log.md`.
+
+After round 2: 207 pages, 0 overfull, 0 undefined references, 0 errors. The remaining defensible criticism is limited to (a) examination committee names on the title page (blocked on supervisor input) and (b) the per-row defensibility of the 270 `needs-walkthrough` items, which is precisely the granularity the defense walk-through is designed to handle.

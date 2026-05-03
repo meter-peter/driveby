@@ -1,6 +1,8 @@
 # Perfect API — FastAPI Reference Implementation
 
 > **Moved to separate repo**: [`novelcore/perfect-api`](https://github.com/novelcore/perfect-api)
+>
+> **Naming convention (thesis vs source):** the thesis text refers to this API as **`non-critical-api`** (the rename rationale is in thesis Chapter 7 §7.2). Source identifiers in this directory, deployment manifests, and container images keep the historical name `perfect-api` for stability across past results, deployments, and clusters. The rename will be propagated to source in the v4.0 release. The artefact is the same.
 
 ## Overview
 A FastAPI (Python) application designed as the "known-good" reference implementation for DriveBy validation. This API is intentionally well-documented and well-structured to serve as the positive control in thesis evaluation.

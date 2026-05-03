@@ -1,7 +1,10 @@
 # APIs Directory — Sample APIs for Testing
 
 ## Purpose
-Contains sample API implementations used for controlled evaluation of DriveBy's validation principles. These APIs serve as the ground truth for thesis evaluation (Chapter 6).
+Contains sample API implementations used for controlled evaluation of DriveBy's validation principles. These APIs serve as the ground truth for thesis evaluation (Chapter 7).
+
+## Naming convention (thesis vs source)
+The thesis text refers to `perfect-api` as **`non-critical-api`** — see thesis Chapter 7 §7.2 for the rationale. Source identifiers (this directory, the namespaces, container images, Crossplane CRs, CI workflows, results JSON) keep the historical name `perfect-api` for stability across past results, deployments, and clusters. The rename will be propagated to source in the v4.0 release. When you see `perfect-api` in code and `non-critical-api` in the thesis, they refer to the same artefact.
 
 ## Inventory
 
