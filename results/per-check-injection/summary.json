@@ -1,0 +1,215 @@
+{
+  "baseline": {
+    "P001": true,
+    "P002": true,
+    "P003": true,
+    "P004": true,
+    "P005": true,
+    "P008": true
+  },
+  "single_check_runs": [
+    {
+      "mutation": "p001-duplicate-opid",
+      "target": "P001",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Specification structure is valid",
+        "No duplicate operationIds"
+      ]
+    },
+    {
+      "mutation": "p001-invalid-method",
+      "target": "P001",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Specification structure is valid"
+      ]
+    },
+    {
+      "mutation": "p002-strip-descriptions",
+      "target": "P002",
+      "outcome": "DETECTED",
+      "collateral": [
+        "P008"
+      ],
+      "new_failed_checks": [
+        "All operations have detailed descriptions",
+        "All enums have descriptions",
+        "All operations have clear summaries",
+        "All schemas have descriptions"
+      ]
+    },
+    {
+      "mutation": "p002-strip-examples",
+      "target": "P002",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "All request/response bodies have examples"
+      ]
+    },
+    {
+      "mutation": "p002-strip-contact",
+      "target": "P002",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "License information is provided",
+        "Contact information is provided"
+      ]
+    },
+    {
+      "mutation": "p003-strip-4xx-5xx",
+      "target": "P003",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "All operations document 5xx error responses",
+        "All operations document 4xx error responses"
+      ]
+    },
+    {
+      "mutation": "p003-strip-shared-responses",
+      "target": "P003",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Common error responses are defined in components"
+      ]
+    },
+    {
+      "mutation": "p004-untype-request-bodies",
+      "target": "P004",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "All schemas specify data types"
+      ]
+    },
+    {
+      "mutation": "p004-strip-constraints",
+      "target": "n/a",
+      "outcome": "err: {\"level\":\"info\",\"msg\":\"[loader] Successfully loaded OpenAPI spec from: /home/met",
+      "collateral": [],
+      "new_failed_checks": []
+    },
+    {
+      "mutation": "p005-strip-security-schemes",
+      "target": "P005",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Security schemes are defined",
+        "Security requirements are consistent"
+      ]
+    },
+    {
+      "mutation": "p005-strip-global-security",
+      "target": "P005",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Global security requirements are set",
+        "Operation-level security is defined"
+      ]
+    },
+    {
+      "mutation": "p005-strip-op-security",
+      "target": "P005",
+      "outcome": "MISSED",
+      "collateral": [],
+      "new_failed_checks": []
+    },
+    {
+      "mutation": "p008-invalid-version",
+      "target": "P008",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Version follows semantic versioning"
+      ]
+    },
+    {
+      "mutation": "p008-strip-strategy-doc",
+      "target": "P008",
+      "outcome": "DETECTED",
+      "collateral": [],
+      "new_failed_checks": [
+        "Versioning strategy is documented"
+      ]
+    },
+    {
+      "mutation": "p009-strip-param-examples",
+      "target": "P009",
+      "outcome": "MISSED",
+      "collateral": [],
+      "new_failed_checks": []
+    }
+  ],
+  "combination_runs": [
+    {
+      "kind": "pair",
+      "mutations": [
+        "p001-invalid-method",
+        "p002-strip-examples"
+      ],
+      "targets": [
+        "P001",
+        "P002"
+      ],
+      "outcome": "ALL DETECTED",
+      "principles": {
+        "P001": false,
+        "P002": false,
+        "P003": true,
+        "P004": true,
+        "P005": true,
+        "P008": true
+      }
+    },
+    {
+      "kind": "pair",
+      "mutations": [
+        "p001-duplicate-opid",
+        "p003-strip-4xx-5xx"
+      ],
+      "targets": [
+        "P001",
+        "P003"
+      ],
+      "outcome": "ALL DETECTED",
+      "principles": {
+        "P001": false,
+        "P002": true,
+        "P003": false,
+        "P004": true,
+        "P005": true,
+        "P008": true
+      }
+    },
+    {
+      "kind": "triple",
+      "mutations": [
+        "p002-strip-descriptions",
+        "p003-strip-4xx-5xx",
+        "p005-strip-security-schemes"
+      ],
+      "targets": [
+        "P002",
+        "P003",
+        "P005"
+      ],
+      "outcome": "ALL DETECTED",
+      "principles": {
+        "P001": true,
+        "P002": false,
+        "P003": false,
+        "P004": true,
+        "P005": false,
+        "P008": false
+      }
+    }
+  ]
+}

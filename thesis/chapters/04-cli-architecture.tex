@@ -1,9 +1,22 @@
-\chapter{CLI Architecture}
+\chapter{The DriveBy System}
 \label{ch:architecture}
 
-Chapter~\ref{ch:methodology} defined Documentation-Driven Testing as a two-layer methodology: three axioms and nine validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
+Chapter~\ref{ch:methodology} defined Specification-Driven Testing as a two-layer conceptual framework: three axioms and nine validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
 
 The scope of this chapter is the DriveBy binary itself---its internal packages, interfaces, and data structures. The Kubernetes infrastructure that hosts DriveBy as a quality gate is presented in Chapter~\ref{ch:kubernetes}, and the GitOps pipelines that trigger and consume its output are described in Chapter~\ref{ch:workflow}.
+
+Before describing the internal structure of the system, Figure~\ref{fig:system-context} situates DriveBy within its environment. The system under study is the DriveBy CLI together with the XSDLC composition that wraps it; the context shows the external actors and systems that interact with this boundary---the API developer, the application's CI, the OpenAPI specification and target API, ArgoCD, the GitOps Promoter, the GitOps repository, the Crossplane control plane, and the platform operator---together with the structured validation report that is the system's primary output.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/system-context.tex}%
+}
+\caption{System context. The dashed boundary encloses the system under study (DriveBy CLI plus XSDLC composition). External actors and systems are coloured by category (legend at lower-left). Edge labels indicate the artifact or signal exchanged across the boundary.}
+\label{fig:system-context}
+\end{figure}
+
+Figure~\ref{fig:component-diagram} then opens that boundary to expose the major internal Go packages of the CLI and their dependencies, and Figure~\ref{fig:class-diagram} (Section~\ref{sec:principle-checker-pattern}) shows the two central interfaces---\texttt{APISpec} and \texttt{PrincipleChecker}---together with their concrete realisations.
 
 % ============================================================================
 \section{Architecture Overview}
@@ -15,7 +28,7 @@ The scope of this chapter is the DriveBy binary itself---its internal packages, 
 \label{subsec:design-goals}
 % ----------------------------------------------------------------------------
 
-The DriveBy architecture is shaped by five design goals derived from the DDT axioms:
+The DriveBy architecture is shaped by five design goals derived from the SDT axioms:
 
 \begin{enumerate}
     \item \textbf{Version agnosticism.} Principle checkers must operate identically on OpenAPI~3.0.x, OpenAPI~3.1.0, and Swagger~2.0 specifications. No checker may contain version-specific branching logic.
@@ -29,7 +42,7 @@ The DriveBy architecture is shaped by five design goals derived from the DDT axi
     \item \textbf{Separation of concerns.} Type definitions, specification parsing, validation logic, runtime testing, report generation, and CLI presentation must reside in distinct packages with unidirectional dependencies.
 \end{enumerate}
 
-These goals map directly to the DDT axioms. Version agnosticism enables Completeness (the same checks apply regardless of specification version). Determinism by construction enforces the Axiom of Determinism. Machine-readable output satisfies Observability.
+These goals map directly to the SDT axioms. Version agnosticism enables Completeness (the same checks apply regardless of specification version). Determinism by construction enforces the Axiom of Determinism. Machine-readable output satisfies Observability.
 
 The implementation draws on two classical design patterns~\cite{gof}. The \textit{Adapter pattern} provides version agnosticism: each specification format is wrapped by an adapter that exposes a common interface. The \textit{Strategy pattern} provides extensibility: each principle checker is an interchangeable strategy that the engine selects based on validation mode.
 
@@ -44,13 +57,20 @@ DriveBy is implemented as a single Go module (\texttt{github.com/meter-peter/dri
 types <- spec <- loader <- principles <- testing <- engine <- cli
 \end{verbatim}
 
-No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualizes this dependency chain.
+No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualises this strict left-to-right dependency chain at the package level. Figure~\ref{fig:component-diagram} adds the external interfaces (the OpenAPI input, the target API under HTTP probing, and the structured report output) and groups packages into architectural layers.
 
 \begin{figure}[htbp]
 \centering
 \input{figures/dependency-flow.tex}
-\caption{DriveBy package dependency graph. Arrows indicate import direction; color denotes architectural layer.}
+\caption{DriveBy package dependency graph. Arrows indicate import direction; colour denotes architectural layer.}
 \label{fig:dependency-flow}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/component-diagram.tex}}
+\caption{Component diagram of the DriveBy CLI. Solid arrows are internal package dependencies; dashed violet arrows cross the system boundary to external interfaces. Colour denotes architectural layer (entry point, orchestration, principles, spec abstraction, foundation).}
+\label{fig:component-diagram}
 \end{figure}
 
 Table~\ref{tab:package-map} summarizes each package's responsibility and size.
@@ -194,18 +214,18 @@ The \texttt{APISpec} interface returns normalized types that abstract away versi
 \centering
 \caption{Normalized specification types in the \texttt{spec} package.}
 \label{tab:normalized-types}
-\small
-\begin{tabular}{@{}llp{6.5cm}@{}}
+\footnotesize
+\begin{tabular}{@{}p{2.4cm}p{4.6cm}p{5.8cm}@{}}
 \toprule
 \textbf{Type} & \textbf{Key Fields} & \textbf{Purpose} \\
 \midrule
-\texttt{Schema}       & Type, Properties, Required, AllOf/OneOf/AnyOf, Nullable & Unified schema representation; handles both 3.0.x \texttt{nullable} and 3.1.0 \texttt{type: [``null'', ...]} semantics \\
-\texttt{Operation}    & Method, Path, Parameters, RequestBody, Responses, Security & Single HTTP operation with all metadata needed by checkers \\
-\texttt{PathItem}     & Parameters, Operations map & Groups operations sharing a path; path-level parameters are propagated \\
-\texttt{Parameter}    & Name, In, Required, Schema, Example & Normalized parameter; \texttt{In} is a string (``path'', ``query'', ``header'', ``cookie'') \\
-\texttt{Response}     & Description, Content map & Status-code-keyed response with content-type-specific schemas \\
-\texttt{SecurityScheme} & Type, Name, In, Scheme, Description & Auth mechanism metadata for P005 validation \\
-\texttt{Components}   & Schemas, Responses, SecuritySchemes & Reusable definitions referenced across operations \\
+\texttt{Schema}       & Type, Properties, Required, AllOf/OneOf/AnyOf, Nullable & Unified schema representation; handles both 3.0.x \texttt{nullable} and 3.1.0 \texttt{type: [``null'', ...]} semantics. \\
+\texttt{Operation}    & Method, Path, Parameters, RequestBody, Responses, Security & Single HTTP operation with all metadata needed by checkers. \\
+\texttt{PathItem}     & Parameters, Operations map & Groups operations sharing a path; path-level parameters are propagated. \\
+\texttt{Parameter}    & Name, In, Required, Schema, Example & Normalized parameter; \texttt{In} is a string (``path'', ``query'', ``header'', ``cookie''). \\
+\texttt{Response}     & Description, Content map & Status-code-keyed response with content-type-specific schemas. \\
+\texttt{SecurityScheme} & Type, Name, In, Scheme, Description & Auth mechanism metadata for P005 validation. \\
+\texttt{Components}   & Schemas, Responses, SecuritySchemes & Reusable definitions referenced across operations. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -317,14 +337,24 @@ Both transforms operate on the raw \texttt{map[string]interface\{\}} before any 
 % ============================================================================
 \section{The Principle Checker Pattern}
 \label{sec:principle-checker}
+\label{sec:principle-checker-pattern}
 % ============================================================================
+
+The two design abstractions introduced so far---the \texttt{APISpec} interface (Section~\ref{sec:spec-abstraction}) and the \texttt{PrincipleChecker} interface defined below---are summarised together in Figure~\ref{fig:class-diagram}. The figure shows: the two interfaces with their methods; the two version-specific adapters that realise \texttt{APISpec} (\texttt{openAPI3Spec} and \texttt{swagger2Spec}); the seven implemented and two planned concrete principle checkers that realise \texttt{PrincipleChecker}; and how the \texttt{Engine} consumes both interfaces to drive validation.
+
+\begin{figure}[htbp]
+\centering
+\input{figures/class-diagram.tex}
+\caption{Class / interface diagram of DriveBy's two central abstractions. Dashed grey arrows denote interface realisation (concrete class implements interface); solid grey arrows denote use. Dashed nodes (P006, P007) are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers.}
+\label{fig:class-diagram}
+\end{figure}
 
 % ----------------------------------------------------------------------------
 \subsection{The PrincipleChecker Interface}
 \label{subsec:checker-interface}
 % ----------------------------------------------------------------------------
 
-Every DDT principle is implemented as a type that satisfies the \texttt{PrincipleChecker} interface:
+Every SDT principle is implemented as a type that satisfies the \texttt{PrincipleChecker} interface:
 
 \begin{lstlisting}[language=Go,caption={The PrincipleChecker interface (\texttt{principles/checker.go}).},label={lst:checker}]
 type PrincipleChecker interface {
@@ -560,7 +590,7 @@ The Markdown renderer groups principles by category (Specification, Documentatio
 
 The JSON-first design supports the Axiom of Observability: structured JSON output can be parsed by quality dashboards, fed into monitoring systems, or consumed by downstream pipeline stages without text parsing.
 
-This JSON-first design also enables a class of consumer that the architecture anticipates but does not require: autonomous engineering agents. Each \texttt{PrincipleResult} in the JSON report carries a machine-readable principle ID, a boolean pass/fail status, structured check outcomes, and a \texttt{SuggestedFix} string. An agent consuming this report can programmatically determine \textit{what} failed (principle and check), \textit{why} it failed (details and message), and \textit{how to fix it} (suggested remediation)~\cite{swe-agent}. The validation report is therefore not merely a quality signal---it is an instruction set for autonomous API specification improvement. As agent architectures mature, DDT's structured output positions it as a natural feedback source in agent-driven development loops where the agent validates, diagnoses, remediates, and re-validates without human intervention.
+This JSON-first design also enables a class of consumer that the architecture anticipates but does not require: autonomous engineering agents. Each \texttt{PrincipleResult} in the JSON report carries a machine-readable principle ID, a boolean pass/fail status, structured check outcomes, and a \texttt{SuggestedFix} string. An agent consuming this report can programmatically determine \textit{what} failed (principle and check), \textit{why} it failed (details and message), and \textit{how to fix it} (suggested remediation)~\cite{swe-agent}. The validation report is therefore not merely a quality signal---it is an instruction set for autonomous API specification improvement. As agent architectures mature, SDT's structured output positions it as a natural feedback source in agent-driven development loops where the agent validates, diagnoses, remediates, and re-validates without human intervention.
 
 % ============================================================================
 \section{Command-Line Interface}
@@ -638,7 +668,7 @@ DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocat
 \label{sec:architecture-summary}
 % ============================================================================
 
-This chapter described the architecture of the DriveBy framework across eleven internal packages. The specification abstraction layer (Section~\ref{sec:spec-abstraction}) provides version-agnostic validation through the Adapter pattern, ensuring that principle checkers operate identically on OpenAPI~3.x and Swagger~2.0 specifications. The principle checker pattern (Section~\ref{sec:principle-checker}) uses the Strategy pattern to encapsulate each DDT principle as an interchangeable validator selected by the registry based on validation mode. Seven principle checkers (P001--P005, P008, P009) are registered; P006 and P007 are implemented as dedicated test runners outside the registry. The engine (Section~\ref{sec:engine}) orchestrates the four-step pipeline---load, select, evaluate, aggregate---that produces deterministic, structured reports.
+This chapter described the architecture of the DriveBy framework across eleven internal packages. The specification abstraction layer (Section~\ref{sec:spec-abstraction}) provides version-agnostic validation through the Adapter pattern, ensuring that principle checkers operate identically on OpenAPI~3.x and Swagger~2.0 specifications. The principle checker pattern (Section~\ref{sec:principle-checker}) uses the Strategy pattern to encapsulate each SDT principle as an interchangeable validator selected by the registry based on validation mode. Seven principle checkers (P001--P005, P008, P009) are registered; P006 and P007 are implemented as dedicated test runners outside the registry. The engine (Section~\ref{sec:engine}) orchestrates the four-step pipeline---load, select, evaluate, aggregate---that produces deterministic, structured reports.
 
 The runtime testing subsystem (Section~\ref{sec:runtime-testing}) extends validation beyond static analysis to live API verification, deriving test cases deterministically from the specification. The report generator (Section~\ref{sec:report-generation}) produces JSON and Markdown outputs suitable for both machine consumption and human review. The CLI (Section~\ref{sec:cli}) exposes all capabilities through a four-command interface with structured exit codes designed for CI/CD integration.
 

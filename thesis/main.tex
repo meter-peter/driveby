@@ -1,5 +1,9 @@
 \documentclass[12pt,a4paper]{report}
 \usepackage[utf8]{inputenc}
+% Uncomment after: sudo dnf install -y texlive-collection-langgreek
+%\usepackage[T1,LGR]{fontenc}
+%\usepackage[greek,english]{babel}
+%\usepackage{alphabeta}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
@@ -40,8 +44,8 @@
 
 \vspace{2cm}
 
-{\LARGE\textbf{Documentation-Driven Testing (DDT):\\[0.3cm]
-A Paradigm for Automated API Quality Assurance\\[0.3cm]
+{\LARGE\textbf{Specification-Driven Testing (SDT):\\[0.3cm]
+A Conceptual Framework for Automated API Quality Assurance\\[0.3cm]
 in the GitOps Era}\\[1cm]}
 
 \vspace{1cm}
@@ -56,7 +60,14 @@ in the GitOps Era}\\[1cm]}
 
 {\large 2026}
 \end{titlepage}
+
+\include{chapters/abstract-en}
+% Requires texlive-collection-langgreek: sudo dnf install -y texlive-collection-langgreek
+%\include{chapters/abstract-gr}
+
 \tableofcontents
+
+\include{chapters/lists-and-acronyms}
 
 \include{chapters/01-introduction}
 \include{chapters/02-related-work}

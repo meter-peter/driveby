@@ -1,4 +1,7 @@
 % Provider Architecture — Chapter 5, Section 5.3.4
+% Updated 2026-05 (round-1 review): added colour-semantics legend per [338].
+% Colours encode the *control plane* a resource targets (blue = Kubernetes
+% API, orange = GitHub API, violet = thesis-built composition layer).
 % Shows: XSDLC CR → Composition → provider-kubernetes + provider-upjet-github
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
@@ -94,5 +97,21 @@
 % Control plane labels
 \node[font=\tiny\itshape,text=blue!60!black] at (1.2,-8.0) {Kubernetes control plane};
 \node[font=\tiny\itshape,text=orange!60!black] at (7.8,-7.3) {GitHub control plane};
+
+% ==================== Legend (colour semantics) ====================
+% Per comment [338]: indicate what the colours mean
+\node[anchor=west, font=\scriptsize\bfseries] at (-1.2,-9.0) {Legend (colour = target control plane)};
+
+\fill[violet!15,draw=violet!70!black] (-1.2,-9.6) rectangle (-0.85,-9.3);
+\node[anchor=west, font=\tiny] at (-0.8,-9.45) {thesis-built (XSDLC CR \& composition)};
+
+\fill[teal!12,draw=teal!70!black] (3.6,-9.6) rectangle (3.95,-9.3);
+\node[anchor=west, font=\tiny] at (4.0,-9.45) {composition pipeline (Crossplane functions)};
+
+\fill[blue!12,draw=blue!60!black] (-1.2,-10.1) rectangle (-0.85,-9.8);
+\node[anchor=west, font=\tiny] at (-0.8,-9.95) {provider-kubernetes — in-cluster resources};
+
+\fill[orange!12,draw=orange!60!black] (3.6,-10.1) rectangle (3.95,-9.8);
+\node[anchor=west, font=\tiny] at (4.0,-9.95) {provider-upjet-github — GitHub API resources};
 
 \end{tikzpicture}

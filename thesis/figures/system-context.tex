@@ -1,0 +1,97 @@
+% System Context Diagram — Chapter 4 (DriveBy + XSDLC system boundary)
+% Added 2026-05 (round-1 review) per supervisor comments [247], [248], [336].
+% Shows: the system under study (DriveBy CLI + XSDLC composition) inside a
+% boundary, with the external actors and systems that interact with it.
+% This is a true context diagram in the SSADM/SysML sense: one box per
+% external entity, no internal decomposition of the system itself.
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    sysbox/.style={
+        rectangle,
+        rounded corners=8pt,
+        draw=blue!50!black,
+        thick,
+        fill=blue!8,
+        minimum width=6.5cm,
+        minimum height=2.4cm,
+        font=\bfseries\small,
+        align=center
+    },
+    actor/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=#1!60!black,
+        fill=#1!10,
+        minimum width=2.6cm,
+        minimum height=1.0cm,
+        font=\scriptsize\bfseries,
+        align=center
+    },
+    flow/.style={
+        ->,
+        thick,
+        font=\tiny,
+        align=center
+    }
+]
+
+% ---- The system under study (centre) ----
+\node[sysbox] (sys) at (0,0) {DriveBy + XSDLC\\{\small\itshape specification-driven validation}\\{\small\itshape and quality-gated delivery}};
+
+% ---- External actors / systems around the boundary ----
+% North: developer, CI
+\node[actor=teal]   (dev)     at (-4,2.6) {API\\Developer};
+\node[actor=teal]   (ci)      at ( 4,2.6) {Application CI\\(GitHub Actions)};
+
+% West: target API and its OpenAPI spec
+\node[actor=violet] (api)     at (-7,0)   {Target API\\(under test)};
+\node[actor=violet] (spec)    at (-7,-2)  {OpenAPI\\Specification};
+
+% East: ArgoCD, Promoter, GitOps repo
+\node[actor=orange] (argocd)  at ( 7,1)   {ArgoCD};
+\node[actor=orange] (promoter)at ( 7,-1)  {GitOps\\Promoter};
+\node[actor=orange] (gitops)  at ( 7,-2.6){GitOps\\Repository};
+
+% South: Crossplane control plane and operator
+\node[actor=brown]  (xplane)  at (-4,-2.6){Crossplane\\Control Plane};
+\node[actor=brown]  (operator)at ( 0,-2.6){Platform\\Operator};
+
+% North-east: the audience for the validation report
+\node[actor=gray]   (report)  at ( 0,3.5) {Validation\\Report (JSON, exit code)};
+
+% ---- Flows (label on every edge — what is exchanged) ----
+\draw[flow] (dev.south)     -- node[right]{commits, CRs} (sys.north west);
+\draw[flow] (ci.south)      -- node[left]{triggers}     (sys.north east);
+\draw[flow] (sys.north)     -- node[right]{produces}    (report.south);
+
+\draw[flow] (spec.east)     -- node[above]{spec URL}    (sys.west);
+\draw[flow] (sys.west)      -- node[below]{HTTP probes}    (api.east);
+
+\draw[flow] (sys.east)      -- node[above]{Application\\manifests} (argocd.west);
+\draw[flow] (promoter.west) -- node[above]{commit\\status} (sys.east);
+\draw[flow] (sys.south east)-- node[right]{PRs, branches}(gitops.north);
+
+\draw[flow] (sys.south west)-- node[left] {XRD, composition,\\WorkflowTemplates} (xplane.north);
+\draw[flow] (operator.north)-- node[right]{installs / inspects} (sys.south);
+
+% ---- System-boundary band ----
+\begin{scope}[on background layer]
+    \node[draw=blue!30, dashed, rounded corners=10pt, fit=(sys), inner sep=4pt] (boundary) {};
+\end{scope}
+
+% ---- Legend (colour semantics) ----
+\node[font=\scriptsize\bfseries, anchor=west] at (-7,-4.6) {Legend};
+\begin{scope}[shift={(-7,-5.0)}]
+  \fill[teal!10,draw=teal!60!black]   (0.0,0.0) rectangle (0.3,0.3);
+  \node[font=\tiny, anchor=west] at (0.4,0.15) {Human / CI actor};
+  \fill[violet!10,draw=violet!60!black] (3.0,0.0) rectangle (3.3,0.3);
+  \node[font=\tiny, anchor=west] at (3.4,0.15) {Target API \& its spec};
+  \fill[orange!10,draw=orange!60!black] (6.0,0.0) rectangle (6.3,0.3);
+  \node[font=\tiny, anchor=west] at (6.4,0.15) {GitOps delivery};
+  \fill[brown!10,draw=brown!60!black]  (9.0,0.0) rectangle (9.3,0.3);
+  \node[font=\tiny, anchor=west] at (9.4,0.15) {Cluster control};
+  \fill[gray!15,draw=gray!60!black]    (12.0,0.0) rectangle (12.3,0.3);
+  \node[font=\tiny, anchor=west] at (12.4,0.15) {Output};
+\end{scope}
+
+\end{tikzpicture}

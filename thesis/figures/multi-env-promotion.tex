@@ -36,7 +36,7 @@
 \node[env=red] (prod) at (11,0) {Production\\(\texttt{prod})};
 
 % Quality gates
-\node[gate] (gate1) at (2.75,0) {DDT Quality\\Gate};
+\node[gate] (gate1) at (2.75,0) {SDT Quality\\Gate};
 \node[gate] (gate2) at (8.25,0) {Manual\\Approval};
 
 % Arrows
@@ -47,7 +47,7 @@
 
 % Policies
 \node[policy=blue] at (0,-1.0) {autoMerge: true\\(auto-sync)};
-\node[policy=orange] at (5.5,-1.0) {autoMerge: true\\(gated by DDT)};
+\node[policy=orange] at (5.5,-1.0) {autoMerge: true\\(gated by SDT)};
 \node[policy=red] at (11,-1.0) {autoMerge: false\\(manual approval)};
 
 % Commit status flow

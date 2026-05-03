@@ -16,7 +16,7 @@ The quality gate operates on a key insight: \textit{validate the source environm
 
 This promotion PR triggers the quality gate. The GitHub webhook fires, the EventSource receives the event, the Sensor filters for PR actions, and the Workflow executes validation against the \textit{development} environment---the environment where the new code is already running. The validation results determine whether the promotion PR is approved (merged) or blocked (left open with a failure status).
 
-This inversion is deliberate. Validating the source environment ensures that quality is assessed against the actual deployment rather than a hypothetical future state. If the API in development passes strict DDT validation, the same code deployed to staging will behave identically (assuming equivalent infrastructure). The alternative---validating the target environment after promotion---would detect problems only after the potentially breaking change has already been deployed, violating the shift-left principle~\cite{shift-left}.
+This inversion is deliberate. Validating the source environment ensures that quality is assessed against the actual deployment rather than a hypothetical future state. If the API in development passes strict SDT validation, the same code deployed to staging will behave identically (assuming equivalent infrastructure). The alternative---validating the target environment after promotion---would detect problems only after the potentially breaking change has already been deployed, violating the shift-left principle~\cite{shift-left}.
 
 Figure~\ref{fig:gitops-pipeline} shows the end-to-end pipeline from deploy trigger to validation feedback.
 
@@ -164,7 +164,7 @@ The GitOps Promoter~\cite{gitops-promoter} automates environment promotion by wa
 \resizebox{\textwidth}{!}{%
 \input{figures/multi-env-promotion.tex}%
 }
-\caption{Multi-environment promotion model. Development auto-syncs; staging promotion is gated by DDT validation (commit status); production requires manual approval.}
+\caption{Multi-environment promotion model. Development auto-syncs; staging promotion is gated by SDT validation (commit status); production requires manual approval.}
 \label{fig:multi-env-promotion}
 \end{figure}
 
@@ -223,7 +223,7 @@ The ChangeTransferPolicy is itself a second reconciliation layer: it is auto-cre
 \label{sec:human-in-the-loop}
 % ============================================================================
 
-The quality gate system is not fully autonomous. It automates objective assessments---DDT validation, health checks, load testing---while preserving human judgment for subjective assessments. This section maps the automation spectrum and identifies the decision points where human intervention is required or optional.
+The quality gate system is not fully autonomous. It automates objective assessments---SDT validation, health checks, load testing---while preserving human judgment for subjective assessments. This section maps the automation spectrum and identifies the decision points where human intervention is required or optional.
 
 % ----------------------------------------------------------------------------
 \subsection{The Automation Spectrum}
@@ -234,8 +234,8 @@ The system supports four points on the automation spectrum, controlled by two bo
 
 \begin{enumerate}
     \item \textbf{Fully automated} (development): \texttt{autoMerge: true}, automated sync. After the developer triggers a deploy, changes flow from the \texttt{-next} branch, are auto-merged by the Promoter, and auto-synced by ArgoCD. No further human intervention after the initial trigger.
-    \item \textbf{Automated with quality gate} (staging): \texttt{autoMerge: true}, automated sync, with a commit status gate. The Promoter waits for DDT validation to report success before merging. If validation fails, the PR remains open until the developer fixes the issue and re-pushes. Once the gate passes, promotion and sync are automatic.
-    \item \textbf{Gated with human approval} (production): \texttt{autoMerge: false}, auto-sync. The Promoter creates the PR and DDT validates the source environment, but a human must explicitly merge the promotion PR. Once merged, ArgoCD auto-syncs the change. The single human checkpoint is the merge decision---ArgoCD always reflects the branch state.
+    \item \textbf{Automated with quality gate} (staging): \texttt{autoMerge: true}, automated sync, with a commit status gate. The Promoter waits for SDT validation to report success before merging. If validation fails, the PR remains open until the developer fixes the issue and re-pushes. Once the gate passes, promotion and sync are automatic.
+    \item \textbf{Gated with human approval} (production): \texttt{autoMerge: false}, auto-sync. The Promoter creates the PR and SDT validates the source environment, but a human must explicitly merge the promotion PR. Once merged, ArgoCD auto-syncs the change. The single human checkpoint is the merge decision---ArgoCD always reflects the branch state.
     \item \textbf{Fully manual merge}: no quality gate, manual merge, auto-sync. This mode is possible but unused in the reference deployment---it offers no advantage over the gated model. ArgoCD still auto-syncs once the branch is updated.
 \end{enumerate}
 
@@ -246,7 +246,7 @@ Figure~\ref{fig:human-in-the-loop} illustrates how these two configurable slots-
 \resizebox{\textwidth}{!}{%
 \input{figures/human-in-the-loop.tex}%
 }
-\caption{Modular automation spectrum. Each environment is a pipeline of four stages with two independently configurable slots: quality gate (\texttt{gate.checks[]}) and merge policy (\texttt{autoMerge}). ArgoCD always auto-syncs. The composition renders different infrastructure for each combination---from fully automated (Env$_1$: no gate, auto-merge, auto-sync) through gated automation (Env$_2$: DDT + functional test, auto-merge) to human-controlled merge (Env$_N$: DDT + load test, manual approval, auto-sync). The Propagate and Sync stages are fixed; quality gate and merge policy are configurable per environment.}
+\caption{Modular automation spectrum. Each environment is a pipeline of four stages with two independently configurable slots: quality gate (\texttt{gate.checks[]}) and merge policy (\texttt{autoMerge}). ArgoCD always auto-syncs. The composition renders different infrastructure for each combination---from fully automated (Env$_1$: no gate, auto-merge, auto-sync) through gated automation (Env$_2$: SDT + functional test, auto-merge) to human-controlled merge (Env$_N$: SDT + load test, manual approval, auto-sync). The Propagate and Sync stages are fixed; quality gate and merge policy are configurable per environment.}
 \label{fig:human-in-the-loop}
 \end{figure}
 
@@ -255,7 +255,7 @@ Figure~\ref{fig:human-in-the-loop} illustrates how these two configurable slots-
 \label{subsec:automation-override}
 % ----------------------------------------------------------------------------
 
-The design philosophy is: \textit{automate objective assessments, preserve human judgment for subjective assessments}. DDT validation, health checks, and load testing produce binary signals (pass/fail) based on measurable criteria. These are objective and automatable. Production readiness, business timing, and release coordination involve context that no automated system can capture. These are subjective and require human judgment.
+The design philosophy is: \textit{automate objective assessments, preserve human judgment for subjective assessments}. SDT validation, health checks, and load testing produce binary signals (pass/fail) based on measurable criteria. These are objective and automatable. Production readiness, business timing, and release coordination involve context that no automated system can capture. These are subjective and require human judgment.
 
 The \texttt{autoMerge: false} setting is a deliberate architectural choice, not a limitation. It reflects the principle that the final decision to deploy to production should be an affirmative human act, even when all automated checks have passed. The quality gate provides confidence; the human provides authorization.
 
@@ -311,7 +311,7 @@ Feedback       & Developer fix cycle         & Re-deploy $\rightarrow$ re-valida
 \end{tabular}
 \end{table}
 
-The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that DDT explicitly prevents.
+The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that SDT explicitly prevents.
 
 Figure~\ref{fig:quality-control-loop} illustrates the closed loop.
 
@@ -340,7 +340,7 @@ The Kubernetes controller model (Section~\ref{subsec:reconciliation-loop}) makes
 
 This control-theoretic framing connects to the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation}: the specification is the ontological artifact, the DriveBy CLI is the reconciliation agent, and the quality gate is the correction mechanism.
 
-The three DDT axioms map to necessary control-loop properties. \textit{Completeness} requires that the setpoint fully characterizes the desired behavior---an incomplete specification produces an under-determined loop that cannot distinguish conforming from non-conforming APIs. \textit{Determinism} requires consistent sensor output---a non-deterministic validator would oscillate between pass and fail for identical states. \textit{Observability} requires structured, actionable output---without it, feedback degenerates into a binary gate with no diagnostic value, and developers cannot identify what to fix.
+The three SDT axioms map to necessary control-loop properties. \textit{Completeness} requires that the setpoint fully characterizes the desired behavior---an incomplete specification produces an under-determined loop that cannot distinguish conforming from non-conforming APIs. \textit{Determinism} requires consistent sensor output---a non-deterministic validator would oscillate between pass and fail for identical states. \textit{Observability} requires structured, actionable output---without it, feedback degenerates into a binary gate with no diagnostic value, and developers cannot identify what to fix.
 
 This is not a metaphorical mapping. Each component---setpoint, sensor, controller, actuator, feedback path---has a concrete implementation. The correspondence explains why the system converges, why it self-heals, and why the axiomatic foundation is necessary rather than merely desirable.
 
@@ -349,14 +349,14 @@ This is not a metaphorical mapping. Each component---setpoint, sensor, controlle
 \label{sec:cicd-driveby}
 % ============================================================================
 
-DriveBy's own development pipeline serves as a reflexive demonstration of the DDT methodology: the tool that validates API quality is itself subject to automated quality gates at every stage of delivery. The pipeline design follows three principles: (1)~a \textit{test gate} that blocks all artifact production---no binary, image, or chart is published unless tests pass; (2)~\textit{parallel artifact generation}---independent outputs (binaries, container images, Helm charts) are produced concurrently to minimize release latency; and (3)~\textit{multi-format distribution}---a single Git tag produces version-aligned artifacts across three distribution channels, ensuring that consumers always reference a consistent release. Three GitHub Actions~\cite{github-actions} workflows implement these principles.
+DriveBy's own development pipeline serves as a reflexive demonstration of the SDT framework: the tool that validates API quality is itself subject to automated quality gates at every stage of delivery. The pipeline design follows three principles: (1)~a \textit{test gate} that blocks all artifact production---no binary, image, or chart is published unless tests pass; (2)~\textit{parallel artifact generation}---independent outputs (binaries, container images, Helm charts) are produced concurrently to minimize release latency; and (3)~\textit{multi-format distribution}---a single Git tag produces version-aligned artifacts across three distribution channels, ensuring that consumers always reference a consistent release. Three GitHub Actions~\cite{github-actions} workflows implement these principles.
 
 % ----------------------------------------------------------------------------
 \subsection{Continuous Integration}
 \label{subsec:ci-pipeline}
 % ----------------------------------------------------------------------------
 
-The \texttt{ci.yml} workflow implements a layered validation strategy where each layer provides a different kind of assurance: compilation verifies build integrity, static analysis detects code-level defects, testing validates behavioral correctness, and a documentation check enforces meta-validation---that documentation artifacts remain synchronized with the codebase. This last layer embodies a DDT-adjacent principle: documentation completeness should be verified automatically, not assumed. The documentation check scans CLAUDE.md files and documentation entries against the source tree, failing the build when they diverge.
+The \texttt{ci.yml} workflow implements a layered validation strategy where each layer provides a different kind of assurance: compilation verifies build integrity, static analysis detects code-level defects, testing validates behavioral correctness, and a documentation check enforces meta-validation---that documentation artifacts remain synchronized with the codebase. This last layer embodies a SDT-adjacent principle: documentation completeness should be verified automatically, not assumed. The documentation check scans CLAUDE.md files and documentation entries against the source tree, failing the build when they diverge.
 
 The workflow uses a two-tier triggering strategy. On pull requests, it runs all four validation layers and uploads coverage artifacts for review, providing fast feedback during development. On pushes to \texttt{main}, it additionally builds the container image (without pushing) to verify that the Docker build remains functional on the mainline. This tiered approach ensures that PRs receive rapid validation while the mainline maintains a stricter invariant: every commit on \texttt{main} is both tested and container-buildable.
 
@@ -385,7 +385,7 @@ The \texttt{release.yml} workflow implements a fan-out pattern: a single semanti
 \label{fig:release-pipeline}
 \end{figure}
 
-The test gate re-runs static analysis and the test suite. All subsequent jobs depend on this gate, enforcing the invariant that no artifacts are produced from untested code. This is the release-level analog of the quality gate pattern: just as DDT blocks promotion on validation failure, the test gate blocks artifact production on test failure.
+The test gate re-runs static analysis and the test suite. All subsequent jobs depend on this gate, enforcing the invariant that no artifacts are produced from untested code. This is the release-level analog of the quality gate pattern: just as SDT blocks promotion on validation failure, the test gate blocks artifact production on test failure.
 
 The three parallel producers each address a distinct distribution channel. GoReleaser~\cite{goreleaser} produces cross-compiled platform binaries with SHA256 checksums and an auto-generated changelog, targeting direct CLI consumption. The Docker job produces container images with a semver-derived tagging strategy---full version, major.minor, and \texttt{latest}---that lets consumers choose their stability-versus-freshness trade-off: pinning to a patch version for reproducibility, tracking a minor version for compatible updates, or always using the latest release. The Helm job packages the chart and pushes it to the OCI registry (Section~\ref{subsec:oci-distribution}).
 
@@ -441,8 +441,8 @@ This composability is the key design property. Each gate's \texttt{checks[]} arr
 
 The human-in-the-loop model (Section~\ref{sec:human-in-the-loop}) provides a tunable automation spectrum. The \texttt{autoMerge} flag controls whether promotion is fully automated (development, staging after gate passes) or requires explicit human approval (production). ArgoCD always auto-syncs; the \texttt{autoMerge} flag controls only the Promoter's PR merge behavior, not ArgoCD synchronization. The result is a system where objective assessments are automated and subjective decisions---production readiness, business timing---remain with humans.
 
-The control-theoretic framing (Section~\ref{sec:control-loop}) explains \textit{why} this design converges: the OpenAPI specification is the setpoint, DriveBy is the sensor, and the Promoter is the actuator. Negative feedback blocks promotion on failure, driving developers to fix issues until their API conforms. The three DDT axioms---Completeness, Determinism, Observability---are necessary conditions for this loop to function, connecting the theoretical foundations of Chapter~\ref{ch:related-work} to the concrete implementation.
+The control-theoretic framing (Section~\ref{sec:control-loop}) explains \textit{why} this design converges: the OpenAPI specification is the setpoint, DriveBy is the sensor, and the Promoter is the actuator. Negative feedback blocks promotion on failure, driving developers to fix issues until their API conforms. The three SDT axioms---Completeness, Determinism, Observability---are necessary conditions for this loop to function, connecting the theoretical foundations of Chapter~\ref{ch:related-work} to the concrete implementation.
 
 DriveBy's own release pipeline (Section~\ref{sec:cicd-driveby}) demonstrates that the project practices what it preaches: automated test gates, parallel artifact production (binaries, Docker images, Helm charts), and OCI-based distribution to the GitHub Container Registry.
 
-Chapter~\ref{ch:evaluation} evaluates this system empirically, measuring DDT's effectiveness across controlled and large-scale settings.
+Chapter~\ref{ch:evaluation} evaluates this system empirically, measuring SDT's effectiveness across controlled and large-scale settings.

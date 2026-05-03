@@ -3,7 +3,7 @@
 
 Modern software systems are built on APIs. They connect microservices, power mobile applications, expose business logic to partners, and increasingly serve as the interface through which autonomous agents interact with the world. Yet the quality assurance practices around these interfaces remain stubbornly manual, disconnected from the declarative pipelines that deploy the very services they test.
 
-This thesis introduces Documentation-Driven Testing (DDT), a methodology that treats the API specification not merely as documentation, but as the single source of truth from which validation rules, test cases, and quality gates are derived automatically. We present the theoretical foundations of DDT, an open-source implementation called DriveBy, and an empirical evaluation demonstrating its effectiveness across both controlled and large-scale settings.
+This thesis introduces Specification-Driven Testing (SDT)\footnote{An earlier formulation of this work used the name \textit{Documentation-Driven Testing} (DDT). Following supervisor review, we adopted the more precise name \textit{Specification-Driven Testing} to reflect that the framework operates on a formal API specification (OpenAPI), not on documentation in general.}\textsuperscript{,}\footnote{Throughout the thesis, ``API'' refers specifically to \emph{HTTP-based RESTful APIs} described by the OpenAPI specification (versions 3.0.x and 3.1.0), with limited treatment of Swagger 2.0 via the conversion adapter discussed in Chapter~\ref{ch:architecture}. The framework's axioms are stated at a level of generality that admits extension to other API styles---GraphQL introspection schemas, gRPC service definitions, AsyncAPI for event-driven systems---but those extensions are scoped as future work (Chapter~\ref{ch:conclusion}). Where the text uses ``API'' without qualification, the RESTful + OpenAPI scope is implied.}, a conceptual framework that treats the API specification not merely as documentation, but as the single source of truth from which validation rules, test cases, and quality gates are derived automatically. We present the theoretical foundations of SDT---three axioms grounding nine validation principles---together with an open-source implementation called DriveBy, and an empirical evaluation demonstrating its effectiveness across both controlled and large-scale settings. We position SDT explicitly as a conceptual framework---a strong theoretical core for a future formal methodology---rather than as a complete software-testing methodology in its own right; the elements that would be required to elevate it to a full methodology (test derivation procedure, execution and failure semantics, lifecycle governance) are identified as future work in Chapter~\ref{ch:conclusion}.
 
 % ============================================================================
 \section{The Cost of Manual Operations}
@@ -58,14 +58,14 @@ This philosophy has transformed infrastructure. It has transformed deployment. I
 \subsection{A Technology Showcase}
 \label{subsec:technology-showcase}
 
-Beyond its methodological contribution, this thesis serves as a reference implementation of how contemporary software is built, automated, and delivered. The system described in subsequent chapters integrates Kubernetes-native automation through Crossplane custom resource definitions, event-driven orchestration through Argo Events and Argo Workflows, multi-environment promotion through the GitOps Promoter, three CI/CD pipelines producing multi-platform binaries, OCI container images, and Helm charts, and AI-assisted development through agentic workflows with structured knowledge protocols. These technologies are not ancillary to the DDT contribution---they are the medium through which DDT becomes operational. A methodology that cannot be deployed declaratively, triggered automatically, and promoted through environment gates remains an academic exercise. By demonstrating DDT as a proof-of-concept within a cloud-native stack deployed on a live Kubernetes cluster, this thesis shows not only \textit{what} DDT is, but \textit{how} modern software can be built, tested, and delivered in the GitOps era. The implementation is a concept validation---a working prototype that demonstrates feasibility and architectural viability, not a production-hardened product.
+Beyond its methodological contribution, this thesis serves as a reference implementation of how contemporary software is built, automated, and delivered. The system described in subsequent chapters integrates Kubernetes-native automation through Crossplane custom resource definitions, event-driven orchestration through Argo Events and Argo Workflows, multi-environment promotion through the GitOps Promoter, three CI/CD pipelines producing multi-platform binaries, OCI container images, and Helm charts, and AI-assisted development through agentic workflows with structured knowledge protocols. These technologies are not ancillary to the SDT contribution---they are the medium through which SDT becomes operational. A methodology that cannot be deployed declaratively, triggered automatically, and promoted through environment gates remains an academic exercise. By demonstrating SDT as a proof-of-concept within a cloud-native stack deployed on a live Kubernetes cluster, this thesis shows not only \textit{what} SDT is, but \textit{how} modern software can be built, tested, and delivered in the GitOps era. The implementation is a concept validation---a working prototype that demonstrates feasibility and architectural viability, not a production-hardened product.
 
 \subsection{The Agentic Development Frontier}
 \label{subsec:agentic-dev}
 
 A parallel development accelerates the urgency. AI-assisted software engineering tools---from code completion systems like GitHub Copilot~\cite{github-copilot-research} to autonomous agents capable of executing multi-step development workflows---are reshaping how software is built. These tools depend on structured, machine-readable inputs. An agent cannot interpret a Confluence page or parse a Slack thread; it requires formal specifications with well-defined semantics.
 
-DDT produces exactly this kind of output. Validation results are structured, machine-readable quality signals tied directly to the specification. A CI pipeline can gate on them. A GitOps reconciliation loop can consume them. An autonomous agent can reason about them. By grounding API quality in the specification rather than in human judgment, DDT aligns naturally with a future in which agents---not only humans---participate in the development lifecycle.
+SDT produces exactly this kind of output. Validation results are structured, machine-readable quality signals tied directly to the specification. A CI pipeline can gate on them. A GitOps reconciliation loop can consume them. An autonomous agent can reason about them. By grounding API quality in the specification rather than in human judgment, SDT aligns naturally with a future in which agents---not only humans---participate in the development lifecycle.
 
 We do not claim that agentic development is mature today. We observe that the trajectory is clear, and that methodologies producing structured, specification-derived quality signals are inherently better positioned for this trajectory than those producing unstructured, human-authored test reports.
 
@@ -92,20 +92,20 @@ In software organizations, this challenge is acute. The CNCF Platforms White Pap
 
 API specifications occupy a unique position in this landscape. They are simultaneously a technical contract (consumed by code generators and testing tools), a documentation artifact (consumed by developers during integration), and a knowledge repository (encoding decisions about authentication flows, error semantics, versioning strategy, and data models). When a senior engineer designs an API's error handling to return structured problem details with correlation IDs, that design decision is captured in the specification---but only if the specification is complete enough to include it.
 
-DDT operationalizes this insight. A specification that passes all nine DDT principles is not merely ``valid'' in the schema sense. It is \textit{onboarding-complete}: a new engineer can understand the API's contract, its security model, its error behavior, and its versioning strategy by reading the specification alone. DDT transforms the specification from a passive documentation artifact into an actively validated knowledge base. The validation report identifies precisely where knowledge gaps remain---missing descriptions, undocumented error responses, absent security definitions---converting the diffuse problem of ``incomplete documentation'' into a concrete, actionable checklist.
+SDT operationalizes this insight. A specification that passes all nine SDT principles is not merely ``valid'' in the schema sense. It is \textit{onboarding-complete}: a new engineer can understand the API's contract, its security model, its error behavior, and its versioning strategy by reading the specification alone. SDT transforms the specification from a passive documentation artifact into an actively validated knowledge base. The validation report identifies precisely where knowledge gaps remain---missing descriptions, undocumented error responses, absent security definitions---converting the diffuse problem of ``incomplete documentation'' into a concrete, actionable checklist.
 
-This framing reveals DDT as a knowledge transfer mechanism disguised as a testing tool. The nine principles do not merely assess technical correctness; they assess whether the specification captures the organizational knowledge that a consumer needs. When the engineer who designed the authentication flow leaves, the knowledge persists---not in a Confluence page that drifts, but in a specification whose completeness is continuously validated.
+This framing reveals SDT as a knowledge transfer mechanism disguised as a testing tool. The nine principles do not merely assess technical correctness; they assess whether the specification captures the organizational knowledge that a consumer needs. When the engineer who designed the authentication flow leaves, the knowledge persists---not in a Confluence page that drifts, but in a specification whose completeness is continuously validated.
 
-The same completeness that enables human onboarding enables a qualitatively different kind of consumer: autonomous engineering agents. Tribal knowledge is inaccessible to new hires; it is \textit{entirely} inaccessible to software agents, which cannot ask clarifying questions in Slack or infer intent from naming conventions. An agent that consumes a DDT-validated specification receives a machine-readable contract with documented endpoints, error semantics, security requirements, and schema constraints---exactly the structured input that agent architectures require to reason about API interactions~\cite{swe-agent}. DDT does not predict when autonomous agents will routinely maintain and consume APIs. It ensures that the knowledge substrate is machine-readable \textit{today}, so that it is agent-ready when the tooling matures.
+The same completeness that enables human onboarding enables a qualitatively different kind of consumer: autonomous engineering agents. Tribal knowledge is inaccessible to new hires; it is \textit{entirely} inaccessible to software agents, which cannot ask clarifying questions in Slack or infer intent from naming conventions. An agent that consumes a SDT-validated specification receives a machine-readable contract with documented endpoints, error semantics, security requirements, and schema constraints---exactly the structured input that agent architectures require to reason about API interactions~\cite{swe-agent}. SDT does not predict when autonomous agents will routinely maintain and consume APIs. It ensures that the knowledge substrate is machine-readable \textit{today}, so that it is agent-ready when the tooling matures.
 
 \subsection{Why Auto-Generated Specifications Matter}
 \label{subsec:autogen-specs}
 
-DDT rests on an assumption of specification completeness: the specification must fully describe the API contract. This assumption is not aspirational---it is increasingly achievable. Modern frameworks such as FastAPI~\cite{fastapi} auto-generate OpenAPI specifications directly from annotated source code. Spring Boot, Express with swagger-jsdoc, and dozens of other frameworks offer similar capabilities. The specification is not a separate artifact that engineers must remember to maintain; it is a byproduct of the implementation itself.
+SDT rests on an assumption of specification completeness: the specification must fully describe the API contract. This assumption is not aspirational---it is increasingly achievable. Modern frameworks such as FastAPI~\cite{fastapi} auto-generate OpenAPI specifications directly from annotated source code. Spring Boot, Express with swagger-jsdoc, and dozens of other frameworks offer similar capabilities. The specification is not a separate artifact that engineers must remember to maintain; it is a byproduct of the implementation itself.
 
 However, auto-generated specifications are structurally correct but semantically incomplete. A framework generates endpoint paths, parameter types, and response status codes, but it cannot generate meaningful descriptions, usage examples, or documentation of business logic constraints. The specification is \textit{valid} in the schema sense but \textit{insufficient} in the documentation sense.
 
-This gap---between structural correctness and semantic completeness---is precisely what DDT detects. The methodology's validation principles assess not only whether the specification parses correctly, but whether it contains the information a consumer needs: descriptions on every operation, examples on every schema, documented error responses, and explicit security definitions. DDT does not replace auto-generation; it audits the output and identifies where human enrichment is still required.
+This gap---between structural correctness and semantic completeness---is precisely what SDT detects. The methodology's validation principles assess not only whether the specification parses correctly, but whether it contains the information a consumer needs: descriptions on every operation, examples on every schema, documented error responses, and explicit security definitions. SDT does not replace auto-generation; it audits the output and identifies where human enrichment is still required.
 
 % ============================================================================
 \section{Problem Statement}
@@ -126,9 +126,9 @@ The opportunity is concrete. OpenAPI specifications already contain the informat
 This thesis investigates the following research questions:
 
 \begin{description}
-  \item[RQ1:] \textit{Can a methodology grounded in specification completeness, behavioral determinism, and operational observability demonstrate the feasibility of automated API quality assurance that can operate without dedicated testers in the promotion pipeline?}
+  \item[RQ1:] \textit{Can a conceptual framework grounded in specification completeness, behavioral determinism, and operational observability demonstrate the feasibility of automated API quality assurance that can operate without dedicated testers in the promotion pipeline?}
 
-  We formalize DDT as three axioms mapped to nine validation principles and evaluate whether the resulting automated checks detect the same categories of defects that manual review identifies---with zero test authorship, zero human interpretation, and zero dedicated QA personnel. This question is addressed in Chapters~\ref{ch:methodology} and~\ref{ch:evaluation}.
+  We formalize SDT as three axioms mapped to nine validation principles and evaluate whether the resulting automated checks detect the same categories of defects that manual review identifies---with zero test authorship, zero human interpretation, and zero dedicated QA personnel. This question is addressed in Chapters~\ref{ch:methodology} and~\ref{ch:evaluation}.
 
   \item[RQ2:] \textit{To what extent can validation rules, test cases, and quality gates be derived automatically from OpenAPI specifications, and does the resulting automation produce actionable, machine-readable signals suitable for both human engineers and autonomous agents?}
 
@@ -140,7 +140,7 @@ This thesis investigates the following research questions:
 
   \item[RQ4:] \textit{Can quality-gated delivery pipelines be expressed as Kubernetes-native ontological specifications that operators and autonomous agents can discover, inspect, and manage as composable building blocks within an internal developer platform?}
 
-  We demonstrate that the XSDLC CRD functions as a machine-readable, structurally typed, discoverable specification---not merely a tool configuration---that integrates into Novelcore's IDP alongside database operators, networking compositions, and observability stacks, all following the same Crossplane pattern. This question is addressed in Chapters~\ref{ch:kubernetes} and~\ref{ch:conclusion}.
+  We demonstrate that the XSDLC CRD functions as a machine-readable, structurally typed, discoverable specification---not merely a tool configuration---that integrates into Novelcore's Internal Developer Platform (IDP)\footnote{An \emph{Internal Developer Platform} (IDP) is the Kubernetes-native abstraction layer that an organisation builds on top of its raw cluster infrastructure to give application teams a curated, declarative interface for provisioning the resources they need (databases, networking, observability, delivery pipelines). The Cloud Native Computing Foundation's Platform Engineering working group documents the pattern; the Crossplane operator and Backstage are typical building blocks. Novelcore's IDP, branded internally as \emph{KubeCore}, is built on Crossplane compositions and is the deployment environment for the operational evaluation in Chapter~\ref{ch:evaluation}.} alongside database operators, networking compositions, and observability stacks, all following the same Crossplane pattern. This question is addressed in Chapters~\ref{ch:kubernetes} and~\ref{ch:conclusion}.
 \end{description}
 
 % ============================================================================
@@ -148,21 +148,45 @@ This thesis investigates the following research questions:
 \label{sec:contributions}
 % ============================================================================
 
-This thesis presents a proof-of-concept system and makes six contributions:
+This thesis presents a proof-of-concept system and makes six contributions. Section~\ref{sec:rq-contribution-mapping} provides an explicit mapping between these contributions and the four research questions of Section~\ref{sec:research-questions}.
 
 \begin{enumerate}
-  \item \textbf{The DDT Methodology.} We define Documentation-Driven Testing as a formal methodology built on three axioms---Completeness, Determinism, and Observability---and nine validation principles (P001--P009) mapped systematically to these axioms. DDT provides a reusable, specification-agnostic framework for deriving API quality gates from documentation artifacts.
+  \item \textbf{A Conceptual Framework for Specification-Driven API Validation.} We define Specification-Driven Testing (SDT) as a conceptual framework---a strong theoretical core for a future formal methodology---built on three axioms (Completeness, Determinism, Observability) and nine validation principles (P001--P009) systematically mapped to these axioms. SDT provides a reusable, specification-agnostic basis for deriving API quality gates from a formal API contract. We claim it as a conceptual framework rather than a complete software-testing methodology: the elements that would elevate it to a full methodology---a formal test derivation procedure, execution and failure semantics, and lifecycle governance---are scoped as future work (see Chapter~\ref{ch:conclusion}).
 
-  \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements DDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, test-ready), and produces structured reports suitable for CI/CD integration.
+  \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements SDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, test-ready), and produces structured reports suitable for CI/CD integration.
 
-  \item \textbf{The XSDLC Declarative Pipeline.} We design the XSDLC Crossplane custom resource definition that generates a complete quality-gated delivery pipeline from a single CR (\(\sim\)25 lines of YAML $\rightarrow$ \(\sim\)44 resources in 15 seconds). XSDLC replaces hours of manual ClickOps with a declarative, version-controlled, self-healing specification that can be surgically installed into and removed from existing Kubernetes clusters without affecting pre-existing infrastructure.
+  \item \textbf{The XSDLC Declarative Pipeline.} We design the XSDLC Crossplane custom resource definition that generates a complete quality-gated delivery pipeline from a single CR (\(\sim\)25 lines of YAML $\rightarrow$ 45--50 Kubernetes objects in 15 seconds). XSDLC replaces hours of manual ClickOps with a declarative, version-controlled, self-healing specification that can be surgically installed into and removed from existing Kubernetes clusters without affecting pre-existing infrastructure.
 
   \item \textbf{XSDLC as Ontological Specification.} We demonstrate that the XSDLC CRD functions as a Kubernetes-native ontological artifact~\cite{gruber-ontology}---discoverable, inspectable, and manageable by operators and autonomous agents as a composable building block within an internal developer platform. This contribution reframes quality-gated delivery as a platform capability expressed through structured, machine-readable specifications rather than imperative tooling.
 
-  \item \textbf{Empirical Evaluation.} We evaluate DDT through three complementary experiments: a controlled evaluation against a reference API, an agent-driven large-scale evaluation against public APIs from APIs.guru~\cite{apis-guru}, and a proof-of-concept deployment on Novelcore's IDP demonstrating the feasibility of zero-tester quality assurance and declarative load testing contracts.
+  \item \textbf{Empirical Evaluation.} We evaluate SDT through three complementary experiments: a controlled evaluation against a reference API, an agent-driven large-scale evaluation against public APIs from APIs.guru~\cite{apis-guru}, and a proof-of-concept deployment on Novelcore's IDP demonstrating the feasibility of zero-tester quality assurance and declarative load testing contracts.
 
-  \item \textbf{Agent-Driven Development Methodology.} We document the AI-assisted development methodology used to build DriveBy, centered on the CLAUDE.md knowledge protocol---a hierarchical system of machine-first documentation files that provides AI agents with persistent, structured context for cross-session collaboration. The methodology was validated across 57 agent sessions and demonstrates that DDT's structured output is directly consumable by AI agents for automated evaluation and specification remediation.
+  \item \textbf{An Agent-Driven Development Framework.} We document the AI-assisted development framework used to build DriveBy, centered on the CLAUDE.md knowledge protocol---a hierarchical system of machine-first documentation files that provides AI agents with persistent, structured context for cross-session collaboration. We claim this as an enabling framework that operates within an existing software development lifecycle, not as a standalone methodology in itself. The framework was exercised throughout the 12-day Phase~B agent-partnership window described quantitatively in Chapter~\ref{ch:ai-development} and demonstrates that SDT's structured output is directly consumable by AI agents for automated evaluation and specification remediation.
 \end{enumerate}
+
+\subsection{Research Questions and Contributions Mapping}
+\label{sec:rq-contribution-mapping}
+
+Table~\ref{tab:rq-contribution-mapping} traces each research question to the contributions that address it, and to the chapter where the evidence is presented. A check mark (\cmark) indicates that the contribution directly addresses the research question; a tilde (\textasciitilde) indicates partial or supporting evidence.
+
+\begin{table}[htbp]
+\centering
+\caption{Mapping of research questions to thesis contributions. Direct support is marked \cmark; supporting evidence is marked \textasciitilde.}
+\label{tab:rq-contribution-mapping}
+\small
+\begin{tabular}{@{}lccccccl@{}}
+\toprule
+\textbf{Question} & \textbf{C1} & \textbf{C2} & \textbf{C3} & \textbf{C4} & \textbf{C5} & \textbf{C6} & \textbf{Primary chapters} \\
+\midrule
+RQ1 & \cmark & \cmark & & & \cmark & \textasciitilde & Ch.~\ref{ch:methodology}, \ref{ch:evaluation} \\
+RQ2 & \textasciitilde & \cmark & & & \cmark & \cmark & Ch.~\ref{ch:architecture}, \ref{ch:evaluation} \\
+RQ3 & & \textasciitilde & \cmark & & \cmark & & Ch.~\ref{ch:kubernetes}, \ref{ch:workflow}, \ref{ch:evaluation} \\
+RQ4 & & & \cmark & \cmark & & & Ch.~\ref{ch:kubernetes}, \ref{ch:conclusion} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Contribution legend: \textbf{C1} SDT conceptual framework; \textbf{C2} DriveBy implementation; \textbf{C3} XSDLC declarative pipeline; \textbf{C4} XSDLC as ontological specification; \textbf{C5} empirical evaluation; \textbf{C6} agent-driven development framework.
 
 % ============================================================================
 \section{Thesis Structure}
@@ -172,9 +196,9 @@ This thesis presents a proof-of-concept system and makes six contributions:
 The remainder of this thesis is organized as follows:
 
 \begin{description}
-  \item[Chapter~\ref{ch:related-work}] surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning DDT within the existing landscape and identifying six research gaps.
+  \item[Chapter~\ref{ch:related-work}] surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning SDT within the existing landscape and identifying six research gaps.
 
-  \item[Chapter~\ref{ch:methodology}] presents the DDT methodology: three axioms, nine validation principles, the formal axiom-to-principle mapping, and four validation modes that enable incremental adoption.
+  \item[Chapter~\ref{ch:methodology}] presents the SDT framework: three axioms, nine validation principles, the formal axiom-to-principle mapping, and four validation modes that enable incremental adoption.
 
   \item[Chapter~\ref{ch:architecture}] describes the DriveBy CLI architecture: the \texttt{APISpec} abstraction layer for version-agnostic validation, the principle checker pattern, the engine's mode-based orchestration, and the structured report generation system.
 
@@ -182,9 +206,9 @@ The remainder of this thesis is organized as follows:
 
   \item[Chapter~\ref{ch:workflow}] describes the GitOps pipeline: the promotion-driven quality gate flow, the two-repo BYOCI architecture, the GitOps Promoter's multi-environment model, human-in-the-loop automation patterns, the quality gate as a closed-loop control system, and DriveBy's own CI/CD release pipeline.
 
-  \item[Chapter~\ref{ch:evaluation}] presents the empirical evaluation: controlled validation against a reference API (perfect-api), large-scale validation against public APIs from APIs.guru, and a proof-of-concept operational evaluation on Novelcore's IDP demonstrating the feasibility of zero-tester quality assurance, declarative load testing contracts, and 15-second pipeline provisioning.
+  \item[Chapter~\ref{ch:evaluation}] presents the empirical evaluation: controlled validation against a reference API (\texttt{non-critical-api}), large-scale validation against public APIs from APIs.guru, and a proof-of-concept operational evaluation on Novelcore's IDP demonstrating the feasibility of zero-tester quality assurance, declarative load testing contracts, and 15-second pipeline provisioning.
 
-  \item[Chapter~\ref{ch:ai-development}] examines AI-assisted development: the CLAUDE.md knowledge protocol that enables agentic workflows, the persistent agent memory system, the agent-driven multi-API evaluation, the agent-driven thesis writing process, and DDT as feedback infrastructure for autonomous agent loops.
+  \item[Chapter~\ref{ch:ai-development}] examines AI-assisted development: the CLAUDE.md knowledge protocol that enables agentic workflows, the persistent agent memory system, the agent-driven multi-API evaluation, the agent-driven thesis writing process, and SDT as feedback infrastructure for autonomous agent loops.
 
   \item[Chapter~\ref{ch:discussion}] discusses the results, revisits the research questions with evidence from the evaluation, and reflects on the ontological significance of XSDLC as a platform building block.
 

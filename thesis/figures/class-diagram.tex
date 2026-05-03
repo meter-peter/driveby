@@ -1,0 +1,133 @@
+% Class / Interface Diagram — Chapter 4
+% Updated 2026-05 (round-1 review): plain-rectangle layout (no rectangle split)
+% to avoid renderer issues; compact natural-width coordinates.
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    every node/.style={font=\scriptsize},
+    iface/.style={
+        rectangle,
+        rounded corners=1pt,
+        draw=violet!60!black,
+        fill=violet!6,
+        align=left,
+        text width=4.4cm,
+        inner sep=4pt,
+        font=\scriptsize
+    },
+    cls/.style={
+        rectangle,
+        rounded corners=1pt,
+        draw=teal!60!black,
+        fill=teal!5,
+        align=left,
+        text width=3.4cm,
+        inner sep=4pt,
+        font=\scriptsize
+    },
+    plcheck/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=orange!60!black,
+        fill=orange!7,
+        align=center,
+        minimum width=1.7cm,
+        minimum height=0.7cm,
+        font=\tiny\bfseries
+    },
+    plcheck-planned/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=gray!60,
+        fill=white,
+        align=center,
+        minimum width=1.7cm,
+        minimum height=0.7cm,
+        densely dashed,
+        font=\tiny\bfseries
+    },
+    realize/.style={->, thick, densely dashed, gray!50!black},
+    use/.style={->, thick, gray!60!black}
+]
+
+% ==================== Top: APISpec interface and adapters + Engine ====================
+\node[iface] (apispec) at (0,0) {%
+  \textbf{$\langle\!\langle$\,interface\,$\rangle\!\rangle$ APISpec}\\[2pt]
+  \rule{4cm}{0.4pt}\\[2pt]
+  \texttt{Version() string}\\
+  \texttt{Title() string}\\
+  \texttt{Paths() map[string]*PathItem}\\
+  \texttt{Operations() []*Operation}\\
+  \texttt{Components() *Components}\\
+  \texttt{ValidateStructure() error}%
+};
+
+\node[cls] (oa3) at (-5.5,-3.5) {%
+  \textbf{openAPI3Spec}\\[2pt]
+  \rule{3cm}{0.4pt}\\[2pt]
+  wraps \texttt{*openapi3.T}\\
+  3.0.x and 3.1.0\\
+  null-type semantics%
+};
+
+\node[cls] (sw2) at (5.5,-3.5) {%
+  \textbf{swagger2Spec}\\[2pt]
+  \rule{3cm}{0.4pt}\\[2pt]
+  wraps \texttt{*openapi2.T}\\
+  downgrades to 3.0.x\\
+  via \texttt{openapi2conv}%
+};
+
+\draw[realize] (oa3.north) -- (apispec.south west);
+\draw[realize] (sw2.north) -- (apispec.south east);
+
+% Engine to the right of APISpec, but stacked above to keep width contained
+\node[cls] (engine) at (5.5,0.3) {%
+  \textbf{Engine}\\[2pt]
+  \rule{3cm}{0.4pt}\\[2pt]
+  \texttt{Validate(spec, mode)}\\
+  selects checkers via\\
+  \texttt{Registry.ForMode()}\\
+  aggregates results%
+};
+\draw[use] (engine.west) -- node[above]{uses} (apispec.east);
+
+% ==================== Bottom: PrincipleChecker interface and impls ====================
+\node[iface] (pcint) at (0,-7.0) {%
+  \textbf{$\langle\!\langle$\,interface\,$\rangle\!\rangle$ PrincipleChecker}\\[2pt]
+  \rule{4cm}{0.4pt}\\[2pt]
+  \texttt{ID() string}\\
+  \texttt{Axiom() Axiom}\\
+  \texttt{Severity() Severity}\\
+  \texttt{Modes() []ValidationMode}\\
+  \texttt{Check(spec APISpec)}\\
+  \quad\texttt{PrincipleResult}%
+};
+
+\draw[use] (pcint.north) -- node[right]{consumes} (apispec.south);
+\draw[use] (engine.south) to[bend left=20] node[right]{invokes} (pcint.east);
+
+% Concrete principle checkers
+\node[plcheck]         (p001) at (-5.5,-9.8) {P001\\Compliance};
+\node[plcheck]         (p002) at (-3.7,-9.8) {P002\\Documentation};
+\node[plcheck]         (p003) at (-1.9,-9.8) {P003\\Errors};
+\node[plcheck]         (p004) at (-0.1,-9.8) {P004\\Schema};
+\node[plcheck]         (p005) at ( 1.7,-9.8) {P005\\Security};
+\node[plcheck]         (p008) at ( 3.5,-9.8) {P008\\Versioning};
+\node[plcheck]         (p009) at ( 5.3,-9.8) {P009\\Test\\Readiness};
+\node[plcheck-planned] (p006) at (-1.0,-11.3){P006\\Functional\\(planned)};
+\node[plcheck-planned] (p007) at ( 2.5,-11.3){P007\\Performance\\(planned)};
+
+\foreach \n in {p001,p002,p003,p004,p005,p008,p009,p006,p007} {
+  \draw[realize] (\n.north) -- (pcint.south);
+}
+
+% Legend
+\node[anchor=west, font=\scriptsize\bfseries] at (-5.5,-12.8) {Legend};
+\draw[realize] (-5.5,-13.2) -- (-4.5,-13.2);
+\node[anchor=west, font=\tiny] at (-4.4,-13.2) {realises (interface implementation)};
+\draw[use] (1.0,-13.2) -- (2.0,-13.2);
+\node[anchor=west, font=\tiny] at (2.1,-13.2) {uses};
+\node[plcheck-planned, scale=0.55] at (4.0,-13.2) {planned};
+\node[anchor=west, font=\tiny] at (4.65,-13.2) {dashed = defined, not yet implemented};
+
+\end{tikzpicture}

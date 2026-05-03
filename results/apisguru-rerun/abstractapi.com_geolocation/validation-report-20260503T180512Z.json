@@ -1,0 +1,345 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-05-03T21:05:12.553882647+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P001",
+        "name": "OpenAPI Specification Compliance",
+        "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+        "category": "Specification",
+        "severity": "critical",
+        "tags": [
+          "openapi",
+          "specification",
+          "compliance"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "OpenAPI version is 3.0.x or 3.1.0",
+          "Required info fields (title, version) are present",
+          "Paths are properly defined",
+          "Components are valid",
+          "References are resolvable",
+          "No duplicate operationIds",
+          "Valid HTTP methods used"
+        ]
+      },
+      "Passed": false,
+      "Message": "OpenAPI spec validation failed: Specification structure is valid: invalid paths: invalid path /v1/: invalid operation GET: example 0: value must be an object\nSchema:\n  {\n    \"properties\": {\n      \"city\": {\n        \"type\": \"string\"\n      },\n      \"city_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"connection\": {\n        \"properties\": {\n          \"autonomous_system_number\": {\n            \"type\": \"integer\"\n          },\n          \"autonomous_system_organization\": {\n            \"type\": \"string\"\n          },\n          \"connection_type\": {\n            \"type\": \"string\"\n          },\n          \"isp_name\": {\n            \"type\": \"string\"\n          },\n          \"organization_name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"continent\": {\n        \"type\": \"string\"\n      },\n      \"continent_code\": {\n        \"type\": \"string\"\n      },\n      \"continent_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"country\": {\n        \"type\": \"string\"\n      },\n      \"country_code\": {\n        \"type\": \"string\"\n      },\n      \"country_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"country_is_eu\": {\n        \"type\": \"boolean\"\n      },\n      \"currency\": {\n        \"properties\": {\n          \"currency_code\": {\n            \"type\": \"string\"\n          },\n          \"currency_name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"flag\": {\n        \"properties\": {\n          \"emoji\": {\n            \"type\": \"string\"\n          },\n          \"png\": {\n            \"type\": \"string\"\n          },\n          \"svg\": {\n            \"type\": \"string\"\n          },\n          \"unicode\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"ip_address\": {\n        \"type\": \"string\"\n      },\n      \"latitude\": {\n        \"type\": \"number\"\n      },\n      \"longitude\": {\n        \"type\": \"number\"\n      },\n      \"postal_code\": {\n        \"type\": \"string\"\n      },\n      \"region\": {\n        \"type\": \"string\"\n      },\n      \"region_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"region_iso_code\": {\n        \"type\": \"string\"\n      },\n      \"security\": {\n        \"properties\": {\n          \"is_vpn\": {\n            \"type\": \"boolean\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"timezone\": {\n        \"properties\": {\n          \"abbreviation\": {\n            \"type\": \"string\"\n          },\n          \"current_time\": {\n            \"type\": \"string\"\n          },\n          \"gmt_offset\": {\n            \"type\": \"integer\"\n          },\n          \"is_dst\": {\n            \"type\": \"boolean\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      }\n    },\n    \"type\": \"object\"\n  }\n\nValue:\n  \"{\\\"ip_address\\\":\\\"195.154.25.40\\\",\\\"city\\\":\\\"Paris\\\",\\\"city_geoname_id\\\":2988507,\\\"region\\\":\\\"Île-de-France\\\",\\\"region_iso_code\\\":\\\"IDF\\\",\\\"region_geoname_id\\\":3012874,\\\"postal_code\\\":\\\"75008\\\",\\\"country\\\":\\\"France\\\",\\\"country_code\\\":\\\"FR\\\",\\\"country_geoname_id\\\":3017382,\\\"country_is_eu\\\":true,\\\"continent\\\":\\\"Europe\\\",\\\"continent_code\\\":\\\"EU\\\",\\\"continent_geoname_id\\\":6255148,\\\"longitude\\\":2.4075,\\\"latitude\\\":48.8323,\\\"security\\\":{\\\"is_vpn\\\":false},\\\"timezone\\\":{\\\"name\\\":\\\"Europe/Paris\\\",\\\"abbreviation\\\":\\\"CEST\\\",\\\"gmt_offset\\\":2,\\\"current_time\\\":\\\"15:42:18\\\",\\\"is_dst\\\":true},\\\"flag\\\":{\\\"emoji\\\":\\\"\\u003cë\\u003c÷\\\",\\\"unicode\\\":\\\"U+1F1EB U+1F1F7\\\",\\\"png\\\":\\\"https://static.abstractapi.com/country-flags/FR_flag.png\\\",\\\"svg\\\":\\\"https://static.abstractapi.com/country-flags/FR_flag.svg\\\"},\\\"currency\\\":{\\\"currency_name\\\":\\\"Euros\\\",\\\"currency_code\\\":\\\"EUR\\\"},\\\"connection\\\":{\\\"autonomous_system_number\\\":12876,\\\"autonomous_system_organization\\\":\\\"Online S.a.s.\\\",\\\"connection_type\\\":\\\"Corporate\\\",\\\"isp_name\\\":\\\"Online S.A.S.\\\",\\\"organization_name\\\":\\\"ONLINE\\\"}}\"\n",
+      "Details": {
+        "checks": {
+          "Components are valid": true,
+          "No duplicate operationIds": true,
+          "Paths are properly defined": true,
+          "Required info fields (title, version) are present": true,
+          "Specification structure is valid": false,
+          "Specification version is present": true,
+          "Valid HTTP methods used": true
+        },
+        "messages": {
+          "Specification structure is valid": "invalid paths: invalid path /v1/: invalid operation GET: example 0: value must be an object\nSchema:\n  {\n    \"properties\": {\n      \"city\": {\n        \"type\": \"string\"\n      },\n      \"city_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"connection\": {\n        \"properties\": {\n          \"autonomous_system_number\": {\n            \"type\": \"integer\"\n          },\n          \"autonomous_system_organization\": {\n            \"type\": \"string\"\n          },\n          \"connection_type\": {\n            \"type\": \"string\"\n          },\n          \"isp_name\": {\n            \"type\": \"string\"\n          },\n          \"organization_name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"continent\": {\n        \"type\": \"string\"\n      },\n      \"continent_code\": {\n        \"type\": \"string\"\n      },\n      \"continent_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"country\": {\n        \"type\": \"string\"\n      },\n      \"country_code\": {\n        \"type\": \"string\"\n      },\n      \"country_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"country_is_eu\": {\n        \"type\": \"boolean\"\n      },\n      \"currency\": {\n        \"properties\": {\n          \"currency_code\": {\n            \"type\": \"string\"\n          },\n          \"currency_name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"flag\": {\n        \"properties\": {\n          \"emoji\": {\n            \"type\": \"string\"\n          },\n          \"png\": {\n            \"type\": \"string\"\n          },\n          \"svg\": {\n            \"type\": \"string\"\n          },\n          \"unicode\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"ip_address\": {\n        \"type\": \"string\"\n      },\n      \"latitude\": {\n        \"type\": \"number\"\n      },\n      \"longitude\": {\n        \"type\": \"number\"\n      },\n      \"postal_code\": {\n        \"type\": \"string\"\n      },\n      \"region\": {\n        \"type\": \"string\"\n      },\n      \"region_geoname_id\": {\n        \"type\": \"integer\"\n      },\n      \"region_iso_code\": {\n        \"type\": \"string\"\n      },\n      \"security\": {\n        \"properties\": {\n          \"is_vpn\": {\n            \"type\": \"boolean\"\n          }\n        },\n        \"type\": \"object\"\n      },\n      \"timezone\": {\n        \"properties\": {\n          \"abbreviation\": {\n            \"type\": \"string\"\n          },\n          \"current_time\": {\n            \"type\": \"string\"\n          },\n          \"gmt_offset\": {\n            \"type\": \"integer\"\n          },\n          \"is_dst\": {\n            \"type\": \"boolean\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n          }\n        },\n        \"type\": \"object\"\n      }\n    },\n    \"type\": \"object\"\n  }\n\nValue:\n  \"{\\\"ip_address\\\":\\\"195.154.25.40\\\",\\\"city\\\":\\\"Paris\\\",\\\"city_geoname_id\\\":2988507,\\\"region\\\":\\\"Île-de-France\\\",\\\"region_iso_code\\\":\\\"IDF\\\",\\\"region_geoname_id\\\":3012874,\\\"postal_code\\\":\\\"75008\\\",\\\"country\\\":\\\"France\\\",\\\"country_code\\\":\\\"FR\\\",\\\"country_geoname_id\\\":3017382,\\\"country_is_eu\\\":true,\\\"continent\\\":\\\"Europe\\\",\\\"continent_code\\\":\\\"EU\\\",\\\"continent_geoname_id\\\":6255148,\\\"longitude\\\":2.4075,\\\"latitude\\\":48.8323,\\\"security\\\":{\\\"is_vpn\\\":false},\\\"timezone\\\":{\\\"name\\\":\\\"Europe/Paris\\\",\\\"abbreviation\\\":\\\"CEST\\\",\\\"gmt_offset\\\":2,\\\"current_time\\\":\\\"15:42:18\\\",\\\"is_dst\\\":true},\\\"flag\\\":{\\\"emoji\\\":\\\"\\u003cë\\u003c÷\\\",\\\"unicode\\\":\\\"U+1F1EB U+1F1F7\\\",\\\"png\\\":\\\"https://static.abstractapi.com/country-flags/FR_flag.png\\\",\\\"svg\\\":\\\"https://static.abstractapi.com/country-flags/FR_flag.svg\\\"},\\\"currency\\\":{\\\"currency_name\\\":\\\"Euros\\\",\\\"currency_code\\\":\\\"EUR\\\"},\\\"connection\\\":{\\\"autonomous_system_number\\\":12876,\\\"autonomous_system_organization\\\":\\\"Online S.a.s.\\\",\\\"connection_type\\\":\\\"Corporate\\\",\\\"isp_name\\\":\\\"Online S.A.S.\\\",\\\"organization_name\\\":\\\"ONLINE\\\"}}\"\n"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P002",
+        "name": "API Documentation Quality",
+        "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
+        "category": "Documentation",
+        "severity": "critical",
+        "tags": [
+          "documentation",
+          "quality",
+          "usability"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations have clear summaries",
+          "All operations have detailed descriptions",
+          "All operations have unique operationIds",
+          "All parameters have descriptions",
+          "All request/response bodies have examples",
+          "All schemas have descriptions",
+          "All enums have descriptions",
+          "API has a general description",
+          "Contact information is provided",
+          "License information is provided"
+        ]
+      },
+      "Passed": false,
+      "Message": "Documentation quality issues found: All operations have clear summaries: GET /v1/; All operations have unique operationIds: GET /v1/; All parameters have descriptions: GET /v1/: parameter api_key, GET /v1/: parameter ip_address, GET /v1/: parameter fields; All schemas have descriptions: inline_response_200",
+      "Details": {
+        "checks": {
+          "API has a general description": true,
+          "All operations have clear summaries": false,
+          "All operations have unique operationIds": false,
+          "All parameters have descriptions": false,
+          "All schemas have descriptions": false,
+          "Contact information is provided": false,
+          "License information is provided": false
+        },
+        "messages": {
+          "Contact information is provided": "Contact information is missing",
+          "License information is provided": "License information is missing"
+        },
+        "missing_docs": {
+          "All operations have clear summaries": [
+            "GET /v1/"
+          ],
+          "All operations have unique operationIds": [
+            "GET /v1/"
+          ],
+          "All parameters have descriptions": [
+            "GET /v1/: parameter api_key",
+            "GET /v1/: parameter ip_address",
+            "GET /v1/: parameter fields"
+          ],
+          "All schemas have descriptions": [
+            "inline_response_200"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add missing documentation including descriptions, examples, and operation details",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P003",
+        "name": "Error Handling Standards",
+        "description": "Validates comprehensive error response documentation and consistent error handling patterns",
+        "category": "Error Handling",
+        "severity": "critical",
+        "tags": [
+          "errors",
+          "responses",
+          "standards"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations document 4xx error responses",
+          "All operations document 5xx error responses",
+          "Error responses include error codes",
+          "Error responses include error messages",
+          "Error responses include error details schema",
+          "Common error responses are defined in components",
+          "Error responses follow consistent format"
+        ]
+      },
+      "Passed": false,
+      "Message": "Error handling issues found: All operations document 4xx error responses: GET /v1/; All operations document 5xx error responses: GET /v1/",
+      "Details": {
+        "checks": {
+          "All operations document 4xx error responses": false,
+          "All operations document 5xx error responses": false,
+          "Common error responses are defined in components": false,
+          "Error responses follow consistent format": true
+        },
+        "messages": {
+          "Common error responses are defined in components": "No common error responses defined in components"
+        },
+        "missing_errors": {
+          "All operations document 4xx error responses": [
+            "GET /v1/"
+          ],
+          "All operations document 5xx error responses": [
+            "GET /v1/"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive error response documentation including codes, messages, and consistent error schemas",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P004",
+        "name": "Request Schema Definitions",
+        "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+        "category": "Schema",
+        "severity": "critical",
+        "tags": [
+          "schema",
+          "validation",
+          "request"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All path parameters have schemas",
+          "All query parameters have schemas",
+          "All header parameters have schemas",
+          "All request bodies have content schemas",
+          "All schemas specify data types",
+          "All schemas have appropriate constraints",
+          "All required fields are marked",
+          "All enums have valid values",
+          "All numeric fields have min/max values",
+          "All string fields have length constraints"
+        ]
+      },
+      "Passed": false,
+      "Message": "Request validation issues found: All string fields have length constraints: GET /v1/: parameter api_key, GET /v1/: parameter ip_address, GET /v1/: parameter fields",
+      "Details": {
+        "checks": {
+          "All enums have valid values": true,
+          "All header parameters have schemas": true,
+          "All numeric fields have min/max values": true,
+          "All path parameters have schemas": true,
+          "All query parameters have schemas": true,
+          "All request bodies have content schemas": true,
+          "All required fields are marked": true,
+          "All schemas have appropriate constraints": true,
+          "All schemas specify data types": true,
+          "All string fields have length constraints": false
+        },
+        "messages": {},
+        "missing_validation": {
+          "All string fields have length constraints": [
+            "GET /v1/: parameter api_key",
+            "GET /v1/: parameter ip_address",
+            "GET /v1/: parameter fields"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive schema validation including data types, constraints, and required fields",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P005",
+        "name": "Security Standards",
+        "description": "Validates comprehensive security requirements and authentication mechanisms",
+        "category": "Security",
+        "severity": "critical",
+        "tags": [
+          "security",
+          "authentication",
+          "authorization"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Security schemes are defined",
+          "Global security requirements are set",
+          "Operation-level security is defined",
+          "OAuth2 scopes are documented",
+          "API keys are properly described",
+          "Authentication headers are specified",
+          "Security requirements are consistent"
+        ]
+      },
+      "Passed": false,
+      "Message": "Security validation failed: Security schemes are defined: No security schemes defined in components.securitySchemes; Global security requirements are set: No top-level security requirements defined; Operation-level security is defined: Endpoints without security: GET /v1/",
+      "Details": {
+        "checks": {
+          "API keys are properly described": true,
+          "Authentication headers are specified": true,
+          "Global security requirements are set": false,
+          "OAuth2 scopes are documented": true,
+          "Operation-level security is defined": false,
+          "Security requirements are consistent": true,
+          "Security schemes are defined": false
+        },
+        "messages": {
+          "Global security requirements are set": "No top-level security requirements defined",
+          "Operation-level security is defined": "Endpoints without security: GET /v1/",
+          "Security schemes are defined": "No security schemes defined in components.securitySchemes"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Review security schemes, global security requirements, and per-operation security",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P008",
+        "name": "API Versioning Strategy",
+        "description": "Validates proper API versioning implementation and documentation",
+        "category": "Versioning",
+        "severity": "warning",
+        "tags": [
+          "versioning",
+          "compatibility",
+          "lifecycle"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "API version is specified",
+          "Version follows semantic versioning",
+          "Versioning strategy is documented",
+          "Deprecation notices are present",
+          "Breaking changes are documented",
+          "Version compatibility is specified",
+          "Migration guides are referenced"
+        ]
+      },
+      "Passed": false,
+      "Message": "Versioning validation failed: Breaking changes are documented: Info description does not reference breaking changes or a changelog; Version compatibility is specified: Info description does not mention version compatibility; Migration guides are referenced: Info description does not reference migration or upgrade guides; Versioning strategy is documented: Info description does not mention versioning strategy",
+      "Details": {
+        "checks": {
+          "API version is specified": true,
+          "Breaking changes are documented": false,
+          "Deprecation notices are present": true,
+          "Migration guides are referenced": false,
+          "Version compatibility is specified": false,
+          "Version follows semantic versioning": true,
+          "Versioning strategy is documented": false
+        },
+        "messages": {
+          "Breaking changes are documented": "Info description does not reference breaking changes or a changelog",
+          "Migration guides are referenced": "Info description does not reference migration or upgrade guides",
+          "Version compatibility is specified": "Info description does not mention version compatibility",
+          "Versioning strategy is documented": "Info description does not mention versioning strategy"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Update the info section with version details, deprecation notices, and migration references",
+      "TestImpact": null
+    }
+  ],
+  "total_checks": 6,
+  "passed_checks": 0,
+  "failed_checks": 6,
+  "summary": {
+    "CriticalIssues": 5,
+    "Warnings": 1,
+    "Info": 0,
+    "Categories": [
+      "Specification",
+      "Documentation",
+      "Error Handling",
+      "Schema",
+      "Security",
+      "Versioning"
+    ],
+    "FailedTags": [
+      "request",
+      "authorization",
+      "versioning",
+      "schema",
+      "openapi",
+      "compliance",
+      "quality",
+      "responses",
+      "compatibility",
+      "lifecycle",
+      "errors",
+      "security",
+      "validation",
+      "authentication",
+      "specification",
+      "documentation",
+      "usability",
+      "standards"
+    ],
+    "TestSummary": null
+  }
+}

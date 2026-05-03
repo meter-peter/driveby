@@ -1,0 +1,1097 @@
+# API Validation Report
+
+Generated: 2026-05-03T21:05:12+03:00
+Environment: production
+Version: 1.0.0
+
+## Summary
+
+- Total Checks: 6
+- Passed Checks: 2
+- Failed Checks: 4
+- Critical Issues: 3
+- Warnings: 1
+- Info: 0
+
+### Categories
+- Documentation
+- Error Handling
+- Schema
+- Versioning
+
+
+### Failed Tags
+- validation
+- versioning
+- compatibility
+- lifecycle
+- documentation
+- quality
+- schema
+- request
+- usability
+- errors
+- responses
+- standards
+
+
+## Principle Results
+
+### Specification
+
+#### P001: OpenAPI Specification Compliance (Passed) [critical]
+
+Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices
+
+- **Status:** Passed
+- **Message:** OpenAPI specification is fully compliant with 3.0/3.1 standards
+- **Tags:** openapi, specification, compliance
+
+**Checks Performed:**
+- OpenAPI version is 3.0.x or 3.1.0
+- Required info fields (title, version) are present
+- Paths are properly defined
+- Components are valid
+- References are resolvable
+- No duplicate operationIds
+- Valid HTTP methods used
+
+**Details:**
+```json
+{
+    "checks": {
+      "Components are valid": true,
+      "No duplicate operationIds": true,
+      "Paths are properly defined": true,
+      "Required info fields (title, version) are present": true,
+      "Specification structure is valid": true,
+      "Specification version is present": true,
+      "Valid HTTP methods used": true
+    },
+    "messages": {}
+  }
+```
+
+---
+
+### Documentation
+
+#### P002: API Documentation Quality (Failed) [critical]
+
+Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines
+
+- **Status:** Failed
+- **Message:** Documentation quality issues found: All operations have clear summaries: POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter, GET /crx/packmgr/service/script.html, GET /etc/truststore/truststore.p12, POST /crx/explorer/ui/setpassword.jsp, GET /system/console/configMgr, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json, GET /{intermediatePath}/{authorizableId}/keystore/store.p12, POST /{path}/{name}.rw.html, GET /{intermediatePath}/{authorizableId}.ks.json, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet, POST /system/console/bundles/{name}, POST /{path}/, POST /apps/system/config/org.apache.http.proxyconfigurator.config, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config, POST /apps/system/config/org.apache.felix.http, POST /crx/packmgr/service/.json/{path}, GET /system/console/status-productinfo.json, GET /crx/packmgr/installstatus.jsp, POST /libs/replication/treeactivation.html, POST /etc/truststore, GET /system/console/bundles/{name}.json, GET /system/health, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck, DELETE /etc/replication/agents.{runmode}/{name}, GET /etc/replication/agents.{runmode}/{name}, POST /etc/replication/agents.{runmode}/{name}, POST /libs/granite/security/post/sslSetup.html, GET /libs/granite/security/truststore.json, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler, POST /.cqactions.html, POST /crx/packmgr/service.jsp, POST /libs/granite/security/post/authorizables, POST /crx/packmgr/update.jsp, GET /etc/replication/agents.{runmode}.-1.json, POST /apps/system/config/{configNodeName}, GET /etc/packages/{group}/{name}-{version}.zip, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator, GET /{path}/{name}, POST /{path}/{name}, DELETE /{path}/{name}, GET /crx/server/crx.default/jcr:root/.1.json, POST /{intermediatePath}/{authorizableId}.ks.html, POST /libs/granite/security/post/truststore, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}, GET /bin/querybuilder.json, POST /bin/querybuilder.json, GET /libs/granite/core/content/login.html, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet; All operations have detailed descriptions: POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter, GET /crx/packmgr/service/script.html, GET /etc/truststore/truststore.p12, POST /crx/explorer/ui/setpassword.jsp, GET /system/console/configMgr, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json, GET /{intermediatePath}/{authorizableId}/keystore/store.p12, POST /{path}/{name}.rw.html, GET /{intermediatePath}/{authorizableId}.ks.json, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet, POST /system/console/bundles/{name}, POST /{path}/, POST /apps/system/config/org.apache.http.proxyconfigurator.config, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config, POST /apps/system/config/org.apache.felix.http, POST /crx/packmgr/service/.json/{path}, GET /system/console/status-productinfo.json, GET /crx/packmgr/installstatus.jsp, POST /libs/replication/treeactivation.html, POST /etc/truststore, GET /system/console/bundles/{name}.json, GET /system/health, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck, DELETE /etc/replication/agents.{runmode}/{name}, GET /etc/replication/agents.{runmode}/{name}, POST /etc/replication/agents.{runmode}/{name}, POST /libs/granite/security/post/sslSetup.html, GET /libs/granite/security/truststore.json, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler, POST /.cqactions.html, POST /crx/packmgr/service.jsp, POST /libs/granite/security/post/authorizables, POST /crx/packmgr/update.jsp, GET /etc/replication/agents.{runmode}.-1.json, POST /apps/system/config/{configNodeName}, GET /etc/packages/{group}/{name}-{version}.zip, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator, GET /{path}/{name}, POST /{path}/{name}, DELETE /{path}/{name}, GET /crx/server/crx.default/jcr:root/.1.json, POST /{intermediatePath}/{authorizableId}.ks.html, POST /libs/granite/security/post/truststore, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}, GET /bin/querybuilder.json, POST /bin/querybuilder.json, GET /libs/granite/core/content/login.html, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet; All parameters have descriptions: POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods@TypeHint, POST /crx/explorer/ui/setpassword.jsp: parameter old, POST /crx/explorer/ui/setpassword.jsp: parameter plain, POST /crx/explorer/ui/setpassword.jsp: parameter verify, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter group, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter name, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter version, GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter intermediatePath, GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter authorizableId, POST /{path}/{name}.rw.html: parameter path, POST /{path}/{name}.rw.html: parameter name, POST /{path}/{name}.rw.html: parameter addMembers, GET /{intermediatePath}/{authorizableId}.ks.json: parameter intermediatePath, GET /{intermediatePath}/{authorizableId}.ks.json: parameter authorizableId, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml@TypeHint, POST /system/console/bundles/{name}: parameter name, POST /system/console/bundles/{name}: parameter action, POST /{path}/: parameter path, POST /{path}/: parameter jcr:primaryType, POST /{path}/: parameter :name, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure, POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure@TypeHint, POST /crx/packmgr/service/.json/{path}: parameter path, POST /crx/packmgr/service/.json/{path}: parameter cmd, POST /crx/packmgr/service/.json/{path}: parameter groupName, POST /crx/packmgr/service/.json/{path}: parameter packageName, POST /crx/packmgr/service/.json/{path}: parameter packageVersion, POST /crx/packmgr/service/.json/{path}: parameter _charset_, POST /crx/packmgr/service/.json/{path}: parameter force, POST /crx/packmgr/service/.json/{path}: parameter recursive, POST /libs/replication/treeactivation.html: parameter ignoredeactivated, POST /libs/replication/treeactivation.html: parameter onlymodified, POST /libs/replication/treeactivation.html: parameter path, POST /libs/replication/treeactivation.html: parameter cmd, GET /system/console/bundles/{name}.json: parameter name, GET /system/health: parameter tags, GET /system/health: parameter combineTagsOr, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored@TypeHint, DELETE /etc/replication/agents.{runmode}/{name}: parameter runmode, DELETE /etc/replication/agents.{runmode}/{name}: parameter name, GET /etc/replication/agents.{runmode}/{name}: parameter runmode, GET /etc/replication/agents.{runmode}/{name}: parameter name, POST /etc/replication/agents.{runmode}/{name}: parameter runmode, POST /etc/replication/agents.{runmode}/{name}: parameter name, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute@TypeHint, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:name, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:template, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/enabled, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:description, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModified, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModifiedBy, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:mixinTypes, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:title, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/logLevel, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/noStatusUpdate, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/noVersioning, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolConnectTimeout, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPConnectionClosed, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPExpired, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders@TypeHint, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPMethod, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPSRelaxed, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolInterface, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolSocketTimeout, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolVersion, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMDomain, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPassword, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPort, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyUser, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMaxSize, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMode, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchWaitTime, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/retryDelay, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/reverseReplication, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/serializationType, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/sling:resourceType, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/ssl, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMDomain, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportPassword, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUri, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUser, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerDistribute, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerModified, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerOnOffTime, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerReceive, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerSpecific, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/userId, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:primaryType, POST /etc/replication/agents.{runmode}/{name}: parameter :operation, POST /libs/granite/security/post/sslSetup.html: parameter keystorePassword, POST /libs/granite/security/post/sslSetup.html: parameter keystorePasswordConfirm, POST /libs/granite/security/post/sslSetup.html: parameter truststorePassword, POST /libs/granite/security/post/sslSetup.html: parameter truststorePasswordConfirm, POST /libs/granite/security/post/sslSetup.html: parameter httpsHostname, POST /libs/granite/security/post/sslSetup.html: parameter httpsPort, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter post, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter apply, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter delete, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter action, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter $location, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter path, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter service.ranking, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpCertAlias, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpHttpRedirect, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter serviceProviderEntityId, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter assertionConsumerServiceURL, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter spPrivateKeyAlias, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter keyStorePassword, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultRedirectUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIDAttribute, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter useEncryption, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter createUser, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter addGroupMemberships, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter groupMembershipAttribute, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultGroups, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter nameIdFormat, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter synchronizeAttributes, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter handleLogout, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter logoutUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter clockTolerance, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter digestMethod, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter signatureMethod, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIntermediatePath, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter propertylist, POST /.cqactions.html: parameter authorizableId, POST /.cqactions.html: parameter changelog, POST /crx/packmgr/service.jsp: parameter cmd, POST /libs/granite/security/post/authorizables: parameter authorizableId, POST /libs/granite/security/post/authorizables: parameter intermediatePath, POST /libs/granite/security/post/authorizables: parameter createUser, POST /libs/granite/security/post/authorizables: parameter createGroup, POST /libs/granite/security/post/authorizables: parameter rep:password, POST /libs/granite/security/post/authorizables: parameter profile/givenName, POST /crx/packmgr/update.jsp: parameter groupName, POST /crx/packmgr/update.jsp: parameter packageName, POST /crx/packmgr/update.jsp: parameter version, POST /crx/packmgr/update.jsp: parameter path, POST /crx/packmgr/update.jsp: parameter filter, POST /crx/packmgr/update.jsp: parameter _charset_, GET /etc/replication/agents.{runmode}.-1.json: parameter runmode, POST /apps/system/config/{configNodeName}: parameter configNodeName, GET /etc/packages/{group}/{name}-{version}.zip: parameter group, GET /etc/packages/{group}/{name}-{version}.zip: parameter name, GET /etc/packages/{group}/{name}-{version}.zip: parameter version, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables@TypeHint, GET /{path}/{name}: parameter path, GET /{path}/{name}: parameter name, POST /{path}/{name}: parameter path, POST /{path}/{name}: parameter name, POST /{path}/{name}: parameter :operation, POST /{path}/{name}: parameter deleteAuthorizable, DELETE /{path}/{name}: parameter path, DELETE /{path}/{name}: parameter name, POST /{intermediatePath}/{authorizableId}.ks.html: parameter intermediatePath, POST /{intermediatePath}/{authorizableId}.ks.html: parameter authorizableId, POST /{intermediatePath}/{authorizableId}.ks.html: parameter :operation, POST /{intermediatePath}/{authorizableId}.ks.html: parameter currentPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter newPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter rePassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyStorePass, POST /{intermediatePath}/{authorizableId}.ks.html: parameter alias, POST /{intermediatePath}/{authorizableId}.ks.html: parameter newAlias, POST /{intermediatePath}/{authorizableId}.ks.html: parameter removeAlias, POST /libs/granite/security/post/truststore: parameter :operation, POST /libs/granite/security/post/truststore: parameter newPassword, POST /libs/granite/security/post/truststore: parameter rePassword, POST /libs/granite/security/post/truststore: parameter keyStoreType, POST /libs/granite/security/post/truststore: parameter removeAlias, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}: parameter action, GET /bin/querybuilder.json: parameter path, GET /bin/querybuilder.json: parameter p.limit, GET /bin/querybuilder.json: parameter 1_property, GET /bin/querybuilder.json: parameter 1_property.value, POST /bin/querybuilder.json: parameter path, POST /bin/querybuilder.json: parameter p.limit, POST /bin/querybuilder.json: parameter 1_property, POST /bin/querybuilder.json: parameter 1_property.value, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias@TypeHint, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri@TypeHint; All request/response bodies have examples: GET /crx/packmgr/service/script.html: 404 text/html response, GET /crx/packmgr/service/script.html: 405 text/html response, GET /etc/truststore/truststore.p12: default application/octet-stream response, POST /crx/explorer/ui/setpassword.jsp: default text/plain response, GET /system/console/configMgr: 200 text/xml response, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: default application/json response, GET /{intermediatePath}/{authorizableId}/keystore/store.p12: default application/octet-stream response, GET /{intermediatePath}/{authorizableId}.ks.json: 200 text/plain response, GET /{intermediatePath}/{authorizableId}.ks.json: default text/plain response, POST /crx/packmgr/service/.json/{path}: request body, POST /crx/packmgr/service/.json/{path}: multipart/form-data request body, POST /crx/packmgr/service/.json/{path}: default application/json response, GET /system/console/status-productinfo.json: default application/json response, GET /crx/packmgr/installstatus.jsp: 200 application/json response, GET /crx/packmgr/installstatus.jsp: default application/json response, POST /etc/truststore: request body, POST /etc/truststore: multipart/form-data request body, POST /etc/truststore: default text/plain response, GET /system/console/bundles/{name}.json: 200 application/json response, GET /system/console/bundles/{name}.json: default application/json response, GET /system/health: default application/json response, POST /libs/granite/security/post/sslSetup.html: request body, POST /libs/granite/security/post/sslSetup.html: multipart/form-data request body, POST /libs/granite/security/post/sslSetup.html: default text/plain response, GET /libs/granite/security/truststore.json: 200 application/json response, GET /libs/granite/security/truststore.json: default application/json response, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: 200 text/plain response, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: 302 text/plain response, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: default text/plain response, POST /crx/packmgr/service.jsp: default text/xml response, POST /libs/granite/security/post/authorizables: default text/html response, POST /crx/packmgr/update.jsp: default application/json response, GET /etc/replication/agents.{runmode}.-1.json: default application/json response, GET /etc/packages/{group}/{name}-{version}.zip: default application/octet-stream response, POST /{path}/{name}: request body, POST /{path}/{name}: multipart/form-data request body, GET /crx/server/crx.default/jcr:root/.1.json: 200 plain/text response, GET /crx/server/crx.default/jcr:root/.1.json: 404 plain/text response, POST /{intermediatePath}/{authorizableId}.ks.html: request body, POST /{intermediatePath}/{authorizableId}.ks.html: multipart/form-data request body, POST /{intermediatePath}/{authorizableId}.ks.html: 200 text/plain response, POST /{intermediatePath}/{authorizableId}.ks.html: default text/plain response, POST /libs/granite/security/post/truststore: request body, POST /libs/granite/security/post/truststore: multipart/form-data request body, POST /libs/granite/security/post/truststore: default text/plain response, GET /bin/querybuilder.json: default application/json response, POST /bin/querybuilder.json: default application/json response, GET /libs/granite/core/content/login.html: default text/html response; All schemas have descriptions: KeystoreInfo, InstallStatus, BundleData, BundleInfo, SamlConfigurationProperties, KeystoreItems, SamlConfigurationPropertyItemsArray, SamlConfigurationPropertyItemsBoolean, TruststoreInfo, SamlConfigurationPropertyItemsString, TruststoreItems, BundleDataProp, SamlConfigurationPropertyItemsLong, SamlConfigurationInfo, KeystoreChainItems
+- **Tags:** documentation, quality, usability
+
+**Checks Performed:**
+- All operations have clear summaries
+- All operations have detailed descriptions
+- All operations have unique operationIds
+- All parameters have descriptions
+- All request/response bodies have examples
+- All schemas have descriptions
+- All enums have descriptions
+- API has a general description
+- Contact information is provided
+- License information is provided
+
+**Details:**
+```json
+{
+    "checks": {
+      "API has a general description": true,
+      "All operations have clear summaries": false,
+      "All operations have detailed descriptions": false,
+      "All parameters have descriptions": false,
+      "All request/response bodies have examples": false,
+      "All schemas have descriptions": false,
+      "Contact information is provided": true,
+      "License information is provided": false
+    },
+    "messages": {
+      "License information is provided": "License information is missing"
+    },
+    "missing_docs": {
+      "All operations have clear summaries": [
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter",
+        "GET /crx/packmgr/service/script.html",
+        "GET /etc/truststore/truststore.p12",
+        "POST /crx/explorer/ui/setpassword.jsp",
+        "GET /system/console/configMgr",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12",
+        "POST /{path}/{name}.rw.html",
+        "GET /{intermediatePath}/{authorizableId}.ks.json",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet",
+        "POST /system/console/bundles/{name}",
+        "POST /{path}/",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config",
+        "POST /apps/system/config/org.apache.felix.http",
+        "POST /crx/packmgr/service/.json/{path}",
+        "GET /system/console/status-productinfo.json",
+        "GET /crx/packmgr/installstatus.jsp",
+        "POST /libs/replication/treeactivation.html",
+        "POST /etc/truststore",
+        "GET /system/console/bundles/{name}.json",
+        "GET /system/health",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck",
+        "DELETE /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/replication/agents.{runmode}/{name}",
+        "POST /etc/replication/agents.{runmode}/{name}",
+        "POST /libs/granite/security/post/sslSetup.html",
+        "GET /libs/granite/security/truststore.json",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler",
+        "POST /.cqactions.html",
+        "POST /crx/packmgr/service.jsp",
+        "POST /libs/granite/security/post/authorizables",
+        "POST /crx/packmgr/update.jsp",
+        "GET /etc/replication/agents.{runmode}.-1.json",
+        "POST /apps/system/config/{configNodeName}",
+        "GET /etc/packages/{group}/{name}-{version}.zip",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator",
+        "GET /{path}/{name}",
+        "POST /{path}/{name}",
+        "DELETE /{path}/{name}",
+        "GET /crx/server/crx.default/jcr:root/.1.json",
+        "POST /{intermediatePath}/{authorizableId}.ks.html",
+        "POST /libs/granite/security/post/truststore",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}",
+        "GET /bin/querybuilder.json",
+        "POST /bin/querybuilder.json",
+        "GET /libs/granite/core/content/login.html",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet"
+      ],
+      "All operations have detailed descriptions": [
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter",
+        "GET /crx/packmgr/service/script.html",
+        "GET /etc/truststore/truststore.p12",
+        "POST /crx/explorer/ui/setpassword.jsp",
+        "GET /system/console/configMgr",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12",
+        "POST /{path}/{name}.rw.html",
+        "GET /{intermediatePath}/{authorizableId}.ks.json",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet",
+        "POST /system/console/bundles/{name}",
+        "POST /{path}/",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config",
+        "POST /apps/system/config/org.apache.felix.http",
+        "POST /crx/packmgr/service/.json/{path}",
+        "GET /system/console/status-productinfo.json",
+        "GET /crx/packmgr/installstatus.jsp",
+        "POST /libs/replication/treeactivation.html",
+        "POST /etc/truststore",
+        "GET /system/console/bundles/{name}.json",
+        "GET /system/health",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck",
+        "DELETE /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/replication/agents.{runmode}/{name}",
+        "POST /etc/replication/agents.{runmode}/{name}",
+        "POST /libs/granite/security/post/sslSetup.html",
+        "GET /libs/granite/security/truststore.json",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler",
+        "POST /.cqactions.html",
+        "POST /crx/packmgr/service.jsp",
+        "POST /libs/granite/security/post/authorizables",
+        "POST /crx/packmgr/update.jsp",
+        "GET /etc/replication/agents.{runmode}.-1.json",
+        "POST /apps/system/config/{configNodeName}",
+        "GET /etc/packages/{group}/{name}-{version}.zip",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator",
+        "GET /{path}/{name}",
+        "POST /{path}/{name}",
+        "DELETE /{path}/{name}",
+        "GET /crx/server/crx.default/jcr:root/.1.json",
+        "POST /{intermediatePath}/{authorizableId}.ks.html",
+        "POST /libs/granite/security/post/truststore",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}",
+        "GET /bin/querybuilder.json",
+        "POST /bin/querybuilder.json",
+        "GET /libs/granite/core/content/login.html",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet"
+      ],
+      "All parameters have descriptions": [
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods@TypeHint",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter old",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter plain",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter verify",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter group",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter name",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter version",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter intermediatePath",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter authorizableId",
+        "POST /{path}/{name}.rw.html: parameter path",
+        "POST /{path}/{name}.rw.html: parameter name",
+        "POST /{path}/{name}.rw.html: parameter addMembers",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: parameter intermediatePath",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: parameter authorizableId",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml@TypeHint",
+        "POST /system/console/bundles/{name}: parameter name",
+        "POST /system/console/bundles/{name}: parameter action",
+        "POST /{path}/: parameter path",
+        "POST /{path}/: parameter jcr:primaryType",
+        "POST /{path}/: parameter :name",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure@TypeHint",
+        "POST /crx/packmgr/service/.json/{path}: parameter path",
+        "POST /crx/packmgr/service/.json/{path}: parameter cmd",
+        "POST /crx/packmgr/service/.json/{path}: parameter groupName",
+        "POST /crx/packmgr/service/.json/{path}: parameter packageName",
+        "POST /crx/packmgr/service/.json/{path}: parameter packageVersion",
+        "POST /crx/packmgr/service/.json/{path}: parameter _charset_",
+        "POST /crx/packmgr/service/.json/{path}: parameter force",
+        "POST /crx/packmgr/service/.json/{path}: parameter recursive",
+        "POST /libs/replication/treeactivation.html: parameter ignoredeactivated",
+        "POST /libs/replication/treeactivation.html: parameter onlymodified",
+        "POST /libs/replication/treeactivation.html: parameter path",
+        "POST /libs/replication/treeactivation.html: parameter cmd",
+        "GET /system/console/bundles/{name}.json: parameter name",
+        "GET /system/health: parameter tags",
+        "GET /system/health: parameter combineTagsOr",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored@TypeHint",
+        "DELETE /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "DELETE /etc/replication/agents.{runmode}/{name}: parameter name",
+        "GET /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "GET /etc/replication/agents.{runmode}/{name}: parameter name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute@TypeHint",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:template",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/enabled",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:description",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModified",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModifiedBy",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:mixinTypes",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:title",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/logLevel",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/noStatusUpdate",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/noVersioning",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolConnectTimeout",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPConnectionClosed",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPExpired",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders@TypeHint",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPMethod",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPSRelaxed",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolInterface",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolSocketTimeout",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolVersion",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMDomain",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPassword",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPort",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyUser",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMaxSize",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMode",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchWaitTime",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/retryDelay",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/reverseReplication",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/serializationType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/sling:resourceType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/ssl",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMDomain",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportPassword",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUri",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUser",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerDistribute",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerModified",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerOnOffTime",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerReceive",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/triggerSpecific",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/userId",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:primaryType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter :operation",
+        "POST /libs/granite/security/post/sslSetup.html: parameter keystorePassword",
+        "POST /libs/granite/security/post/sslSetup.html: parameter keystorePasswordConfirm",
+        "POST /libs/granite/security/post/sslSetup.html: parameter truststorePassword",
+        "POST /libs/granite/security/post/sslSetup.html: parameter truststorePasswordConfirm",
+        "POST /libs/granite/security/post/sslSetup.html: parameter httpsHostname",
+        "POST /libs/granite/security/post/sslSetup.html: parameter httpsPort",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter post",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter apply",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter delete",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter action",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter $location",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter path",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter service.ranking",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpCertAlias",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpHttpRedirect",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter serviceProviderEntityId",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter assertionConsumerServiceURL",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter spPrivateKeyAlias",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter keyStorePassword",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultRedirectUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIDAttribute",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter useEncryption",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter createUser",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter addGroupMemberships",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter groupMembershipAttribute",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultGroups",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter nameIdFormat",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter synchronizeAttributes",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter handleLogout",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter logoutUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter clockTolerance",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter digestMethod",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter signatureMethod",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIntermediatePath",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter propertylist",
+        "POST /.cqactions.html: parameter authorizableId",
+        "POST /.cqactions.html: parameter changelog",
+        "POST /crx/packmgr/service.jsp: parameter cmd",
+        "POST /libs/granite/security/post/authorizables: parameter authorizableId",
+        "POST /libs/granite/security/post/authorizables: parameter intermediatePath",
+        "POST /libs/granite/security/post/authorizables: parameter createUser",
+        "POST /libs/granite/security/post/authorizables: parameter createGroup",
+        "POST /libs/granite/security/post/authorizables: parameter rep:password",
+        "POST /libs/granite/security/post/authorizables: parameter profile/givenName",
+        "POST /crx/packmgr/update.jsp: parameter groupName",
+        "POST /crx/packmgr/update.jsp: parameter packageName",
+        "POST /crx/packmgr/update.jsp: parameter version",
+        "POST /crx/packmgr/update.jsp: parameter path",
+        "POST /crx/packmgr/update.jsp: parameter filter",
+        "POST /crx/packmgr/update.jsp: parameter _charset_",
+        "GET /etc/replication/agents.{runmode}.-1.json: parameter runmode",
+        "POST /apps/system/config/{configNodeName}: parameter configNodeName",
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter group",
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter name",
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter version",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables@TypeHint",
+        "GET /{path}/{name}: parameter path",
+        "GET /{path}/{name}: parameter name",
+        "POST /{path}/{name}: parameter path",
+        "POST /{path}/{name}: parameter name",
+        "POST /{path}/{name}: parameter :operation",
+        "POST /{path}/{name}: parameter deleteAuthorizable",
+        "DELETE /{path}/{name}: parameter path",
+        "DELETE /{path}/{name}: parameter name",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter intermediatePath",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter authorizableId",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter :operation",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter currentPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter newPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter rePassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyStorePass",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter alias",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter newAlias",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter removeAlias",
+        "POST /libs/granite/security/post/truststore: parameter :operation",
+        "POST /libs/granite/security/post/truststore: parameter newPassword",
+        "POST /libs/granite/security/post/truststore: parameter rePassword",
+        "POST /libs/granite/security/post/truststore: parameter keyStoreType",
+        "POST /libs/granite/security/post/truststore: parameter removeAlias",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}: parameter action",
+        "GET /bin/querybuilder.json: parameter path",
+        "GET /bin/querybuilder.json: parameter p.limit",
+        "GET /bin/querybuilder.json: parameter 1_property",
+        "GET /bin/querybuilder.json: parameter 1_property.value",
+        "POST /bin/querybuilder.json: parameter path",
+        "POST /bin/querybuilder.json: parameter p.limit",
+        "POST /bin/querybuilder.json: parameter 1_property",
+        "POST /bin/querybuilder.json: parameter 1_property.value",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias@TypeHint",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri@TypeHint"
+      ],
+      "All request/response bodies have examples": [
+        "GET /crx/packmgr/service/script.html: 404 text/html response",
+        "GET /crx/packmgr/service/script.html: 405 text/html response",
+        "GET /etc/truststore/truststore.p12: default application/octet-stream response",
+        "POST /crx/explorer/ui/setpassword.jsp: default text/plain response",
+        "GET /system/console/configMgr: 200 text/xml response",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: default application/json response",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12: default application/octet-stream response",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: 200 text/plain response",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: default text/plain response",
+        "POST /crx/packmgr/service/.json/{path}: request body",
+        "POST /crx/packmgr/service/.json/{path}: multipart/form-data request body",
+        "POST /crx/packmgr/service/.json/{path}: default application/json response",
+        "GET /system/console/status-productinfo.json: default application/json response",
+        "GET /crx/packmgr/installstatus.jsp: 200 application/json response",
+        "GET /crx/packmgr/installstatus.jsp: default application/json response",
+        "POST /etc/truststore: request body",
+        "POST /etc/truststore: multipart/form-data request body",
+        "POST /etc/truststore: default text/plain response",
+        "GET /system/console/bundles/{name}.json: 200 application/json response",
+        "GET /system/console/bundles/{name}.json: default application/json response",
+        "GET /system/health: default application/json response",
+        "POST /libs/granite/security/post/sslSetup.html: request body",
+        "POST /libs/granite/security/post/sslSetup.html: multipart/form-data request body",
+        "POST /libs/granite/security/post/sslSetup.html: default text/plain response",
+        "GET /libs/granite/security/truststore.json: 200 application/json response",
+        "GET /libs/granite/security/truststore.json: default application/json response",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: 200 text/plain response",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: 302 text/plain response",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: default text/plain response",
+        "POST /crx/packmgr/service.jsp: default text/xml response",
+        "POST /libs/granite/security/post/authorizables: default text/html response",
+        "POST /crx/packmgr/update.jsp: default application/json response",
+        "GET /etc/replication/agents.{runmode}.-1.json: default application/json response",
+        "GET /etc/packages/{group}/{name}-{version}.zip: default application/octet-stream response",
+        "POST /{path}/{name}: request body",
+        "POST /{path}/{name}: multipart/form-data request body",
+        "GET /crx/server/crx.default/jcr:root/.1.json: 200 plain/text response",
+        "GET /crx/server/crx.default/jcr:root/.1.json: 404 plain/text response",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: request body",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: multipart/form-data request body",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: 200 text/plain response",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: default text/plain response",
+        "POST /libs/granite/security/post/truststore: request body",
+        "POST /libs/granite/security/post/truststore: multipart/form-data request body",
+        "POST /libs/granite/security/post/truststore: default text/plain response",
+        "GET /bin/querybuilder.json: default application/json response",
+        "POST /bin/querybuilder.json: default application/json response",
+        "GET /libs/granite/core/content/login.html: default text/html response"
+      ],
+      "All schemas have descriptions": [
+        "KeystoreInfo",
+        "InstallStatus",
+        "BundleData",
+        "BundleInfo",
+        "SamlConfigurationProperties",
+        "KeystoreItems",
+        "SamlConfigurationPropertyItemsArray",
+        "SamlConfigurationPropertyItemsBoolean",
+        "TruststoreInfo",
+        "SamlConfigurationPropertyItemsString",
+        "TruststoreItems",
+        "BundleDataProp",
+        "SamlConfigurationPropertyItemsLong",
+        "SamlConfigurationInfo",
+        "KeystoreChainItems"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add missing documentation including descriptions, examples, and operation details
+
+---
+
+### Schema
+
+#### P004: Request Schema Definitions (Failed) [critical]
+
+Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints
+
+- **Status:** Failed
+- **Message:** Request validation issues found: All string fields have length constraints: GET /etc/packages/{group}/{name}-{version}.zip: parameter group, GET /etc/packages/{group}/{name}-{version}.zip: parameter name, GET /etc/packages/{group}/{name}-{version}.zip: parameter version, GET /{intermediatePath}/{authorizableId}.ks.json: parameter intermediatePath, GET /{intermediatePath}/{authorizableId}.ks.json: parameter authorizableId, GET /etc/replication/agents.{runmode}.-1.json: parameter runmode, POST /crx/explorer/ui/setpassword.jsp: parameter old, POST /crx/explorer/ui/setpassword.jsp: parameter plain, POST /crx/explorer/ui/setpassword.jsp: parameter verify, POST /etc/truststore.truststore.p12: multipart/form-data schema, POST /bin/querybuilder.json: parameter path, POST /bin/querybuilder.json: parameter 1_property, POST /bin/querybuilder.json: parameter 1_property.value, GET /bin/querybuilder.json: parameter path, GET /bin/querybuilder.json: parameter 1_property, GET /bin/querybuilder.json: parameter 1_property.value, POST /crx/packmgr/service.jsp: parameter cmd, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter action, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter $location, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpCertAlias, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter serviceProviderEntityId, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter assertionConsumerServiceURL, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter spPrivateKeyAlias, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter keyStorePassword, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultRedirectUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIDAttribute, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter groupMembershipAttribute, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter nameIdFormat, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter logoutUrl, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter digestMethod, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter signatureMethod, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIntermediatePath, GET /system/console/bundles/{name}.json: parameter name, POST /{intermediatePath}/{authorizableId}.ks.html: parameter intermediatePath, POST /{intermediatePath}/{authorizableId}.ks.html: parameter authorizableId, POST /{intermediatePath}/{authorizableId}.ks.html: parameter :operation, POST /{intermediatePath}/{authorizableId}.ks.html: parameter currentPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter newPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter rePassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyPassword, POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyStorePass, POST /{intermediatePath}/{authorizableId}.ks.html: parameter alias, POST /{intermediatePath}/{authorizableId}.ks.html: parameter newAlias, POST /{intermediatePath}/{authorizableId}.ks.html: parameter removeAlias, POST /{intermediatePath}/{authorizableId}.ks.html.keyStore: multipart/form-data schema, POST /{intermediatePath}/{authorizableId}.ks.html.pk: multipart/form-data schema, POST /{intermediatePath}/{authorizableId}.ks.html.cert-chain: multipart/form-data schema, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod@TypeHint, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath@TypeHint, POST /libs/granite/security/post/truststore: parameter :operation, POST /libs/granite/security/post/truststore: parameter newPassword, POST /libs/granite/security/post/truststore: parameter rePassword, POST /libs/granite/security/post/truststore: parameter keyStoreType, POST /libs/granite/security/post/truststore: parameter removeAlias, POST /libs/granite/security/post/truststore.certificate: multipart/form-data schema, POST /libs/granite/security/post/sslSetup.html: parameter keystorePassword, POST /libs/granite/security/post/sslSetup.html: parameter keystorePasswordConfirm, POST /libs/granite/security/post/sslSetup.html: parameter truststorePassword, POST /libs/granite/security/post/sslSetup.html: parameter truststorePasswordConfirm, POST /libs/granite/security/post/sslSetup.html: parameter httpsHostname, POST /libs/granite/security/post/sslSetup.html: parameter httpsPort, POST /libs/granite/security/post/sslSetup.html.privatekeyFile: multipart/form-data schema, POST /libs/granite/security/post/sslSetup.html.certificateFile: multipart/form-data schema, POST /libs/granite/security/post/authorizables: parameter authorizableId, POST /libs/granite/security/post/authorizables: parameter intermediatePath, POST /libs/granite/security/post/authorizables: parameter createUser, POST /libs/granite/security/post/authorizables: parameter createGroup, POST /libs/granite/security/post/authorizables: parameter rep:password, POST /libs/granite/security/post/authorizables: parameter profile/givenName, POST /system/console/bundles/{name}: parameter name, POST /system/console/bundles/{name}: parameter action, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter group, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter name, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter version, GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter intermediatePath, GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter authorizableId, POST /crx/packmgr/update.jsp: parameter groupName, POST /crx/packmgr/update.jsp: parameter packageName, POST /crx/packmgr/update.jsp: parameter version, POST /crx/packmgr/update.jsp: parameter path, POST /crx/packmgr/update.jsp: parameter filter, POST /crx/packmgr/update.jsp: parameter _charset_, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}: parameter action, POST /.cqactions.html: parameter authorizableId, POST /.cqactions.html: parameter changelog, POST /libs/replication/treeactivation.html: parameter path, POST /libs/replication/treeactivation.html: parameter cmd, POST /{path}/{name}.rw.html: parameter path, POST /{path}/{name}.rw.html: parameter name, POST /{path}/{name}.rw.html: parameter addMembers, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt@TypeHint, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml@TypeHint, DELETE /{path}/{name}: parameter path, DELETE /{path}/{name}: parameter name, GET /{path}/{name}: parameter path, GET /{path}/{name}: parameter name, POST /{path}/{name}: parameter path, POST /{path}/{name}: parameter name, POST /{path}/{name}: parameter :operation, POST /{path}/{name}: parameter deleteAuthorizable, POST /{path}/{name}.file: multipart/form-data schema, GET /system/health: parameter tags, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable@TypeHint, POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure, POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure@TypeHint, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias@TypeHint, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri@TypeHint, POST /crx/packmgr/service/.json/{path}: parameter path, POST /crx/packmgr/service/.json/{path}: parameter cmd, POST /crx/packmgr/service/.json/{path}: parameter groupName, POST /crx/packmgr/service/.json/{path}: parameter packageName, POST /crx/packmgr/service/.json/{path}: parameter packageVersion, POST /crx/packmgr/service/.json/{path}: parameter _charset_, POST /crx/packmgr/service/.json/{path}.package: multipart/form-data schema, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables@TypeHint, POST /apps/system/config/{configNodeName}: parameter configNodeName, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user@TypeHint, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password@TypeHint, DELETE /etc/replication/agents.{runmode}/{name}: parameter runmode, DELETE /etc/replication/agents.{runmode}/{name}: parameter name, GET /etc/replication/agents.{runmode}/{name}: parameter runmode, GET /etc/replication/agents.{runmode}/{name}: parameter name, POST /etc/replication/agents.{runmode}/{name}: parameter runmode, POST /etc/replication/agents.{runmode}/{name}: parameter name, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute@TypeHint, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:name, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:template, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:description, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModified, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModifiedBy, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:mixinTypes, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:title, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/logLevel, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPExpired, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders@TypeHint, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPMethod, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolInterface, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolVersion, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMDomain, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPassword, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyUser, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMode, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/retryDelay, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/serializationType, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/sling:resourceType, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/ssl, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMDomain, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMHost, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportPassword, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUri, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUser, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/userId, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:primaryType, POST /etc/replication/agents.{runmode}/{name}: parameter :operation, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp@TypeHint, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods@TypeHint, POST /{path}/: parameter path, POST /{path}/: parameter jcr:primaryType, POST /{path}/: parameter :name; All numeric fields have min/max values: POST /bin/querybuilder.json: parameter p.limit, GET /bin/querybuilder.json: parameter p.limit, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter service.ranking, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter clockTolerance, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance, POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolConnectTimeout, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolSocketTimeout, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPort, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMaxSize, POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchWaitTime
+- **Tags:** schema, validation, request
+
+**Checks Performed:**
+- All path parameters have schemas
+- All query parameters have schemas
+- All header parameters have schemas
+- All request bodies have content schemas
+- All schemas specify data types
+- All schemas have appropriate constraints
+- All required fields are marked
+- All enums have valid values
+- All numeric fields have min/max values
+- All string fields have length constraints
+
+**Details:**
+```json
+{
+    "checks": {
+      "All enums have valid values": true,
+      "All header parameters have schemas": true,
+      "All numeric fields have min/max values": false,
+      "All path parameters have schemas": true,
+      "All query parameters have schemas": true,
+      "All request bodies have content schemas": true,
+      "All required fields are marked": true,
+      "All schemas have appropriate constraints": true,
+      "All schemas specify data types": true,
+      "All string fields have length constraints": false
+    },
+    "messages": {},
+    "missing_validation": {
+      "All numeric fields have min/max values": [
+        "POST /bin/querybuilder.json: parameter p.limit",
+        "GET /bin/querybuilder.json: parameter p.limit",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter service.ranking",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter clockTolerance",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolConnectTimeout",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolSocketTimeout",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPort",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMaxSize",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchWaitTime"
+      ],
+      "All string fields have length constraints": [
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter group",
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter name",
+        "GET /etc/packages/{group}/{name}-{version}.zip: parameter version",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: parameter intermediatePath",
+        "GET /{intermediatePath}/{authorizableId}.ks.json: parameter authorizableId",
+        "GET /etc/replication/agents.{runmode}.-1.json: parameter runmode",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter old",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter plain",
+        "POST /crx/explorer/ui/setpassword.jsp: parameter verify",
+        "POST /etc/truststore.truststore.p12: multipart/form-data schema",
+        "POST /bin/querybuilder.json: parameter path",
+        "POST /bin/querybuilder.json: parameter 1_property",
+        "POST /bin/querybuilder.json: parameter 1_property.value",
+        "GET /bin/querybuilder.json: parameter path",
+        "GET /bin/querybuilder.json: parameter 1_property",
+        "GET /bin/querybuilder.json: parameter 1_property.value",
+        "POST /crx/packmgr/service.jsp: parameter cmd",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter action",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter $location",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter idpCertAlias",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter serviceProviderEntityId",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter assertionConsumerServiceURL",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter spPrivateKeyAlias",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter keyStorePassword",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter defaultRedirectUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIDAttribute",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter groupMembershipAttribute",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter nameIdFormat",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter logoutUrl",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter digestMethod",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter signatureMethod",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler: parameter userIntermediatePath",
+        "GET /system/console/bundles/{name}.json: parameter name",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter intermediatePath",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter authorizableId",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter :operation",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter currentPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter newPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter rePassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyPassword",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter keyStorePass",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter alias",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter newAlias",
+        "POST /{intermediatePath}/{authorizableId}.ks.html: parameter removeAlias",
+        "POST /{intermediatePath}/{authorizableId}.ks.html.keyStore: multipart/form-data schema",
+        "POST /{intermediatePath}/{authorizableId}.ks.html.pk: multipart/form-data schema",
+        "POST /{intermediatePath}/{authorizableId}.ks.html.cert-chain: multipart/form-data schema",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter keyStorePassword@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter service.ranking@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpHttpRedirect@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter createUser@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultRedirectUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIDAttribute@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter defaultGroups@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpCertAlias@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter addGroupMemberships@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter path@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter synchronizeAttributes@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter clockTolerance@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter groupMembershipAttribute@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter idpUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter logoutUrl@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter serviceProviderEntityId@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter assertionConsumerServiceURL@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter handleLogout@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter spPrivateKeyAlias@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter useEncryption@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter nameIdFormat@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter digestMethod@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter signatureMethod@TypeHint",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config: parameter userIntermediatePath@TypeHint",
+        "POST /libs/granite/security/post/truststore: parameter :operation",
+        "POST /libs/granite/security/post/truststore: parameter newPassword",
+        "POST /libs/granite/security/post/truststore: parameter rePassword",
+        "POST /libs/granite/security/post/truststore: parameter keyStoreType",
+        "POST /libs/granite/security/post/truststore: parameter removeAlias",
+        "POST /libs/granite/security/post/truststore.certificate: multipart/form-data schema",
+        "POST /libs/granite/security/post/sslSetup.html: parameter keystorePassword",
+        "POST /libs/granite/security/post/sslSetup.html: parameter keystorePasswordConfirm",
+        "POST /libs/granite/security/post/sslSetup.html: parameter truststorePassword",
+        "POST /libs/granite/security/post/sslSetup.html: parameter truststorePasswordConfirm",
+        "POST /libs/granite/security/post/sslSetup.html: parameter httpsHostname",
+        "POST /libs/granite/security/post/sslSetup.html: parameter httpsPort",
+        "POST /libs/granite/security/post/sslSetup.html.privatekeyFile: multipart/form-data schema",
+        "POST /libs/granite/security/post/sslSetup.html.certificateFile: multipart/form-data schema",
+        "POST /libs/granite/security/post/authorizables: parameter authorizableId",
+        "POST /libs/granite/security/post/authorizables: parameter intermediatePath",
+        "POST /libs/granite/security/post/authorizables: parameter createUser",
+        "POST /libs/granite/security/post/authorizables: parameter createGroup",
+        "POST /libs/granite/security/post/authorizables: parameter rep:password",
+        "POST /libs/granite/security/post/authorizables: parameter profile/givenName",
+        "POST /system/console/bundles/{name}: parameter name",
+        "POST /system/console/bundles/{name}: parameter action",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter group",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter name",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json: parameter version",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter intermediatePath",
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12: parameter authorizableId",
+        "POST /crx/packmgr/update.jsp: parameter groupName",
+        "POST /crx/packmgr/update.jsp: parameter packageName",
+        "POST /crx/packmgr/update.jsp: parameter version",
+        "POST /crx/packmgr/update.jsp: parameter path",
+        "POST /crx/packmgr/update.jsp: parameter filter",
+        "POST /crx/packmgr/update.jsp: parameter _charset_",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}: parameter action",
+        "POST /.cqactions.html: parameter authorizableId",
+        "POST /.cqactions.html: parameter changelog",
+        "POST /libs/replication/treeactivation.html: parameter path",
+        "POST /libs/replication/treeactivation.html: parameter cmd",
+        "POST /{path}/{name}.rw.html: parameter path",
+        "POST /{path}/{name}.rw.html: parameter name",
+        "POST /{path}/{name}.rw.html: parameter addMembers",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter json.maximumresults@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.html@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.txt@TypeHint",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet: parameter enable.xml@TypeHint",
+        "DELETE /{path}/{name}: parameter path",
+        "DELETE /{path}/{name}: parameter name",
+        "GET /{path}/{name}: parameter path",
+        "GET /{path}/{name}: parameter name",
+        "POST /{path}/{name}: parameter path",
+        "POST /{path}/{name}: parameter name",
+        "POST /{path}/{name}: parameter :operation",
+        "POST /{path}/{name}: parameter deleteAuthorizable",
+        "POST /{path}/{name}.file: multipart/form-data schema",
+        "GET /system/health: parameter tags",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.nio@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.keystore.key.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.truststore.password@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.clientcertificate@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.apache.felix.https.enable@TypeHint",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure",
+        "POST /apps/system/config/org.apache.felix.http: parameter org.osgi.service.http.port.secure@TypeHint",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter alias@TypeHint",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet: parameter dav.create-absolute-uri@TypeHint",
+        "POST /crx/packmgr/service/.json/{path}: parameter path",
+        "POST /crx/packmgr/service/.json/{path}: parameter cmd",
+        "POST /crx/packmgr/service/.json/{path}: parameter groupName",
+        "POST /crx/packmgr/service/.json/{path}: parameter packageName",
+        "POST /crx/packmgr/service/.json/{path}: parameter packageVersion",
+        "POST /crx/packmgr/service/.json/{path}: parameter _charset_",
+        "POST /crx/packmgr/service/.json/{path}.package: multipart/form-data schema",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator: parameter pwdreset.authorizables@TypeHint",
+        "POST /apps/system/config/{configNodeName}: parameter configNodeName",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck: parameter bundles.ignored@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.host@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.port@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.exceptions@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.enabled@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.user@TypeHint",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config: parameter proxy.password@TypeHint",
+        "DELETE /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "DELETE /etc/replication/agents.{runmode}/{name}: parameter name",
+        "GET /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "GET /etc/replication/agents.{runmode}/{name}: parameter name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter runmode",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:distribute@TypeHint",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:name",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/cq:template",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:description",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModified",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:lastModifiedBy",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:mixinTypes",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/jcr:title",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/logLevel",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPExpired",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPHeaders@TypeHint",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolHTTPMethod",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolInterface",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/protocolVersion",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMDomain",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyNTLMHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyPassword",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/proxyUser",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/queueBatchMode",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/retryDelay",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/serializationType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/sling:resourceType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/ssl",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMDomain",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportNTLMHost",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportPassword",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUri",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/transportUser",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:content/userId",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter jcr:primaryType",
+        "POST /etc/replication/agents.{runmode}/{name}: parameter :operation",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.empty@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter allow.hosts.regexp@TypeHint",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter: parameter filter.methods@TypeHint",
+        "POST /{path}/: parameter path",
+        "POST /{path}/: parameter jcr:primaryType",
+        "POST /{path}/: parameter :name"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add comprehensive schema validation including data types, constraints, and required fields
+
+---
+
+### Error Handling
+
+#### P003: Error Handling Standards (Failed) [critical]
+
+Validates comprehensive error response documentation and consistent error handling patterns
+
+- **Status:** Failed
+- **Message:** Error handling issues found: All operations document 4xx error responses: GET /{intermediatePath}/{authorizableId}/keystore/store.p12, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck, POST /libs/granite/security/post/authorizables, GET /libs/granite/security/truststore.json, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}, GET /system/health, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json, POST /{intermediatePath}/{authorizableId}.ks.html, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet, POST /libs/replication/treeactivation.html, POST /.cqactions.html, GET /system/console/bundles/{name}.json, POST /bin/querybuilder.json, GET /bin/querybuilder.json, POST /libs/granite/security/post/truststore, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator, POST /crx/packmgr/update.jsp, DELETE /{path}/{name}, GET /{path}/{name}, POST /{path}/{name}, GET /crx/packmgr/installstatus.jsp, GET /system/console/configMgr, POST /apps/system/config/org.apache.felix.http, GET /etc/replication/agents.{runmode}.-1.json, POST /crx/explorer/ui/setpassword.jsp, POST /etc/truststore, POST /apps/system/config/{configNodeName}, POST /{path}/{name}.rw.html, POST /libs/granite/security/post/sslSetup.html, GET /etc/truststore/truststore.p12, POST /system/console/bundles/{name}, POST /{path}/, POST /crx/packmgr/service.jsp, GET /{intermediatePath}/{authorizableId}.ks.json, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler, GET /system/console/status-productinfo.json, GET /libs/granite/core/content/login.html, POST /crx/packmgr/service/.json/{path}, POST /apps/system/config/org.apache.http.proxyconfigurator.config, POST /etc/replication/agents.{runmode}/{name}, DELETE /etc/replication/agents.{runmode}/{name}, GET /etc/replication/agents.{runmode}/{name}, GET /etc/packages/{group}/{name}-{version}.zip; All operations document 5xx error responses: GET /{intermediatePath}/{authorizableId}/keystore/store.p12, POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck, POST /libs/granite/security/post/authorizables, GET /libs/granite/security/truststore.json, POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}, GET /system/health, GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json, POST /{intermediatePath}/{authorizableId}.ks.html, POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter, POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config, POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet, POST /libs/replication/treeactivation.html, GET /crx/packmgr/service/script.html, POST /.cqactions.html, GET /system/console/bundles/{name}.json, POST /bin/querybuilder.json, GET /bin/querybuilder.json, POST /libs/granite/security/post/truststore, POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet, POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator, POST /crx/packmgr/update.jsp, DELETE /{path}/{name}, GET /{path}/{name}, POST /{path}/{name}, GET /crx/packmgr/installstatus.jsp, POST /apps/system/config/org.apache.felix.http, GET /etc/replication/agents.{runmode}.-1.json, POST /crx/explorer/ui/setpassword.jsp, GET /crx/server/crx.default/jcr:root/.1.json, POST /etc/truststore, POST /apps/system/config/{configNodeName}, POST /{path}/{name}.rw.html, POST /libs/granite/security/post/sslSetup.html, GET /etc/truststore/truststore.p12, POST /system/console/bundles/{name}, POST /{path}/, POST /crx/packmgr/service.jsp, GET /{intermediatePath}/{authorizableId}.ks.json, POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler, GET /system/console/status-productinfo.json, GET /libs/granite/core/content/login.html, POST /crx/packmgr/service/.json/{path}, POST /apps/system/config/org.apache.http.proxyconfigurator.config, POST /etc/replication/agents.{runmode}/{name}, DELETE /etc/replication/agents.{runmode}/{name}, GET /etc/replication/agents.{runmode}/{name}, GET /etc/packages/{group}/{name}-{version}.zip; Error responses include error details schema: GET /crx/packmgr/service/script.html: 404 response, GET /crx/packmgr/service/script.html: 405 response, GET /system/console/configMgr: 5XX response, GET /crx/server/crx.default/jcr:root/.1.json: 404 response
+- **Tags:** errors, responses, standards
+
+**Checks Performed:**
+- All operations document 4xx error responses
+- All operations document 5xx error responses
+- Error responses include error codes
+- Error responses include error messages
+- Error responses include error details schema
+- Common error responses are defined in components
+- Error responses follow consistent format
+
+**Details:**
+```json
+{
+    "checks": {
+      "All operations document 4xx error responses": false,
+      "All operations document 5xx error responses": false,
+      "Common error responses are defined in components": false,
+      "Error responses follow consistent format": true,
+      "Error responses include error details schema": false
+    },
+    "messages": {
+      "Common error responses are defined in components": "No common error responses defined in components"
+    },
+    "missing_errors": {
+      "All operations document 4xx error responses": [
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck",
+        "POST /libs/granite/security/post/authorizables",
+        "GET /libs/granite/security/truststore.json",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}",
+        "GET /system/health",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json",
+        "POST /{intermediatePath}/{authorizableId}.ks.html",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet",
+        "POST /libs/replication/treeactivation.html",
+        "POST /.cqactions.html",
+        "GET /system/console/bundles/{name}.json",
+        "POST /bin/querybuilder.json",
+        "GET /bin/querybuilder.json",
+        "POST /libs/granite/security/post/truststore",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator",
+        "POST /crx/packmgr/update.jsp",
+        "DELETE /{path}/{name}",
+        "GET /{path}/{name}",
+        "POST /{path}/{name}",
+        "GET /crx/packmgr/installstatus.jsp",
+        "GET /system/console/configMgr",
+        "POST /apps/system/config/org.apache.felix.http",
+        "GET /etc/replication/agents.{runmode}.-1.json",
+        "POST /crx/explorer/ui/setpassword.jsp",
+        "POST /etc/truststore",
+        "POST /apps/system/config/{configNodeName}",
+        "POST /{path}/{name}.rw.html",
+        "POST /libs/granite/security/post/sslSetup.html",
+        "GET /etc/truststore/truststore.p12",
+        "POST /system/console/bundles/{name}",
+        "POST /{path}/",
+        "POST /crx/packmgr/service.jsp",
+        "GET /{intermediatePath}/{authorizableId}.ks.json",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler",
+        "GET /system/console/status-productinfo.json",
+        "GET /libs/granite/core/content/login.html",
+        "POST /crx/packmgr/service/.json/{path}",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config",
+        "POST /etc/replication/agents.{runmode}/{name}",
+        "DELETE /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/packages/{group}/{name}-{version}.zip"
+      ],
+      "All operations document 5xx error responses": [
+        "GET /{intermediatePath}/{authorizableId}/keystore/store.p12",
+        "POST /apps/system/config/com.shinesolutions.healthcheck.hc.impl.ActiveBundleHealthCheck",
+        "POST /libs/granite/security/post/authorizables",
+        "GET /libs/granite/security/truststore.json",
+        "POST /system/console/jmx/com.adobe.granite:type=Repository/op/{action}",
+        "GET /system/health",
+        "GET /etc/packages/{group}/{name}-{version}.zip/jcr:content/vlt:definition/filter.tidy.2.json",
+        "POST /{intermediatePath}/{authorizableId}.ks.html",
+        "POST /apps/system/config/org.apache.sling.security.impl.ReferrerFilter",
+        "POST /apps/system/config/com.adobe.granite.auth.saml.SamlAuthenticationHandler.config",
+        "POST /apps/system/config/org.apache.sling.servlets.get.DefaultGetServlet",
+        "POST /libs/replication/treeactivation.html",
+        "GET /crx/packmgr/service/script.html",
+        "POST /.cqactions.html",
+        "GET /system/console/bundles/{name}.json",
+        "POST /bin/querybuilder.json",
+        "GET /bin/querybuilder.json",
+        "POST /libs/granite/security/post/truststore",
+        "POST /apps/system/config/org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet",
+        "POST /apps/system/config/com.shinesolutions.aem.passwordreset.Activator",
+        "POST /crx/packmgr/update.jsp",
+        "DELETE /{path}/{name}",
+        "GET /{path}/{name}",
+        "POST /{path}/{name}",
+        "GET /crx/packmgr/installstatus.jsp",
+        "POST /apps/system/config/org.apache.felix.http",
+        "GET /etc/replication/agents.{runmode}.-1.json",
+        "POST /crx/explorer/ui/setpassword.jsp",
+        "GET /crx/server/crx.default/jcr:root/.1.json",
+        "POST /etc/truststore",
+        "POST /apps/system/config/{configNodeName}",
+        "POST /{path}/{name}.rw.html",
+        "POST /libs/granite/security/post/sslSetup.html",
+        "GET /etc/truststore/truststore.p12",
+        "POST /system/console/bundles/{name}",
+        "POST /{path}/",
+        "POST /crx/packmgr/service.jsp",
+        "GET /{intermediatePath}/{authorizableId}.ks.json",
+        "POST /system/console/configMgr/com.adobe.granite.auth.saml.SamlAuthenticationHandler",
+        "GET /system/console/status-productinfo.json",
+        "GET /libs/granite/core/content/login.html",
+        "POST /crx/packmgr/service/.json/{path}",
+        "POST /apps/system/config/org.apache.http.proxyconfigurator.config",
+        "POST /etc/replication/agents.{runmode}/{name}",
+        "DELETE /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/replication/agents.{runmode}/{name}",
+        "GET /etc/packages/{group}/{name}-{version}.zip"
+      ],
+      "Error responses include error details schema": [
+        "GET /crx/packmgr/service/script.html: 404 response",
+        "GET /crx/packmgr/service/script.html: 405 response",
+        "GET /system/console/configMgr: 5XX response",
+        "GET /crx/server/crx.default/jcr:root/.1.json: 404 response"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add comprehensive error response documentation including codes, messages, and consistent error schemas
+
+---
+
+### Security
+
+#### P005: Security Standards (Passed) [critical]
+
+Validates comprehensive security requirements and authentication mechanisms
+
+- **Status:** Passed
+- **Message:** All security requirements are properly defined and consistent
+- **Tags:** security, authentication, authorization
+
+**Checks Performed:**
+- Security schemes are defined
+- Global security requirements are set
+- Operation-level security is defined
+- OAuth2 scopes are documented
+- API keys are properly described
+- Authentication headers are specified
+- Security requirements are consistent
+
+**Details:**
+```json
+{
+    "checks": {
+      "API keys are properly described": true,
+      "Authentication headers are specified": true,
+      "Global security requirements are set": true,
+      "OAuth2 scopes are documented": true,
+      "Operation-level security is defined": true,
+      "Security requirements are consistent": true,
+      "Security schemes are defined": true
+    },
+    "messages": {}
+  }
+```
+
+---
+
+### Versioning
+
+#### P008: API Versioning Strategy (Failed) [warning]
+
+Validates proper API versioning implementation and documentation
+
+- **Status:** Failed
+- **Message:** Versioning validation failed: Version compatibility is specified: Info description does not mention version compatibility; Migration guides are referenced: Info description does not reference migration or upgrade guides; Version follows semantic versioning: Version "3.7.1-pre.0" does not match semver format (expected MAJOR.MINOR.PATCH); Versioning strategy is documented: Info description does not mention versioning strategy; Breaking changes are documented: Info description does not reference breaking changes or a changelog
+- **Tags:** versioning, compatibility, lifecycle
+
+**Checks Performed:**
+- API version is specified
+- Version follows semantic versioning
+- Versioning strategy is documented
+- Deprecation notices are present
+- Breaking changes are documented
+- Version compatibility is specified
+- Migration guides are referenced
+
+**Details:**
+```json
+{
+    "checks": {
+      "API version is specified": true,
+      "Breaking changes are documented": false,
+      "Deprecation notices are present": true,
+      "Migration guides are referenced": false,
+      "Version compatibility is specified": false,
+      "Version follows semantic versioning": false,
+      "Versioning strategy is documented": false
+    },
+    "messages": {
+      "Breaking changes are documented": "Info description does not reference breaking changes or a changelog",
+      "Migration guides are referenced": "Info description does not reference migration or upgrade guides",
+      "Version compatibility is specified": "Info description does not mention version compatibility",
+      "Version follows semantic versioning": "Version \"3.7.1-pre.0\" does not match semver format (expected MAJOR.MINOR.PATCH)",
+      "Versioning strategy is documented": "Info description does not mention versioning strategy"
+    }
+  }
+```
+
+**Suggested Fix:**
+Update the info section with version details, deprecation notices, and migration references
+
+---
+

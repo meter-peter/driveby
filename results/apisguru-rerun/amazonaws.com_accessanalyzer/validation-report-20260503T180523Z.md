@@ -1,0 +1,1107 @@
+# API Validation Report
+
+Generated: 2026-05-03T21:05:23+03:00
+Environment: production
+Version: 1.0.0
+
+## Summary
+
+- Total Checks: 6
+- Passed Checks: 2
+- Failed Checks: 4
+- Critical Issues: 3
+- Warnings: 1
+- Info: 0
+
+### Categories
+- Documentation
+- Error Handling
+- Schema
+- Versioning
+
+
+### Failed Tags
+- versioning
+- compatibility
+- lifecycle
+- documentation
+- quality
+- usability
+- standards
+- schema
+- validation
+- request
+- errors
+- responses
+
+
+## Principle Results
+
+### Specification
+
+#### P001: OpenAPI Specification Compliance (Passed) [critical]
+
+Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices
+
+- **Status:** Passed
+- **Message:** OpenAPI specification is fully compliant with 3.0/3.1 standards
+- **Tags:** openapi, specification, compliance
+
+**Checks Performed:**
+- OpenAPI version is 3.0.x or 3.1.0
+- Required info fields (title, version) are present
+- Paths are properly defined
+- Components are valid
+- References are resolvable
+- No duplicate operationIds
+- Valid HTTP methods used
+
+**Details:**
+```json
+{
+    "checks": {
+      "Components are valid": true,
+      "No duplicate operationIds": true,
+      "Paths are properly defined": true,
+      "Required info fields (title, version) are present": true,
+      "Specification structure is valid": true,
+      "Specification version is present": true,
+      "Valid HTTP methods used": true
+    },
+    "messages": {}
+  }
+```
+
+---
+
+### Documentation
+
+#### P002: API Documentation Quality (Failed) [critical]
+
+Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines
+
+- **Status:** Failed
+- **Message:** Documentation quality issues found: All enums have descriptions: Type: enum value ACCOUNT, Type: enum value ORGANIZATION, FindingChangeType: enum value CHANGED, FindingChangeType: enum value NEW, FindingChangeType: enum value UNCHANGED, ResourceType: enum value AWS::S3::Bucket, ResourceType: enum value AWS::IAM::Role, ResourceType: enum value AWS::SQS::Queue, ResourceType: enum value AWS::Lambda::Function, ResourceType: enum value AWS::Lambda::LayerVersion, ResourceType: enum value AWS::KMS::Key, ResourceType: enum value AWS::SecretsManager::Secret, ResourceType: enum value AWS::EFS::FileSystem, ResourceType: enum value AWS::EC2::Snapshot, ResourceType: enum value AWS::ECR::Repository, ResourceType: enum value AWS::RDS::DBSnapshot, ResourceType: enum value AWS::RDS::DBClusterSnapshot, ResourceType: enum value AWS::SNS::Topic, ReasonCode: enum value AWS_SERVICE_ACCESS_DISABLED, ReasonCode: enum value DELEGATED_ADMINISTRATOR_DEREGISTERED, ReasonCode: enum value ORGANIZATION_DELETED, ReasonCode: enum value SERVICE_LINKED_ROLE_CREATION_FAILED, AccessPreviewStatus: enum value COMPLETED, AccessPreviewStatus: enum value CREATING, AccessPreviewStatus: enum value FAILED, Locale: enum value DE, Locale: enum value EN, Locale: enum value ES, Locale: enum value FR, Locale: enum value IT, Locale: enum value JA, Locale: enum value KO, Locale: enum value PT_BR, Locale: enum value ZH_CN, Locale: enum value ZH_TW, FindingSourceType: enum value POLICY, FindingSourceType: enum value BUCKET_ACL, FindingSourceType: enum value S3_ACCESS_POINT, FindingSourceType: enum value S3_ACCESS_POINT_ACCOUNT, JobErrorCode: enum value AUTHORIZATION_ERROR, JobErrorCode: enum value RESOURCE_NOT_FOUND_ERROR, JobErrorCode: enum value SERVICE_QUOTA_EXCEEDED_ERROR, JobErrorCode: enum value SERVICE_ERROR, AclPermission: enum value READ, AclPermission: enum value WRITE, AclPermission: enum value READ_ACP, AclPermission: enum value WRITE_ACP, AclPermission: enum value FULL_CONTROL, AccessPreviewStatusReasonCode: enum value INTERNAL_ERROR, AccessPreviewStatusReasonCode: enum value INVALID_CONFIGURATION, PolicyType: enum value IDENTITY_POLICY, PolicyType: enum value RESOURCE_POLICY, PolicyType: enum value SERVICE_CONTROL_POLICY, JobStatus: enum value IN_PROGRESS, JobStatus: enum value SUCCEEDED, JobStatus: enum value FAILED, JobStatus: enum value CANCELED, FindingStatusUpdate: enum value ACTIVE, FindingStatusUpdate: enum value ARCHIVED, ValidatePolicyResourceType: enum value AWS::S3::Bucket, ValidatePolicyResourceType: enum value AWS::S3::AccessPoint, ValidatePolicyResourceType: enum value AWS::S3::MultiRegionAccessPoint, ValidatePolicyResourceType: enum value AWS::S3ObjectLambda::AccessPoint, ValidatePolicyResourceType: enum value AWS::IAM::AssumeRolePolicyDocument, OrderBy: enum value ASC, OrderBy: enum value DESC, ValidatePolicyFindingType: enum value ERROR, ValidatePolicyFindingType: enum value SECURITY_WARNING, ValidatePolicyFindingType: enum value SUGGESTION, ValidatePolicyFindingType: enum value WARNING, KmsGrantOperation: enum value CreateGrant, KmsGrantOperation: enum value Decrypt, KmsGrantOperation: enum value DescribeKey, KmsGrantOperation: enum value Encrypt, KmsGrantOperation: enum value GenerateDataKey, KmsGrantOperation: enum value GenerateDataKeyPair, KmsGrantOperation: enum value GenerateDataKeyPairWithoutPlaintext, KmsGrantOperation: enum value GenerateDataKeyWithoutPlaintext, KmsGrantOperation: enum value GetPublicKey, KmsGrantOperation: enum value ReEncryptFrom, KmsGrantOperation: enum value ReEncryptTo, KmsGrantOperation: enum value RetireGrant, KmsGrantOperation: enum value Sign, KmsGrantOperation: enum value Verify, FindingStatus: enum value ACTIVE, FindingStatus: enum value ARCHIVED, FindingStatus: enum value RESOLVED, AnalyzerStatus: enum value ACTIVE, AnalyzerStatus: enum value CREATING, AnalyzerStatus: enum value DISABLED, AnalyzerStatus: enum value FAILED; All operations have clear summaries: POST /policy/validation, PUT /archive-rule, GET /access-preview/{accessPreviewId}#analyzerArn, GET /analyzed-resource#analyzerArn&resourceArn, POST /resource/scan, GET /tags/{resourceArn}, POST /tags/{resourceArn}, PUT /access-preview, GET /analyzer/{analyzerName}, DELETE /analyzer/{analyzerName}, GET /policy/generation/{jobId}, PUT /policy/generation/{jobId}, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}, GET /analyzer/{analyzerName}/archive-rule/{ruleName}, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}, POST /finding, PUT /finding, POST /analyzed-resource, DELETE /tags/{resourceArn}#tagKeys, GET /analyzer, PUT /analyzer, GET /finding/{id}#analyzerArn, GET /analyzer/{analyzerName}/archive-rule, PUT /analyzer/{analyzerName}/archive-rule, GET /access-preview#analyzerArn, POST /access-preview/{accessPreviewId}, GET /policy/generation, PUT /policy/generation; All request/response bodies have examples: POST /policy/validation: request body, POST /policy/validation: application/json request body, POST /policy/validation: 483 application/json response, POST /policy/validation: 200 application/json response, POST /policy/validation: 480 application/json response, POST /policy/validation: 481 application/json response, POST /policy/validation: 482 application/json response, PUT /archive-rule: request body, PUT /archive-rule: application/json request body, PUT /archive-rule: 482 application/json response, PUT /archive-rule: 483 application/json response, PUT /archive-rule: 484 application/json response, PUT /archive-rule: 480 application/json response, PUT /archive-rule: 481 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 482 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 483 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 484 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 200 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 480 application/json response, GET /access-preview/{accessPreviewId}#analyzerArn: 481 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 483 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 484 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 200 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 480 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 481 application/json response, GET /analyzed-resource#analyzerArn&resourceArn: 482 application/json response, POST /resource/scan: request body, POST /resource/scan: application/json request body, POST /resource/scan: 482 application/json response, POST /resource/scan: 483 application/json response, POST /resource/scan: 484 application/json response, POST /resource/scan: 480 application/json response, POST /resource/scan: 481 application/json response, GET /tags/{resourceArn}: 483 application/json response, GET /tags/{resourceArn}: 484 application/json response, GET /tags/{resourceArn}: 200 application/json response, GET /tags/{resourceArn}: 480 application/json response, GET /tags/{resourceArn}: 481 application/json response, GET /tags/{resourceArn}: 482 application/json response, POST /tags/{resourceArn}: request body, POST /tags/{resourceArn}: application/json request body, POST /tags/{resourceArn}: 480 application/json response, POST /tags/{resourceArn}: 481 application/json response, POST /tags/{resourceArn}: 482 application/json response, POST /tags/{resourceArn}: 483 application/json response, POST /tags/{resourceArn}: 484 application/json response, POST /tags/{resourceArn}: 200 application/json response, PUT /access-preview: request body, PUT /access-preview: application/json request body, PUT /access-preview: 481 application/json response, PUT /access-preview: 482 application/json response, PUT /access-preview: 483 application/json response, PUT /access-preview: 484 application/json response, PUT /access-preview: 485 application/json response, PUT /access-preview: 486 application/json response, PUT /access-preview: 200 application/json response, PUT /access-preview: 480 application/json response, GET /analyzer/{analyzerName}: 484 application/json response, GET /analyzer/{analyzerName}: 200 application/json response, GET /analyzer/{analyzerName}: 480 application/json response, GET /analyzer/{analyzerName}: 481 application/json response, GET /analyzer/{analyzerName}: 482 application/json response, GET /analyzer/{analyzerName}: 483 application/json response, DELETE /analyzer/{analyzerName}: 482 application/json response, DELETE /analyzer/{analyzerName}: 483 application/json response, DELETE /analyzer/{analyzerName}: 484 application/json response, DELETE /analyzer/{analyzerName}: 480 application/json response, DELETE /analyzer/{analyzerName}: 481 application/json response, GET /policy/generation/{jobId}: 200 application/json response, GET /policy/generation/{jobId}: 480 application/json response, GET /policy/generation/{jobId}: 481 application/json response, GET /policy/generation/{jobId}: 482 application/json response, GET /policy/generation/{jobId}: 483 application/json response, PUT /policy/generation/{jobId}: 200 application/json response, PUT /policy/generation/{jobId}: 480 application/json response, PUT /policy/generation/{jobId}: 481 application/json response, PUT /policy/generation/{jobId}: 482 application/json response, PUT /policy/generation/{jobId}: 483 application/json response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 200 application/json response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: request body, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: application/json request body, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response, POST /finding: request body, POST /finding: application/json request body, POST /finding: 484 application/json response, POST /finding: 200 application/json response, POST /finding: 480 application/json response, POST /finding: 481 application/json response, POST /finding: 482 application/json response, POST /finding: 483 application/json response, PUT /finding: request body, PUT /finding: application/json request body, PUT /finding: 484 application/json response, PUT /finding: 480 application/json response, PUT /finding: 481 application/json response, PUT /finding: 482 application/json response, PUT /finding: 483 application/json response, POST /analyzed-resource: request body, POST /analyzed-resource: application/json request body, POST /analyzed-resource: 480 application/json response, POST /analyzed-resource: 481 application/json response, POST /analyzed-resource: 482 application/json response, POST /analyzed-resource: 483 application/json response, POST /analyzed-resource: 484 application/json response, POST /analyzed-resource: 200 application/json response, DELETE /tags/{resourceArn}#tagKeys: 481 application/json response, DELETE /tags/{resourceArn}#tagKeys: 482 application/json response, DELETE /tags/{resourceArn}#tagKeys: 483 application/json response, DELETE /tags/{resourceArn}#tagKeys: 484 application/json response, DELETE /tags/{resourceArn}#tagKeys: 200 application/json response, DELETE /tags/{resourceArn}#tagKeys: 480 application/json response, GET /analyzer: 481 application/json response, GET /analyzer: 482 application/json response, GET /analyzer: 483 application/json response, GET /analyzer: 200 application/json response, GET /analyzer: 480 application/json response, PUT /analyzer: request body, PUT /analyzer: application/json request body, PUT /analyzer: 485 application/json response, PUT /analyzer: 200 application/json response, PUT /analyzer: 480 application/json response, PUT /analyzer: 481 application/json response, PUT /analyzer: 482 application/json response, PUT /analyzer: 483 application/json response, PUT /analyzer: 484 application/json response, GET /finding/{id}#analyzerArn: 200 application/json response, GET /finding/{id}#analyzerArn: 480 application/json response, GET /finding/{id}#analyzerArn: 481 application/json response, GET /finding/{id}#analyzerArn: 482 application/json response, GET /finding/{id}#analyzerArn: 483 application/json response, GET /finding/{id}#analyzerArn: 484 application/json response, GET /analyzer/{analyzerName}/archive-rule: 482 application/json response, GET /analyzer/{analyzerName}/archive-rule: 483 application/json response, GET /analyzer/{analyzerName}/archive-rule: 200 application/json response, GET /analyzer/{analyzerName}/archive-rule: 480 application/json response, GET /analyzer/{analyzerName}/archive-rule: 481 application/json response, PUT /analyzer/{analyzerName}/archive-rule: request body, PUT /analyzer/{analyzerName}/archive-rule: application/json request body, PUT /analyzer/{analyzerName}/archive-rule: 486 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 480 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 481 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 482 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 483 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 484 application/json response, PUT /analyzer/{analyzerName}/archive-rule: 485 application/json response, GET /access-preview#analyzerArn: 480 application/json response, GET /access-preview#analyzerArn: 481 application/json response, GET /access-preview#analyzerArn: 482 application/json response, GET /access-preview#analyzerArn: 483 application/json response, GET /access-preview#analyzerArn: 484 application/json response, GET /access-preview#analyzerArn: 200 application/json response, POST /access-preview/{accessPreviewId}: request body, POST /access-preview/{accessPreviewId}: application/json request body, POST /access-preview/{accessPreviewId}: 481 application/json response, POST /access-preview/{accessPreviewId}: 482 application/json response, POST /access-preview/{accessPreviewId}: 483 application/json response, POST /access-preview/{accessPreviewId}: 484 application/json response, POST /access-preview/{accessPreviewId}: 485 application/json response, POST /access-preview/{accessPreviewId}: 200 application/json response, POST /access-preview/{accessPreviewId}: 480 application/json response, GET /policy/generation: 481 application/json response, GET /policy/generation: 482 application/json response, GET /policy/generation: 483 application/json response, GET /policy/generation: 200 application/json response, GET /policy/generation: 480 application/json response, PUT /policy/generation: request body, PUT /policy/generation: application/json request body, PUT /policy/generation: 480 application/json response, PUT /policy/generation: 481 application/json response, PUT /policy/generation: 482 application/json response, PUT /policy/generation: 483 application/json response, PUT /policy/generation: 484 application/json response, PUT /policy/generation: 485 application/json response, PUT /policy/generation: 200 application/json response; All schemas have descriptions: TagKeys, CloudTrailArn, FilterCriteriaMap, PolicyGenerationList, ListAccessPreviewsResponse, ConfigurationsMapKey, Type, PolicyDocument, JobId, AnalyzedResourcesList, FindingSourceList, PathElementList, IssueCode, RdsDbSnapshotAccountIdsList, RdsDbSnapshotKmsKeyId, Name, ValidatePolicyFindingList, PrincipalArn, IamTrustPolicy, InternalServerException, String, KmsGrantOperationsList, PrincipalMap, FindingChangeType, ListAccessPreviewFindingsResponse, FindingIdList, CancelPolicyGenerationResponse, ListAccessPreviewFindingsRequest, KmsKeyPoliciesMap, RdsDbClusterSnapshotAttributeName, ResourceType, CreateAccessPreviewResponse, CancelPolicyGenerationRequest, TrailList, AclCanonicalId, ArchiveRulesList, ConfigurationsMap, SecretsManagerSecretPolicy, ReasonCode, KmsConstraintsMap, RdsDbClusterSnapshotAccountId, RdsDbSnapshotAttributesMap, PolicyName, ResourceArn, ListAccessPreviewsRequest, GeneratedPolicyList, AccessPreviewStatus, ActionList, ListPolicyGenerationsRequestMaxResultsInteger, KmsConstraintsValue, Locale, ValueList, RetiringPrincipal, StartPolicyGenerationResponse, RdsDbClusterSnapshotAccountIdsList, ListPolicyGenerationsRequest, StartPolicyGenerationRequest, AclUri, RdsDbSnapshotAttributeName, SqsQueuePolicy, RdsDbClusterSnapshotKmsKeyId, KmsConstraintsKey, AccessPreviewsList, RegionList, GetAccessPreviewRequest, RoleArn, LearnMoreLink, VpcId, IssuingAccount, TrailPropertiesList, Boolean, FindingSourceType, EcrRepositoryPolicy, GetGeneratedPolicyResponse, ThrottlingException, ServiceQuotaExceededException, GetAccessPreviewResponse, ValidationException, JobErrorCode, SharedViaList, LocationList, FindingsList, Token, ListPolicyGenerationsResponse, RdsDbSnapshotAccountId, AclPermission, EbsUserId, CreateAccessPreviewRequest, AccessPreviewStatusReasonCode, S3BucketPolicy, AccessDeniedException, PolicyType, JobStatus, S3BucketAclGrantConfigurationsList, FindingStatusUpdate, AccessPointArn, AnalyzersList, ValidatePolicyResourceType, S3AccessPointConfigurationsMap, GranteePrincipal, KmsGrantConfigurationsList, EbsSnapshotDataEncryptionKeyId, FindingId, ResourceNotFoundException, AccessPreviewFindingsList, ConditionKeyMap, KmsKeyPolicy, EbsGroup, ValidatePolicyRequest, AccessPreviewFindingId, TagsMap, ConflictException, EbsUserIdList, InlineArchiveRulesList, OrderBy, AnalyzerArn, ValidatePolicyFindingType, SecretsManagerSecretKmsId, SnsTopicPolicy, Timestamp, AccessPointPolicy, ValidatePolicyResponse, KmsGrantOperation, FindingStatus, RdsDbClusterSnapshotAttributesMap, AccessPreviewId, AnalyzerStatus, EbsGroupList, Integer, EfsFileSystemPolicy, GetGeneratedPolicyRequest
+- **Tags:** documentation, quality, usability
+
+**Checks Performed:**
+- All operations have clear summaries
+- All operations have detailed descriptions
+- All operations have unique operationIds
+- All parameters have descriptions
+- All request/response bodies have examples
+- All schemas have descriptions
+- All enums have descriptions
+- API has a general description
+- Contact information is provided
+- License information is provided
+
+**Details:**
+```json
+{
+    "checks": {
+      "API has a general description": true,
+      "All enums have descriptions": false,
+      "All operations have clear summaries": false,
+      "All request/response bodies have examples": false,
+      "All schemas have descriptions": false,
+      "Contact information is provided": true,
+      "License information is provided": true
+    },
+    "messages": {},
+    "missing_docs": {
+      "All enums have descriptions": [
+        "Type: enum value ACCOUNT",
+        "Type: enum value ORGANIZATION",
+        "FindingChangeType: enum value CHANGED",
+        "FindingChangeType: enum value NEW",
+        "FindingChangeType: enum value UNCHANGED",
+        "ResourceType: enum value AWS::S3::Bucket",
+        "ResourceType: enum value AWS::IAM::Role",
+        "ResourceType: enum value AWS::SQS::Queue",
+        "ResourceType: enum value AWS::Lambda::Function",
+        "ResourceType: enum value AWS::Lambda::LayerVersion",
+        "ResourceType: enum value AWS::KMS::Key",
+        "ResourceType: enum value AWS::SecretsManager::Secret",
+        "ResourceType: enum value AWS::EFS::FileSystem",
+        "ResourceType: enum value AWS::EC2::Snapshot",
+        "ResourceType: enum value AWS::ECR::Repository",
+        "ResourceType: enum value AWS::RDS::DBSnapshot",
+        "ResourceType: enum value AWS::RDS::DBClusterSnapshot",
+        "ResourceType: enum value AWS::SNS::Topic",
+        "ReasonCode: enum value AWS_SERVICE_ACCESS_DISABLED",
+        "ReasonCode: enum value DELEGATED_ADMINISTRATOR_DEREGISTERED",
+        "ReasonCode: enum value ORGANIZATION_DELETED",
+        "ReasonCode: enum value SERVICE_LINKED_ROLE_CREATION_FAILED",
+        "AccessPreviewStatus: enum value COMPLETED",
+        "AccessPreviewStatus: enum value CREATING",
+        "AccessPreviewStatus: enum value FAILED",
+        "Locale: enum value DE",
+        "Locale: enum value EN",
+        "Locale: enum value ES",
+        "Locale: enum value FR",
+        "Locale: enum value IT",
+        "Locale: enum value JA",
+        "Locale: enum value KO",
+        "Locale: enum value PT_BR",
+        "Locale: enum value ZH_CN",
+        "Locale: enum value ZH_TW",
+        "FindingSourceType: enum value POLICY",
+        "FindingSourceType: enum value BUCKET_ACL",
+        "FindingSourceType: enum value S3_ACCESS_POINT",
+        "FindingSourceType: enum value S3_ACCESS_POINT_ACCOUNT",
+        "JobErrorCode: enum value AUTHORIZATION_ERROR",
+        "JobErrorCode: enum value RESOURCE_NOT_FOUND_ERROR",
+        "JobErrorCode: enum value SERVICE_QUOTA_EXCEEDED_ERROR",
+        "JobErrorCode: enum value SERVICE_ERROR",
+        "AclPermission: enum value READ",
+        "AclPermission: enum value WRITE",
+        "AclPermission: enum value READ_ACP",
+        "AclPermission: enum value WRITE_ACP",
+        "AclPermission: enum value FULL_CONTROL",
+        "AccessPreviewStatusReasonCode: enum value INTERNAL_ERROR",
+        "AccessPreviewStatusReasonCode: enum value INVALID_CONFIGURATION",
+        "PolicyType: enum value IDENTITY_POLICY",
+        "PolicyType: enum value RESOURCE_POLICY",
+        "PolicyType: enum value SERVICE_CONTROL_POLICY",
+        "JobStatus: enum value IN_PROGRESS",
+        "JobStatus: enum value SUCCEEDED",
+        "JobStatus: enum value FAILED",
+        "JobStatus: enum value CANCELED",
+        "FindingStatusUpdate: enum value ACTIVE",
+        "FindingStatusUpdate: enum value ARCHIVED",
+        "ValidatePolicyResourceType: enum value AWS::S3::Bucket",
+        "ValidatePolicyResourceType: enum value AWS::S3::AccessPoint",
+        "ValidatePolicyResourceType: enum value AWS::S3::MultiRegionAccessPoint",
+        "ValidatePolicyResourceType: enum value AWS::S3ObjectLambda::AccessPoint",
+        "ValidatePolicyResourceType: enum value AWS::IAM::AssumeRolePolicyDocument",
+        "OrderBy: enum value ASC",
+        "OrderBy: enum value DESC",
+        "ValidatePolicyFindingType: enum value ERROR",
+        "ValidatePolicyFindingType: enum value SECURITY_WARNING",
+        "ValidatePolicyFindingType: enum value SUGGESTION",
+        "ValidatePolicyFindingType: enum value WARNING",
+        "KmsGrantOperation: enum value CreateGrant",
+        "KmsGrantOperation: enum value Decrypt",
+        "KmsGrantOperation: enum value DescribeKey",
+        "KmsGrantOperation: enum value Encrypt",
+        "KmsGrantOperation: enum value GenerateDataKey",
+        "KmsGrantOperation: enum value GenerateDataKeyPair",
+        "KmsGrantOperation: enum value GenerateDataKeyPairWithoutPlaintext",
+        "KmsGrantOperation: enum value GenerateDataKeyWithoutPlaintext",
+        "KmsGrantOperation: enum value GetPublicKey",
+        "KmsGrantOperation: enum value ReEncryptFrom",
+        "KmsGrantOperation: enum value ReEncryptTo",
+        "KmsGrantOperation: enum value RetireGrant",
+        "KmsGrantOperation: enum value Sign",
+        "KmsGrantOperation: enum value Verify",
+        "FindingStatus: enum value ACTIVE",
+        "FindingStatus: enum value ARCHIVED",
+        "FindingStatus: enum value RESOLVED",
+        "AnalyzerStatus: enum value ACTIVE",
+        "AnalyzerStatus: enum value CREATING",
+        "AnalyzerStatus: enum value DISABLED",
+        "AnalyzerStatus: enum value FAILED"
+      ],
+      "All operations have clear summaries": [
+        "POST /policy/validation",
+        "PUT /archive-rule",
+        "GET /access-preview/{accessPreviewId}#analyzerArn",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn",
+        "POST /resource/scan",
+        "GET /tags/{resourceArn}",
+        "POST /tags/{resourceArn}",
+        "PUT /access-preview",
+        "GET /analyzer/{analyzerName}",
+        "DELETE /analyzer/{analyzerName}",
+        "GET /policy/generation/{jobId}",
+        "PUT /policy/generation/{jobId}",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "POST /finding",
+        "PUT /finding",
+        "POST /analyzed-resource",
+        "DELETE /tags/{resourceArn}#tagKeys",
+        "GET /analyzer",
+        "PUT /analyzer",
+        "GET /finding/{id}#analyzerArn",
+        "GET /analyzer/{analyzerName}/archive-rule",
+        "PUT /analyzer/{analyzerName}/archive-rule",
+        "GET /access-preview#analyzerArn",
+        "POST /access-preview/{accessPreviewId}",
+        "GET /policy/generation",
+        "PUT /policy/generation"
+      ],
+      "All request/response bodies have examples": [
+        "POST /policy/validation: request body",
+        "POST /policy/validation: application/json request body",
+        "POST /policy/validation: 483 application/json response",
+        "POST /policy/validation: 200 application/json response",
+        "POST /policy/validation: 480 application/json response",
+        "POST /policy/validation: 481 application/json response",
+        "POST /policy/validation: 482 application/json response",
+        "PUT /archive-rule: request body",
+        "PUT /archive-rule: application/json request body",
+        "PUT /archive-rule: 482 application/json response",
+        "PUT /archive-rule: 483 application/json response",
+        "PUT /archive-rule: 484 application/json response",
+        "PUT /archive-rule: 480 application/json response",
+        "PUT /archive-rule: 481 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 482 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 483 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 484 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 200 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 480 application/json response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 481 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 483 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 484 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 200 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 480 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 481 application/json response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 482 application/json response",
+        "POST /resource/scan: request body",
+        "POST /resource/scan: application/json request body",
+        "POST /resource/scan: 482 application/json response",
+        "POST /resource/scan: 483 application/json response",
+        "POST /resource/scan: 484 application/json response",
+        "POST /resource/scan: 480 application/json response",
+        "POST /resource/scan: 481 application/json response",
+        "GET /tags/{resourceArn}: 483 application/json response",
+        "GET /tags/{resourceArn}: 484 application/json response",
+        "GET /tags/{resourceArn}: 200 application/json response",
+        "GET /tags/{resourceArn}: 480 application/json response",
+        "GET /tags/{resourceArn}: 481 application/json response",
+        "GET /tags/{resourceArn}: 482 application/json response",
+        "POST /tags/{resourceArn}: request body",
+        "POST /tags/{resourceArn}: application/json request body",
+        "POST /tags/{resourceArn}: 480 application/json response",
+        "POST /tags/{resourceArn}: 481 application/json response",
+        "POST /tags/{resourceArn}: 482 application/json response",
+        "POST /tags/{resourceArn}: 483 application/json response",
+        "POST /tags/{resourceArn}: 484 application/json response",
+        "POST /tags/{resourceArn}: 200 application/json response",
+        "PUT /access-preview: request body",
+        "PUT /access-preview: application/json request body",
+        "PUT /access-preview: 481 application/json response",
+        "PUT /access-preview: 482 application/json response",
+        "PUT /access-preview: 483 application/json response",
+        "PUT /access-preview: 484 application/json response",
+        "PUT /access-preview: 485 application/json response",
+        "PUT /access-preview: 486 application/json response",
+        "PUT /access-preview: 200 application/json response",
+        "PUT /access-preview: 480 application/json response",
+        "GET /analyzer/{analyzerName}: 484 application/json response",
+        "GET /analyzer/{analyzerName}: 200 application/json response",
+        "GET /analyzer/{analyzerName}: 480 application/json response",
+        "GET /analyzer/{analyzerName}: 481 application/json response",
+        "GET /analyzer/{analyzerName}: 482 application/json response",
+        "GET /analyzer/{analyzerName}: 483 application/json response",
+        "DELETE /analyzer/{analyzerName}: 482 application/json response",
+        "DELETE /analyzer/{analyzerName}: 483 application/json response",
+        "DELETE /analyzer/{analyzerName}: 484 application/json response",
+        "DELETE /analyzer/{analyzerName}: 480 application/json response",
+        "DELETE /analyzer/{analyzerName}: 481 application/json response",
+        "GET /policy/generation/{jobId}: 200 application/json response",
+        "GET /policy/generation/{jobId}: 480 application/json response",
+        "GET /policy/generation/{jobId}: 481 application/json response",
+        "GET /policy/generation/{jobId}: 482 application/json response",
+        "GET /policy/generation/{jobId}: 483 application/json response",
+        "PUT /policy/generation/{jobId}: 200 application/json response",
+        "PUT /policy/generation/{jobId}: 480 application/json response",
+        "PUT /policy/generation/{jobId}: 481 application/json response",
+        "PUT /policy/generation/{jobId}: 482 application/json response",
+        "PUT /policy/generation/{jobId}: 483 application/json response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 200 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: request body",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: application/json request body",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 application/json response",
+        "POST /finding: request body",
+        "POST /finding: application/json request body",
+        "POST /finding: 484 application/json response",
+        "POST /finding: 200 application/json response",
+        "POST /finding: 480 application/json response",
+        "POST /finding: 481 application/json response",
+        "POST /finding: 482 application/json response",
+        "POST /finding: 483 application/json response",
+        "PUT /finding: request body",
+        "PUT /finding: application/json request body",
+        "PUT /finding: 484 application/json response",
+        "PUT /finding: 480 application/json response",
+        "PUT /finding: 481 application/json response",
+        "PUT /finding: 482 application/json response",
+        "PUT /finding: 483 application/json response",
+        "POST /analyzed-resource: request body",
+        "POST /analyzed-resource: application/json request body",
+        "POST /analyzed-resource: 480 application/json response",
+        "POST /analyzed-resource: 481 application/json response",
+        "POST /analyzed-resource: 482 application/json response",
+        "POST /analyzed-resource: 483 application/json response",
+        "POST /analyzed-resource: 484 application/json response",
+        "POST /analyzed-resource: 200 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 481 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 482 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 483 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 484 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 200 application/json response",
+        "DELETE /tags/{resourceArn}#tagKeys: 480 application/json response",
+        "GET /analyzer: 481 application/json response",
+        "GET /analyzer: 482 application/json response",
+        "GET /analyzer: 483 application/json response",
+        "GET /analyzer: 200 application/json response",
+        "GET /analyzer: 480 application/json response",
+        "PUT /analyzer: request body",
+        "PUT /analyzer: application/json request body",
+        "PUT /analyzer: 485 application/json response",
+        "PUT /analyzer: 200 application/json response",
+        "PUT /analyzer: 480 application/json response",
+        "PUT /analyzer: 481 application/json response",
+        "PUT /analyzer: 482 application/json response",
+        "PUT /analyzer: 483 application/json response",
+        "PUT /analyzer: 484 application/json response",
+        "GET /finding/{id}#analyzerArn: 200 application/json response",
+        "GET /finding/{id}#analyzerArn: 480 application/json response",
+        "GET /finding/{id}#analyzerArn: 481 application/json response",
+        "GET /finding/{id}#analyzerArn: 482 application/json response",
+        "GET /finding/{id}#analyzerArn: 483 application/json response",
+        "GET /finding/{id}#analyzerArn: 484 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule: 482 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule: 483 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule: 200 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule: 480 application/json response",
+        "GET /analyzer/{analyzerName}/archive-rule: 481 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: request body",
+        "PUT /analyzer/{analyzerName}/archive-rule: application/json request body",
+        "PUT /analyzer/{analyzerName}/archive-rule: 486 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 480 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 481 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 482 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 483 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 484 application/json response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 485 application/json response",
+        "GET /access-preview#analyzerArn: 480 application/json response",
+        "GET /access-preview#analyzerArn: 481 application/json response",
+        "GET /access-preview#analyzerArn: 482 application/json response",
+        "GET /access-preview#analyzerArn: 483 application/json response",
+        "GET /access-preview#analyzerArn: 484 application/json response",
+        "GET /access-preview#analyzerArn: 200 application/json response",
+        "POST /access-preview/{accessPreviewId}: request body",
+        "POST /access-preview/{accessPreviewId}: application/json request body",
+        "POST /access-preview/{accessPreviewId}: 481 application/json response",
+        "POST /access-preview/{accessPreviewId}: 482 application/json response",
+        "POST /access-preview/{accessPreviewId}: 483 application/json response",
+        "POST /access-preview/{accessPreviewId}: 484 application/json response",
+        "POST /access-preview/{accessPreviewId}: 485 application/json response",
+        "POST /access-preview/{accessPreviewId}: 200 application/json response",
+        "POST /access-preview/{accessPreviewId}: 480 application/json response",
+        "GET /policy/generation: 481 application/json response",
+        "GET /policy/generation: 482 application/json response",
+        "GET /policy/generation: 483 application/json response",
+        "GET /policy/generation: 200 application/json response",
+        "GET /policy/generation: 480 application/json response",
+        "PUT /policy/generation: request body",
+        "PUT /policy/generation: application/json request body",
+        "PUT /policy/generation: 480 application/json response",
+        "PUT /policy/generation: 481 application/json response",
+        "PUT /policy/generation: 482 application/json response",
+        "PUT /policy/generation: 483 application/json response",
+        "PUT /policy/generation: 484 application/json response",
+        "PUT /policy/generation: 485 application/json response",
+        "PUT /policy/generation: 200 application/json response"
+      ],
+      "All schemas have descriptions": [
+        "TagKeys",
+        "CloudTrailArn",
+        "FilterCriteriaMap",
+        "PolicyGenerationList",
+        "ListAccessPreviewsResponse",
+        "ConfigurationsMapKey",
+        "Type",
+        "PolicyDocument",
+        "JobId",
+        "AnalyzedResourcesList",
+        "FindingSourceList",
+        "PathElementList",
+        "IssueCode",
+        "RdsDbSnapshotAccountIdsList",
+        "RdsDbSnapshotKmsKeyId",
+        "Name",
+        "ValidatePolicyFindingList",
+        "PrincipalArn",
+        "IamTrustPolicy",
+        "InternalServerException",
+        "String",
+        "KmsGrantOperationsList",
+        "PrincipalMap",
+        "FindingChangeType",
+        "ListAccessPreviewFindingsResponse",
+        "FindingIdList",
+        "CancelPolicyGenerationResponse",
+        "ListAccessPreviewFindingsRequest",
+        "KmsKeyPoliciesMap",
+        "RdsDbClusterSnapshotAttributeName",
+        "ResourceType",
+        "CreateAccessPreviewResponse",
+        "CancelPolicyGenerationRequest",
+        "TrailList",
+        "AclCanonicalId",
+        "ArchiveRulesList",
+        "ConfigurationsMap",
+        "SecretsManagerSecretPolicy",
+        "ReasonCode",
+        "KmsConstraintsMap",
+        "RdsDbClusterSnapshotAccountId",
+        "RdsDbSnapshotAttributesMap",
+        "PolicyName",
+        "ResourceArn",
+        "ListAccessPreviewsRequest",
+        "GeneratedPolicyList",
+        "AccessPreviewStatus",
+        "ActionList",
+        "ListPolicyGenerationsRequestMaxResultsInteger",
+        "KmsConstraintsValue",
+        "Locale",
+        "ValueList",
+        "RetiringPrincipal",
+        "StartPolicyGenerationResponse",
+        "RdsDbClusterSnapshotAccountIdsList",
+        "ListPolicyGenerationsRequest",
+        "StartPolicyGenerationRequest",
+        "AclUri",
+        "RdsDbSnapshotAttributeName",
+        "SqsQueuePolicy",
+        "RdsDbClusterSnapshotKmsKeyId",
+        "KmsConstraintsKey",
+        "AccessPreviewsList",
+        "RegionList",
+        "GetAccessPreviewRequest",
+        "RoleArn",
+        "LearnMoreLink",
+        "VpcId",
+        "IssuingAccount",
+        "TrailPropertiesList",
+        "Boolean",
+        "FindingSourceType",
+        "EcrRepositoryPolicy",
+        "GetGeneratedPolicyResponse",
+        "ThrottlingException",
+        "ServiceQuotaExceededException",
+        "GetAccessPreviewResponse",
+        "ValidationException",
+        "JobErrorCode",
+        "SharedViaList",
+        "LocationList",
+        "FindingsList",
+        "Token",
+        "ListPolicyGenerationsResponse",
+        "RdsDbSnapshotAccountId",
+        "AclPermission",
+        "EbsUserId",
+        "CreateAccessPreviewRequest",
+        "AccessPreviewStatusReasonCode",
+        "S3BucketPolicy",
+        "AccessDeniedException",
+        "PolicyType",
+        "JobStatus",
+        "S3BucketAclGrantConfigurationsList",
+        "FindingStatusUpdate",
+        "AccessPointArn",
+        "AnalyzersList",
+        "ValidatePolicyResourceType",
+        "S3AccessPointConfigurationsMap",
+        "GranteePrincipal",
+        "KmsGrantConfigurationsList",
+        "EbsSnapshotDataEncryptionKeyId",
+        "FindingId",
+        "ResourceNotFoundException",
+        "AccessPreviewFindingsList",
+        "ConditionKeyMap",
+        "KmsKeyPolicy",
+        "EbsGroup",
+        "ValidatePolicyRequest",
+        "AccessPreviewFindingId",
+        "TagsMap",
+        "ConflictException",
+        "EbsUserIdList",
+        "InlineArchiveRulesList",
+        "OrderBy",
+        "AnalyzerArn",
+        "ValidatePolicyFindingType",
+        "SecretsManagerSecretKmsId",
+        "SnsTopicPolicy",
+        "Timestamp",
+        "AccessPointPolicy",
+        "ValidatePolicyResponse",
+        "KmsGrantOperation",
+        "FindingStatus",
+        "RdsDbClusterSnapshotAttributesMap",
+        "AccessPreviewId",
+        "AnalyzerStatus",
+        "EbsGroupList",
+        "Integer",
+        "EfsFileSystemPolicy",
+        "GetGeneratedPolicyRequest"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add missing documentation including descriptions, examples, and operation details
+
+---
+
+### Schema
+
+#### P004: Request Schema Definitions (Failed) [critical]
+
+Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints
+
+- **Status:** Failed
+- **Message:** Request validation issues found: All numeric fields have min/max values: POST /analyzed-resource.maxResults: application/json schema, GET /analyzer: parameter maxResults, GET /analyzer/{analyzerName}/archive-rule: parameter maxResults, GET /access-preview#analyzerArn: parameter maxResults, POST /policy/validation: parameter maxResults, POST /access-preview/{accessPreviewId}.maxResults: application/json schema, POST /finding.maxResults: application/json schema; All schemas specify data types: PUT /policy/generation.cloudTrailDetails.endTime: application/json schema, PUT /policy/generation.cloudTrailDetails.startTime: application/json schema, PUT /policy/generation.cloudTrailDetails.trails: application/json schema, PUT /policy/generation.cloudTrailDetails.accessRole: application/json schema, PUT /policy/generation.policyGenerationDetails.principalArn: application/json schema, PUT /analyzer.archiveRules[].filter: application/json schema, PUT /analyzer.archiveRules[].ruleName: application/json schema, POST /finding.sort.orderBy: application/json schema, POST /finding.sort.attributeName: application/json schema; All string fields have length constraints: /finding/{id}#analyzerArn: parameter X-Amz-Content-Sha256, /finding/{id}#analyzerArn: parameter X-Amz-Date, /finding/{id}#analyzerArn: parameter X-Amz-Algorithm, /finding/{id}#analyzerArn: parameter X-Amz-Credential, /finding/{id}#analyzerArn: parameter X-Amz-Security-Token, /finding/{id}#analyzerArn: parameter X-Amz-Signature, /finding/{id}#analyzerArn: parameter X-Amz-SignedHeaders, GET /finding/{id}#analyzerArn: parameter id, /analyzed-resource: parameter X-Amz-Content-Sha256, /analyzed-resource: parameter X-Amz-Date, /analyzed-resource: parameter X-Amz-Algorithm, /analyzed-resource: parameter X-Amz-Credential, /analyzed-resource: parameter X-Amz-Security-Token, /analyzed-resource: parameter X-Amz-Signature, /analyzed-resource: parameter X-Amz-SignedHeaders, POST /analyzed-resource: parameter maxResults, POST /analyzed-resource: parameter nextToken, POST /analyzed-resource.nextToken: application/json schema, POST /analyzed-resource.resourceType: application/json schema, /analyzer/{analyzerName}: parameter X-Amz-Content-Sha256, /analyzer/{analyzerName}: parameter X-Amz-Date, /analyzer/{analyzerName}: parameter X-Amz-Algorithm, /analyzer/{analyzerName}: parameter X-Amz-Credential, /analyzer/{analyzerName}: parameter X-Amz-Security-Token, /analyzer/{analyzerName}: parameter X-Amz-Signature, /analyzer/{analyzerName}: parameter X-Amz-SignedHeaders, DELETE /analyzer/{analyzerName}: parameter clientToken, /policy/generation/{jobId}: parameter X-Amz-Content-Sha256, /policy/generation/{jobId}: parameter X-Amz-Date, /policy/generation/{jobId}: parameter X-Amz-Algorithm, /policy/generation/{jobId}: parameter X-Amz-Credential, /policy/generation/{jobId}: parameter X-Amz-Security-Token, /policy/generation/{jobId}: parameter X-Amz-Signature, /policy/generation/{jobId}: parameter X-Amz-SignedHeaders, GET /policy/generation/{jobId}: parameter jobId, PUT /policy/generation/{jobId}: parameter jobId, /access-preview: parameter X-Amz-Content-Sha256, /access-preview: parameter X-Amz-Date, /access-preview: parameter X-Amz-Algorithm, /access-preview: parameter X-Amz-Credential, /access-preview: parameter X-Amz-Security-Token, /access-preview: parameter X-Amz-Signature, /access-preview: parameter X-Amz-SignedHeaders, PUT /access-preview.clientToken: application/json schema, /tags/{resourceArn}: parameter X-Amz-Content-Sha256, /tags/{resourceArn}: parameter X-Amz-Date, /tags/{resourceArn}: parameter X-Amz-Algorithm, /tags/{resourceArn}: parameter X-Amz-Credential, /tags/{resourceArn}: parameter X-Amz-Security-Token, /tags/{resourceArn}: parameter X-Amz-Signature, /tags/{resourceArn}: parameter X-Amz-SignedHeaders, POST /tags/{resourceArn}: parameter resourceArn, GET /tags/{resourceArn}: parameter resourceArn, /policy/generation: parameter X-Amz-Content-Sha256, /policy/generation: parameter X-Amz-Date, /policy/generation: parameter X-Amz-Algorithm, /policy/generation: parameter X-Amz-Credential, /policy/generation: parameter X-Amz-Security-Token, /policy/generation: parameter X-Amz-Signature, /policy/generation: parameter X-Amz-SignedHeaders, GET /policy/generation: parameter nextToken, PUT /policy/generation.clientToken: application/json schema, /archive-rule: parameter X-Amz-Content-Sha256, /archive-rule: parameter X-Amz-Date, /archive-rule: parameter X-Amz-Algorithm, /archive-rule: parameter X-Amz-Credential, /archive-rule: parameter X-Amz-Security-Token, /archive-rule: parameter X-Amz-Signature, /archive-rule: parameter X-Amz-SignedHeaders, PUT /archive-rule.clientToken: application/json schema, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Content-Sha256, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Date, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Algorithm, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Credential, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Security-Token, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Signature, /access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-SignedHeaders, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Content-Sha256, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Date, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Algorithm, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Credential, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Security-Token, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-Signature, /analyzed-resource#analyzerArn&resourceArn: parameter X-Amz-SignedHeaders, /analyzer: parameter X-Amz-Content-Sha256, /analyzer: parameter X-Amz-Date, /analyzer: parameter X-Amz-Algorithm, /analyzer: parameter X-Amz-Credential, /analyzer: parameter X-Amz-Security-Token, /analyzer: parameter X-Amz-Signature, /analyzer: parameter X-Amz-SignedHeaders, GET /analyzer: parameter nextToken, GET /analyzer: parameter type, PUT /analyzer.clientToken: application/json schema, PUT /analyzer.type: application/json schema, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Content-Sha256, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Date, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Algorithm, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Credential, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Security-Token, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-Signature, /analyzer/{analyzerName}/archive-rule: parameter X-Amz-SignedHeaders, GET /analyzer/{analyzerName}/archive-rule: parameter nextToken, PUT /analyzer/{analyzerName}/archive-rule.clientToken: application/json schema, /access-preview#analyzerArn: parameter X-Amz-Content-Sha256, /access-preview#analyzerArn: parameter X-Amz-Date, /access-preview#analyzerArn: parameter X-Amz-Algorithm, /access-preview#analyzerArn: parameter X-Amz-Credential, /access-preview#analyzerArn: parameter X-Amz-Security-Token, /access-preview#analyzerArn: parameter X-Amz-Signature, /access-preview#analyzerArn: parameter X-Amz-SignedHeaders, GET /access-preview#analyzerArn: parameter nextToken, /resource/scan: parameter X-Amz-Content-Sha256, /resource/scan: parameter X-Amz-Date, /resource/scan: parameter X-Amz-Algorithm, /resource/scan: parameter X-Amz-Credential, /resource/scan: parameter X-Amz-Security-Token, /resource/scan: parameter X-Amz-Signature, /resource/scan: parameter X-Amz-SignedHeaders, POST /resource/scan.resourceOwnerAccount: application/json schema, /policy/validation: parameter X-Amz-Content-Sha256, /policy/validation: parameter X-Amz-Date, /policy/validation: parameter X-Amz-Algorithm, /policy/validation: parameter X-Amz-Credential, /policy/validation: parameter X-Amz-Security-Token, /policy/validation: parameter X-Amz-Signature, /policy/validation: parameter X-Amz-SignedHeaders, POST /policy/validation: parameter nextToken, POST /policy/validation.locale: application/json schema, POST /policy/validation.policyDocument: application/json schema, POST /policy/validation.policyType: application/json schema, POST /policy/validation.validatePolicyResourceType: application/json schema, /tags/{resourceArn}#tagKeys: parameter X-Amz-Content-Sha256, /tags/{resourceArn}#tagKeys: parameter X-Amz-Date, /tags/{resourceArn}#tagKeys: parameter X-Amz-Algorithm, /tags/{resourceArn}#tagKeys: parameter X-Amz-Credential, /tags/{resourceArn}#tagKeys: parameter X-Amz-Security-Token, /tags/{resourceArn}#tagKeys: parameter X-Amz-Signature, /tags/{resourceArn}#tagKeys: parameter X-Amz-SignedHeaders, DELETE /tags/{resourceArn}#tagKeys: parameter resourceArn, /access-preview/{accessPreviewId}: parameter X-Amz-Content-Sha256, /access-preview/{accessPreviewId}: parameter X-Amz-Date, /access-preview/{accessPreviewId}: parameter X-Amz-Algorithm, /access-preview/{accessPreviewId}: parameter X-Amz-Credential, /access-preview/{accessPreviewId}: parameter X-Amz-Security-Token, /access-preview/{accessPreviewId}: parameter X-Amz-Signature, /access-preview/{accessPreviewId}: parameter X-Amz-SignedHeaders, POST /access-preview/{accessPreviewId}: parameter maxResults, POST /access-preview/{accessPreviewId}: parameter nextToken, POST /access-preview/{accessPreviewId}.nextToken: application/json schema, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Content-Sha256, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Date, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Algorithm, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Credential, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Security-Token, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Signature, /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-SignedHeaders, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter clientToken, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}.clientToken: application/json schema, /finding: parameter X-Amz-Content-Sha256, /finding: parameter X-Amz-Date, /finding: parameter X-Amz-Algorithm, /finding: parameter X-Amz-Credential, /finding: parameter X-Amz-Security-Token, /finding: parameter X-Amz-Signature, /finding: parameter X-Amz-SignedHeaders, POST /finding: parameter maxResults, POST /finding: parameter nextToken, POST /finding.nextToken: application/json schema, PUT /finding.status: application/json schema, PUT /finding.clientToken: application/json schema, PUT /finding.ids[]: application/json schema
+- **Tags:** schema, validation, request
+
+**Checks Performed:**
+- All path parameters have schemas
+- All query parameters have schemas
+- All header parameters have schemas
+- All request bodies have content schemas
+- All schemas specify data types
+- All schemas have appropriate constraints
+- All required fields are marked
+- All enums have valid values
+- All numeric fields have min/max values
+- All string fields have length constraints
+
+**Details:**
+```json
+{
+    "checks": {
+      "All enums have valid values": true,
+      "All header parameters have schemas": true,
+      "All numeric fields have min/max values": false,
+      "All path parameters have schemas": true,
+      "All query parameters have schemas": true,
+      "All request bodies have content schemas": true,
+      "All required fields are marked": true,
+      "All schemas have appropriate constraints": true,
+      "All schemas specify data types": false,
+      "All string fields have length constraints": false
+    },
+    "messages": {},
+    "missing_validation": {
+      "All numeric fields have min/max values": [
+        "POST /analyzed-resource.maxResults: application/json schema",
+        "GET /analyzer: parameter maxResults",
+        "GET /analyzer/{analyzerName}/archive-rule: parameter maxResults",
+        "GET /access-preview#analyzerArn: parameter maxResults",
+        "POST /policy/validation: parameter maxResults",
+        "POST /access-preview/{accessPreviewId}.maxResults: application/json schema",
+        "POST /finding.maxResults: application/json schema"
+      ],
+      "All schemas specify data types": [
+        "PUT /policy/generation.cloudTrailDetails.endTime: application/json schema",
+        "PUT /policy/generation.cloudTrailDetails.startTime: application/json schema",
+        "PUT /policy/generation.cloudTrailDetails.trails: application/json schema",
+        "PUT /policy/generation.cloudTrailDetails.accessRole: application/json schema",
+        "PUT /policy/generation.policyGenerationDetails.principalArn: application/json schema",
+        "PUT /analyzer.archiveRules[].filter: application/json schema",
+        "PUT /analyzer.archiveRules[].ruleName: application/json schema",
+        "POST /finding.sort.orderBy: application/json schema",
+        "POST /finding.sort.attributeName: application/json schema"
+      ],
+      "All string fields have length constraints": [
+        "/finding/{id}#analyzerArn: parameter X-Amz-Content-Sha256",
+        "/finding/{id}#analyzerArn: parameter X-Amz-Date",
+        "/finding/{id}#analyzerArn: parameter X-Amz-Algorithm",
+        "/finding/{id}#analyzerArn: parameter X-Amz-Credential",
+        "/finding/{id}#analyzerArn: parameter X-Amz-Security-Token",
+        "/finding/{id}#analyzerArn: parameter X-Amz-Signature",
+        "/finding/{id}#analyzerArn: parameter X-Amz-SignedHeaders",
+        "GET /finding/{id}#analyzerArn: parameter id",
+        "/analyzed-resource: parameter X-Amz-Content-Sha256",
+        "/analyzed-resource: parameter X-Amz-Date",
+        "/analyzed-resource: parameter X-Amz-Algorithm",
+        "/analyzed-resource: parameter X-Amz-Credential",
+        "/analyzed-resource: parameter X-Amz-Security-Token",
+        "/analyzed-resource: parameter X-Amz-Signature",
+        "/analyzed-resource: parameter X-Amz-SignedHeaders",
+        "POST /analyzed-resource: parameter maxResults",
+        "POST /analyzed-resource: parameter nextToken",
+        "POST /analyzed-resource.nextToken: application/json schema",
+        "POST /analyzed-resource.resourceType: application/json schema",
+        "/analyzer/{analyzerName}: parameter X-Amz-Content-Sha256",
+        "/analyzer/{analyzerName}: parameter X-Amz-Date",
+        "/analyzer/{analyzerName}: parameter X-Amz-Algorithm",
+        "/analyzer/{analyzerName}: parameter X-Amz-Credential",
+        "/analyzer/{analyzerName}: parameter X-Amz-Security-Token",
+        "/analyzer/{analyzerName}: parameter X-Amz-Signature",
+        "/analyzer/{analyzerName}: parameter X-Amz-SignedHeaders",
+        "DELETE /analyzer/{analyzerName}: parameter clientToken",
+        "/policy/generation/{jobId}: parameter X-Amz-Content-Sha256",
+        "/policy/generation/{jobId}: parameter X-Amz-Date",
+        "/policy/generation/{jobId}: parameter X-Amz-Algorithm",
+        "/policy/generation/{jobId}: parameter X-Amz-Credential",
+        "/policy/generation/{jobId}: parameter X-Amz-Security-Token",
+        "/policy/generation/{jobId}: parameter X-Amz-Signature",
+        "/policy/generation/{jobId}: parameter X-Amz-SignedHeaders",
+        "GET /policy/generation/{jobId}: parameter jobId",
+        "PUT /policy/generation/{jobId}: parameter jobId",
+        "/access-preview: parameter X-Amz-Content-Sha256",
+        "/access-preview: parameter X-Amz-Date",
+        "/access-preview: parameter X-Amz-Algorithm",
+        "/access-preview: parameter X-Amz-Credential",
+        "/access-preview: parameter X-Amz-Security-Token",
+        "/access-preview: parameter X-Amz-Signature",
+        "/access-preview: parameter X-Amz-SignedHeaders",
+        "PUT /access-preview.clientToken: application/json schema",
+        "/tags/{resourceArn}: parameter X-Amz-Content-Sha256",
+        "/tags/{resourceArn}: parameter X-Amz-Date",
+        "/tags/{resourceArn}: parameter X-Amz-Algorithm",
+        "/tags/{resourceArn}: parameter X-Amz-Credential",
+        "/tags/{resourceArn}: parameter X-Amz-Security-Token",
+        "/tags/{resourceArn}: parameter X-Amz-Signature",
+        "/tags/{resourceArn}: parameter X-Amz-SignedHeaders",
+        "POST /tags/{resourceArn}: parameter resourceArn",
+        "GET /tags/{resourceArn}: parameter resourceArn",
+        "/policy/generation: parameter X-Amz-Content-Sha256",
+        "/policy/generation: parameter X-Amz-Date",
+        "/policy/generation: parameter X-Amz-Algorithm",
+        "/policy/generation: parameter X-Amz-Credential",
+        "/policy/generation: parameter X-Amz-Security-Token",
+        "/policy/generation: parameter X-Amz-Signature",
+        "/policy/generation: parameter X-Amz-SignedHeaders",
+        "GET /policy/generation: parameter nextToken",
+        "PUT /policy/generation.clientToken: application/json schema",
+        "/archive-rule: parameter X-Amz-Content-Sha256",
+        "/archive-rule: parameter X-Amz-Date",
+        "/archive-rule: parameter X-Amz-Algorithm",
+        "/archive-rule: parameter X-Amz-Credential",
+        "/archive-rule: parameter X-Amz-Security-Token",
+        "/archive-rule: parameter X-Amz-Signature",
+        "/archive-rule: parameter X-Amz-SignedHeaders",
+        "PUT /archive-rule.clientToken: application/json schema",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Content-Sha256",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Date",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Algorithm",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Credential",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Security-Token",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-Signature",
+        "/access-preview/{accessPreviewId}#analyzerArn: parameter X-Amz-SignedHeaders",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Content-Sha256",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Date",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Algorithm",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Credential",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Security-Token",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-Signature",
+        "/analyzed-resource#analyzerArn\u0026resourceArn: parameter X-Amz-SignedHeaders",
+        "/analyzer: parameter X-Amz-Content-Sha256",
+        "/analyzer: parameter X-Amz-Date",
+        "/analyzer: parameter X-Amz-Algorithm",
+        "/analyzer: parameter X-Amz-Credential",
+        "/analyzer: parameter X-Amz-Security-Token",
+        "/analyzer: parameter X-Amz-Signature",
+        "/analyzer: parameter X-Amz-SignedHeaders",
+        "GET /analyzer: parameter nextToken",
+        "GET /analyzer: parameter type",
+        "PUT /analyzer.clientToken: application/json schema",
+        "PUT /analyzer.type: application/json schema",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Content-Sha256",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Date",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Algorithm",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Credential",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Security-Token",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-Signature",
+        "/analyzer/{analyzerName}/archive-rule: parameter X-Amz-SignedHeaders",
+        "GET /analyzer/{analyzerName}/archive-rule: parameter nextToken",
+        "PUT /analyzer/{analyzerName}/archive-rule.clientToken: application/json schema",
+        "/access-preview#analyzerArn: parameter X-Amz-Content-Sha256",
+        "/access-preview#analyzerArn: parameter X-Amz-Date",
+        "/access-preview#analyzerArn: parameter X-Amz-Algorithm",
+        "/access-preview#analyzerArn: parameter X-Amz-Credential",
+        "/access-preview#analyzerArn: parameter X-Amz-Security-Token",
+        "/access-preview#analyzerArn: parameter X-Amz-Signature",
+        "/access-preview#analyzerArn: parameter X-Amz-SignedHeaders",
+        "GET /access-preview#analyzerArn: parameter nextToken",
+        "/resource/scan: parameter X-Amz-Content-Sha256",
+        "/resource/scan: parameter X-Amz-Date",
+        "/resource/scan: parameter X-Amz-Algorithm",
+        "/resource/scan: parameter X-Amz-Credential",
+        "/resource/scan: parameter X-Amz-Security-Token",
+        "/resource/scan: parameter X-Amz-Signature",
+        "/resource/scan: parameter X-Amz-SignedHeaders",
+        "POST /resource/scan.resourceOwnerAccount: application/json schema",
+        "/policy/validation: parameter X-Amz-Content-Sha256",
+        "/policy/validation: parameter X-Amz-Date",
+        "/policy/validation: parameter X-Amz-Algorithm",
+        "/policy/validation: parameter X-Amz-Credential",
+        "/policy/validation: parameter X-Amz-Security-Token",
+        "/policy/validation: parameter X-Amz-Signature",
+        "/policy/validation: parameter X-Amz-SignedHeaders",
+        "POST /policy/validation: parameter nextToken",
+        "POST /policy/validation.locale: application/json schema",
+        "POST /policy/validation.policyDocument: application/json schema",
+        "POST /policy/validation.policyType: application/json schema",
+        "POST /policy/validation.validatePolicyResourceType: application/json schema",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Content-Sha256",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Date",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Algorithm",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Credential",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Security-Token",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-Signature",
+        "/tags/{resourceArn}#tagKeys: parameter X-Amz-SignedHeaders",
+        "DELETE /tags/{resourceArn}#tagKeys: parameter resourceArn",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Content-Sha256",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Date",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Algorithm",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Credential",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Security-Token",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-Signature",
+        "/access-preview/{accessPreviewId}: parameter X-Amz-SignedHeaders",
+        "POST /access-preview/{accessPreviewId}: parameter maxResults",
+        "POST /access-preview/{accessPreviewId}: parameter nextToken",
+        "POST /access-preview/{accessPreviewId}.nextToken: application/json schema",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Content-Sha256",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Date",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Algorithm",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Credential",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Security-Token",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-Signature",
+        "/analyzer/{analyzerName}/archive-rule/{ruleName}: parameter X-Amz-SignedHeaders",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: parameter clientToken",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}.clientToken: application/json schema",
+        "/finding: parameter X-Amz-Content-Sha256",
+        "/finding: parameter X-Amz-Date",
+        "/finding: parameter X-Amz-Algorithm",
+        "/finding: parameter X-Amz-Credential",
+        "/finding: parameter X-Amz-Security-Token",
+        "/finding: parameter X-Amz-Signature",
+        "/finding: parameter X-Amz-SignedHeaders",
+        "POST /finding: parameter maxResults",
+        "POST /finding: parameter nextToken",
+        "POST /finding.nextToken: application/json schema",
+        "PUT /finding.status: application/json schema",
+        "PUT /finding.clientToken: application/json schema",
+        "PUT /finding.ids[]: application/json schema"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add comprehensive schema validation including data types, constraints, and required fields
+
+---
+
+### Error Handling
+
+#### P003: Error Handling Standards (Failed) [critical]
+
+Validates comprehensive error response documentation and consistent error handling patterns
+
+- **Status:** Failed
+- **Message:** Error handling issues found: All operations document 5xx error responses: POST /analyzed-resource, PUT /archive-rule, GET /analyzed-resource#analyzerArn&resourceArn, GET /analyzer, PUT /analyzer, GET /access-preview#analyzerArn, POST /finding, PUT /finding, GET /access-preview/{accessPreviewId}#analyzerArn, GET /analyzer/{analyzerName}/archive-rule, PUT /analyzer/{analyzerName}/archive-rule, GET /finding/{id}#analyzerArn, POST /access-preview/{accessPreviewId}, POST /tags/{resourceArn}, GET /tags/{resourceArn}, GET /policy/generation/{jobId}, PUT /policy/generation/{jobId}, POST /policy/validation, PUT /access-preview, GET /analyzer/{analyzerName}/archive-rule/{ruleName}, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}, DELETE /analyzer/{analyzerName}, GET /analyzer/{analyzerName}, GET /policy/generation, PUT /policy/generation, DELETE /tags/{resourceArn}#tagKeys, POST /resource/scan; Error responses include error details schema: POST /analyzed-resource: 484 response, POST /analyzed-resource: 480 response, POST /analyzed-resource: 481 response, POST /analyzed-resource: 482 response, POST /analyzed-resource: 483 response, PUT /archive-rule: 480 response, PUT /archive-rule: 481 response, PUT /archive-rule: 482 response, PUT /archive-rule: 483 response, PUT /archive-rule: 484 response, GET /analyzed-resource#analyzerArn&resourceArn: 484 response, GET /analyzed-resource#analyzerArn&resourceArn: 480 response, GET /analyzed-resource#analyzerArn&resourceArn: 481 response, GET /analyzed-resource#analyzerArn&resourceArn: 482 response, GET /analyzed-resource#analyzerArn&resourceArn: 483 response, GET /analyzer: 480 response, GET /analyzer: 481 response, GET /analyzer: 482 response, GET /analyzer: 483 response, PUT /analyzer: 480 response, PUT /analyzer: 481 response, PUT /analyzer: 482 response, PUT /analyzer: 483 response, PUT /analyzer: 484 response, PUT /analyzer: 485 response, GET /access-preview#analyzerArn: 481 response, GET /access-preview#analyzerArn: 482 response, GET /access-preview#analyzerArn: 483 response, GET /access-preview#analyzerArn: 484 response, GET /access-preview#analyzerArn: 480 response, POST /finding: 480 response, POST /finding: 481 response, POST /finding: 482 response, POST /finding: 483 response, POST /finding: 484 response, PUT /finding: 481 response, PUT /finding: 482 response, PUT /finding: 483 response, PUT /finding: 484 response, PUT /finding: 480 response, GET /access-preview/{accessPreviewId}#analyzerArn: 480 response, GET /access-preview/{accessPreviewId}#analyzerArn: 481 response, GET /access-preview/{accessPreviewId}#analyzerArn: 482 response, GET /access-preview/{accessPreviewId}#analyzerArn: 483 response, GET /access-preview/{accessPreviewId}#analyzerArn: 484 response, GET /analyzer/{analyzerName}/archive-rule: 480 response, GET /analyzer/{analyzerName}/archive-rule: 481 response, GET /analyzer/{analyzerName}/archive-rule: 482 response, GET /analyzer/{analyzerName}/archive-rule: 483 response, PUT /analyzer/{analyzerName}/archive-rule: 481 response, PUT /analyzer/{analyzerName}/archive-rule: 482 response, PUT /analyzer/{analyzerName}/archive-rule: 483 response, PUT /analyzer/{analyzerName}/archive-rule: 484 response, PUT /analyzer/{analyzerName}/archive-rule: 485 response, PUT /analyzer/{analyzerName}/archive-rule: 486 response, PUT /analyzer/{analyzerName}/archive-rule: 480 response, GET /finding/{id}#analyzerArn: 483 response, GET /finding/{id}#analyzerArn: 484 response, GET /finding/{id}#analyzerArn: 480 response, GET /finding/{id}#analyzerArn: 481 response, GET /finding/{id}#analyzerArn: 482 response, POST /access-preview/{accessPreviewId}: 480 response, POST /access-preview/{accessPreviewId}: 481 response, POST /access-preview/{accessPreviewId}: 482 response, POST /access-preview/{accessPreviewId}: 483 response, POST /access-preview/{accessPreviewId}: 484 response, POST /access-preview/{accessPreviewId}: 485 response, POST /tags/{resourceArn}: 481 response, POST /tags/{resourceArn}: 482 response, POST /tags/{resourceArn}: 483 response, POST /tags/{resourceArn}: 484 response, POST /tags/{resourceArn}: 480 response, GET /tags/{resourceArn}: 481 response, GET /tags/{resourceArn}: 482 response, GET /tags/{resourceArn}: 483 response, GET /tags/{resourceArn}: 484 response, GET /tags/{resourceArn}: 480 response, GET /policy/generation/{jobId}: 481 response, GET /policy/generation/{jobId}: 482 response, GET /policy/generation/{jobId}: 483 response, GET /policy/generation/{jobId}: 480 response, PUT /policy/generation/{jobId}: 482 response, PUT /policy/generation/{jobId}: 483 response, PUT /policy/generation/{jobId}: 480 response, PUT /policy/generation/{jobId}: 481 response, POST /policy/validation: 482 response, POST /policy/validation: 483 response, POST /policy/validation: 480 response, POST /policy/validation: 481 response, PUT /access-preview: 483 response, PUT /access-preview: 484 response, PUT /access-preview: 485 response, PUT /access-preview: 486 response, PUT /access-preview: 480 response, PUT /access-preview: 481 response, PUT /access-preview: 482 response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response, GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response, PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response, DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response, DELETE /analyzer/{analyzerName}: 482 response, DELETE /analyzer/{analyzerName}: 483 response, DELETE /analyzer/{analyzerName}: 484 response, DELETE /analyzer/{analyzerName}: 480 response, DELETE /analyzer/{analyzerName}: 481 response, GET /analyzer/{analyzerName}: 482 response, GET /analyzer/{analyzerName}: 483 response, GET /analyzer/{analyzerName}: 484 response, GET /analyzer/{analyzerName}: 480 response, GET /analyzer/{analyzerName}: 481 response, GET /policy/generation: 482 response, GET /policy/generation: 483 response, GET /policy/generation: 480 response, GET /policy/generation: 481 response, PUT /policy/generation: 481 response, PUT /policy/generation: 482 response, PUT /policy/generation: 483 response, PUT /policy/generation: 484 response, PUT /policy/generation: 485 response, PUT /policy/generation: 480 response, DELETE /tags/{resourceArn}#tagKeys: 484 response, DELETE /tags/{resourceArn}#tagKeys: 480 response, DELETE /tags/{resourceArn}#tagKeys: 481 response, DELETE /tags/{resourceArn}#tagKeys: 482 response, DELETE /tags/{resourceArn}#tagKeys: 483 response, POST /resource/scan: 480 response, POST /resource/scan: 481 response, POST /resource/scan: 482 response, POST /resource/scan: 483 response, POST /resource/scan: 484 response
+- **Tags:** errors, responses, standards
+
+**Checks Performed:**
+- All operations document 4xx error responses
+- All operations document 5xx error responses
+- Error responses include error codes
+- Error responses include error messages
+- Error responses include error details schema
+- Common error responses are defined in components
+- Error responses follow consistent format
+
+**Details:**
+```json
+{
+    "checks": {
+      "All operations document 4xx error responses": true,
+      "All operations document 5xx error responses": false,
+      "Common error responses are defined in components": false,
+      "Error responses follow consistent format": true,
+      "Error responses include error details schema": false
+    },
+    "messages": {
+      "Common error responses are defined in components": "No common error responses defined in components"
+    },
+    "missing_errors": {
+      "All operations document 5xx error responses": [
+        "POST /analyzed-resource",
+        "PUT /archive-rule",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn",
+        "GET /analyzer",
+        "PUT /analyzer",
+        "GET /access-preview#analyzerArn",
+        "POST /finding",
+        "PUT /finding",
+        "GET /access-preview/{accessPreviewId}#analyzerArn",
+        "GET /analyzer/{analyzerName}/archive-rule",
+        "PUT /analyzer/{analyzerName}/archive-rule",
+        "GET /finding/{id}#analyzerArn",
+        "POST /access-preview/{accessPreviewId}",
+        "POST /tags/{resourceArn}",
+        "GET /tags/{resourceArn}",
+        "GET /policy/generation/{jobId}",
+        "PUT /policy/generation/{jobId}",
+        "POST /policy/validation",
+        "PUT /access-preview",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}",
+        "DELETE /analyzer/{analyzerName}",
+        "GET /analyzer/{analyzerName}",
+        "GET /policy/generation",
+        "PUT /policy/generation",
+        "DELETE /tags/{resourceArn}#tagKeys",
+        "POST /resource/scan"
+      ],
+      "Error responses include error details schema": [
+        "POST /analyzed-resource: 484 response",
+        "POST /analyzed-resource: 480 response",
+        "POST /analyzed-resource: 481 response",
+        "POST /analyzed-resource: 482 response",
+        "POST /analyzed-resource: 483 response",
+        "PUT /archive-rule: 480 response",
+        "PUT /archive-rule: 481 response",
+        "PUT /archive-rule: 482 response",
+        "PUT /archive-rule: 483 response",
+        "PUT /archive-rule: 484 response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 484 response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 480 response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 481 response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 482 response",
+        "GET /analyzed-resource#analyzerArn\u0026resourceArn: 483 response",
+        "GET /analyzer: 480 response",
+        "GET /analyzer: 481 response",
+        "GET /analyzer: 482 response",
+        "GET /analyzer: 483 response",
+        "PUT /analyzer: 480 response",
+        "PUT /analyzer: 481 response",
+        "PUT /analyzer: 482 response",
+        "PUT /analyzer: 483 response",
+        "PUT /analyzer: 484 response",
+        "PUT /analyzer: 485 response",
+        "GET /access-preview#analyzerArn: 481 response",
+        "GET /access-preview#analyzerArn: 482 response",
+        "GET /access-preview#analyzerArn: 483 response",
+        "GET /access-preview#analyzerArn: 484 response",
+        "GET /access-preview#analyzerArn: 480 response",
+        "POST /finding: 480 response",
+        "POST /finding: 481 response",
+        "POST /finding: 482 response",
+        "POST /finding: 483 response",
+        "POST /finding: 484 response",
+        "PUT /finding: 481 response",
+        "PUT /finding: 482 response",
+        "PUT /finding: 483 response",
+        "PUT /finding: 484 response",
+        "PUT /finding: 480 response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 480 response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 481 response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 482 response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 483 response",
+        "GET /access-preview/{accessPreviewId}#analyzerArn: 484 response",
+        "GET /analyzer/{analyzerName}/archive-rule: 480 response",
+        "GET /analyzer/{analyzerName}/archive-rule: 481 response",
+        "GET /analyzer/{analyzerName}/archive-rule: 482 response",
+        "GET /analyzer/{analyzerName}/archive-rule: 483 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 481 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 482 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 483 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 484 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 485 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 486 response",
+        "PUT /analyzer/{analyzerName}/archive-rule: 480 response",
+        "GET /finding/{id}#analyzerArn: 483 response",
+        "GET /finding/{id}#analyzerArn: 484 response",
+        "GET /finding/{id}#analyzerArn: 480 response",
+        "GET /finding/{id}#analyzerArn: 481 response",
+        "GET /finding/{id}#analyzerArn: 482 response",
+        "POST /access-preview/{accessPreviewId}: 480 response",
+        "POST /access-preview/{accessPreviewId}: 481 response",
+        "POST /access-preview/{accessPreviewId}: 482 response",
+        "POST /access-preview/{accessPreviewId}: 483 response",
+        "POST /access-preview/{accessPreviewId}: 484 response",
+        "POST /access-preview/{accessPreviewId}: 485 response",
+        "POST /tags/{resourceArn}: 481 response",
+        "POST /tags/{resourceArn}: 482 response",
+        "POST /tags/{resourceArn}: 483 response",
+        "POST /tags/{resourceArn}: 484 response",
+        "POST /tags/{resourceArn}: 480 response",
+        "GET /tags/{resourceArn}: 481 response",
+        "GET /tags/{resourceArn}: 482 response",
+        "GET /tags/{resourceArn}: 483 response",
+        "GET /tags/{resourceArn}: 484 response",
+        "GET /tags/{resourceArn}: 480 response",
+        "GET /policy/generation/{jobId}: 481 response",
+        "GET /policy/generation/{jobId}: 482 response",
+        "GET /policy/generation/{jobId}: 483 response",
+        "GET /policy/generation/{jobId}: 480 response",
+        "PUT /policy/generation/{jobId}: 482 response",
+        "PUT /policy/generation/{jobId}: 483 response",
+        "PUT /policy/generation/{jobId}: 480 response",
+        "PUT /policy/generation/{jobId}: 481 response",
+        "POST /policy/validation: 482 response",
+        "POST /policy/validation: 483 response",
+        "POST /policy/validation: 480 response",
+        "POST /policy/validation: 481 response",
+        "PUT /access-preview: 483 response",
+        "PUT /access-preview: 484 response",
+        "PUT /access-preview: 485 response",
+        "PUT /access-preview: 486 response",
+        "PUT /access-preview: 480 response",
+        "PUT /access-preview: 481 response",
+        "PUT /access-preview: 482 response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response",
+        "GET /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response",
+        "PUT /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 480 response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 481 response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 482 response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 483 response",
+        "DELETE /analyzer/{analyzerName}/archive-rule/{ruleName}: 484 response",
+        "DELETE /analyzer/{analyzerName}: 482 response",
+        "DELETE /analyzer/{analyzerName}: 483 response",
+        "DELETE /analyzer/{analyzerName}: 484 response",
+        "DELETE /analyzer/{analyzerName}: 480 response",
+        "DELETE /analyzer/{analyzerName}: 481 response",
+        "GET /analyzer/{analyzerName}: 482 response",
+        "GET /analyzer/{analyzerName}: 483 response",
+        "GET /analyzer/{analyzerName}: 484 response",
+        "GET /analyzer/{analyzerName}: 480 response",
+        "GET /analyzer/{analyzerName}: 481 response",
+        "GET /policy/generation: 482 response",
+        "GET /policy/generation: 483 response",
+        "GET /policy/generation: 480 response",
+        "GET /policy/generation: 481 response",
+        "PUT /policy/generation: 481 response",
+        "PUT /policy/generation: 482 response",
+        "PUT /policy/generation: 483 response",
+        "PUT /policy/generation: 484 response",
+        "PUT /policy/generation: 485 response",
+        "PUT /policy/generation: 480 response",
+        "DELETE /tags/{resourceArn}#tagKeys: 484 response",
+        "DELETE /tags/{resourceArn}#tagKeys: 480 response",
+        "DELETE /tags/{resourceArn}#tagKeys: 481 response",
+        "DELETE /tags/{resourceArn}#tagKeys: 482 response",
+        "DELETE /tags/{resourceArn}#tagKeys: 483 response",
+        "POST /resource/scan: 480 response",
+        "POST /resource/scan: 481 response",
+        "POST /resource/scan: 482 response",
+        "POST /resource/scan: 483 response",
+        "POST /resource/scan: 484 response"
+      ]
+    }
+  }
+```
+
+**Suggested Fix:**
+Add comprehensive error response documentation including codes, messages, and consistent error schemas
+
+---
+
+### Security
+
+#### P005: Security Standards (Passed) [critical]
+
+Validates comprehensive security requirements and authentication mechanisms
+
+- **Status:** Passed
+- **Message:** All security requirements are properly defined and consistent
+- **Tags:** security, authentication, authorization
+
+**Checks Performed:**
+- Security schemes are defined
+- Global security requirements are set
+- Operation-level security is defined
+- OAuth2 scopes are documented
+- API keys are properly described
+- Authentication headers are specified
+- Security requirements are consistent
+
+**Details:**
+```json
+{
+    "checks": {
+      "API keys are properly described": true,
+      "Authentication headers are specified": true,
+      "Global security requirements are set": true,
+      "OAuth2 scopes are documented": true,
+      "Operation-level security is defined": true,
+      "Security requirements are consistent": true,
+      "Security schemes are defined": true
+    },
+    "messages": {}
+  }
+```
+
+---
+
+### Versioning
+
+#### P008: API Versioning Strategy (Failed) [warning]
+
+Validates proper API versioning implementation and documentation
+
+- **Status:** Failed
+- **Message:** Versioning validation failed: Version follows semantic versioning: Version "2019-11-01" does not match semver format (expected MAJOR.MINOR.PATCH); Versioning strategy is documented: Info description does not mention versioning strategy; Breaking changes are documented: Info description does not reference breaking changes or a changelog; Version compatibility is specified: Info description does not mention version compatibility; Migration guides are referenced: Info description does not reference migration or upgrade guides
+- **Tags:** versioning, compatibility, lifecycle
+
+**Checks Performed:**
+- API version is specified
+- Version follows semantic versioning
+- Versioning strategy is documented
+- Deprecation notices are present
+- Breaking changes are documented
+- Version compatibility is specified
+- Migration guides are referenced
+
+**Details:**
+```json
+{
+    "checks": {
+      "API version is specified": true,
+      "Breaking changes are documented": false,
+      "Deprecation notices are present": true,
+      "Migration guides are referenced": false,
+      "Version compatibility is specified": false,
+      "Version follows semantic versioning": false,
+      "Versioning strategy is documented": false
+    },
+    "messages": {
+      "Breaking changes are documented": "Info description does not reference breaking changes or a changelog",
+      "Migration guides are referenced": "Info description does not reference migration or upgrade guides",
+      "Version compatibility is specified": "Info description does not mention version compatibility",
+      "Version follows semantic versioning": "Version \"2019-11-01\" does not match semver format (expected MAJOR.MINOR.PATCH)",
+      "Versioning strategy is documented": "Info description does not mention versioning strategy"
+    }
+  }
+```
+
+**Suggested Fix:**
+Update the info section with version details, deprecation notices, and migration references
+
+---
+

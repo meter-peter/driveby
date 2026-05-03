@@ -1,0 +1,741 @@
+{
+  "csv": "results/apisguru-rerun/apis-3x.csv",
+  "total_apis": 50,
+  "successful_runs": 50,
+  "failed_runs": 0,
+  "duration_seconds": 15.36,
+  "per_principle": {
+    "P001": {
+      "pass": 23,
+      "fail": 27,
+      "error": 0
+    },
+    "P002": {
+      "pass": 0,
+      "fail": 50,
+      "error": 0
+    },
+    "P003": {
+      "pass": 0,
+      "fail": 50,
+      "error": 0
+    },
+    "P004": {
+      "pass": 6,
+      "fail": 44,
+      "error": 0
+    },
+    "P005": {
+      "pass": 13,
+      "fail": 37,
+      "error": 0
+    },
+    "P008": {
+      "pass": 0,
+      "fail": 50,
+      "error": 0
+    }
+  },
+  "per_api": [
+    {
+      "name": "1password.com:events",
+      "url": "https://api.apis.guru/v2/specs/1password.com/events/1.0.0/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "1password.local:connect",
+      "url": "https://api.apis.guru/v2/specs/1password.local/connect/1.5.7/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "6-dot-authentiqio.appspot.com",
+      "url": "https://api.apis.guru/v2/specs/6-dot-authentiqio.appspot.com/6/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "ably.io:platform",
+      "url": "https://api.apis.guru/v2/specs/ably.io/platform/1.1.0/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "ably.net:control",
+      "url": "https://api.apis.guru/v2/specs/ably.net/control/1.0.14/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "abstractapi.com:geolocation",
+      "url": "https://api.apis.guru/v2/specs/abstractapi.com/geolocation/1.0.0/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adobe.com:aem",
+      "url": "https://api.apis.guru/v2/specs/adobe.com/aem/3.7.1-pre.0/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:AccountService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/AccountService/6/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalanceControlService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalanceControlService/1/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalancePlatformConfigurationNotification-v1",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalancePlatformConfigurationNotification-v1/1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalancePlatformPaymentNotification-v1",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalancePlatformPaymentNotification-v1/1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalancePlatformReportNotification-v1",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalancePlatformReportNotification-v1/1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalancePlatformService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalancePlatformService/2/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BalancePlatformTransferNotification-v3",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BalancePlatformTransferNotification-v3/3/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:BinLookupService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/BinLookupService/54/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:CheckoutService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/CheckoutService/70/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:CheckoutUtilityService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/CheckoutUtilityService/1/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:DataProtectionService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/DataProtectionService/1/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:FundService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/FundService/6/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:HopService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/HopService/6/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:LegalEntityService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/LegalEntityService/3/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:ManagementNotificationService-v1",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/ManagementNotificationService-v1/1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:ManagementService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/ManagementService/1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:MarketPayNotificationService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/MarketPayNotificationService/6/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "pass",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:NotificationConfigurationService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/NotificationConfigurationService/6/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:PaymentService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/PaymentService/68/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:PayoutService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/PayoutService/68/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:RecurringService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/RecurringService/68/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:StoredValueService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/StoredValueService/46/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:TestCardService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/TestCardService/1/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:TfmAPIService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/TfmAPIService/1/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "adyen.com:TransferService",
+      "url": "https://api.apis.guru/v2/specs/adyen.com/TransferService/3/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "agco-ats.com",
+      "url": "https://api.apis.guru/v2/specs/agco-ats.com/v1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "airbyte.local:config",
+      "url": "https://api.apis.guru/v2/specs/airbyte.local/config/1.0.0/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "alertersystem.com",
+      "url": "https://api.apis.guru/v2/specs/alertersystem.com/1.6.0/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amadeus.com",
+      "url": "https://api.apis.guru/v2/specs/amadeus.com/2.2.0/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amadeus.com:amadeus-flight-price-analysis",
+      "url": "https://api.apis.guru/v2/specs/amadeus.com/amadeus-flight-price-analysis/1.0.1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amadeus.com:amadeus-location-score",
+      "url": "https://api.apis.guru/v2/specs/amadeus.com/amadeus-location-score/1.0.2/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amadeus.com:amadeus-travel-recommendations",
+      "url": "https://api.apis.guru/v2/specs/amadeus.com/amadeus-travel-recommendations/1.0.3/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amadeus.com:amadeus-trip-parser",
+      "url": "https://api.apis.guru/v2/specs/amadeus.com/amadeus-trip-parser/3.0.1/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "fail",
+        "P008": "fail"
+      },
+      "passed_count": 0,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:AWSMigrationHub",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/AWSMigrationHub/2017-05-31/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:accessanalyzer",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/accessanalyzer/2019-11-01/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:acm",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/acm/2015-12-08/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:acm-pca",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/acm-pca/2017-08-22/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:alexaforbusiness",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/alexaforbusiness/2017-11-09/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:amp",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/amp/2020-08-01/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:amplify",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/amplify/2017-07-25/openapi.json",
+      "outcomes": {
+        "P001": "fail",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 1,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:amplifybackend",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/amplifybackend/2020-08-11/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:apigateway",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/apigateway/2015-07-09/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    },
+    {
+      "name": "amazonaws.com:apigatewaymanagementapi",
+      "url": "https://api.apis.guru/v2/specs/amazonaws.com/apigatewaymanagementapi/2018-11-29/openapi.json",
+      "outcomes": {
+        "P001": "pass",
+        "P002": "fail",
+        "P003": "fail",
+        "P004": "fail",
+        "P005": "pass",
+        "P008": "fail"
+      },
+      "passed_count": 2,
+      "total_evaluated": 6
+    }
+  ]
+}

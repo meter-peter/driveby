@@ -20,6 +20,8 @@ thesis/**/*.blg
 thesis/**/*.out
 thesis/**/*.run.xml
 thesis/**/*.toc
+thesis/**/*.lof
+thesis/**/*.lot
 thesis/**/*.pdf
 
 # Claude Code

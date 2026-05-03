@@ -1,0 +1,82 @@
+% Component Diagram — Chapter 4 (DriveBy CLI internal components)
+% Updated 2026-05 (round-1 review): compact natural-width layout (no resize),
+% wider package nodes so labels fit without clipping.
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    every node/.style={font=\scriptsize},
+    pkg/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=#1!60!black,
+        fill=#1!8,
+        align=center,
+        text width=3.6cm,
+        inner sep=4pt,
+        font=\scriptsize\bfseries
+    },
+    dep/.style={->, thick, gray!60!black},
+    ext/.style={->, thick, densely dashed, violet!60!black},
+    extlabel/.style={font=\scriptsize\itshape, align=center}
+]
+
+% Top: CLI
+\node[pkg=teal] (cli)        at (0,0)   {\texttt{cli}\\\mdseries\scriptsize\textnormal{root, validate, test commands}};
+
+% Layer 2: orchestration
+\node[pkg=blue] (engine)     at (-4.0,-2.5) {\texttt{engine}\\\mdseries\scriptsize\textnormal{mode-based orchestration}};
+\node[pkg=blue] (testing)    at ( 0,-2.5)   {\texttt{testing}\\\mdseries\scriptsize\textnormal{functional, load runners}};
+\node[pkg=blue] (report)     at ( 4.0,-2.5) {\texttt{report}\\\mdseries\scriptsize\textnormal{JSON / Markdown}};
+
+% Layer 3: principles
+\node[pkg=orange] (principles) at (-4.0,-5.0)
+  {\texttt{principles}\\\mdseries\scriptsize\textnormal{P001--P005, P008, P009 checkers}};
+
+% Layer 4: spec abstraction
+\node[pkg=violet] (spec)     at (0,-5.0)   {\texttt{spec}\\\mdseries\scriptsize\textnormal{APISpec interface, adapters}};
+
+% Layer 5: foundation
+\node[pkg=brown]  (loader)   at (-4.0,-7.5)  {\texttt{loader}\\\mdseries\scriptsize\textnormal{file / URL loader}};
+\node[pkg=gray]   (types)    at ( 0,-7.5)   {\texttt{types}\\\mdseries\scriptsize\textnormal{value types, modes}};
+
+% Internal dependencies
+\draw[dep] (cli.south)         -- (engine.north);
+\draw[dep] (cli.south)         -- (testing.north);
+\draw[dep] (cli.south)         -- (report.north);
+
+\draw[dep] (engine.south)      -- (principles.north);
+\draw[dep] (engine.east)       -- (testing.west);
+\draw[dep] (engine.east)       to[bend left=15] (report.west);
+
+\draw[dep] (principles.east)   -- (spec.west);
+\draw[dep] (testing.south)     -- (spec.north east);
+
+\draw[dep] (spec.south)        -- (types.north);
+\draw[dep] (principles.south)  -- (loader.north);
+\draw[dep] (loader.east)       -- (types.west);
+
+% External interfaces (dashed, into/out of system boundary)
+\node[extlabel, anchor=east] (ext-in)  at (-7.6,-7.5)   {OpenAPI URL\\or file};
+\draw[ext] (ext-in.east) -- (loader.west);
+
+\node[extlabel, anchor=east] (ext-api) at (-7.6,-2.5)   {Target API\\(HTTP)};
+\draw[ext] (ext-api.east) to[bend left=10] (testing.west);
+
+\node[extlabel, anchor=west] (ext-out) at ( 6.6,-2.5)   {JSON report,\\exit code};
+\draw[ext] (report.east) -- (ext-out.west);
+
+% System boundary (around all internal packages only)
+\begin{scope}[on background layer]
+    \node[draw=blue!40, dashed, rounded corners=10pt,
+          fit=(cli)(engine)(testing)(report)(principles)(spec)(loader)(types),
+          inner sep=12pt,
+          label={[anchor=north west,font=\scriptsize\itshape]north west:DriveBy CLI (system boundary)}] {};
+\end{scope}
+
+% Legend
+\node[anchor=west, font=\scriptsize\bfseries] at (-7.6,-9.5) {Legend};
+\draw[dep]  (-7.6,-9.9) -- (-6.6,-9.9);
+\node[anchor=west, font=\tiny] at (-6.5,-9.9) {internal dependency};
+\draw[ext]  (-2.5,-9.9) -- (-1.5,-9.9);
+\node[anchor=west, font=\tiny] at (-1.4,-9.9) {external interface (across system boundary)};
+
+\end{tikzpicture}
