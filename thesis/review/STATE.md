@@ -7,7 +7,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 
 | metric | value |
 |---|---|
-| **Build** | clean — 210 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
+| **Build** | clean — 208 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
 | **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms |
 | **Latest commit** | `14ea94c` ("Activate Greek abstract — front matter now bilingual") |
 | **Round-1 commit** | `b96e6a6` ("Round-1 thesis revision addressing supervisor's 610 inline comments") |
