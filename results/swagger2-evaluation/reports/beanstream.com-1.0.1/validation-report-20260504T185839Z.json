@@ -1,0 +1,497 @@
+{
+  "status": "failed",
+  "exit_code": 1,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-05-04T21:58:39.421469904+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P001",
+        "name": "OpenAPI Specification Compliance",
+        "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+        "category": "Specification",
+        "severity": "critical",
+        "tags": [
+          "openapi",
+          "specification",
+          "compliance"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "OpenAPI version is 3.0.x or 3.1.0",
+          "Required info fields (title, version) are present",
+          "Paths are properly defined",
+          "Components are valid",
+          "References are resolvable",
+          "No duplicate operationIds",
+          "Valid HTTP methods used"
+        ]
+      },
+      "Passed": true,
+      "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
+      "Details": {
+        "checks": {
+          "Components are valid": true,
+          "No duplicate operationIds": true,
+          "Paths are properly defined": true,
+          "Required info fields (title, version) are present": true,
+          "Specification structure is valid": true,
+          "Specification version is present": true,
+          "Valid HTTP methods used": true
+        },
+        "messages": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P002",
+        "name": "API Documentation Quality",
+        "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
+        "category": "Documentation",
+        "severity": "critical",
+        "tags": [
+          "documentation",
+          "quality",
+          "usability"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations have clear summaries",
+          "All operations have detailed descriptions",
+          "All operations have unique operationIds",
+          "All parameters have descriptions",
+          "All request/response bodies have examples",
+          "All schemas have descriptions",
+          "All enums have descriptions",
+          "API has a general description",
+          "Contact information is provided",
+          "License information is provided"
+        ]
+      },
+      "Passed": false,
+      "Message": "Documentation quality issues found: All operations have unique operationIds: DELETE /profiles/{profileId}/cards/{cardId}, PUT /profiles/{profileId}/cards/{cardId}, GET /profiles/{profileId}, PUT /profiles/{profileId}, DELETE /profiles/{profileId}, POST /scripts/tokenization/tokens, POST /payments, POST /payments/{transId}/returns, POST /profiles, POST /reports, POST /payments/{transId}/void, GET /profiles/{profileId}/cards, POST /profiles/{profileId}/cards, GET /payments/{transId}, POST /payments/{transId}/completions; All parameters have descriptions: PUT /profiles/{profileId}: parameter updateProfileBody, POST /scripts/tokenization/tokens: parameter token_request, POST /payments: parameter payment_request, POST /payments/{transId}/returns: parameter return, POST /profiles: parameter createProfileBody, POST /reports: parameter search_query, POST /payments/{transId}/void: parameter void, POST /payments/{transId}/completions: parameter payment_request; All schemas have descriptions: Address, TokenResponse, Criteria, ProfileGetCards, Adjustment, ProfileCard, Link, BeanstreamException, Detail, ProfileToken, UpdateProfileBody, CardPurchaseResponse, Return, CardGetTransactionResponse, ProfilePurchase, GetProfileDefaultCard, PaymentResponse, ProfileFromToken, TokenPurchase, PaymentProfile, Custom, ProfileFromCard, Card, ProfileResponse, SearchResult, CreateProfileBody, SearchQuery, PaymentRequest, TokenRequest, ProfileCards, Void, SearchRecord, Transaction",
+      "Details": {
+        "checks": {
+          "API has a general description": true,
+          "All operations have unique operationIds": false,
+          "All parameters have descriptions": false,
+          "All schemas have descriptions": false,
+          "Contact information is provided": false,
+          "License information is provided": false
+        },
+        "messages": {
+          "Contact information is provided": "Contact information is missing",
+          "License information is provided": "License information is missing"
+        },
+        "missing_docs": {
+          "All operations have unique operationIds": [
+            "DELETE /profiles/{profileId}/cards/{cardId}",
+            "PUT /profiles/{profileId}/cards/{cardId}",
+            "GET /profiles/{profileId}",
+            "PUT /profiles/{profileId}",
+            "DELETE /profiles/{profileId}",
+            "POST /scripts/tokenization/tokens",
+            "POST /payments",
+            "POST /payments/{transId}/returns",
+            "POST /profiles",
+            "POST /reports",
+            "POST /payments/{transId}/void",
+            "GET /profiles/{profileId}/cards",
+            "POST /profiles/{profileId}/cards",
+            "GET /payments/{transId}",
+            "POST /payments/{transId}/completions"
+          ],
+          "All parameters have descriptions": [
+            "PUT /profiles/{profileId}: parameter updateProfileBody",
+            "POST /scripts/tokenization/tokens: parameter token_request",
+            "POST /payments: parameter payment_request",
+            "POST /payments/{transId}/returns: parameter return",
+            "POST /profiles: parameter createProfileBody",
+            "POST /reports: parameter search_query",
+            "POST /payments/{transId}/void: parameter void",
+            "POST /payments/{transId}/completions: parameter payment_request"
+          ],
+          "All schemas have descriptions": [
+            "Address",
+            "TokenResponse",
+            "Criteria",
+            "ProfileGetCards",
+            "Adjustment",
+            "ProfileCard",
+            "Link",
+            "BeanstreamException",
+            "Detail",
+            "ProfileToken",
+            "UpdateProfileBody",
+            "CardPurchaseResponse",
+            "Return",
+            "CardGetTransactionResponse",
+            "ProfilePurchase",
+            "GetProfileDefaultCard",
+            "PaymentResponse",
+            "ProfileFromToken",
+            "TokenPurchase",
+            "PaymentProfile",
+            "Custom",
+            "ProfileFromCard",
+            "Card",
+            "ProfileResponse",
+            "SearchResult",
+            "CreateProfileBody",
+            "SearchQuery",
+            "PaymentRequest",
+            "TokenRequest",
+            "ProfileCards",
+            "Void",
+            "SearchRecord",
+            "Transaction"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add missing documentation including descriptions, examples, and operation details",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P003",
+        "name": "Error Handling Standards",
+        "description": "Validates comprehensive error response documentation and consistent error handling patterns",
+        "category": "Error Handling",
+        "severity": "critical",
+        "tags": [
+          "errors",
+          "responses",
+          "standards"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations document 4xx error responses",
+          "All operations document 5xx error responses",
+          "Error responses include error codes",
+          "Error responses include error messages",
+          "Error responses include error details schema",
+          "Common error responses are defined in components",
+          "Error responses follow consistent format"
+        ]
+      },
+      "Passed": false,
+      "Message": "Error handling issues found: All operations document 4xx error responses: POST /scripts/tokenization/tokens; All operations document 5xx error responses: POST /scripts/tokenization/tokens; Error responses include error details schema: POST /payments: 402 response, POST /payments: 403 response, POST /payments: 405 response, POST /payments: 500 response, POST /payments: 400 response, POST /payments: 401 response, GET /payments/{transId}: 400 response, GET /payments/{transId}: 401 response, GET /payments/{transId}: 402 response, GET /payments/{transId}: 403 response, GET /payments/{transId}: 405 response, GET /payments/{transId}: 500 response, POST /payments/{transId}/returns: 400 response, POST /payments/{transId}/returns: 401 response, POST /payments/{transId}/returns: 402 response, POST /payments/{transId}/returns: 403 response, POST /payments/{transId}/returns: 405 response, POST /payments/{transId}/returns: 500 response, PUT /profiles/{profileId}/cards/{cardId}: 401 response, PUT /profiles/{profileId}/cards/{cardId}: 402 response, PUT /profiles/{profileId}/cards/{cardId}: 403 response, PUT /profiles/{profileId}/cards/{cardId}: 405 response, PUT /profiles/{profileId}/cards/{cardId}: 500 response, PUT /profiles/{profileId}/cards/{cardId}: 400 response, DELETE /profiles/{profileId}/cards/{cardId}: 402 response, DELETE /profiles/{profileId}/cards/{cardId}: 403 response, DELETE /profiles/{profileId}/cards/{cardId}: 405 response, DELETE /profiles/{profileId}/cards/{cardId}: 500 response, DELETE /profiles/{profileId}/cards/{cardId}: 400 response, DELETE /profiles/{profileId}/cards/{cardId}: 401 response, POST /payments/{transId}/void: 402 response, POST /payments/{transId}/void: 403 response, POST /payments/{transId}/void: 405 response, POST /payments/{transId}/void: 500 response, POST /payments/{transId}/void: 400 response, POST /payments/{transId}/void: 401 response, GET /profiles/{profileId}: 405 response, GET /profiles/{profileId}: 500 response, GET /profiles/{profileId}: 400 response, GET /profiles/{profileId}: 401 response, GET /profiles/{profileId}: 402 response, GET /profiles/{profileId}: 403 response, PUT /profiles/{profileId}: 400 response, PUT /profiles/{profileId}: 401 response, PUT /profiles/{profileId}: 402 response, PUT /profiles/{profileId}: 403 response, PUT /profiles/{profileId}: 405 response, PUT /profiles/{profileId}: 500 response, DELETE /profiles/{profileId}: 405 response, DELETE /profiles/{profileId}: 500 response, DELETE /profiles/{profileId}: 400 response, DELETE /profiles/{profileId}: 401 response, DELETE /profiles/{profileId}: 402 response, DELETE /profiles/{profileId}: 403 response, POST /payments/{transId}/completions: 401 response, POST /payments/{transId}/completions: 402 response, POST /payments/{transId}/completions: 403 response, POST /payments/{transId}/completions: 405 response, POST /payments/{transId}/completions: 500 response, POST /payments/{transId}/completions: 400 response, POST /profiles: 400 response, POST /profiles: 401 response, POST /profiles: 402 response, POST /profiles: 403 response, POST /profiles: 405 response, POST /profiles: 500 response, POST /reports: 405 response, POST /reports: 500 response, POST /reports: 400 response, POST /reports: 401 response, POST /reports: 402 response, POST /reports: 403 response, GET /profiles/{profileId}/cards: 500 response, GET /profiles/{profileId}/cards: 400 response, GET /profiles/{profileId}/cards: 401 response, GET /profiles/{profileId}/cards: 402 response, GET /profiles/{profileId}/cards: 403 response, GET /profiles/{profileId}/cards: 405 response, POST /profiles/{profileId}/cards: 500 response, POST /profiles/{profileId}/cards: 400 response, POST /profiles/{profileId}/cards: 401 response, POST /profiles/{profileId}/cards: 402 response, POST /profiles/{profileId}/cards: 403 response, POST /profiles/{profileId}/cards: 405 response",
+      "Details": {
+        "checks": {
+          "All operations document 4xx error responses": true,
+          "All operations document 5xx error responses": true,
+          "Common error responses are defined in components": false,
+          "Error responses follow consistent format": true,
+          "Error responses include error details schema": false
+        },
+        "messages": {
+          "Common error responses are defined in components": "No common error responses defined in components"
+        },
+        "missing_errors": {
+          "All operations document 4xx error responses": [
+            "POST /scripts/tokenization/tokens"
+          ],
+          "All operations document 5xx error responses": [
+            "POST /scripts/tokenization/tokens"
+          ],
+          "Error responses include error details schema": [
+            "POST /payments: 402 response",
+            "POST /payments: 403 response",
+            "POST /payments: 405 response",
+            "POST /payments: 500 response",
+            "POST /payments: 400 response",
+            "POST /payments: 401 response",
+            "GET /payments/{transId}: 400 response",
+            "GET /payments/{transId}: 401 response",
+            "GET /payments/{transId}: 402 response",
+            "GET /payments/{transId}: 403 response",
+            "GET /payments/{transId}: 405 response",
+            "GET /payments/{transId}: 500 response",
+            "POST /payments/{transId}/returns: 400 response",
+            "POST /payments/{transId}/returns: 401 response",
+            "POST /payments/{transId}/returns: 402 response",
+            "POST /payments/{transId}/returns: 403 response",
+            "POST /payments/{transId}/returns: 405 response",
+            "POST /payments/{transId}/returns: 500 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 401 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 402 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 403 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 405 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 500 response",
+            "PUT /profiles/{profileId}/cards/{cardId}: 400 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 402 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 403 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 405 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 500 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 400 response",
+            "DELETE /profiles/{profileId}/cards/{cardId}: 401 response",
+            "POST /payments/{transId}/void: 402 response",
+            "POST /payments/{transId}/void: 403 response",
+            "POST /payments/{transId}/void: 405 response",
+            "POST /payments/{transId}/void: 500 response",
+            "POST /payments/{transId}/void: 400 response",
+            "POST /payments/{transId}/void: 401 response",
+            "GET /profiles/{profileId}: 405 response",
+            "GET /profiles/{profileId}: 500 response",
+            "GET /profiles/{profileId}: 400 response",
+            "GET /profiles/{profileId}: 401 response",
+            "GET /profiles/{profileId}: 402 response",
+            "GET /profiles/{profileId}: 403 response",
+            "PUT /profiles/{profileId}: 400 response",
+            "PUT /profiles/{profileId}: 401 response",
+            "PUT /profiles/{profileId}: 402 response",
+            "PUT /profiles/{profileId}: 403 response",
+            "PUT /profiles/{profileId}: 405 response",
+            "PUT /profiles/{profileId}: 500 response",
+            "DELETE /profiles/{profileId}: 405 response",
+            "DELETE /profiles/{profileId}: 500 response",
+            "DELETE /profiles/{profileId}: 400 response",
+            "DELETE /profiles/{profileId}: 401 response",
+            "DELETE /profiles/{profileId}: 402 response",
+            "DELETE /profiles/{profileId}: 403 response",
+            "POST /payments/{transId}/completions: 401 response",
+            "POST /payments/{transId}/completions: 402 response",
+            "POST /payments/{transId}/completions: 403 response",
+            "POST /payments/{transId}/completions: 405 response",
+            "POST /payments/{transId}/completions: 500 response",
+            "POST /payments/{transId}/completions: 400 response",
+            "POST /profiles: 400 response",
+            "POST /profiles: 401 response",
+            "POST /profiles: 402 response",
+            "POST /profiles: 403 response",
+            "POST /profiles: 405 response",
+            "POST /profiles: 500 response",
+            "POST /reports: 405 response",
+            "POST /reports: 500 response",
+            "POST /reports: 400 response",
+            "POST /reports: 401 response",
+            "POST /reports: 402 response",
+            "POST /reports: 403 response",
+            "GET /profiles/{profileId}/cards: 500 response",
+            "GET /profiles/{profileId}/cards: 400 response",
+            "GET /profiles/{profileId}/cards: 401 response",
+            "GET /profiles/{profileId}/cards: 402 response",
+            "GET /profiles/{profileId}/cards: 403 response",
+            "GET /profiles/{profileId}/cards: 405 response",
+            "POST /profiles/{profileId}/cards: 500 response",
+            "POST /profiles/{profileId}/cards: 400 response",
+            "POST /profiles/{profileId}/cards: 401 response",
+            "POST /profiles/{profileId}/cards: 402 response",
+            "POST /profiles/{profileId}/cards: 403 response",
+            "POST /profiles/{profileId}/cards: 405 response"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive error response documentation including codes, messages, and consistent error schemas",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P004",
+        "name": "Request Schema Definitions",
+        "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+        "category": "Schema",
+        "severity": "critical",
+        "tags": [
+          "schema",
+          "validation",
+          "request"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All path parameters have schemas",
+          "All query parameters have schemas",
+          "All header parameters have schemas",
+          "All request bodies have content schemas",
+          "All schemas specify data types",
+          "All schemas have appropriate constraints",
+          "All required fields are marked",
+          "All enums have valid values",
+          "All numeric fields have min/max values",
+          "All string fields have length constraints"
+        ]
+      },
+      "Passed": false,
+      "Message": "Request validation issues found: All numeric fields have min/max values: GET /payments/{transId}: parameter transId, POST /payments/{transId}/completions: parameter transId, POST /payments/{transId}/returns: parameter transId, POST /payments/{transId}/void: parameter transId, PUT /profiles/{profileId}/cards/{cardId}: parameter cardId, DELETE /profiles/{profileId}/cards/{cardId}: parameter cardId; All schemas specify data types: POST /payments/{transId}/completions: parameter payment_request, POST /payments/{transId}/returns: parameter return, POST /profiles: parameter createProfileBody, POST /reports: parameter search_query, POST /payments/{transId}/void: parameter void, PUT /profiles/{profileId}: parameter updateProfileBody, POST /payments: parameter payment_request, PUT /profiles/{profileId}/cards/{cardId}: parameter card, POST /profiles/{profileId}/cards: parameter card, POST /scripts/tokenization/tokens: parameter token_request; All string fields have length constraints: GET /profiles/{profileId}: parameter profileId, PUT /profiles/{profileId}: parameter profileId, DELETE /profiles/{profileId}: parameter profileId, PUT /profiles/{profileId}/cards/{cardId}: parameter profileId, DELETE /profiles/{profileId}/cards/{cardId}: parameter profileId, GET /profiles/{profileId}/cards: parameter profileId, POST /profiles/{profileId}/cards: parameter profileId",
+      "Details": {
+        "checks": {
+          "All enums have valid values": true,
+          "All header parameters have schemas": true,
+          "All numeric fields have min/max values": false,
+          "All path parameters have schemas": true,
+          "All query parameters have schemas": true,
+          "All request bodies have content schemas": true,
+          "All required fields are marked": true,
+          "All schemas have appropriate constraints": true,
+          "All schemas specify data types": false,
+          "All string fields have length constraints": false
+        },
+        "messages": {},
+        "missing_validation": {
+          "All numeric fields have min/max values": [
+            "GET /payments/{transId}: parameter transId",
+            "POST /payments/{transId}/completions: parameter transId",
+            "POST /payments/{transId}/returns: parameter transId",
+            "POST /payments/{transId}/void: parameter transId",
+            "PUT /profiles/{profileId}/cards/{cardId}: parameter cardId",
+            "DELETE /profiles/{profileId}/cards/{cardId}: parameter cardId"
+          ],
+          "All schemas specify data types": [
+            "POST /payments/{transId}/completions: parameter payment_request",
+            "POST /payments/{transId}/returns: parameter return",
+            "POST /profiles: parameter createProfileBody",
+            "POST /reports: parameter search_query",
+            "POST /payments/{transId}/void: parameter void",
+            "PUT /profiles/{profileId}: parameter updateProfileBody",
+            "POST /payments: parameter payment_request",
+            "PUT /profiles/{profileId}/cards/{cardId}: parameter card",
+            "POST /profiles/{profileId}/cards: parameter card",
+            "POST /scripts/tokenization/tokens: parameter token_request"
+          ],
+          "All string fields have length constraints": [
+            "GET /profiles/{profileId}: parameter profileId",
+            "PUT /profiles/{profileId}: parameter profileId",
+            "DELETE /profiles/{profileId}: parameter profileId",
+            "PUT /profiles/{profileId}/cards/{cardId}: parameter profileId",
+            "DELETE /profiles/{profileId}/cards/{cardId}: parameter profileId",
+            "GET /profiles/{profileId}/cards: parameter profileId",
+            "POST /profiles/{profileId}/cards: parameter profileId"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive schema validation including data types, constraints, and required fields",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P005",
+        "name": "Security Standards",
+        "description": "Validates comprehensive security requirements and authentication mechanisms",
+        "category": "Security",
+        "severity": "critical",
+        "tags": [
+          "security",
+          "authentication",
+          "authorization"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Security schemes are defined",
+          "Global security requirements are set",
+          "Operation-level security is defined",
+          "OAuth2 scopes are documented",
+          "API keys are properly described",
+          "Authentication headers are specified",
+          "Security requirements are consistent"
+        ]
+      },
+      "Passed": false,
+      "Message": "Security validation failed: Security schemes are defined: No security schemes defined in components.securitySchemes; Global security requirements are set: No top-level security requirements defined; Operation-level security is defined: Endpoints without security: POST /payments/{transId}/completions, POST /payments/{transId}/returns, PUT /profiles/{profileId}/cards/{cardId}, DELETE /profiles/{profileId}/cards/{cardId}, POST /payments/{transId}/void, GET /profiles/{profileId}, PUT /profiles/{profileId}, DELETE /profiles/{profileId}, GET /profiles/{profileId}/cards, POST /profiles/{profileId}/cards, POST /scripts/tokenization/tokens, POST /payments, GET /payments/{transId}, POST /profiles, POST /reports",
+      "Details": {
+        "checks": {
+          "API keys are properly described": true,
+          "Authentication headers are specified": true,
+          "Global security requirements are set": false,
+          "OAuth2 scopes are documented": true,
+          "Operation-level security is defined": false,
+          "Security requirements are consistent": true,
+          "Security schemes are defined": false
+        },
+        "messages": {
+          "Global security requirements are set": "No top-level security requirements defined",
+          "Operation-level security is defined": "Endpoints without security: POST /payments/{transId}/completions, POST /payments/{transId}/returns, PUT /profiles/{profileId}/cards/{cardId}, DELETE /profiles/{profileId}/cards/{cardId}, POST /payments/{transId}/void, GET /profiles/{profileId}, PUT /profiles/{profileId}, DELETE /profiles/{profileId}, GET /profiles/{profileId}/cards, POST /profiles/{profileId}/cards, POST /scripts/tokenization/tokens, POST /payments, GET /payments/{transId}, POST /profiles, POST /reports",
+          "Security schemes are defined": "No security schemes defined in components.securitySchemes"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Review security schemes, global security requirements, and per-operation security",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P008",
+        "name": "API Versioning Strategy",
+        "description": "Validates proper API versioning implementation and documentation",
+        "category": "Versioning",
+        "severity": "warning",
+        "tags": [
+          "versioning",
+          "compatibility",
+          "lifecycle"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "API version is specified",
+          "Version follows semantic versioning",
+          "Versioning strategy is documented",
+          "Deprecation notices are present",
+          "Breaking changes are documented",
+          "Version compatibility is specified",
+          "Migration guides are referenced"
+        ]
+      },
+      "Passed": false,
+      "Message": "Versioning validation failed: Versioning strategy is documented: Info description does not mention versioning strategy; Breaking changes are documented: Info description does not reference breaking changes or a changelog; Version compatibility is specified: Info description does not mention version compatibility; Migration guides are referenced: Info description does not reference migration or upgrade guides",
+      "Details": {
+        "checks": {
+          "API version is specified": true,
+          "Breaking changes are documented": false,
+          "Deprecation notices are present": true,
+          "Migration guides are referenced": false,
+          "Version compatibility is specified": false,
+          "Version follows semantic versioning": true,
+          "Versioning strategy is documented": false
+        },
+        "messages": {
+          "Breaking changes are documented": "Info description does not reference breaking changes or a changelog",
+          "Migration guides are referenced": "Info description does not reference migration or upgrade guides",
+          "Version compatibility is specified": "Info description does not mention version compatibility",
+          "Versioning strategy is documented": "Info description does not mention versioning strategy"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Update the info section with version details, deprecation notices, and migration references",
+      "TestImpact": null
+    }
+  ],
+  "total_checks": 6,
+  "passed_checks": 1,
+  "failed_checks": 5,
+  "summary": {
+    "CriticalIssues": 4,
+    "Warnings": 1,
+    "Info": 0,
+    "Categories": [
+      "Documentation",
+      "Error Handling",
+      "Schema",
+      "Security",
+      "Versioning"
+    ],
+    "FailedTags": [
+      "errors",
+      "standards",
+      "lifecycle",
+      "validation",
+      "compatibility",
+      "quality",
+      "schema",
+      "authentication",
+      "authorization",
+      "usability",
+      "responses",
+      "request",
+      "security",
+      "versioning",
+      "documentation"
+    ],
+    "TestSummary": null
+  }
+}

@@ -47,9 +47,9 @@ Total: **610** comments across **150** pages.
 
 | status | count | meaning |
 |---|---:|---|
-| `done` | 64 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, or directly addressed in round 5 (figure removal + Ch.7 arm reorder) |
+| `done` | 65 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, directly addressed in round 5 (figure removal + Ch.7 arm reorder), or addressed in round 6 (Swagger 2.0 evaluation arm) |
 | `addressed-by-rewrite` | 516 | substantive concern absorbed into a round-1/2/4 chapter rewrite, with the resolution noted per row in the `[r4: ...]` trailer |
-| `discussed` | 23 | design-debate comment whose disposition is recorded per row (`[r4: ...]`) and, for the substantive ones, in `changes-log.md` or `professor-reply.md` |
+| `discussed` | 22 | design-debate comment whose disposition is recorded per row (`[r4: ...]`) and, for the substantive ones, in `changes-log.md` or `professor-reply.md` |
 | `deferred` | 7 | comment text explicitly flags future work or PhD continuation |
 | `needs-walkthrough` | 0 | --- (round-4 sweep classified every row case-by-case) |
 | `open` | 0 | --- (every row classified) |
@@ -527,7 +527,7 @@ Round-2 bulk classification has been applied; see status legend above.
 | [462](kritikos-comments.md#page-122) | 122 | ch7-evaluation | gamma | must | addressed-by-rewrite | could explain how this is done.Do you have a different branch per defect injecti  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |
 | [463](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | done | is this expected? I mean that you indicate here what is the expectation by evalu |
 | [464](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | addressed-by-rewrite | ok but what is really meant by quality dimension? As we know that there are nice  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |
-| [465](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | discussed | Very interesting aspect to include OpenAPI version in the table. However, you se |
+| [465](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | done | Very interesting aspect to include OpenAPI version in the table. However, you se  [r6: 20-API Swagger 2.0 evaluation arm added as §7.5.4 (subsec:swagger2-eval). Harvester extended with 2.0 selector; all 20 specs validated successfully; same systemic gap pattern observed (80% scored 1/6 vs 84% for 3.x). Raw artefacts under results/swagger2-evaluation/. Closes [465]] |
 | [466](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | done | If you have removed a specific quality dimension from here, the naming of the AP |
 | [467](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | done | Here the principle affected seems to be P005. The same holds for the next API. B |
 | [468](kritikos-comments.md#page-123) | 123 | ch7-evaluation | gamma | must | addressed-by-rewrite | ok but it is not clear how degradation is detected in this case. You put a speci  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |

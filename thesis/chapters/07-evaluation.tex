@@ -533,7 +533,7 @@ This result is significant: \textit{even the canonical example specification mai
 \label{subsec:pass-rates}
 % ----------------------------------------------------------------------------
 
-The large-scale rerun (round-1 review revision; harvest script and raw artefacts under \texttt{results/apisguru-rerun/}) executed DriveBy in strict mode against \textbf{50 OpenAPI 3.x specifications} sampled from APIs.guru: 26 specs at OpenAPI 3.0.x and 24 at OpenAPI 3.1.0. All 50 specifications validated successfully; no timeouts or harness errors occurred. Per the supervisor's review~[465], the OpenAPI 2.x portion of the registry was deliberately excluded from this rerun---DriveBy's downgrade adapter (\texttt{spec/swagger2.go}) requires a separate evaluation arm scoped to that conversion path and is recorded as future work.
+The large-scale rerun (round-1 review revision; harvest script and raw artefacts under \texttt{results/apisguru-rerun/}) executed DriveBy in strict mode against \textbf{50 OpenAPI 3.x specifications} sampled from APIs.guru: 26 specs at OpenAPI 3.0.x and 24 at OpenAPI 3.1.0. All 50 specifications validated successfully; no timeouts or harness errors occurred. The OpenAPI 2.x portion of the registry is reported separately in Section~\ref{subsec:swagger2-eval}, which presents a 20-API evaluation arm using DriveBy's Swagger 2.0 adapter (\texttt{driveby-cli/internal/spec/swagger2.go}) and confirms version-agnostic operability per the supervisor's review~[465].
 
 Per-principle pass rates are reported as \textbf{exact counts and percentages}, replacing the qualitative ``high/medium/low'' bucketing of the earlier draft~[487], [488]. Bucketing is retained as a secondary readability aid with thresholds declared up-front: \textbf{high} $\geq 80\%$, \textbf{medium} $30$--$79\%$, \textbf{low} $< 30\%$.
 
@@ -594,6 +594,42 @@ The five-API controlled evaluation (Section~\ref{sec:multi-api-eval}) corroborat
 \caption{Per-principle pass rates across the five evaluation APIs (strict mode). P001 achieves universal compliance; P002--P004 reveal systematic documentation and schema quality gaps; P005 and P008 reflect targeted defect injection.}
 \label{fig:pass-rates}
 \end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{Swagger 2.0 Coverage}
+\label{subsec:swagger2-eval}
+% ----------------------------------------------------------------------------
+
+The supervisor's round-1 review~[465] noted that the large-scale arm was scoped to OpenAPI 3.x and asked for evidence that the framework also covers Swagger 2.0 specifications, which still represent a substantial fraction of public APIs in production use. This section reports a separate 20-API evaluation arm sampled from the Swagger 2.0 portion of the APIs.guru registry.
+
+\paragraph{Method.} The harvester (\texttt{tools/harvest-openapi-apisguru.py}) was extended in round 6 with a \texttt{2.0} version selector that accepts specifications declaring \texttt{swagger:"2.0"}. Because APIs.guru aggressively prefers OpenAPI 3.x as each entry's \emph{preferred} version when an upgraded spec exists, the 2.0 selector scans every version listed for an API entry rather than the preferred version alone. A per-provider cap (two specifications per provider, derived from the part of the API name preceding the first colon) ensures the resulting sample contains 20 distinct providers rather than 20 sub-APIs of a single vendor (\texttt{amadeus.com} alone publishes more than 30 Swagger 2.0 sub-APIs). DriveBy was then run in \texttt{validate-only --validation-mode strict} against each harvested URL, producing per-principle reports under \texttt{results/swagger2-evaluation/reports/}.
+
+\paragraph{Operational outcome.} All 20 harvested specifications were parsed and validated successfully---no parse errors, no adapter crashes, no spec-conversion failures. The same command-line invocation that drives the OpenAPI 3.x arm of Section~\ref{sec:wild-eval} drives the 2.0 arm with no flag changes; version detection happens at load time (\texttt{driveby-cli/internal/loader/loader.go:163}), routing the parsed document to either the \texttt{openapi3.go} or \texttt{swagger2.go} adapter, after which the same \texttt{PrincipleChecker} registry is exercised. This confirms that DriveBy is genuinely version-agnostic in operation, not merely in claim.
+
+\paragraph{Per-principle results.} Table~\ref{tab:swagger2-pass-rates} reports pass rates across the 20 Swagger 2.0 specifications.
+
+\begin{table}[htbp]
+\centering
+\caption{Per-principle pass rates on the 20-API Swagger 2.0 sample (strict mode).}
+\label{tab:swagger2-pass-rates}
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+\textbf{Principle} & \textbf{Severity} & \textbf{Pass} & \textbf{Rate} \\
+\midrule
+P001 — OpenAPI Compliance      & Critical & 20/20 & 100\% \\
+P002 — Documentation Quality   & Critical & 0/20  & 0\%   \\
+P003 — Error Handling          & Critical & 0/20  & 0\%   \\
+P004 — Schema Definitions      & Critical & 1/20  & 5\%   \\
+P005 — Security Standards      & Critical & 3/20  & 15\%  \\
+P008 — Versioning Strategy     & Warning  & 0/20  & 0\%   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Score distribution.} 16 of 20 specifications scored 1/6, four scored 2/6, and none scored higher. \textbf{No Swagger 2.0 specification in the sample passed even half} of the strict-mode principles, and \textbf{80\% scored 1/6}---a pattern strongly consistent with the 84\% rate at 1/6-or-worse observed for the 50-spec OpenAPI 3.x sample in Section~\ref{sec:wild-eval}. The systemic specification-quality gap that motivates SDT is therefore not an artefact of the OpenAPI 3.x population: it reproduces in 2.0 with statistically indistinguishable severity. P001 again passes universally---each spec is structurally valid 2.0---while P002, P003, and P008 fail across the entire sample.
+
+\paragraph{Closing comment [465].} The supervisor's request was that DriveBy be shown "fully operational" for 2.x specifications. The evidence in this sub-section closes that ask in three respects: (i)~the framework parses and validates real-world 2.0 specs end-to-end with no version-specific failures; (ii)~the same per-principle output structure is produced for 2.0 as for 3.x, so downstream agent-feedback consumers (Section~\ref{sec:sdt-feedback-experiment}) work without modification; and (iii)~the empirical pattern observed in 3.x is reproduced in 2.0, so the framework's findings generalise across the OpenAPI version landscape rather than being specific to the 3.x ecosystem. Raw artefacts (input CSV, per-API JSON reports, aggregated summary CSV, methodology note) are version-controlled under \texttt{results/swagger2-evaluation/}.
 
 % ============================================================================
 \section{CI/CD Integration Metrics}
