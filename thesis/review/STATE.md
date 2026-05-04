@@ -7,29 +7,32 @@ Treat this file as the source-of-truth status when picking the work back up.
 
 | metric | value |
 |---|---|
-| **Build** | clean — 212 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
+| **Build** | clean — 214 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
 | **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms (longtable) |
-| **Latest commit** | round-3 (Acronyms longtable + figure overlap fixes + missing `amssymb` package) |
+| **Latest commit** | round-4 (full needs-walkthrough sweep: 270 rows hand-audited, Ch.2 substantive prose adds) |
 | **Round-1 commit** | `b96e6a6` ("Round-1 thesis revision addressing supervisor's 610 inline comments") |
 | **Round-2 commit** | `5f342e2` ("Round-2 thesis closure: severity alignment, Greek abstract, comment-index audit") |
+| **Round-3 commit** | `56efe41` ("Round-3 thesis layout closure: zero overfull, zero errors, 212 pp") |
 | **Round-3 fixes** | Acronyms multi-page table; Fig 5.1 legend frame overlap; Fig 5.4 reconciliation-loop annotations; long-token `\allowbreak` hints; `\usepackage{amssymb}` (was blocking `\bigstar`) |
+| **Round-4 fixes** | Ch.2 prose adds (EvoMaster, OpenAPI 3.2, Smardas+Kritikos 2025, Optic/APIClarity/42Crunch named, code-first rewording, Table 2.1 symbol legend); Ch.4 vegeta "attack" disclaimed; comment-index 270 needs-walkthrough rows hand-classified per-row |
 | **Branch** | `main`, pushed to `origin/main` |
 | **Resubmission target** | 2026-05-31 |
 | **Defense** | mid-June 2026, in-person, University of the Aegean |
 
-## Comment-index closure
+## Comment-index closure (post round-4 hand audit)
 
 | status | count | meaning |
 |---|---:|---|
-| `done` | 50 | explicitly cited in `changes-log.md` |
-| `addressed-by-rewrite` | 280 | absorbed into round-1/2 chapter rewrites |
-| `discussed` | 3 | disposition recorded in `changes-log.md` or `professor-reply.md` |
+| `done` | 62 | explicitly cited in `changes-log.md` (round-1 closure) or hand-edited in round 4 |
+| `addressed-by-rewrite` | 516 | absorbed into round-1/2/4 chapter rewrites; per-row resolution note in `[r4: ...]` trailer |
+| `discussed` | 25 | design-debate comment whose disposition is recorded per row and in `changes-log.md` / `professor-reply.md` |
 | `deferred` | 7 | comment text explicitly flags future work / PhD continuation |
-| `needs-walkthrough` | 270 | typo/generic/struct in partially-rewritten chapters; will be confirmed live during defense walk-through |
+| `needs-walkthrough` | **0** | round-4 sweep classified every row case-by-case |
 | `open` | **0** | every row classified |
 | **total** | **610** | |
 
-Classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
+Round-1 classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
+Round-4 hand audit: 270 previously-`needs-walkthrough` rows were walked one-by-one against the current chapter prose; each carries a `[r4: ...]` trailer naming the section/subsection that addresses the supervisor's concern. Any individual comment can therefore be answered live at defense without searching.
 
 ## Work delivered
 
@@ -57,14 +60,13 @@ Classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
 ## What is NOT done (defensible-but-supervisor-may-probe)
 
 - **Examination committee names** on the title page — blocked on supervisor input. Apply with a small pre-submission patch when names arrive.
-- **270 `needs-walkthrough` items** — typos / generic comments in Ch.2/4/5/6/9 that round-1 didn't blanket-close. Defensible during live defense walk-through; not blocking submission.
 - **`perfect-api` source rename** — 91 occurrences across `apis/`, `kubernetes/`, `tools/`, `Makefile`. Deferred to v4.0 release; documented in source-side READMEs.
 - **OpenAPI 2.x evaluation arm** — closed as future work in §7.4.
 
 ## Picking the work back up
 
 1. Read this file for status.
-2. `cd thesis && pdflatex main.tex` (×3 passes) — should produce 212 pages, 0 overfull.
+2. `cd thesis && pdflatex main.tex` (×3 passes) — should produce 214 pages, 0 overfull.
 3. If supervisor sends a new round of comments, repeat the round-1/2 pattern: extract → index → classify → rewrite → log.
 4. The Greek build requires Fedora packages: `texlive-collection-langgreek` and `texlive-babel-english` (both installed as of 2026-05-04 on this machine).
 
@@ -72,7 +74,7 @@ Classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
 
 | Path | Purpose |
 |---|---|
-| `thesis/main.pdf` | latest build (212 pp, bilingual) |
+| `thesis/main.pdf` | latest build (214 pp, bilingual) |
 | `thesis/review/comment-index.md` | 610-row audit table |
 | `thesis/review/changes-log.md` | per-comment closure log (round 1 + round 2) |
 | `thesis/review/REVISION-REPORT.md` | full narrative report including round 2 closure section |

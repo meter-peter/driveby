@@ -566,7 +566,7 @@ The test inputs are derived deterministically from the specification---parameter
 \label{subsec:performance-testing}
 % ----------------------------------------------------------------------------
 
-The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from non-destructive endpoints, runs a configurable attack (rate, duration, concurrent users), and collects latency percentiles and throughput metrics. Results are compared against user-defined thresholds, producing binary pass/fail outcomes suitable for CI/CD quality gates. The \texttt{PrincipleChecker} wrapper for P007 that integrates these results into the unified validation report is pending.
+The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from non-destructive endpoints, runs a configurable load profile---vegeta's terminology refers to this as an ``attack'', but the test issues only well-formed, specification-derived requests at a configurable rate, duration, and concurrency level; no penetration testing or security probing is performed---and collects latency percentiles and throughput metrics. Results are compared against user-defined thresholds, producing binary pass/fail outcomes suitable for CI/CD quality gates. The \texttt{PrincipleChecker} wrapper for P007 that integrates these results into the unified validation report is pending.
 
 % ============================================================================
 \section{Report Generation}
