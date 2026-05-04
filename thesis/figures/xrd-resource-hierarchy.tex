@@ -40,7 +40,8 @@
 \node[xrd] (xsdlc) at (3.25,0) {XSDLC\\(single CR per application)};
 
 % --- App-level resources (left column) ---
-\node[grouplabel=teal] at (0,-1.2) {App-level (shared)};
+% Group label on the left of the column so the XSDLC arrow has a clear path.
+\node[grouplabel=teal,anchor=east] at (-2.0,-1.2) {App-level (shared)};
 
 \node[resource] (sa)       at (0,-2.0) {ServiceAccount};
 \node[resource] (eb)       at (0,-2.8) {EventBus};
@@ -63,7 +64,8 @@
 \draw[->,thick,teal!50!black] (promstrat) -- (commitst);
 
 % --- Per-gate resources (right column) ---
-\node[grouplabel=orange] at (6.5,-1.2) {Per-gate (one set each)};
+% Group label on the right of the column so the XSDLC arrow has a clear path.
+\node[grouplabel=orange,anchor=west] at (8.5,-1.2) {Per-gate (one set each)};
 
 \node[resource] (role)    at (6.5,-2.0) {Role};
 \node[resource] (rb)      at (6.5,-2.8) {RoleBinding};

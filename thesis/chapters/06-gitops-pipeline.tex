@@ -45,7 +45,7 @@ The pipeline begins when an external event---a promotion PR opened on GitHub---m
 
 The composition solves this through a convention-over-configuration mechanism. Both the webhook URL and the Ingress resource that exposes it are derived deterministically from two identity fields in the \texttt{XSDLC} spec: the application name and the gated environment name. The URL follows the pattern \texttt{https://\{app\}-\{gate\}-webhook.\{domain\}/\{app\}-\{gate\}-pr-trigger}. Because the Ingress resource, the EventSource endpoint, and the GitHub webhook configuration are all generated from the same identity fields by the same composition, they are guaranteed to agree. This provides three properties: (1)~no manual URL management---the operator never configures webhook endpoints; (2)~uniqueness---each gate in the cluster receives a distinct URL; and (3)~predictability---an operator can determine the webhook URL for any gate from the \texttt{XSDLC} CR's fields alone.
 
-The Ingress resource carries a cert-manager annotation that triggers automatic TLS certificate provisioning. TLS termination happens at the Ingress controller (Traefik), so the EventSource receives plaintext HTTP on port~12000 internally. This is an instance of the platform inheritance design goal (Section~\ref{subsec:k8s-design-goals}): the application developer never configures TLS certificates or ingress routing; the platform provides these capabilities, and the composition references them. For the reference deployment, the staging gate resolves to \texttt{https://perfect-api-staging-gate-webhook.private.novelcore.org/\allowbreak perfect-api-staging-gate-pr-trigger}.
+The Ingress resource carries a cert-manager annotation that triggers automatic TLS certificate provisioning. TLS termination happens at the Ingress controller (Traefik), so the EventSource receives plaintext HTTP on port~12000 internally. This is an instance of the platform inheritance design goal (Section~\ref{subsec:k8s-design-goals}): the application developer never configures TLS certificates or ingress routing; the platform provides these capabilities, and the composition references them. For the reference deployment, the staging gate resolves to \texttt{https://\allowbreak perfect-api-\allowbreak staging-gate-\allowbreak webhook.\allowbreak private.\allowbreak novelcore.org/\allowbreak perfect-api-\allowbreak staging-gate-\allowbreak pr-trigger}.
 
 % ----------------------------------------------------------------------------
 \subsection{Event Processing}
@@ -96,12 +96,12 @@ perfect-api-gitops/             # GitOps repository (auto-created)
         staging/kustomization.yaml
         prod/kustomization.yaml
 
-  environment/dev-next   →      # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
-  environment/dev        →      # Merged by Promoter from dev-next
-  environment/staging-next →    # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
-  environment/staging    →      # Merged by Promoter (after gate passes)
-  environment/prod-next  →      # Hydrated by ArgoCD (manifests/ + hydrator.metadata)
-  environment/prod       →      # Merged by Promoter (after gate passes)
+  environment/dev-next       → # ArgoCD-hydrated
+  environment/dev            → # Promoter merges from dev-next
+  environment/staging-next   → # ArgoCD-hydrated
+  environment/staging        → # Promoter merges (gate passed)
+  environment/prod-next      → # ArgoCD-hydrated
+  environment/prod           → # Promoter merges (gate passed)
 \end{verbatim}
 
 The GitOps repository's \texttt{main} branch holds dry Kustomize manifests organized as a base-plus-overlays structure. Each environment has its own overlay that references the shared base and can customize deployment parameters (replicas, resource limits, environment variables, image tags). The ArgoCD Source Hydrator~\cite{argocd-hydrator} renders each overlay independently and writes the hydrated output---along with a \texttt{hydrator.metadata} file containing the dry commit SHA---to the corresponding \texttt{environment/<name>-next} branch. The GitOps Promoter detects the new commit and creates a promotion PR from the \texttt{-next} branch to the active branch. Quality gates fire on these PRs; ArgoCD syncs from the active branch once the PR is merged.
@@ -178,7 +178,7 @@ The PromotionStrategy is not authored manually. The XSDLC composition generates 
 \begin{itemize}
     \item \textbf{Branch}: defaults to \texttt{environment/<name>} but overridable per environment via \texttt{branch}.
     \item \textbf{autoMerge}: defaults to \texttt{true}; set to \texttt{false} on any environment that requires human approval before promotion.
-    \item \textbf{commitStatusKey}: defaults to \texttt{<envName>-gate}; overridable via \texttt{gate.commitStatusKey}. The key must match between the PromotionStrategy (which watches for it) and the Argo Workflow (which posts it).
+    \item \textbf{commitStatusKey}: defaults to \texttt{<envName>-gate}; overridable via \texttt{gate.\allowbreak commitStatusKey}. The key must match between the PromotionStrategy (which watches for it) and the Argo Workflow (which posts it).
 \end{itemize}
 
 This generation model is environment-count agnostic. The composition iterates over the \texttt{environments[]} array with \texttt{range}, producing a PromotionStrategy with \textit{N} environments for any \textit{N} $\geq$ 2. A two-environment chain (dev $\rightarrow$ prod) and a five-environment chain (dev $\rightarrow$ qa $\rightarrow$ staging $\rightarrow$ preprod $\rightarrow$ prod) are both expressed as XSDLC arrays; the composition handles both without modification.

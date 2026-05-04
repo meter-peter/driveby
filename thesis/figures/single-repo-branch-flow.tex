@@ -32,57 +32,60 @@
 % Developer commit on main (top)
 \node[action, minimum width=5cm] (push) at (5,0) {Developer commits dry manifests\\on \texttt{main} branch};
 
-% BYOCI boundary
-\draw[boundary=red!70!black] (-0.5,-0.7) -- (10.5,-0.7);
-\node[font=\tiny\bfseries,text=red!60!black,anchor=east] at (10.5,-0.5) {Developer updates dry manifests on main (BYOCI)};
-\node[font=\tiny\bfseries,text=teal!60!black,anchor=east] at (10.5,-0.9) {XSDLC hydrates, promotes, gates, syncs};
+% BYOCI boundary — labels placed clearly above and below the dashed line
+% with a small vertical gap so they do not collide with it.
+\draw[boundary=red!70!black] (-0.5,-0.75) -- (10.5,-0.75);
+\node[font=\tiny\bfseries,text=red!60!black,anchor=south east] at (10.5,-0.55) {Developer updates dry manifests on main (BYOCI)};
+\node[font=\tiny\bfseries,text=teal!60!black,anchor=north east] at (10.5,-0.95) {XSDLC hydrates, promotes, gates, syncs};
 
 % ArgoCD Hydrator step
-\node[branch=violet, minimum width=8cm] (hydrator) at (5,-1.6) {ArgoCD Source Hydrator renders per-environment overlays};
+\node[branch=violet, minimum width=8cm] (hydrator) at (5,-1.7) {ArgoCD Source Hydrator renders per-environment overlays};
 
 \draw[->,thick,violet!50!black] (push.south) -- (hydrator.north);
 
 % env-next branches in gitops repo
-\node[branch=blue] (devnext)     at (0,-2.8) {environment/\\dev-next};
-\node[branch=blue] (stagingnext) at (5,-2.8) {environment/\\staging-next};
-\node[branch=blue] (prodnext)    at (10,-2.8) {environment/\\prod-next};
+\node[branch=blue] (devnext)     at (0,-3.0) {environment/\\dev-next};
+\node[branch=blue] (stagingnext) at (5,-3.0) {environment/\\staging-next};
+\node[branch=blue] (prodnext)    at (10,-3.0) {environment/\\prod-next};
 
 \draw[->,thick,blue!50!black] (hydrator.south) -- ++(0,-0.1) -| (devnext.north);
 \draw[->,thick,blue!50!black] (hydrator.south) -- (stagingnext.north);
 \draw[->,thick,blue!50!black] (hydrator.south) -- ++(0,-0.1) -| (prodnext.north);
 
-% Label showing hydrated output
-\node[font=\tiny,text=blue!60!black,anchor=west] at (6.8,-2.1) {manifests/ + hydrator.metadata};
+% Label showing hydrated output — placed in the gap between the hydrator
+% box and the env-next row, in the small horizontal space between the
+% staging-next arrow (centred) and the prod-next arrow (rightmost).
+\node[font=\tiny,text=blue!60!black,anchor=west] at (7.0,-2.45) {manifests/ + hydrator.metadata};
 
 % Promoter PRs
-\node[action] (pr1) at (0,-3.8) {auto-merge (no gate)};
-\node[action] (pr2) at (5,-3.8) {Promoter PR};
-\node[action] (pr3) at (10,-3.8) {Promoter PR};
+\node[action] (pr1) at (0,-4.0) {auto-merge (no gate)};
+\node[action] (pr2) at (5,-4.0) {Promoter PR};
+\node[action] (pr3) at (10,-4.0) {Promoter PR};
 
 \draw[->,thick,blue!40!black] (devnext) -- (pr1);
 \draw[->,thick,blue!40!black] (stagingnext) -- (pr2);
 \draw[->,thick,blue!40!black] (prodnext) -- (pr3);
 
 % Quality gates
-\node[branch=orange, minimum width=2cm] (gate1) at (5,-4.7) {SDT Gate};
-\node[branch=orange, minimum width=2cm] (gate2) at (10,-4.7) {Load Gate};
+\node[branch=orange, minimum width=2cm] (gate1) at (5,-4.9) {SDT Gate};
+\node[branch=orange, minimum width=2cm] (gate2) at (10,-4.9) {Load Gate};
 
 \draw[->,thick,orange!50!black] (pr2) -- (gate1);
 \draw[->,thick,orange!50!black] (pr3) -- (gate2);
 
 % Active branches
-\node[branch=teal] (dev)     at (0,-5.6) {environment/\\dev};
-\node[branch=teal] (staging) at (5,-5.6) {environment/\\staging};
-\node[branch=teal] (prod)    at (10,-5.6) {environment/\\prod};
+\node[branch=teal] (dev)     at (0,-5.8) {environment/\\dev};
+\node[branch=teal] (staging) at (5,-5.8) {environment/\\staging};
+\node[branch=teal] (prod)    at (10,-5.8) {environment/\\prod};
 
 \draw[->,thick,teal!50!black] (pr1) -- (dev);
 \draw[->,thick,teal!50!black] (gate1) -- (staging);
 \draw[->,thick,teal!50!black] (gate2) -- (prod);
 
 % ArgoCD sync (all auto)
-\node[branch=green!60!black] (argodev) at (0,-6.8) {ArgoCD sync\\(auto)};
-\node[branch=green!60!black] (argostg) at (5,-6.8) {ArgoCD sync\\(auto)};
-\node[branch=green!60!black] (argoprod) at (10,-6.8) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argodev) at (0,-7.0) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argostg) at (5,-7.0) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argoprod) at (10,-7.0) {ArgoCD sync\\(auto)};
 
 \draw[->,thick,green!40!black] (dev) -- (argodev);
 \draw[->,thick,green!40!black] (staging) -- (argostg);

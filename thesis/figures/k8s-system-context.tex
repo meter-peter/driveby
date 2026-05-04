@@ -108,30 +108,32 @@
 \draw[->,thick,dashed,teal!50!black] (workflows.south) -- ++(0,-0.5) -| node[below,font=\tiny,teal!50!black,pos=0.25] {validate} (dev-app.south);
 
 % ==================== Legend ====================
-% Colour semantics + "existing vs thesis-built" key per comments [337], [338]
-\node[anchor=west, font=\scriptsize\bfseries] at (-0.7,-6.0) {Legend};
+% Colour semantics + "existing vs thesis-built" key per comments [337], [338].
+% Positioned below the cluster boundary (cluster bottom ~y=-6.05 so legend
+% starts at y=-6.7 to leave a clear margin and avoid frame overlap).
+\node[anchor=west, font=\scriptsize\bfseries] at (-0.7,-6.7) {Legend};
 
 % Colour band
-\fill[teal!10,draw=teal!60!black]   (-0.7,-6.4) rectangle (-0.4,-6.1);
-\node[anchor=west, font=\tiny] at (-0.35,-6.25) {control plane (driveby ns)};
+\fill[teal!10,draw=teal!60!black]   (-0.7,-7.1) rectangle (-0.4,-6.8);
+\node[anchor=west, font=\tiny] at (-0.35,-6.95) {control plane (driveby ns)};
 
-\fill[blue!10,draw=blue!60!black]   (3.0,-6.4) rectangle (3.3,-6.1);
-\node[anchor=west, font=\tiny] at (3.35,-6.25) {dev environment};
+\fill[blue!10,draw=blue!60!black]   (3.0,-7.1) rectangle (3.3,-6.8);
+\node[anchor=west, font=\tiny] at (3.35,-6.95) {dev environment};
 
-\fill[orange!10,draw=orange!60!black] (5.6,-6.4) rectangle (5.9,-6.1);
-\node[anchor=west, font=\tiny] at (5.95,-6.25) {staging environment};
+\fill[orange!10,draw=orange!60!black] (5.6,-7.1) rectangle (5.9,-6.8);
+\node[anchor=west, font=\tiny] at (5.95,-6.95) {staging environment};
 
-\fill[red!10,draw=red!60!black]     (8.4,-6.4) rectangle (8.7,-6.1);
-\node[anchor=west, font=\tiny] at (8.75,-6.25) {production environment};
+\fill[red!10,draw=red!60!black]     (8.4,-7.1) rectangle (8.7,-6.8);
+\node[anchor=west, font=\tiny] at (8.75,-6.95) {production environment};
 
-\fill[violet!10,draw=violet!60!black] (11.5,-6.4) rectangle (11.8,-6.1);
-\node[anchor=west, font=\tiny] at (11.85,-6.25) {pre-existing platform};
+\fill[violet!10,draw=violet!60!black] (11.5,-7.1) rectangle (11.8,-6.8);
+\node[anchor=west, font=\tiny] at (11.85,-6.95) {pre-existing platform};
 
 % Existing vs new band
-\node[anchor=west, font=\tiny\bfseries] at (-0.7,-6.85) {$\bigstar$};
-\node[anchor=west, font=\tiny] at (-0.4,-6.85) {built in this thesis (thicker border)};
+\node[anchor=west, font=\tiny\bfseries] at (-0.7,-7.55) {$\bigstar$};
+\node[anchor=west, font=\tiny] at (-0.4,-7.55) {built in this thesis (thicker border)};
 
-\draw[densely dashed, draw=violet!40!black] (5.6,-6.85) -- (5.95,-6.85);
-\node[anchor=west, font=\tiny] at (6.0,-6.85) {pre-existing on target cluster (dashed border)};
+\draw[densely dashed, draw=violet!40!black] (5.6,-7.55) -- (5.95,-7.55);
+\node[anchor=west, font=\tiny] at (6.0,-7.55) {pre-existing on target cluster (dashed border)};
 
 \end{tikzpicture}

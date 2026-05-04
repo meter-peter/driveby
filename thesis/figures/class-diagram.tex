@@ -103,8 +103,9 @@
   \quad\texttt{PrincipleResult}%
 };
 
-\draw[use] (pcint.north) -- node[right]{consumes} (apispec.south);
-\draw[use] (engine.south) to[bend left=20] node[right]{invokes} (pcint.east);
+\draw[use] (pcint.north) -- node[right,xshift=2pt]{consumes} (apispec.south);
+% Route invokes-arrow around swagger2Spec via the right margin to avoid overlap.
+\draw[use] (engine.east) -- ++(1.4,0) |- node[pos=0.25,right,xshift=2pt]{invokes} (pcint.east);
 
 % Concrete principle checkers
 \node[plcheck]         (p001) at (-5.5,-9.8) {P001\\Compliance};

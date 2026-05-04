@@ -38,7 +38,10 @@
 % Center label
 \node[font=\small\bfseries,text=gray!70,align=center] at (0,0) {Continuous\\Reconciliation};
 
-% auto-ready annotation
-\node[font=\tiny\itshape,text=red!50!black,align=center] at (-3.2,3.2) {function-auto-ready\\marks READY=True};
+% auto-ready annotation — placed to the LEFT of the Status Feedback box,
+% well outside the reconciliation loop so it does not collide with the
+% dashed conditions arrow that crosses the upper midline.
+\node[font=\tiny\itshape,text=red!50!black,align=right,anchor=east]
+    at ($(status.west)+(-0.15,0)$) {function-auto-ready\\marks READY=True};
 
 \end{tikzpicture}

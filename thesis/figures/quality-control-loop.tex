@@ -29,19 +29,19 @@
 \node[block=violet] (setpoint) at (0,0) {\textbf{Desired State}\\OpenAPI Spec};
 
 % Sum point
-\node[sum] (sum) at (2.8,0) {$\Sigma$};
+\node[sum] (sum) at (2.4,0) {$\Sigma$};
 
 % Controller
-\node[block=teal] (controller) at (5.5,0) {\textbf{Controller}\\Argo Workflow\\DAG};
+\node[block=teal] (controller) at (4.7,0) {\textbf{Controller}\\Argo Workflow\\DAG};
 
 % Actuator
-\node[block=orange] (actuator) at (9,0) {\textbf{Actuator}\\CommitStatus +\\Promoter};
+\node[block=orange] (actuator) at (7.7,0) {\textbf{Actuator}\\CommitStatus +\\Promoter};
 
 % Plant
-\node[block=blue] (plant) at (12,0) {\textbf{Plant}\\API Deployment\\(source env)};
+\node[block=blue] (plant) at (10.7,0) {\textbf{Plant}\\API Deployment\\(source env)};
 
 % Sensor
-\node[block=red!70!black] (sensor) at (8.5,-2.5) {\textbf{Sensor}\\DriveBy CLI\\(validation engine)};
+\node[block=red!70!black] (sensor) at (7.7,-2.5) {\textbf{Sensor}\\DriveBy CLI\\(validation engine)};
 
 % Forward path
 \draw[->,thick,violet!50!black] (setpoint) -- (sum);
@@ -58,12 +58,12 @@
 
 % Labels for control theory mapping
 \node[font=\tiny\itshape,text=violet!50!black,anchor=north] at (0,-0.7) {(specification)};
-\node[font=\tiny\itshape,text=teal!50!black,anchor=north] at (5.5,-0.7) {(orchestrator)};
-\node[font=\tiny\itshape,text=orange!50!black,anchor=north] at (9,-0.7) {(gate signal)};
-\node[font=\tiny\itshape,text=blue!50!black,anchor=north] at (12,-0.7) {(deployment)};
-\node[font=\tiny\itshape,text=red!50!black,anchor=north] at (8.5,-3.2) {(SDT validator)};
+\node[font=\tiny\itshape,text=teal!50!black,anchor=north] at (4.7,-0.7) {(orchestrator)};
+\node[font=\tiny\itshape,text=orange!50!black,anchor=north] at (7.7,-0.7) {(gate signal)};
+\node[font=\tiny\itshape,text=blue!50!black,anchor=north] at (10.7,-0.7) {(deployment)};
+\node[font=\tiny\itshape,text=red!50!black,anchor=north] at (7.7,-3.2) {(SDT validator)};
 
 % Convergence annotation
-\node[font=\scriptsize\itshape,text=gray!60,align=center] at (5.5,-3.8) {Closed-loop negative feedback:\\failure blocks promotion $\rightarrow$ developer fixes $\rightarrow$ re-validates $\rightarrow$ converges};
+\node[font=\scriptsize\itshape,text=gray!60,align=center] at (4.7,-3.8) {Closed-loop negative feedback:\\failure blocks promotion $\rightarrow$ developer fixes $\rightarrow$ re-validates $\rightarrow$ converges};
 
 \end{tikzpicture}

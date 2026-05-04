@@ -49,11 +49,11 @@ The \texttt{non-critical-api} is a Python FastAPI application with a hand-crafte
 \label{subsec:baseline}
 % ----------------------------------------------------------------------------
 
-At baseline, \texttt{non-critical-api} passes every implemented principle in every validation mode in which it is evaluated. The recorded JSON report (\texttt{results/local/perfect-api-validate-strict.json}) carries top-level \texttt{"status": "passed"} with no critical or warning findings.
+At baseline, \texttt{non-critical-api} passes every implemented principle in every validation mode in which it is evaluated. The recorded JSON report (\texttt{results/local/\allowbreak perfect-api-validate-strict.json}) carries top-level \texttt{"status": "passed"} with no critical or warning findings.
 
 \begin{table}[htbp]
 \centering
-\caption{Baseline validation results for \texttt{non-critical-api} across validation modes, reproduced from \texttt{results/local/perfect-api-validate-*.json}. \cmark{} = principle fully passes in this mode; ``---'' = principle is not evaluated in this mode.}
+\caption[Baseline validation results for \texttt{non-critical-api} across validation modes.]{Baseline validation results for \texttt{non-critical-api} across validation modes, reproduced from\\ \texttt{results/local/perfect-api-validate-*.json}. \cmark{} = principle fully passes in this mode; ``---'' = principle is not evaluated in this mode.}
 \label{tab:baseline-results}
 \small
 \begin{tabular}{@{}lccccccccl@{}}
@@ -210,7 +210,7 @@ Replacing the earlier speculative ground-truth table with the measured outcomes 
 \caption{Evaluation API suite: each API targets a distinct defect class.}
 \label{tab:api-suite}
 \small
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}l p{0.30\textwidth} p{0.34\textwidth} l@{}}
 \toprule
 \textbf{API} & \textbf{Target Defect Class} & \textbf{Expected Failure} & \textbf{OpenAPI} \\
 \midrule
@@ -265,7 +265,7 @@ Each API was deployed through the XSDLC pipeline, triggering staging gate workfl
 \caption{Staging gate results for all five evaluation APIs.}
 \label{tab:staging-gates}
 \small
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}l p{0.34\textwidth} l p{0.22\textwidth}@{}}
 \toprule
 \textbf{API} & \textbf{Gate Checks} & \textbf{Result} & \textbf{Blocking Failure} \\
 \midrule
@@ -292,7 +292,7 @@ Only two APIs reached the production gate; three were blocked at staging and nev
 \caption{Production gate results. ``Not reached'' indicates the staging gate failed.}
 \label{tab:prod-gates}
 \small
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}l p{0.30\textwidth} l p{0.26\textwidth}@{}}
 \toprule
 \textbf{API} & \textbf{Gate Checks} & \textbf{Result} & \textbf{Blocking Failure} \\
 \midrule
@@ -323,7 +323,7 @@ The five-API evaluation revealed a three-layer defence model, where each layer c
 \caption{Layered validation defence: each layer catches defects invisible to prior layers.}
 \label{tab:layered-defence}
 \small
-\begin{tabular}{@{}clll@{}}
+\begin{tabular}{@{}c p{0.32\textwidth} p{0.27\textwidth} p{0.25\textwidth}@{}}
 \toprule
 \textbf{Layer} & \textbf{Check Type} & \textbf{Defect Class} & \textbf{APIs Caught} \\
 \midrule
@@ -483,7 +483,7 @@ For the PoC, five \texttt{XSDLC} custom resources were applied to the cluster, o
 \caption{Proof-of-concept configuration: gate checks per application per environment. All five applications share the dev~$\rightarrow$~staging~$\rightarrow$~prod chain; differences are confined to the gates.}
 \label{tab:operational-poc-config}
 \footnotesize
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}l p{0.30\textwidth} p{0.42\textwidth}@{}}
 \toprule
 \textbf{Application} & \textbf{Staging gate} & \textbf{Production gate} \\
 \midrule
@@ -510,14 +510,14 @@ Cluster-wide and per-application snapshots were captured at the end of the PoC w
 \caption{Activity volume captured at PoC end across all five applications. Sources: \texttt{results/cluster/all-*.json}, \texttt{results/cluster/<app>/*}.}
 \label{tab:operational-activity}
 \small
-\begin{tabular}{@{}llrl@{}}
+\begin{tabular}{@{}p{0.32\textwidth} p{0.30\textwidth} r p{0.22\textwidth}@{}}
 \toprule
 \textbf{Resource} & \textbf{Source snapshot} & \textbf{Count} & \textbf{Scope} \\
 \midrule
 ArgoCD Applications      & \texttt{all-argocd-apps.json}      & 15 & 3 envs $\times$ 5 apps \\
 Argo Workflow runs        & \texttt{all-workflows.json}         & 44 & gate executions across the PoC window \\
 GitOps Promoter CommitStatus CRDs & \texttt{all-commitstatuses.json} & 32 & per-commit per-environment \\
-Approximate Git commits per gitops repo & inspection             & 6--12 & promotion PRs $+$ hydrator commits \\
+Approximate Git commits per gitops repo & inspection             & 6--12 & promotion PRs + hydrator commits \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -661,7 +661,7 @@ Table~\ref{tab:sdt-feedback-delta} reports the per-principle score delta. Strict
 \caption{SDT feedback experiment: per-principle outcomes for the Swagger Petstore specification, before and after a single agent-revision pass driven solely by the DriveBy validation report. \cmark{} = pass, \xmark{} = fail.}
 \label{tab:sdt-feedback-delta}
 \small
-\begin{tabular}{@{}lcccl@{}}
+\begin{tabular}{@{}l c c c p{0.36\textwidth}@{}}
 \toprule
 \textbf{Principle} & \textbf{Baseline} & \textbf{Revised} & \textbf{$\Delta$} & \textbf{Notes} \\
 \midrule

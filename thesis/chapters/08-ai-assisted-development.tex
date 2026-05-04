@@ -10,7 +10,7 @@ The chapter makes three claims. First, that the author's intellectual ownership-
 \label{sec:authorship}
 % ============================================================================
 
-This section answers, head-on, the question of who did what in this thesis. The data underlying every claim below is reproducible from the project's git history, the persistent agent-memory directory at \texttt{\textasciitilde/.claude/projects/-home-meter-peter-development-driveby/}, and the sixteen \texttt{CLAUDE.md} files in the monorepo.
+This section answers, head-on, the question of who did what in this thesis. The data underlying every claim below is reproducible from the project's git history, the persistent agent-memory directory at \texttt{\textasciitilde/.claude/\allowbreak projects/\allowbreak -home-meter-peter-\allowbreak development-driveby/}, and the sixteen \texttt{CLAUDE.md} files in the monorepo.
 
 % ----------------------------------------------------------------------------
 \subsection{The Two Phases of Development}
@@ -69,9 +69,9 @@ The supervisor's question about \emph{how} the author spent time during Phase~B-
 \caption{Approximate author effort allocation during the 12-day Phase~B productisation sprint (author estimates; precise wall-clock data was not recorded).}
 \label{tab:effort-allocation}
 \small
-\begin{tabular}{@{}lc@{}}
+\begin{tabular}{@{}p{0.72\textwidth} c@{}}
 \toprule
-\textbf{Activity} & \textbf{Approx.\ \% of Phase~B effort} \\
+\textbf{Activity} & \textbf{\% of Phase~B} \\
 \midrule
 Architectural direction and task scoping (author) & 25\% \\
 Reviewing AI-authored code, manifests, and prose (author) & 30\% \\
@@ -126,14 +126,14 @@ The DriveBy project contains sixteen CLAUDE.md files organised in a tree that mi
 \caption{CLAUDE.md hierarchy in the DriveBy monorepo.}
 \label{tab:claudemd-hierarchy}
 \small
-\begin{tabular}{@{}lp{8cm}@{}}
+\begin{tabular}{@{}p{0.40\textwidth} p{0.55\textwidth}@{}}
 \toprule
 \textbf{File} & \textbf{Scope} \\
 \midrule
 \texttt{CLAUDE.md} (root)                          & Project vision, SDT axioms, monorepo map, build commands, code quality rules, maintenance rules \\
 \texttt{driveby-cli/CLAUDE.md}                     & Package map, dependency flow, validation modes, test structure \\
-\texttt{driveby-cli/internal/principles/CLAUDE.md}  & PrincipleChecker interface, per-file status, axiom assignments, procedure for adding principles \\
-\texttt{driveby-cli/internal/spec/CLAUDE.md}        & APISpec interface, adapter pattern, normalised types, strict rules \\
+\texttt{driveby-cli/\allowbreak internal/principles/\allowbreak CLAUDE.md}  & PrincipleChecker interface, per-file status, axiom assignments, procedure for adding principles \\
+\texttt{driveby-cli/\allowbreak internal/spec/\allowbreak CLAUDE.md}        & APISpec interface, adapter pattern, normalised types, strict rules \\
 \texttt{kubernetes/CLAUDE.md}                       & Helm chart structure, XSDLC schema, cluster state, template escaping \\
 \texttt{apis/CLAUDE.md}                            & API inventory, evaluation purpose \\
 \texttt{apis/perfect-api/CLAUDE.md}                 & Endpoints, security model, expected pass/fail results \\
@@ -267,7 +267,7 @@ The thesis CLAUDE.md file (171 lines) provides chapter-by-chapter specifications
     \item \textbf{Author review}: the author reads the draft, edits for accuracy and tone, and accepts or rejects. Substantive sections were fully rewritten by the author after the draft.
 \end{enumerate}
 
-\textbf{Thesis as specification: a worked example.} The supervisor asked~([542]) for a concrete example justifying the claim that the thesis can be treated as a kind of specification against which the code is checked. One representative case: the thesis statement that ``DriveBy implements seven of nine principles as \texttt{PrincipleChecker} instances, with P006 and P007 as planned wrappers'' is treated as authoritative. The CI documentation check (\texttt{tools/check-docs.sh}) cross-references this against the actual files in \texttt{driveby-cli/internal/principles/}: if a P006 file appeared in source without a corresponding update to the thesis status, the build would fail. In this sense the thesis is treated as a high-level specification that gates code state---an asymmetric relationship where the thesis is the source of truth for the project's claimed scope, and the code is checked against it. This is more limited than treating the entire thesis as formal specification, but it does formalise one specific claim per chapter as a CI-enforced invariant.
+\textbf{Thesis as specification: a worked example.} The supervisor asked~([542]) for a concrete example justifying the claim that the thesis can be treated as a kind of specification against which the code is checked. One representative case: the thesis statement that ``DriveBy implements seven of nine principles as \texttt{PrincipleChecker} instances, with P006 and P007 as planned wrappers'' is treated as authoritative. The CI documentation check (\texttt{tools/check-docs.sh}) cross-references this against the actual files in \texttt{driveby-cli/\allowbreak internal/principles/}: if a P006 file appeared in source without a corresponding update to the thesis status, the build would fail. In this sense the thesis is treated as a high-level specification that gates code state---an asymmetric relationship where the thesis is the source of truth for the project's claimed scope, and the code is checked against it. This is more limited than treating the entire thesis as formal specification, but it does formalise one specific claim per chapter as a CI-enforced invariant.
 
 % ============================================================================
 \section{SDT as Agent Feedback Infrastructure}

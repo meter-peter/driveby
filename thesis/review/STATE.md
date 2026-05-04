@@ -7,11 +7,12 @@ Treat this file as the source-of-truth status when picking the work back up.
 
 | metric | value |
 |---|---|
-| **Build** | clean — 208 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
-| **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms |
-| **Latest commit** | `14ea94c` ("Activate Greek abstract — front matter now bilingual") |
+| **Build** | clean — 212 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
+| **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms (longtable) |
+| **Latest commit** | round-3 (Acronyms longtable + figure overlap fixes + missing `amssymb` package) |
 | **Round-1 commit** | `b96e6a6` ("Round-1 thesis revision addressing supervisor's 610 inline comments") |
 | **Round-2 commit** | `5f342e2` ("Round-2 thesis closure: severity alignment, Greek abstract, comment-index audit") |
+| **Round-3 fixes** | Acronyms multi-page table; Fig 5.1 legend frame overlap; Fig 5.4 reconciliation-loop annotations; long-token `\allowbreak` hints; `\usepackage{amssymb}` (was blocking `\bigstar`) |
 | **Branch** | `main`, pushed to `origin/main` |
 | **Resubmission target** | 2026-05-31 |
 | **Defense** | mid-June 2026, in-person, University of the Aegean |
@@ -63,7 +64,7 @@ Classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
 ## Picking the work back up
 
 1. Read this file for status.
-2. `cd thesis && pdflatex main.tex` (×3 passes) — should produce 210 pages, 0 overfull.
+2. `cd thesis && pdflatex main.tex` (×3 passes) — should produce 212 pages, 0 overfull.
 3. If supervisor sends a new round of comments, repeat the round-1/2 pattern: extract → index → classify → rewrite → log.
 4. The Greek build requires Fedora packages: `texlive-collection-langgreek` and `texlive-babel-english` (both installed as of 2026-05-04 on this machine).
 
@@ -71,7 +72,7 @@ Classifier: `review/bulk-classify.py` (re-runnable, version-controlled).
 
 | Path | Purpose |
 |---|---|
-| `thesis/main.pdf` | latest build (210 pp, bilingual) |
+| `thesis/main.pdf` | latest build (212 pp, bilingual) |
 | `thesis/review/comment-index.md` | 610-row audit table |
 | `thesis/review/changes-log.md` | per-comment closure log (round 1 + round 2) |
 | `thesis/review/REVISION-REPORT.md` | full narrative report including round 2 closure section |

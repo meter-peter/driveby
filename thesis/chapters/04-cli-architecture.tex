@@ -51,7 +51,7 @@ The implementation draws on two classical design patterns~\cite{gof}. The \texti
 \label{subsec:module-structure}
 % ----------------------------------------------------------------------------
 
-DriveBy is implemented as a single Go module (\texttt{github.com/meter-peter/driveby/driveby-cli}). The module is organized into eleven internal packages with a strict, unidirectional dependency flow:
+DriveBy is implemented as a single Go module (\texttt{github.com/\allowbreak meter-peter/\allowbreak driveby/\allowbreak driveby-cli}). The module is organized into eleven internal packages with a strict, unidirectional dependency flow:
 
 \begin{verbatim}
 types <- spec <- loader <- principles <- testing <- engine <- cli
@@ -344,7 +344,7 @@ The two design abstractions introduced so far---the \texttt{APISpec} interface (
 
 \begin{figure}[htbp]
 \centering
-\input{figures/class-diagram.tex}
+\resizebox{\textwidth}{!}{\input{figures/class-diagram.tex}}
 \caption{Class / interface diagram of DriveBy's two central abstractions. Dashed grey arrows denote interface realisation (concrete class implements interface); solid grey arrows denote use. Dashed nodes (P006, P007) are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers.}
 \label{fig:class-diagram}
 \end{figure}
