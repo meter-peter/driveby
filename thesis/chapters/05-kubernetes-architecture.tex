@@ -623,7 +623,7 @@ The DAG follows a fixed preamble, a dynamic checks section, and a fixed postambl
 For each check in the gate's ordered \texttt{checks[]} array, the composition generates a DAG step named \texttt{check-<index>-<type>}. Each step depends on the previous step, forming a sequential chain. The step template is selected by check type:
 
 \begin{itemize}
-    \item \texttt{validate-only} $\rightarrow$ \texttt{driveby-validate}: Runs the DriveBy CLI with the configured validation mode. The container image \texttt{ghcr.io/\allowbreak meter-peter/\allowbreak driveby:latest} executes with flags derived from the check's \texttt{validationConfig}. The validation report is stored on a shared PVC at \texttt{/tmp/reports}.
+    \item \texttt{validate-only} $\rightarrow$ \texttt{driveby-validate}: Runs the DriveBy CLI with the configured validation mode. The container image \texttt{ghcr.io/\allowbreak meter-peter/\allowbreak driveby:latest} executes with flags derived from the check's \texttt{validationConfig}. The validation report is stored on a shared PersistentVolumeClaim (PVC) at \texttt{/tmp/reports}.
     \item \texttt{functional-test} $\rightarrow$ \texttt{driveby-functional}: Runs the DriveBy CLI in \texttt{function-only} mode against the live API. Authentication credentials are injected from Kubernetes secrets.
     \item \texttt{load-test} $\rightarrow$ \texttt{driveby-loadtest}: Runs the DriveBy CLI in \texttt{load-only} mode with vegeta-based load testing, parameterized from the check's \texttt{loadTestConfig} (concurrent users, duration, P95 threshold, success rate).
 \end{itemize}

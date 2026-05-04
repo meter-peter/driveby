@@ -9,7 +9,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 |---|---|
 | **Build** | clean — 215 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
 | **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms (longtable) |
-| **Latest commit** | round-6 (Swagger 2.0 evaluation arm added — closes the last must-priority item [465]) |
+| **Latest commit** | round-7 (defensive polish: typo grep-pass, methodology→framework softening, defense Q&A doc) |
 | **Round-1 commit** | `b96e6a6` ("Round-1 thesis revision addressing supervisor's 610 inline comments") |
 | **Round-2 commit** | `5f342e2` ("Round-2 thesis closure: severity alignment, Greek abstract, comment-index audit") |
 | **Round-3 commit** | `56efe41` ("Round-3 thesis layout closure: zero overfull, zero errors, 212 pp") |
@@ -18,6 +18,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 | **Round-4 fixes** | Ch.2 prose adds (EvoMaster, OpenAPI 3.2, Smardas+Kritikos 2025, Optic/APIClarity/42Crunch named, code-first rewording, Table 2.1 symbol legend); Ch.4 vegeta "attack" disclaimed; comment-index 270 needs-walkthrough rows hand-classified per-row |
 | **Round-5 fixes** | [228]: Fig 3.1 (axiom-principle-mapping figure) removed — Table 3.x is the single source for the mapping. [455]: Ch.7 evaluation arms physically reordered to PoC → controlled → multi-API → large-scale; chapter intro, RQ-attribution paragraph, and Fig 7.1 caption rewritten to match the new progression |
 | **Round-6 fixes** | [465]: Swagger 2.0 evaluation arm added as Ch.7 §7.5.4 (`subsec:swagger2-eval`). Harvester extended with `2.0` selector + per-provider cap; 20 distinct-provider Swagger 2.0 specs harvested from APIs.guru and validated in strict mode; results table reports per-principle pass rates; the systemic specification-quality gap observed in 3.x is reproduced in 2.0 (80% of specs score 1/6 vs 84% for 3.x). Ch.9 §9.5 external-validity paragraph updated to cite the 70-API combined population. All three `must`-priority `discussed` items now closed |
+| **Round-7 fixes** | Defensive polish before submission. (a) Typo grep-pass: 10 marginal-typo rows verified against current text and reclassified `done` (PVC expanded on first use; remaining 9 confirmed already absorbed). (b) [557] follow-through: "methodology"→"framework"/"approach" in 5 prominent places (Ch.1 ×3, Ch.7 ×1, Ch.8 ×1) where the formal-methodology connotation overclaimed. Disclaimer phrasing in Ch.1 §1.4 and Ch.10 §10.5 left intact (those uses are deliberately the framework-vs-methodology contrast). (c) New `review/defense-qa.md`: rehearsed answers for the 10 highest-risk discussed/scope items (Ch.9-merge, methodology, control-theory analogy, composite testing, risk scoring, Ch.4 title, static-vs-syntactic, reconciliation-vs-adaptation, P006/P007 wrapper status, single-cluster PoC) |
 | **Branch** | `main`, pushed to `origin/main` |
 | **Resubmission target** | 2026-05-31 |
 | **Defense** | mid-June 2026, in-person, University of the Aegean |
@@ -26,7 +27,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 
 | status | count | meaning |
 |---|---:|---|
-| `done` | 65 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, addressed in round 5, or addressed in round 6 (Swagger 2.0 arm) |
+| `done` | 75 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, addressed in round 5, addressed in round 6 (Swagger 2.0 arm), or verified in round 7 grep-pass (10 typo rows) |
 | `addressed-by-rewrite` | 516 | absorbed into round-1/2/4 chapter rewrites; per-row resolution note in `[r4: ...]` trailer |
 | `discussed` | 22 | design-debate comment whose disposition is recorded per row and in `changes-log.md` / `professor-reply.md` |
 | `deferred` | 7 | comment text explicitly flags future work / PhD continuation |
