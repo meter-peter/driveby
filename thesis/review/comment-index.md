@@ -47,9 +47,9 @@ Total: **610** comments across **150** pages.
 
 | status | count | meaning |
 |---|---:|---|
-| `done` | 62 | explicitly cited in `changes-log.md` (round-1 closure) or hand-edited in round 4 |
+| `done` | 64 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, or directly addressed in round 5 (figure removal + Ch.7 arm reorder) |
 | `addressed-by-rewrite` | 516 | substantive concern absorbed into a round-1/2/4 chapter rewrite, with the resolution noted per row in the `[r4: ...]` trailer |
-| `discussed` | 25 | design-debate comment whose disposition is recorded per row (`[r4: ...]`) and, for the substantive ones, in `changes-log.md` or `professor-reply.md` |
+| `discussed` | 23 | design-debate comment whose disposition is recorded per row (`[r4: ...]`) and, for the substantive ones, in `changes-log.md` or `professor-reply.md` |
 | `deferred` | 7 | comment text explicitly flags future work or PhD continuation |
 | `needs-walkthrough` | 0 | --- (round-4 sweep classified every row case-by-case) |
 | `open` | 0 | --- (every row classified) |
@@ -290,7 +290,7 @@ Round-2 bulk classification has been applied; see status legend above.
 | [225](kritikos-comments.md#page-43) | 43 | ch3-methodology | beta-name | must | addressed-by-rewrite | I am not convinced about these checks. They are already covered in other princip  [r2: beta-name in heavily-rewritten ch3-methodology] |
 | [226](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-name | must | addressed-by-rewrite | the precondition isn't the completeness of the specification? Thus, to me, this   [r2: beta-name in heavily-rewritten ch3-methodology] |
 | [227](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-name | must | addressed-by-rewrite | if deterministic test execution is not guaranteed without this principle, then w  [r2: beta-name in heavily-rewritten ch3-methodology] |
-| [228](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-diag | must | discussed | I do not see any additional detail in figure that is not covered by the table. U |
+| [228](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-diag | must | done | I do not see any additional detail in figure that is not covered by the table. U  [r5: Figure 3.1 (axiom-principle-mapping) removed in round-5; Table 3.x retained as the single mapping artefact, carrying axiom/ID/principle/severity/status. Per supervisor [228]] |
 | [229](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-name | must | addressed-by-rewrite | What about P005. It looks to me that it is also related to completeness.  [r2: beta-name in heavily-rewritten ch3-methodology] |
 | [230](kritikos-comments.md#page-44) | 44 | ch3-methodology | beta-name | must | done | so they also relate to determinism? I ask this as you correlate them only with c |
 | [231](kritikos-comments.md#page-45) | 45 | ch3-methodology | typo | should | addressed-by-rewrite | This should be critical  [r2: typo in heavily-rewritten ch3-methodology; spot-check during defense walk-through] |
@@ -517,7 +517,7 @@ Round-2 bulk classification has been applied; see status legend above.
 | [452](kritikos-comments.md#page-116) | 116 | ch6-gitops | beta-ref | should | done | what is KubeCore? I am not sure this was indicated before. Maybe dedicate a foot |
 | [453](kritikos-comments.md#page-117) | 117 | ch6-gitops | generic | should | addressed-by-rewrite | (so only all relevant resources)  [r4: "so only all relevant resources" qualifier added in r1 — XSDLC instance manages only the resources it generates] |
 | [454](kritikos-comments.md#page-119) | 119 | ch7-evaluation | gamma | must | addressed-by-rewrite | Did not say sth about Section 6.8.  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |
-| [455](kritikos-comments.md#page-120) | 120 | ch7-evaluation | gamma | must | discussed | If PoC evaluation does not lead to assessing various metrics, I would recommend  |
+| [455](kritikos-comments.md#page-120) | 120 | ch7-evaluation | gamma | must | done | If PoC evaluation does not lead to assessing various metrics, I would recommend  [r5: Ch.7 evaluation arms reordered in round-5 to PoC → controlled → multi-API → large-scale per supervisor [455]. §7.2 is now Operational PoC; §7.3 Controlled non-critical-api; §7.4 Multi-API; §7.5 APIs.guru. Chapter intro and Fig 7.1 caption updated to match] |
 | [456](kritikos-comments.md#page-120) | 120 | ch7-evaluation | gamma | must | addressed-by-rewrite | Ok but aren't the evaluations also showing this? That an ontological specificati  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |
 | [457](kritikos-comments.md#page-121) | 121 | ch7-evaluation | gamma | must | addressed-by-rewrite | Question: do we see the PoC operational evaluation? Is this this last arm? I am   [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |
 | [458](kritikos-comments.md#page-121) | 121 | ch7-evaluation | gamma | must | addressed-by-rewrite | detection accuracy is measured by which metrics? Before presenting the controlle  [r2: evaluation extensions delivered in round 1 (per-check, APIs.guru rerun, PoC, agent-feedback)] |

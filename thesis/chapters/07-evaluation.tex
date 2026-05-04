@@ -1,7 +1,7 @@
 \chapter{Evaluation}
 \label{ch:evaluation}
 
-This chapter evaluates SDT and the DriveBy framework across three dimensions: a controlled experiment against a reference API designed to exercise all nine principles, a large-scale evaluation against real-world public APIs from the APIs.guru registry~\cite{apis-guru}, and a proof-of-concept operational evaluation of the XSDLC quality gate system deployed on Novelcore's internal development platform. The chapter concludes with CI/CD integration metrics that quantify the system's footprint and performance characteristics.
+This chapter evaluates SDT and the DriveBy framework across three dimensions, presented in order of increasing breadth---from the operational proof-of-concept (the system actually running and gating promotions on Novelcore's internal platform), through the controlled experiments against a reference API suite designed to exercise all nine principles, to the large-scale evaluation against real-world public APIs from the APIs.guru registry~\cite{apis-guru}. This ordering follows the natural progression of an empirical software-engineering study: proof-of-concept first establishes that the system runs end-to-end in production, the controlled experiments then establish what it detects in carefully constructed cases, and the large-scale arm finally generalises to the population of real public APIs. The chapter concludes with CI/CD integration metrics that quantify the system's footprint and performance characteristics.
 
 % ============================================================================
 \section{Evaluation Framework}
@@ -11,22 +11,162 @@ This chapter evaluates SDT and the DriveBy framework across three dimensions: a 
 The evaluation addresses the four research questions from Chapter~\ref{ch:introduction}:
 
 \begin{description}
+    \item[RQ3] (GitOps integration): How effectively does the framework integrate into cloud-native pipelines as an autonomous quality gate? Evaluated via the proof-of-concept deployment on Novelcore's cluster (Section~\ref{sec:operational-eval}), capturing exact resource counts, gate execution volume, and edge-case behaviour. RQ3 is addressed first because the operational PoC establishes that the system actually runs end-to-end in production before the controlled and large-scale experiments characterise its detection behaviour.
     \item[RQ1] (Framework soundness): Does the SDT conceptual framework provide automated quality assurance that detects realistic defects deterministically and without false positives? Evaluated via the single-API controlled experiment (Section~\ref{sec:controlled-eval}, including the per-check and combination extensions in Section~\ref{subsec:per-check-extension}), the multi-API controlled evaluation (Section~\ref{sec:multi-api-eval}), and the agent-feedback experiment (Section~\ref{sec:sdt-feedback-experiment}) that demonstrates the framework's structured output is sufficient feedback to drive autonomous specification improvement.
-    \item[RQ2] (Automation extent): To what extent can validation and testing be derived from specifications without manual test authorship? Evaluated via the large-scale experiment on 50 public APIs (Section~\ref{sec:wild-eval}), which establishes that the framework derives all validation rules from the specification with zero hand-authored test cases, and via the operational deployment (Section~\ref{sec:operational-eval}).
-    \item[RQ3] (GitOps integration): How effectively does the framework integrate into cloud-native pipelines as an autonomous quality gate? Evaluated via the proof-of-concept deployment on Novelcore's cluster (Section~\ref{sec:operational-eval}), capturing exact resource counts, gate execution volume, and edge-case behaviour.
+    \item[RQ2] (Automation extent): To what extent can validation and testing be derived from specifications without manual test authorship? Evaluated via the operational deployment (Section~\ref{sec:operational-eval}) and the large-scale experiment on 50 public APIs (Section~\ref{sec:wild-eval}), which establishes that the framework derives all validation rules from the specification with zero hand-authored test cases.
     \item[RQ4] (Ontological specification): Can quality-gated delivery pipelines be expressed as Kubernetes-native ontological specifications? Addressed through architectural analysis in Chapters~\ref{ch:kubernetes} and~\ref{ch:conclusion} and operationally validated by the multi-application coexistence observed in Section~\ref{sec:operational-eval}.
 \end{description}
 
-Figure~\ref{fig:eval-methodology} illustrates the three-arm evaluation design.
+Figure~\ref{fig:eval-methodology} illustrates the three-arm evaluation design, presented in the order in which the chapter develops them: proof-of-concept first, controlled second, large-scale third.
 
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{%
 \input{figures/evaluation-methodology.tex}%
 }
-\caption{Three-arm evaluation design: controlled validation against a reference API suite, large-scale validation against public APIs from APIs.guru, and proof-of-concept operational evaluation on an internal development platform.}
+\caption{Three-arm evaluation design, ordered as presented in this chapter: (1)~proof-of-concept operational deployment on an internal development platform, (2)~controlled validation against a reference API suite, and (3)~large-scale validation against public APIs from APIs.guru.}
 \label{fig:eval-methodology}
 \end{figure}
+
+% ============================================================================
+\section{Operational Evaluation: Proof-of-Concept Deployment}
+\label{sec:operational-eval}
+% ============================================================================
+
+The operational evaluation assesses SDT not as an isolated tool but as a proof-of-concept (PoC) feature within an Internal Developer Platform (IDP). This section is structured to address the supervisor's round-1 review observations~[494], [495], [510], which noted that earlier drafts mixed information from prior chapters with PoC-specific results without ever fully describing the PoC setup. The structure adopted here is therefore: (i)~the \emph{initial cluster situation} that pre-existed this thesis (Section~\ref{subsec:operational-initial-state}); (ii)~the \emph{PoC configuration} added for this experiment, including the per-API \texttt{XSDLC} resources and their gate parameters (Section~\ref{subsec:operational-poc-config}); (iii)~the \emph{deployment metrics and resource counts} actually observed on the cluster (Section~\ref{subsec:xsdlc-idp}); and (iv)~the \emph{operational behaviour} including edge cases (Sections~\ref{subsec:no-testers}--\ref{subsec:edge-cases}). Section~\ref{sec:cicd-metrics} concludes with the CI/CD integration metrics that quantify the system's footprint.
+
+% ----------------------------------------------------------------------------
+\subsection{Initial Cluster Situation}
+\label{subsec:operational-initial-state}
+% ----------------------------------------------------------------------------
+
+Before any PoC artefact was deployed, the target cluster (\texttt{private.novelcore.org}) already hosted Novelcore's KubeCore-branded IDP, a Kubernetes platform layer that pre-existed this thesis. The relevant pre-existing components were: ArgoCD (cluster-wide GitOps controller, in the \texttt{argocd} namespace), Crossplane v1.16 with provider-kubernetes (in the \texttt{crossplane-system} namespace), Argo Events with a NATS-based EventBus (in the \texttt{argo-events} namespace), Argo Workflows (in the \texttt{argo-workflows} namespace), Traefik as the ingress controller, and cert-manager wired to a public-CA \texttt{ClusterIssuer}. Five GitHub repositories under the \texttt{novelcore} organisation existed for the five evaluation applications (\texttt{perfect-api}, \texttt{bad-docs-api}, \texttt{no-auth-api}, \texttt{slow-api}, \texttt{broken-api}); in line with the two-repository BYOCI model (Chapter~\ref{ch:workflow}), each application repository contained only application source code and the BYOCI workflow that builds container images.
+
+The PoC therefore began against a stable IDP baseline. The thesis-built additions are scoped to the \texttt{driveby} namespace (Crossplane XRD, Composition, RBAC, EventBus, WorkflowTemplates, GitOps Promoter installation, and the \texttt{XSDLC} resources themselves) and to the per-application namespaces that each \texttt{XSDLC} CR generates. No modification to the pre-existing platform components was required; this is the principal architectural property the operational evaluation is designed to demonstrate.
+
+% ----------------------------------------------------------------------------
+\subsection{Proof-of-Concept Configuration}
+\label{subsec:operational-poc-config}
+% ----------------------------------------------------------------------------
+
+For the PoC, five \texttt{XSDLC} custom resources were applied to the cluster, one per evaluation application. Each CR is approximately 25--35 lines of YAML and shares a common environment chain---\texttt{dev}~$\rightarrow$~\texttt{staging}~$\rightarrow$~\texttt{prod}---differing only in the \emph{gate configuration} on the staging and production transitions. Table~\ref{tab:operational-poc-config} captures the configuration that was set up specifically for this experiment.
+
+\begin{table}[htbp]
+\centering
+\caption{Proof-of-concept configuration: gate checks per application per environment. All five applications share the dev~$\rightarrow$~staging~$\rightarrow$~prod chain; differences are confined to the gates.}
+\label{tab:operational-poc-config}
+\footnotesize
+\begin{tabular}{@{}l p{0.30\textwidth} p{0.42\textwidth}@{}}
+\toprule
+\textbf{Application} & \textbf{Staging gate} & \textbf{Production gate} \\
+\midrule
+\texttt{perfect-api} & validate-only (test-ready) + functional-test & load-test (10 users, 15\,s, P95 $\leq$ 2\,s, success $\geq$ 50\%), \texttt{autoMerge:false} \\
+\texttt{bad-docs-api} & validate-only (strict) & --- \\
+\texttt{no-auth-api}  & validate-only (strict) & --- \\
+\texttt{slow-api}     & validate-only (strict) + functional-test & load-test (50 users, 30\,s, P95 $\leq$ 200\,ms, success $\geq$ 99.5\%), \texttt{autoMerge:false} \\
+\texttt{broken-api}   & validate-only (test-ready) + functional-test & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two design choices in this configuration are worth flagging. First, the staging gate for \texttt{perfect-api} (now \texttt{non-critical-api} in this revised text---see Section~\ref{sec:controlled-eval}) uses \texttt{test-ready} mode rather than \texttt{strict} for the staging-promotion check, while the production gate uses \texttt{strict}. \texttt{test-ready} runs P001--P004 and P009 (a strict subset of the strict-mode set excluding P005 and P008); \texttt{non-critical-api} clears both, so the choice has no operational effect for this reference but exercises the mode-selection mechanism end-to-end. Second, three of the five applications (\texttt{perfect-api}, \texttt{slow-api}, \texttt{broken-api}) carry a production gate with \texttt{autoMerge:false}; the other two are configured to be blocked at staging and so production gates were not exercised. All gate parameters are versioned in Git as \texttt{XSDLC} resources and were applied via \texttt{kubectl apply}; the corresponding manifests are checked into \texttt{kubernetes/examples/}.
+
+% ----------------------------------------------------------------------------
+\subsection{Activity Volume Captured During the PoC}
+\label{subsec:operational-activity}
+% ----------------------------------------------------------------------------
+
+Cluster-wide and per-application snapshots were captured at the end of the PoC window using \texttt{kubectl get} against each relevant resource type. The snapshots are persisted in \texttt{results/cluster/} and \texttt{results/edge-cases/}; Table~\ref{tab:operational-activity} reports the activity volume the snapshots record. Numbers are exact counts from the JSON snapshot files, not approximations.
+
+\begin{table}[htbp]
+\centering
+\caption{Activity volume captured at PoC end across all five applications. Sources: \texttt{results/cluster/all-*.json}, \texttt{results/cluster/<app>/*}.}
+\label{tab:operational-activity}
+\small
+\begin{tabular}{@{}p{0.32\textwidth} p{0.30\textwidth} r p{0.22\textwidth}@{}}
+\toprule
+\textbf{Resource} & \textbf{Source snapshot} & \textbf{Count} & \textbf{Scope} \\
+\midrule
+ArgoCD Applications      & \texttt{all-argocd-apps.json}      & 15 & 3 envs $\times$ 5 apps \\
+Argo Workflow runs        & \texttt{all-workflows.json}         & 44 & gate executions across the PoC window \\
+GitOps Promoter CommitStatus CRDs & \texttt{all-commitstatuses.json} & 32 & per-commit per-environment \\
+Approximate Git commits per gitops repo & inspection             & 6--12 & promotion PRs + hydrator commits \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 32 CommitStatus CRDs (per~[509], the supervisor's request for approximate per-repo commit counts) decompose by phase as follows: 18~\texttt{failure}, 13~\texttt{success}, 1~\texttt{pending}---a distribution consistent with the four defective APIs being intentionally blocked at the staging gate while \texttt{perfect-api} and \texttt{slow-api} progressed further. The 44 Workflow runs include both staging and production gate executions across all five applications, and include the deliberate retries used to verify the workflow re-trigger edge case (Section~\ref{subsec:edge-cases}).
+
+% ----------------------------------------------------------------------------
+\subsection{XSDLC as IDP Feature}
+\label{subsec:xsdlc-idp}
+% ----------------------------------------------------------------------------
+
+The DriveBy quality gate system is deployed on \texttt{private.novelcore.org} as one component of Novelcore's internal developer platform. The IDP is built entirely on Kubernetes operators and Crossplane compositions: database provisioning, networking, observability, and now quality-gated delivery pipelines all follow the same pattern---a custom resource declares the desired state, a composition generates the implementation resources, and Kubernetes controllers reconcile toward that state.
+
+Within this IDP, XSDLC is not a standalone installation. It is a \textit{composable building block} that coexists with other platform capabilities. A single \texttt{XSDLC} custom resource (\(\sim\)25 lines of YAML) provisions \textbf{approximately 45--50 Kubernetes objects} in under 15 seconds for a 3-environment pipeline---the exact number depends on how many environments are gated and whether the GitHub provider is configured to manage branch protection. Per~[370], the count decomposes (for the \texttt{perfect-api} CR observed on the cluster) as: 3 ArgoCD Applications (one per environment), 2 WorkflowTemplates (staging-gate, prod-gate), 4 Argo Events resources (EventBus, EventSource, two Sensors), 2 Ingresses (staging-gate webhook, prod-gate webhook), 5 GitOps Promoter resources (ScmProvider, GitRepository, PromotionStrategy, two CommitStatus templates), per-namespace ServiceAccount and RBAC bindings, ArgoCD push secrets and per-namespace \texttt{ghcr-creds} secrets, and---when GitHub provider is enabled---branches, BranchProtection rules, and boilerplate manifests in the auto-created GitOps repository. The 44--47 spread reported in earlier drafts reflects whether one counts the per-environment branch and protection objects once or per environment. Without XSDLC, a platform operator would need to manually create each of these resources through ClickOps---navigating the ArgoCD UI to create Applications, the GitHub UI to configure branch protection and webhooks, and \texttt{kubectl} to create RBAC, Sensors, and WorkflowTemplates. This manual process takes hours, is error-prone, non-reproducible, and impossible to version-control. XSDLC reduces it to a single declarative resource that can be reviewed in a pull request, stored in Git, and reconciled automatically.
+
+% ----------------------------------------------------------------------------
+\subsection{Quality Assurance Without Dedicated Testers}
+\label{subsec:no-testers}
+% ----------------------------------------------------------------------------
+
+The most consequential operational finding is that SDT demonstrates the feasibility of operating without dedicated API testers in the promotion pipeline. Because validation is embedded in the promotion flow---every promotion PR is automatically validated against the OpenAPI specification and, where configured, load-tested---the quality gate runs without human initiation, human authoring of test cases, or human interpretation of results. This proof-of-concept deployment validates the architectural viability of zero-tester promotion gates, though production adoption would require further hardening and organizational validation.
+
+In the proof-of-concept deployment, API owners can verify that their deployments have been validated against two contracts:
+
+\begin{enumerate}
+    \item \textbf{The specification contract} (P001--P005, P008, P009): The API's documentation, error handling, schema definitions, and security configuration match the declared specification. Any drift between the specification and the implementation is detected before promotion.
+    \item \textbf{The performance contract} (load testing via \texttt{loadTestConfig}): The API handles the configured concurrent user count within the configured P95 latency threshold at the configured success rate. Any performance regression below these thresholds blocks promotion.
+\end{enumerate}
+
+This is not a claim that SDT replaces all testing. Unit tests, integration tests, and exploratory testing remain the developer's responsibility (the BYOCI boundary). SDT replaces the \textit{promotion-gate testing} that would otherwise require a dedicated QA engineer to run manual contract checks and load tests before each environment transition.
+
+% ----------------------------------------------------------------------------
+\subsection{Load Testing as Business Insurance}
+\label{subsec:load-testing-insurance}
+% ----------------------------------------------------------------------------
+
+The quality gate does not prevent all production failures---it prevents \textit{preventable} failures. Consider the scenario where a production API experiences an out-of-memory (OOM) crash because the number of concurrent users has grown beyond the original capacity plan. The quality gate's response to this scenario is instructive:
+
+The production environment \textit{was} load-tested before promotion. The \texttt{loadTestConfig} specified, for example, 50 concurrent users with a P95 latency threshold of 200\,ms and a 99.5\% success rate. The API passed these thresholds, and the promotion was approved. The OOM occurred because the \textit{actual} user load exceeded the \textit{configured} threshold---not because the system failed to test.
+
+This is by design. The quality gate validates against \textit{declared business requirements}, not against unbounded traffic. The correct response to the OOM is not to blame the quality gate but to update the \texttt{loadTestConfig}---increase \texttt{concurrentUsers}, tighten \texttt{maxLatencyP95}, raise \texttt{minSuccessRate}---to reflect the new reality. Because these thresholds are fields in a Kubernetes custom resource, updating them is a one-line YAML change that takes effect on the next promotion cycle.
+
+This pattern---declare thresholds, gate against them, update when reality diverges---transforms load testing from a periodic manual activity into a continuous, declarative contract. The thresholds are versioned in Git, reviewed in pull requests, and enforced automatically. When business requirements change, the thresholds change with them.
+
+A natural extension (discussed in Section~\ref{sec:future-work}) is a controller that watches observability metrics (Prometheus, Grafana) and automatically adjusts \texttt{loadTestConfig} thresholds based on actual production traffic patterns. This would close the loop between observability and quality gating, making the system self-adjusting.
+
+% ----------------------------------------------------------------------------
+\subsection{Operational Edge Cases}
+\label{subsec:edge-cases}
+% ----------------------------------------------------------------------------
+
+Seven edge-case scenarios were tested against the proof-of-concept deployment to verify system behaviour under non-ideal conditions. Table~\ref{tab:edge-cases} summarises the results.
+
+\begin{table}[htbp]
+\centering
+\caption{Operational edge-case test results on \texttt{private.novelcore.org}.}
+\label{tab:edge-cases}
+\small
+\begin{tabular}{@{}lp{7.5cm}c@{}}
+\toprule
+\textbf{Scenario} & \textbf{Observed Behaviour} & \textbf{Pass} \\
+\midrule
+Webhook redelivery & Redelivered webhook was accepted (HTTP~200) and processed; new workflow triggered. & \cmark \\
+Workflow re-trigger & Closing and reopening a PR re-triggered the gate workflow via EventSource/Sensor. New workflow created and completed. & \cmark \\
+Health-check timeout & ArgoCD \texttt{selfHeal} restored the scaled-to-zero deployment before the health check could detect unavailability. Timeout scenario not reproducible with selfHeal enabled. & \xmark \\
+Manual approval & Production PR remained open despite passing all gates (\texttt{autoMerge:~false}). CommitStatus showed \texttt{success}; manual merge required. & \cmark \\
+Branch protection & XSDLC-provisioned BranchProtection rules enforced status checks (\texttt{staging-gate}, \texttt{prod-gate}) on all 5 API repositories. 15 BranchProtection CRDs all Synced/Ready. & \cmark \\
+CommitStatus lifecycle & 32 CommitStatus CRDs observed across 5 APIs. Phase distribution: 18 failure, 13 success, 1 pending. Each commit SHA received its own CRD. & \cmark \\
+ArgoCD sync after merge & Both \texttt{perfect-api-staging} and \texttt{slow-api-staging} reached Synced/Healthy state with running pods after staging PR merge. & \cmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Six of the seven edge cases passed. The health-check timeout scenario could not be reliably triggered because ArgoCD's \texttt{selfHeal} policy restored the scaled-to-zero deployment faster than the EventSource--Sensor--Workflow pipeline could trigger the health check. This is a positive finding for operational resilience---\texttt{selfHeal} and the quality gate reinforce each other---but it means the 5-minute timeout path was only observed when the staging gate genuinely failed and no deployment existed in the target namespace.
+
+The multi-API evaluation also exposed a reporting inconsistency in the \texttt{load-only} CLI command. The \texttt{slow-api} production load test produced a JSON report with \texttt{"exit\_code": 0} despite the test having failed (\texttt{"status": "failed"}). The actual process exit code was correct (exit code~1, raised by the Cobra command handler's \texttt{ExitError} return), and the workflow correctly detected the failure via the process exit code rather than the JSON field. The bug was fixed by computing \texttt{result.Status} from the \texttt{FailedChecks} count before serializing the report. This is a self-testing discovery: the framework's own quality gate infrastructure, running the framework's own CLI, exposed a reporting inconsistency that unit tests had not covered.
 
 % ============================================================================
 \section{Controlled Evaluation: non-critical-api}
@@ -454,146 +594,6 @@ The five-API controlled evaluation (Section~\ref{sec:multi-api-eval}) corroborat
 \caption{Per-principle pass rates across the five evaluation APIs (strict mode). P001 achieves universal compliance; P002--P004 reveal systematic documentation and schema quality gaps; P005 and P008 reflect targeted defect injection.}
 \label{fig:pass-rates}
 \end{figure}
-
-% ============================================================================
-\section{Operational Evaluation: Proof-of-Concept Deployment}
-\label{sec:operational-eval}
-% ============================================================================
-
-The operational evaluation assesses SDT not as an isolated tool but as a proof-of-concept (PoC) feature within an Internal Developer Platform (IDP). This section is structured to address the supervisor's round-1 review observations~[494], [495], [510], which noted that earlier drafts mixed information from prior chapters with PoC-specific results without ever fully describing the PoC setup. The structure adopted here is therefore: (i)~the \emph{initial cluster situation} that pre-existed this thesis (Section~\ref{subsec:operational-initial-state}); (ii)~the \emph{PoC configuration} added for this experiment, including the per-API \texttt{XSDLC} resources and their gate parameters (Section~\ref{subsec:operational-poc-config}); (iii)~the \emph{deployment metrics and resource counts} actually observed on the cluster (Section~\ref{subsec:xsdlc-idp}); and (iv)~the \emph{operational behaviour} including edge cases (Sections~\ref{subsec:no-testers}--\ref{subsec:edge-cases}). Section~\ref{sec:cicd-metrics} concludes with the CI/CD integration metrics that quantify the system's footprint.
-
-% ----------------------------------------------------------------------------
-\subsection{Initial Cluster Situation}
-\label{subsec:operational-initial-state}
-% ----------------------------------------------------------------------------
-
-Before any PoC artefact was deployed, the target cluster (\texttt{private.novelcore.org}) already hosted Novelcore's KubeCore-branded IDP, a Kubernetes platform layer that pre-existed this thesis. The relevant pre-existing components were: ArgoCD (cluster-wide GitOps controller, in the \texttt{argocd} namespace), Crossplane v1.16 with provider-kubernetes (in the \texttt{crossplane-system} namespace), Argo Events with a NATS-based EventBus (in the \texttt{argo-events} namespace), Argo Workflows (in the \texttt{argo-workflows} namespace), Traefik as the ingress controller, and cert-manager wired to a public-CA \texttt{ClusterIssuer}. Five GitHub repositories under the \texttt{novelcore} organisation existed for the five evaluation applications (\texttt{perfect-api}, \texttt{bad-docs-api}, \texttt{no-auth-api}, \texttt{slow-api}, \texttt{broken-api}); in line with the two-repository BYOCI model (Chapter~\ref{ch:workflow}), each application repository contained only application source code and the BYOCI workflow that builds container images.
-
-The PoC therefore began against a stable IDP baseline. The thesis-built additions are scoped to the \texttt{driveby} namespace (Crossplane XRD, Composition, RBAC, EventBus, WorkflowTemplates, GitOps Promoter installation, and the \texttt{XSDLC} resources themselves) and to the per-application namespaces that each \texttt{XSDLC} CR generates. No modification to the pre-existing platform components was required; this is the principal architectural property the operational evaluation is designed to demonstrate.
-
-% ----------------------------------------------------------------------------
-\subsection{Proof-of-Concept Configuration}
-\label{subsec:operational-poc-config}
-% ----------------------------------------------------------------------------
-
-For the PoC, five \texttt{XSDLC} custom resources were applied to the cluster, one per evaluation application. Each CR is approximately 25--35 lines of YAML and shares a common environment chain---\texttt{dev}~$\rightarrow$~\texttt{staging}~$\rightarrow$~\texttt{prod}---differing only in the \emph{gate configuration} on the staging and production transitions. Table~\ref{tab:operational-poc-config} captures the configuration that was set up specifically for this experiment.
-
-\begin{table}[htbp]
-\centering
-\caption{Proof-of-concept configuration: gate checks per application per environment. All five applications share the dev~$\rightarrow$~staging~$\rightarrow$~prod chain; differences are confined to the gates.}
-\label{tab:operational-poc-config}
-\footnotesize
-\begin{tabular}{@{}l p{0.30\textwidth} p{0.42\textwidth}@{}}
-\toprule
-\textbf{Application} & \textbf{Staging gate} & \textbf{Production gate} \\
-\midrule
-\texttt{perfect-api} & validate-only (test-ready) + functional-test & load-test (10 users, 15\,s, P95 $\leq$ 2\,s, success $\geq$ 50\%), \texttt{autoMerge:false} \\
-\texttt{bad-docs-api} & validate-only (strict) & --- \\
-\texttt{no-auth-api}  & validate-only (strict) & --- \\
-\texttt{slow-api}     & validate-only (strict) + functional-test & load-test (50 users, 30\,s, P95 $\leq$ 200\,ms, success $\geq$ 99.5\%), \texttt{autoMerge:false} \\
-\texttt{broken-api}   & validate-only (test-ready) + functional-test & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Two design choices in this configuration are worth flagging. First, the staging gate for \texttt{perfect-api} (now \texttt{non-critical-api} in this revised text---see Section~\ref{sec:controlled-eval}) uses \texttt{test-ready} mode rather than \texttt{strict} for the staging-promotion check, while the production gate uses \texttt{strict}. \texttt{test-ready} runs P001--P004 and P009 (a strict subset of the strict-mode set excluding P005 and P008); \texttt{non-critical-api} clears both, so the choice has no operational effect for this reference but exercises the mode-selection mechanism end-to-end. Second, three of the five applications (\texttt{perfect-api}, \texttt{slow-api}, \texttt{broken-api}) carry a production gate with \texttt{autoMerge:false}; the other two are configured to be blocked at staging and so production gates were not exercised. All gate parameters are versioned in Git as \texttt{XSDLC} resources and were applied via \texttt{kubectl apply}; the corresponding manifests are checked into \texttt{kubernetes/examples/}.
-
-% ----------------------------------------------------------------------------
-\subsection{Activity Volume Captured During the PoC}
-\label{subsec:operational-activity}
-% ----------------------------------------------------------------------------
-
-Cluster-wide and per-application snapshots were captured at the end of the PoC window using \texttt{kubectl get} against each relevant resource type. The snapshots are persisted in \texttt{results/cluster/} and \texttt{results/edge-cases/}; Table~\ref{tab:operational-activity} reports the activity volume the snapshots record. Numbers are exact counts from the JSON snapshot files, not approximations.
-
-\begin{table}[htbp]
-\centering
-\caption{Activity volume captured at PoC end across all five applications. Sources: \texttt{results/cluster/all-*.json}, \texttt{results/cluster/<app>/*}.}
-\label{tab:operational-activity}
-\small
-\begin{tabular}{@{}p{0.32\textwidth} p{0.30\textwidth} r p{0.22\textwidth}@{}}
-\toprule
-\textbf{Resource} & \textbf{Source snapshot} & \textbf{Count} & \textbf{Scope} \\
-\midrule
-ArgoCD Applications      & \texttt{all-argocd-apps.json}      & 15 & 3 envs $\times$ 5 apps \\
-Argo Workflow runs        & \texttt{all-workflows.json}         & 44 & gate executions across the PoC window \\
-GitOps Promoter CommitStatus CRDs & \texttt{all-commitstatuses.json} & 32 & per-commit per-environment \\
-Approximate Git commits per gitops repo & inspection             & 6--12 & promotion PRs + hydrator commits \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The 32 CommitStatus CRDs (per~[509], the supervisor's request for approximate per-repo commit counts) decompose by phase as follows: 18~\texttt{failure}, 13~\texttt{success}, 1~\texttt{pending}---a distribution consistent with the four defective APIs being intentionally blocked at the staging gate while \texttt{perfect-api} and \texttt{slow-api} progressed further. The 44 Workflow runs include both staging and production gate executions across all five applications, and include the deliberate retries used to verify the workflow re-trigger edge case (Section~\ref{subsec:edge-cases}).
-
-% ----------------------------------------------------------------------------
-\subsection{XSDLC as IDP Feature}
-\label{subsec:xsdlc-idp}
-% ----------------------------------------------------------------------------
-
-The DriveBy quality gate system is deployed on \texttt{private.novelcore.org} as one component of Novelcore's internal developer platform. The IDP is built entirely on Kubernetes operators and Crossplane compositions: database provisioning, networking, observability, and now quality-gated delivery pipelines all follow the same pattern---a custom resource declares the desired state, a composition generates the implementation resources, and Kubernetes controllers reconcile toward that state.
-
-Within this IDP, XSDLC is not a standalone installation. It is a \textit{composable building block} that coexists with other platform capabilities. A single \texttt{XSDLC} custom resource (\(\sim\)25 lines of YAML) provisions \textbf{approximately 45--50 Kubernetes objects} in under 15 seconds for a 3-environment pipeline---the exact number depends on how many environments are gated and whether the GitHub provider is configured to manage branch protection. Per~[370], the count decomposes (for the \texttt{perfect-api} CR observed on the cluster) as: 3 ArgoCD Applications (one per environment), 2 WorkflowTemplates (staging-gate, prod-gate), 4 Argo Events resources (EventBus, EventSource, two Sensors), 2 Ingresses (staging-gate webhook, prod-gate webhook), 5 GitOps Promoter resources (ScmProvider, GitRepository, PromotionStrategy, two CommitStatus templates), per-namespace ServiceAccount and RBAC bindings, ArgoCD push secrets and per-namespace \texttt{ghcr-creds} secrets, and---when GitHub provider is enabled---branches, BranchProtection rules, and boilerplate manifests in the auto-created GitOps repository. The 44--47 spread reported in earlier drafts reflects whether one counts the per-environment branch and protection objects once or per environment. Without XSDLC, a platform operator would need to manually create each of these resources through ClickOps---navigating the ArgoCD UI to create Applications, the GitHub UI to configure branch protection and webhooks, and \texttt{kubectl} to create RBAC, Sensors, and WorkflowTemplates. This manual process takes hours, is error-prone, non-reproducible, and impossible to version-control. XSDLC reduces it to a single declarative resource that can be reviewed in a pull request, stored in Git, and reconciled automatically.
-
-% ----------------------------------------------------------------------------
-\subsection{Quality Assurance Without Dedicated Testers}
-\label{subsec:no-testers}
-% ----------------------------------------------------------------------------
-
-The most consequential operational finding is that SDT demonstrates the feasibility of operating without dedicated API testers in the promotion pipeline. Because validation is embedded in the promotion flow---every promotion PR is automatically validated against the OpenAPI specification and, where configured, load-tested---the quality gate runs without human initiation, human authoring of test cases, or human interpretation of results. This proof-of-concept deployment validates the architectural viability of zero-tester promotion gates, though production adoption would require further hardening and organizational validation.
-
-In the proof-of-concept deployment, API owners can verify that their deployments have been validated against two contracts:
-
-\begin{enumerate}
-    \item \textbf{The specification contract} (P001--P005, P008, P009): The API's documentation, error handling, schema definitions, and security configuration match the declared specification. Any drift between the specification and the implementation is detected before promotion.
-    \item \textbf{The performance contract} (load testing via \texttt{loadTestConfig}): The API handles the configured concurrent user count within the configured P95 latency threshold at the configured success rate. Any performance regression below these thresholds blocks promotion.
-\end{enumerate}
-
-This is not a claim that SDT replaces all testing. Unit tests, integration tests, and exploratory testing remain the developer's responsibility (the BYOCI boundary). SDT replaces the \textit{promotion-gate testing} that would otherwise require a dedicated QA engineer to run manual contract checks and load tests before each environment transition.
-
-% ----------------------------------------------------------------------------
-\subsection{Load Testing as Business Insurance}
-\label{subsec:load-testing-insurance}
-% ----------------------------------------------------------------------------
-
-The quality gate does not prevent all production failures---it prevents \textit{preventable} failures. Consider the scenario where a production API experiences an out-of-memory (OOM) crash because the number of concurrent users has grown beyond the original capacity plan. The quality gate's response to this scenario is instructive:
-
-The production environment \textit{was} load-tested before promotion. The \texttt{loadTestConfig} specified, for example, 50 concurrent users with a P95 latency threshold of 200\,ms and a 99.5\% success rate. The API passed these thresholds, and the promotion was approved. The OOM occurred because the \textit{actual} user load exceeded the \textit{configured} threshold---not because the system failed to test.
-
-This is by design. The quality gate validates against \textit{declared business requirements}, not against unbounded traffic. The correct response to the OOM is not to blame the quality gate but to update the \texttt{loadTestConfig}---increase \texttt{concurrentUsers}, tighten \texttt{maxLatencyP95}, raise \texttt{minSuccessRate}---to reflect the new reality. Because these thresholds are fields in a Kubernetes custom resource, updating them is a one-line YAML change that takes effect on the next promotion cycle.
-
-This pattern---declare thresholds, gate against them, update when reality diverges---transforms load testing from a periodic manual activity into a continuous, declarative contract. The thresholds are versioned in Git, reviewed in pull requests, and enforced automatically. When business requirements change, the thresholds change with them.
-
-A natural extension (discussed in Section~\ref{sec:future-work}) is a controller that watches observability metrics (Prometheus, Grafana) and automatically adjusts \texttt{loadTestConfig} thresholds based on actual production traffic patterns. This would close the loop between observability and quality gating, making the system self-adjusting.
-
-% ----------------------------------------------------------------------------
-\subsection{Operational Edge Cases}
-\label{subsec:edge-cases}
-% ----------------------------------------------------------------------------
-
-Seven edge-case scenarios were tested against the proof-of-concept deployment to verify system behaviour under non-ideal conditions. Table~\ref{tab:edge-cases} summarises the results.
-
-\begin{table}[htbp]
-\centering
-\caption{Operational edge-case test results on \texttt{private.novelcore.org}.}
-\label{tab:edge-cases}
-\small
-\begin{tabular}{@{}lp{7.5cm}c@{}}
-\toprule
-\textbf{Scenario} & \textbf{Observed Behaviour} & \textbf{Pass} \\
-\midrule
-Webhook redelivery & Redelivered webhook was accepted (HTTP~200) and processed; new workflow triggered. & \cmark \\
-Workflow re-trigger & Closing and reopening a PR re-triggered the gate workflow via EventSource/Sensor. New workflow created and completed. & \cmark \\
-Health-check timeout & ArgoCD \texttt{selfHeal} restored the scaled-to-zero deployment before the health check could detect unavailability. Timeout scenario not reproducible with selfHeal enabled. & \xmark \\
-Manual approval & Production PR remained open despite passing all gates (\texttt{autoMerge:~false}). CommitStatus showed \texttt{success}; manual merge required. & \cmark \\
-Branch protection & XSDLC-provisioned BranchProtection rules enforced status checks (\texttt{staging-gate}, \texttt{prod-gate}) on all 5 API repositories. 15 BranchProtection CRDs all Synced/Ready. & \cmark \\
-CommitStatus lifecycle & 32 CommitStatus CRDs observed across 5 APIs. Phase distribution: 18 failure, 13 success, 1 pending. Each commit SHA received its own CRD. & \cmark \\
-ArgoCD sync after merge & Both \texttt{perfect-api-staging} and \texttt{slow-api-staging} reached Synced/Healthy state with running pods after staging PR merge. & \cmark \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Six of the seven edge cases passed. The health-check timeout scenario could not be reliably triggered because ArgoCD's \texttt{selfHeal} policy restored the scaled-to-zero deployment faster than the EventSource--Sensor--Workflow pipeline could trigger the health check. This is a positive finding for operational resilience---\texttt{selfHeal} and the quality gate reinforce each other---but it means the 5-minute timeout path was only observed when the staging gate genuinely failed and no deployment existed in the target namespace.
-
-The multi-API evaluation also exposed a reporting inconsistency in the \texttt{load-only} CLI command. The \texttt{slow-api} production load test produced a JSON report with \texttt{"exit\_code": 0} despite the test having failed (\texttt{"status": "failed"}). The actual process exit code was correct (exit code~1, raised by the Cobra command handler's \texttt{ExitError} return), and the workflow correctly detected the failure via the process exit code rather than the JSON field. The bug was fixed by computing \texttt{result.Status} from the \texttt{FailedChecks} count before serializing the report. This is a self-testing discovery: the framework's own quality gate infrastructure, running the framework's own CLI, exposed a reporting inconsistency that unit tests had not covered.
 
 % ============================================================================
 \section{CI/CD Integration Metrics}
