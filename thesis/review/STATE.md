@@ -10,6 +10,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 | **Build** | clean — 215 pages, 0 `Overfull \hbox`, 0 `Underfull \hbox`, 0 errors, 0 undefined refs |
 | **Front matter** | bilingual: English Abstract + Greek Περίληψη + ToC + LoF + LoT + Acronyms (longtable) |
 | **Latest commit** | round-7 (defensive polish: typo grep-pass, methodology→framework softening, defense Q&A doc) |
+| **Latest revision pass** | round-8 (trailer-sharpening: every must-priority `addressed-by-rewrite` row in Ch.3/Ch.7 now cites a specific §X.Y or line range; uncommitted) |
 | **Round-1 commit** | `b96e6a6` ("Round-1 thesis revision addressing supervisor's 610 inline comments") |
 | **Round-2 commit** | `5f342e2` ("Round-2 thesis closure: severity alignment, Greek abstract, comment-index audit") |
 | **Round-3 commit** | `56efe41` ("Round-3 thesis layout closure: zero overfull, zero errors, 212 pp") |
@@ -19,6 +20,7 @@ Treat this file as the source-of-truth status when picking the work back up.
 | **Round-5 fixes** | [228]: Fig 3.1 (axiom-principle-mapping figure) removed — Table 3.x is the single source for the mapping. [455]: Ch.7 evaluation arms physically reordered to PoC → controlled → multi-API → large-scale; chapter intro, RQ-attribution paragraph, and Fig 7.1 caption rewritten to match the new progression |
 | **Round-6 fixes** | [465]: Swagger 2.0 evaluation arm added as Ch.7 §7.5.4 (`subsec:swagger2-eval`). Harvester extended with `2.0` selector + per-provider cap; 20 distinct-provider Swagger 2.0 specs harvested from APIs.guru and validated in strict mode; results table reports per-principle pass rates; the systemic specification-quality gap observed in 3.x is reproduced in 2.0 (80% of specs score 1/6 vs 84% for 3.x). Ch.9 §9.5 external-validity paragraph updated to cite the 70-API combined population. All three `must`-priority `discussed` items now closed |
 | **Round-7 fixes** | Defensive polish before submission. (a) Typo grep-pass: 10 marginal-typo rows verified against current text and reclassified `done` (PVC expanded on first use; remaining 9 confirmed already absorbed). (b) [557] follow-through: "methodology"→"framework"/"approach" in 5 prominent places (Ch.1 ×3, Ch.7 ×1, Ch.8 ×1) where the formal-methodology connotation overclaimed. Disclaimer phrasing in Ch.1 §1.4 and Ch.10 §10.5 left intact (those uses are deliberately the framework-vs-methodology contrast). (c) New `review/defense-qa.md`: rehearsed answers for the 10 highest-risk discussed/scope items (Ch.9-merge, methodology, control-theory analogy, composite testing, risk scoring, Ch.4 title, static-vs-syntactic, reconciliation-vs-adaptation, P006/P007 wrapper status, single-cluster PoC) |
+| **Round-8 fixes** | Trailer-sharpening pass triggered by an audit that found ~70% of `addressed-by-rewrite` trailers were generic boilerplate (`[r2: ... in heavily-rewritten ch3-methodology]` / `[r2: evaluation extensions delivered in round 1 ...]`) that could not be defended live. Sharpened **all 75 must-priority `addressed-by-rewrite` trailers in Ch.3 and Ch.7** to cite specific section labels and line numbers, naming the table or paragraph that resolves each concern. Mis-trailed Ch.8 cluster [520]–[527] re-pointed to the actual answer locations (Ch.3 §3.1 for "what does specification mean", Ch.7 §7.5/§7.7 for defect-classification and RQ-correlation, Ch.10 §10.3 for RQ4-ontological-spec). [481] (4/9 critical-principles) reclassified `addressed-by-rewrite` → `discussed` since post-revision severity escalation deliberately moves the count to 5/9 — knowingly-deviant point. Zero `[r2: ...]` boilerplate remains on must-priority rows for Ch.3 and Ch.7 |
 | **Branch** | `main`, pushed to `origin/main` |
 | **Resubmission target** | 2026-05-31 |
 | **Defense** | mid-June 2026, in-person, University of the Aegean |
@@ -28,8 +30,8 @@ Treat this file as the source-of-truth status when picking the work back up.
 | status | count | meaning |
 |---|---:|---|
 | `done` | 75 | explicitly cited in `changes-log.md` (round-1 closure), hand-edited in round 4, addressed in round 5, addressed in round 6 (Swagger 2.0 arm), or verified in round 7 grep-pass (10 typo rows) |
-| `addressed-by-rewrite` | 516 | absorbed into round-1/2/4 chapter rewrites; per-row resolution note in `[r4: ...]` trailer |
-| `discussed` | 22 | design-debate comment whose disposition is recorded per row and in `changes-log.md` / `professor-reply.md` |
+| `addressed-by-rewrite` | 505 | absorbed into round-1/2/4 chapter rewrites; per-row resolution note in `[r4: ...]` or `[r7: ...]` trailer (round-8 sharpened all 75 must-priority Ch.3/Ch.7 trailers to cite specific §X.Y or line ranges, plus the 8-row Ch.8 mis-trail cluster [520]–[527] re-pointed to their real answer locations) |
+| `discussed` | 23 | design-debate comment whose disposition is recorded per row and in `changes-log.md` / `professor-reply.md` / `defense-qa.md` (round-8 reclassified [481] — the 4/9-vs-5/9 critical-principle count is a deliberate post-revision deviation, not a rewrite-absorption) |
 | `deferred` | 7 | comment text explicitly flags future work / PhD continuation |
 | `needs-walkthrough` | **0** | round-4 sweep classified every row case-by-case |
 | `open` | **0** | every row classified |
