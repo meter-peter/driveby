@@ -483,7 +483,7 @@ The progression through layers followed a strict ordering: \texttt{bad-docs-api}
 \label{subsec:severity-model}
 % ----------------------------------------------------------------------------
 
-The severity model reflects SDT's core design principle: \textit{validation gates functional testing}. Of the nine principles, five are classified as critical in static validation (P001, P002, P003, P004, P005), while P006 and P007 are inherently critical in their respective check types (functional and load testing). Only versioning (P008) and test readiness advisory checks (P009) carry warning severity.
+The severity model reflects SDT's core design principle: \textit{validation gates functional testing}. Of the nine principles, five static principles carry the Critical label (P001--P005); P006 (functional) and P007 (load) are runtime principles whose failures are Critical-by-impact within their respective gate types (test-only and load-test) but are not counted in the 5/9 static-Critical ratio because they do not contribute to the static-validation gate. Only versioning (P008) and test-readiness advisory checks (P009) carry Warning severity.
 
 This 5/9 critical ratio reflects the gatekeeping function of static validation:
 

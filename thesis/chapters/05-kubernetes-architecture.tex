@@ -280,7 +280,7 @@ gate:
 \label{subsec:minimal-config}
 % ----------------------------------------------------------------------------
 
-Listing~\ref{lst:xsdlc-cr} shows a representative \texttt{XSDLC} instance. The entire SDLC pipeline for the \texttt{perfect-api} application---three environments, a validation gate for staging promotion, and a load test gate for production promotion---is defined in approximately 25 lines of YAML.
+Listing~\ref{lst:xsdlc-cr} shows a representative \texttt{XSDLC} instance. The entire SDLC pipeline for the \texttt{perfect-api} application\footnote{Source-code identifiers (namespaces, container images, repository names, the example application) retain the historical name \texttt{perfect-api}; the thesis-level rename to \texttt{non-critical-api} (see Section~\ref{sec:controlled-eval} in Chapter~\ref{ch:evaluation} for the rationale) is a naming decision that will be propagated to source in a follow-up release. Wherever this chapter writes \texttt{perfect-api}, the same artefact is meant.}---three environments, a validation gate for staging promotion, and a load test gate for production promotion---is defined in approximately 25 lines of YAML.
 
 \begin{lstlisting}[caption={XSDLC custom resource defining a three-environment pipeline with quality gates.},label={lst:xsdlc-cr}]
 apiVersion: driveby.io/v1alpha1
