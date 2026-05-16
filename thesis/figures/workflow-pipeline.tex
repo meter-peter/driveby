@@ -16,7 +16,7 @@
     lane label/.style={
         font=\scriptsize\bfseries,
         rotate=90,
-        anchor=south,
+        anchor=center,
         text=#1!70!black
     },
     lane bg/.style={
@@ -36,13 +36,16 @@
     \node[lane bg=orange, minimum width=4cm, minimum height=3.5cm] at (11,0) {};
 \end{scope}
 
-% Lane labels (top)
-\node[lane label=red]     at (-3.1,1.9)  {BYOCI};
-\node[lane label=violet]  at (-0.8,1.9)  {Hydrator};
-\node[lane label=blue]    at (1.3,1.9)   {GitHub};
-\node[lane label=cyan]    at (4.1,1.9)   {Ingress};
-\node[lane label=teal]    at (5.7,1.9)   {Argo Events};
-\node[lane label=orange]  at (9.1,1.9)   {Argo Workflows};
+% Lane labels (inside the lane background, near the top edge of each rectangle)
+% Round-10 follow-up to supervisor [408]: previously sat outside the lane bg at y=1.9
+% (above the rectangle); now positioned at y=1.4, inside each lane background
+% (which extends from y=-1.75 to y=+1.75) above the top row of stages at y=0.8.
+\node[lane label=red]     at (-3.1,1.4)  {BYOCI};
+\node[lane label=violet]  at (-0.8,1.4)  {Hydrator};
+\node[lane label=blue]    at (1.3,1.4)   {GitHub};
+\node[lane label=cyan]    at (4.1,1.4)   {Ingress};
+\node[lane label=teal]    at (5.7,1.4)   {Argo Events};
+\node[lane label=orange]  at (9.1,1.4)   {Argo Workflows};
 
 % BYOCI lane (developer trigger)
 \node[stage=red] (deploy) at (-2,0.8)  {Developer\\commits dry};
