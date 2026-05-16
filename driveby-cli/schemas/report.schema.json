@@ -1,0 +1,299 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/meter-peter/driveby/blob/main/driveby-cli/schemas/report.schema.json",
+  "title": "DriveBy ValidationReport",
+  "description": "Schema for the JSON validation report emitted by the DriveBy CLI. Documents the wire format as currently shipped; see schemas/README.md for known field-casing inconsistencies between the top-level keys (snake_case) and nested PrincipleResult / ValidationSummary fields (PascalCase).",
+  "type": "object",
+  "required": [
+    "status",
+    "exit_code",
+    "version",
+    "environment",
+    "timestamp",
+    "principles",
+    "total_checks",
+    "passed_checks",
+    "failed_checks",
+    "summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["passed", "failed"],
+      "description": "Top-level outcome of the validation run."
+    },
+    "exit_code": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3],
+      "description": "Process exit code. 0=pass, 1=validation_failed, 2=error, 3=test_failure."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version string of the validated API or spec, copied from the spec's info.version."
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment label supplied at invocation time (e.g. 'production', 'staging', 'dev')."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp marking when the validation run completed."
+    },
+    "principles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PrincipleResult" },
+      "description": "Per-principle results, one entry per principle evaluated under the selected validation mode."
+    },
+    "total_checks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of individual checks executed across all principles."
+    },
+    "passed_checks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of checks that passed."
+    },
+    "failed_checks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of checks that failed."
+    },
+    "summary": { "$ref": "#/$defs/ValidationSummary" },
+    "auto_fixes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/AutoFixResult" },
+      "description": "Auto-fix attempts performed during the run, if any. Omitted when no auto-fixes were attempted."
+    },
+    "test_results": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/TestResults" }
+      ],
+      "description": "Functional and performance test results. Omitted in pure static-validation modes."
+    }
+  },
+  "$defs": {
+    "Principle": {
+      "type": "object",
+      "required": ["id", "name", "description", "category", "severity", "tags", "auto_fixable"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^P[0-9]{3}$",
+          "description": "Principle identifier, e.g. 'P001'."
+        },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "warning"]
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "auto_fixable": { "type": "boolean" },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Human-readable check names evaluated by this principle. Optional."
+        }
+      }
+    },
+    "PrincipleResult": {
+      "type": "object",
+      "description": "Result of evaluating a single principle. Note: field names are PascalCase in the current wire format because the Go struct lacks json tags. See schemas/README.md.",
+      "required": ["Principle", "Passed", "Message", "Details", "Explanation", "SuggestedFix"],
+      "additionalProperties": false,
+      "properties": {
+        "Principle": { "$ref": "#/$defs/Principle" },
+        "Passed": { "type": "boolean" },
+        "Message": {
+          "type": "string",
+          "description": "Short human-readable summary of the principle outcome."
+        },
+        "Details": {
+          "description": "Principle-specific detail payload. Schema varies per principle; commonly an object with a 'checks' map of name -> boolean."
+        },
+        "Explanation": {
+          "type": "string",
+          "description": "Longer-form explanation of the result, intended for humans and agents."
+        },
+        "SuggestedFix": {
+          "type": "string",
+          "description": "Actionable remediation suggestion. Empty string when the principle passed."
+        },
+        "TestImpact": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/TestImpact" }
+          ]
+        }
+      }
+    },
+    "TestImpact": {
+      "type": "object",
+      "required": ["CanRunTests", "AffectedTests", "ImpactLevel", "Recommendations"],
+      "additionalProperties": false,
+      "properties": {
+        "CanRunTests": { "type": "boolean" },
+        "AffectedTests": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ImpactLevel": {
+          "type": "string",
+          "enum": ["none", "low", "medium", "high"]
+        },
+        "Recommendations": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ValidationSummary": {
+      "type": "object",
+      "description": "Aggregate counts and category metadata. PascalCase field names match the current wire format.",
+      "required": ["CriticalIssues", "Warnings", "Info", "Categories", "FailedTags"],
+      "additionalProperties": false,
+      "properties": {
+        "CriticalIssues": { "type": "integer", "minimum": 0 },
+        "Warnings": { "type": "integer", "minimum": 0 },
+        "Info": { "type": "integer", "minimum": 0 },
+        "Categories": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "array", "items": { "type": "string" } }
+          ],
+          "description": "Empty array serialises as null (Go nil slice convention)."
+        },
+        "FailedTags": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "array", "items": { "type": "string" } }
+          ],
+          "description": "Empty array serialises as null (Go nil slice convention)."
+        },
+        "TestSummary": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/TestSummary" }
+          ]
+        }
+      }
+    },
+    "TestSummary": {
+      "type": "object",
+      "required": ["FunctionalStatus", "PerformanceStatus", "TotalTests", "PassedTests", "FailedTests", "Warnings", "SkippedTests"],
+      "additionalProperties": false,
+      "properties": {
+        "FunctionalStatus": { "$ref": "#/$defs/TestStatus" },
+        "PerformanceStatus": { "$ref": "#/$defs/TestStatus" },
+        "TotalTests": { "type": "integer", "minimum": 0 },
+        "PassedTests": { "type": "integer", "minimum": 0 },
+        "FailedTests": { "type": "integer", "minimum": 0 },
+        "Warnings": { "type": "integer", "minimum": 0 },
+        "SkippedTests": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "TestStatus": {
+      "type": "string",
+      "enum": ["passed", "failed", "skipped", "error", "not_run"]
+    },
+    "TestResults": {
+      "type": "object",
+      "required": ["StartTime", "EndTime", "Status"],
+      "additionalProperties": false,
+      "properties": {
+        "Functional": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/FunctionalTestResults" }
+          ]
+        },
+        "Performance": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/PerformanceTestResults" }
+          ]
+        },
+        "StartTime": { "type": "string", "format": "date-time" },
+        "EndTime": { "type": "string", "format": "date-time" },
+        "Status": { "$ref": "#/$defs/TestStatus" }
+      }
+    },
+    "FunctionalTestResults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TotalEndpoints": { "type": "integer", "minimum": 0 },
+        "TestedEndpoints": { "type": "integer", "minimum": 0 },
+        "PassedEndpoints": { "type": "integer", "minimum": 0 },
+        "FailedEndpoints": { "type": "integer", "minimum": 0 },
+        "SkippedEndpoints": { "type": "integer", "minimum": 0 },
+        "EndpointResults": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EndpointTestResult" }
+        },
+        "AverageResponseTime": { "type": "integer", "description": "Nanoseconds" },
+        "MaxResponseTime": { "type": "integer", "description": "Nanoseconds" },
+        "MinResponseTime": { "type": "integer", "description": "Nanoseconds" }
+      }
+    },
+    "EndpointTestResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Method": { "type": "string" },
+        "Path": { "type": "string" },
+        "Status": { "$ref": "#/$defs/TestStatus" },
+        "StatusCode": { "type": "integer" },
+        "ResponseTime": { "type": "integer", "description": "Nanoseconds" },
+        "Errors": { "type": "array", "items": { "type": "string" } },
+        "Warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "PerformanceTestResults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TotalRequests": { "type": "integer", "minimum": 0 },
+        "SuccessCount": { "type": "integer", "minimum": 0 },
+        "ErrorCount": { "type": "integer", "minimum": 0 },
+        "ErrorRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "LatencyP50": { "type": "integer", "description": "Nanoseconds" },
+        "LatencyP95": { "type": "integer", "description": "Nanoseconds" },
+        "LatencyP99": { "type": "integer", "description": "Nanoseconds" },
+        "RequestsPerSecond": { "type": "number", "minimum": 0 },
+        "Duration": { "type": "integer", "description": "Nanoseconds" },
+        "Status": { "$ref": "#/$defs/TestStatus" }
+      }
+    },
+    "AutoFixResult": {
+      "type": "object",
+      "required": ["PrincipleID", "Timestamp", "Location", "Success", "Message", "Original"],
+      "additionalProperties": false,
+      "properties": {
+        "PrincipleID": { "type": "string", "pattern": "^P[0-9]{3}$" },
+        "Timestamp": { "type": "string", "format": "date-time" },
+        "Location": { "type": "string" },
+        "Success": { "type": "boolean" },
+        "Message": { "type": "string" },
+        "Error": { "type": "string" },
+        "Original": { "$ref": "#/$defs/PrincipleResult" },
+        "Fixed": { "type": "string" },
+        "TestImpact": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/TestImpact" }
+          ]
+        }
+      }
+    }
+  }
+}
