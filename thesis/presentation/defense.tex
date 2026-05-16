@@ -429,41 +429,68 @@ the gate DAG (staging uses one combination, production another).
 
 \begin{center}
 \begin{tikzpicture}[>={Stealth[length=2mm]}]
+
 \node[rectangle, rounded corners=4pt, draw=sdtviolet!70!black,
-      fill=sdtviolet!15, minimum width=3cm, minimum height=1cm,
+      fill=sdtviolet!15, minimum width=3.2cm, minimum height=0.9cm,
       font=\small\bfseries, align=center]
-  (xsdlc) at (0,1.6)
+  (xsdlc) at (0,2.0)
   {XSDLC CR\\\footnotesize\textnormal{$\sim$35 lines YAML}};
 
-\node[nbx blue] (a1) at (-5.7,0)   {ArgoCD\\App};
-\node[nbx blue] (a2) at (-3.8,0)   {Workflow\\Tpl};
-\node[nbx blue] (a3) at (-1.9,0)   {Event\\Source};
-\node[nbx blue] (a4) at ( 0.0,0)   {Sensor};
-\node[nbx blue] (a5) at ( 1.9,0)   {Ingress};
-\node[nbx blue] (a6) at ( 3.8,0)   {RBAC};
-\node[nbx blue] (a7) at ( 5.7,0)   {Promoter};
+\node[rectangle, rounded corners=3pt, draw=sdtblue!70!black,
+      fill=sdtblue!10, minimum width=2.7cm, minimum height=1.8cm,
+      align=center]
+  (g1) at (-5.1,0.0) {};
+\node[font=\scriptsize\bfseries, text=sdtblue!60!black]
+  at (-5.1,0.55) {Delivery};
+\node[font=\tiny, align=center, text=sdtblue!60!black]
+  at (-5.1,-0.05) {\texttt{Application}\\\texttt{PromotionStrategy}\\\texttt{ChangeTransferPolicy}};
 
-\node[nbx teal] (b1) at (-5.7,-1.1) {Branches};
-\node[nbx teal] (b2) at (-3.8,-1.1) {Branch\\Prot};
-\node[nbx teal] (b3) at (-1.9,-1.1) {Repo\\Files};
-\node[nbx teal] (b4) at ( 0.0,-1.1) {Secrets};
-\node[nbx teal] (b5) at ( 1.9,-1.1) {Scm\\Provider};
-\node[nbx teal] (b6) at ( 3.8,-1.1) {Git\\Repo};
-\node[nbx teal] (b7) at ( 5.7,-1.1) {Svc\\Account};
+\node[rectangle, rounded corners=3pt, draw=sdtteal!70!black,
+      fill=sdtteal!10, minimum width=2.7cm, minimum height=1.8cm,
+      align=center]
+  (g2) at (-1.7,0.0) {};
+\node[font=\scriptsize\bfseries, text=sdtteal!60!black]
+  at (-1.7,0.55) {Validation};
+\node[font=\tiny, align=center, text=sdtteal!60!black]
+  at (-1.7,-0.05) {\texttt{WorkflowTemplate}\\\texttt{EventSource}\\\texttt{Sensor}};
 
-\node[font=\tiny, text=gray, anchor=west] at (-6.3,-2.1)
-  {\ldots $\sim$45--50 Kubernetes objects, generated in $<$15 seconds, all reconciled by Crossplane.};
+\node[rectangle, rounded corners=3pt, draw=sdtorange!70!black,
+      fill=sdtorange!10, minimum width=2.7cm, minimum height=1.8cm,
+      align=center]
+  (g3) at (1.7,0.0) {};
+\node[font=\scriptsize\bfseries, text=sdtorange!60!black]
+  at (1.7,0.55) {GitOps state};
+\node[font=\tiny, align=center, text=sdtorange!60!black]
+  at (1.7,-0.05) {\texttt{Repository}\\\texttt{RepositoryFile}\\\texttt{BranchProtection}};
 
-\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.2) -| (a1.north);
-\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- (a4.north);
-\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.2) -| (a7.north);
+\node[rectangle, rounded corners=3pt, draw=sdtviolet!70!black,
+      fill=sdtviolet!10, minimum width=2.7cm, minimum height=1.8cm,
+      align=center]
+  (g4) at (5.1,0.0) {};
+\node[font=\scriptsize\bfseries, text=sdtviolet!60!black]
+  at (5.1,0.55) {Access \& edge};
+\node[font=\tiny, align=center, text=sdtviolet!60!black]
+  at (5.1,-0.05) {\texttt{ServiceAccount}\\\texttt{Role}, \texttt{RoleBinding}\\\texttt{Ingress}, \texttt{Secret}};
+
+\node[font=\tiny\itshape, text=gray] at (-5.1,-1.35) {sync code to env};
+\node[font=\tiny\itshape, text=gray] at (-1.7,-1.35) {gate the PR};
+\node[font=\tiny\itshape, text=gray] at ( 1.7,-1.35) {declare desired state};
+\node[font=\tiny\itshape, text=gray] at ( 5.1,-1.35) {least-priv identity};
+
+\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.15) -| (g1.north);
+\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.15) -| (g2.north);
+\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.15) -| (g3.north);
+\draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.15) -| (g4.north);
+
+\node[font=\tiny, text=gray, anchor=west] at (-6.5,-2.05)
+  {$\sim$45--50 Kubernetes objects total, generated in $<$15 seconds, all reconciled by Crossplane.};
 \end{tikzpicture}
 \end{center}
 
-\vspace{0.4em}
+\vspace{0.1em}
 \footnotesize
-\alert{The CR \emph{is} a specification.} It declares the quality-gated
-delivery pipeline in a structurally typed, discoverable Kubernetes
+\alert{The CR \emph{is} a specification.} One YAML file declares the
+quality-gated delivery pipeline as a structurally typed Kubernetes
 object --- the same idiom as the OpenAPI spec it validates.
 
 \end{frame}
