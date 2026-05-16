@@ -50,10 +50,10 @@
 \node[policy=orange] at (5.5,-1.0) {autoMerge: true\\(gated by SDT)};
 \node[policy=red] at (11,-1.0) {autoMerge: false\\(manual approval)};
 
-% Commit status flow
-\draw[->,dashed,teal!50!black,thick] (gate1.north) -- ++(0,0.8) node[above,font=\tiny,teal!50!black] {CommitStatus: success/failure};
+% Promoter label (top, centred over the full figure)
+\node[font=\scriptsize,text=black!60] at (5.5,2.0) {GitOps Promoter manages promotion PRs};
 
-% Promoter label
-\node[font=\scriptsize,text=black!60] at (5.5,1.5) {GitOps Promoter manages promotion PRs};
+% Commit status flow (placed below the Promoter label, anchored to the left so it does not collide)
+\draw[->,dashed,teal!50!black,thick] (gate1.north) -- ++(0,0.8) node[above right,font=\tiny,teal!50!black,inner sep=1pt] {CommitStatus: success/failure};
 
 \end{tikzpicture}
