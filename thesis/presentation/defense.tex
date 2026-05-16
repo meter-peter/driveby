@@ -14,6 +14,7 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds,calc}
 \usepackage{pifont}
+\usepackage{listings}
 \newcommand{\cmark}{\textcolor{green!60!black}{\ding{51}}}
 \newcommand{\xmark}{\textcolor{red!70!black}{\ding{55}}}
 
@@ -61,6 +62,14 @@
   bx teal/.style    = {rectangle, rounded corners=3pt, draw=sdtteal!70!black,
                        fill=sdtteal!12, minimum width=2.4cm, minimum height=0.9cm,
                        font=\scriptsize, align=center},
+  % Narrow variants for the XSDLC child-resource grid (slide 10) where
+  % 7 boxes need to fit in one row without overlapping.
+  nbx blue/.style   = {rectangle, rounded corners=2pt, draw=sdtblue!70!black,
+                       fill=sdtblue!12, minimum width=1.55cm, minimum height=0.65cm,
+                       font=\tiny, align=center, inner sep=2pt},
+  nbx teal/.style   = {rectangle, rounded corners=2pt, draw=sdtteal!70!black,
+                       fill=sdtteal!12, minimum width=1.55cm, minimum height=0.65cm,
+                       font=\tiny, align=center, inner sep=2pt},
   % Wide rounded box (for env/stage labels)
   wbx blue/.style   = {rectangle, rounded corners=5pt, draw=sdtblue!70!black,
                        fill=sdtblue!12, minimum width=2.8cm, minimum height=1.2cm,
@@ -423,26 +432,26 @@ the gate DAG (staging uses one combination, production another).
 \node[rectangle, rounded corners=4pt, draw=sdtviolet!70!black,
       fill=sdtviolet!15, minimum width=3cm, minimum height=1cm,
       font=\small\bfseries, align=center]
-  (xsdlc) at (0,1.5)
+  (xsdlc) at (0,1.6)
   {XSDLC CR\\\footnotesize\textnormal{$\sim$35 lines YAML}};
 
-\node[bx blue] (a1) at (-5.5,0)   {ArgoCD App};
-\node[bx blue] (a2) at (-3.7,0)   {WorkflowTpl};
-\node[bx blue] (a3) at (-1.9,0)   {EventSource};
-\node[bx blue] (a4) at (-0.1,0)   {Sensor};
-\node[bx blue] (a5) at ( 1.7,0)   {Ingress};
-\node[bx blue] (a6) at ( 3.5,0)   {RBAC};
-\node[bx blue] (a7) at ( 5.3,0)   {Promoter};
+\node[nbx blue] (a1) at (-5.7,0)   {ArgoCD\\App};
+\node[nbx blue] (a2) at (-3.8,0)   {Workflow\\Tpl};
+\node[nbx blue] (a3) at (-1.9,0)   {Event\\Source};
+\node[nbx blue] (a4) at ( 0.0,0)   {Sensor};
+\node[nbx blue] (a5) at ( 1.9,0)   {Ingress};
+\node[nbx blue] (a6) at ( 3.8,0)   {RBAC};
+\node[nbx blue] (a7) at ( 5.7,0)   {Promoter};
 
-\node[bx teal] (b1) at (-5.5,-1.0) {Branches};
-\node[bx teal] (b2) at (-3.7,-1.0) {BranchProt};
-\node[bx teal] (b3) at (-1.9,-1.0) {RepoFiles};
-\node[bx teal] (b4) at (-0.1,-1.0) {Secrets};
-\node[bx teal] (b5) at ( 1.7,-1.0) {ScmProvider};
-\node[bx teal] (b6) at ( 3.5,-1.0) {GitRepo};
-\node[bx teal] (b7) at ( 5.3,-1.0) {SvcAccount};
+\node[nbx teal] (b1) at (-5.7,-1.1) {Branches};
+\node[nbx teal] (b2) at (-3.8,-1.1) {Branch\\Prot};
+\node[nbx teal] (b3) at (-1.9,-1.1) {Repo\\Files};
+\node[nbx teal] (b4) at ( 0.0,-1.1) {Secrets};
+\node[nbx teal] (b5) at ( 1.9,-1.1) {Scm\\Provider};
+\node[nbx teal] (b6) at ( 3.8,-1.1) {Git\\Repo};
+\node[nbx teal] (b7) at ( 5.7,-1.1) {Svc\\Account};
 
-\node[font=\tiny, text=gray, anchor=west] at (-6.5,-2.0)
+\node[font=\tiny, text=gray, anchor=west] at (-6.3,-2.1)
   {\ldots $\sim$45--50 Kubernetes objects, generated in $<$15 seconds, all reconciled by Crossplane.};
 
 \draw[->,thick,sdtviolet!60!black] (xsdlc.south) -- ++(0,-0.2) -| (a1.north);
@@ -456,6 +465,43 @@ the gate DAG (staging uses one combination, production another).
 \alert{The CR \emph{is} a specification.} It declares the quality-gated
 delivery pipeline in a structurally typed, discoverable Kubernetes
 object --- the same idiom as the OpenAPI spec it validates.
+
+\end{frame}
+
+% --------- 10b. The XSDLC manifest in practice -------------------------
+\begin{frame}[fragile]{What an XSDLC manifest actually looks like}
+
+\vspace{-1.2em}
+\begin{lstlisting}[basicstyle=\fontsize{6pt}{7pt}\ttfamily,
+                   language=,frame=none,xleftmargin=0pt,aboveskip=0pt,belowskip=0pt]
+apiVersion: driveby.io/v1alpha1
+kind: XSDLC
+metadata: { name: perfect-api }
+spec:
+  gitopsRepository: { owner: novelcore, name: perfect-api-gitops }
+  apiConfig:        { port: 8000, openapiEndpoint: /openapi.json }
+  validationDefaults: { validationMode: strict }
+  environments:
+    - { name: dev }
+    - name: staging
+      gate:
+        checks:
+          - type: validate-only
+            validationConfig: { validationMode: test-ready }
+          - type: functional-test
+    - name: prod
+      autoMerge: false
+      gate:
+        checks:
+          - type: load-test
+            loadTestConfig:
+              concurrentUsers: 10
+              testDuration:   "15s"
+              maxLatencyP95:  "2s"
+              minSuccessRate:  0.5
+\end{lstlisting}
+
+\tiny\itshape Real manifest --- \texttt{novelcore-perfect-api/xsdlc-perfect-api.yaml}.
 
 \end{frame}
 
@@ -520,6 +566,48 @@ promotion, quality gating, environment management.
   $\Rightarrow$ ArgoCD syncs.
 \item Fail $\Rightarrow$ commit status failure $\Rightarrow$ PR stays
   open $\Rightarrow$ developer iterates.
+\end{itemize}
+
+\end{frame}
+
+% --------- 12b. Feedback: PR comment with beautified report ------------
+\begin{frame}[fragile]{Feedback in the developer's natural habitat}
+
+\footnotesize
+The Workflow's exit handler posts the DriveBy report \emph{as a PR
+comment} --- developers see precisely which principle failed and how
+to fix it, on the very PR the Promoter just opened.
+
+\vspace{0.5em}
+\begin{center}
+\begin{tikzpicture}[>={Stealth[length=2mm]}]
+\node[rectangle, rounded corners=3pt, draw=sdtteal!70!black,
+      fill=sdtteal!10, minimum width=10.5cm, minimum height=3.0cm,
+      align=left, font=\tiny\ttfamily, inner sep=6pt]
+  (pr) at (0,0)
+  {\textbf{driveby-bot} \textcolor{gray}{commented just now} \\[1pt]
+   \rule{9.5cm}{0.3pt} \\[2pt]
+   \textbf{\textcolor{sdtred!70!black}{[FAIL]} DriveBy --- strict mode --- 4/6 passed} \\[2pt]
+   \textcolor{sdtgreen!50!black}{[OK]} P001 OpenAPI Compliance \\
+   \textcolor{sdtred!70!black}{[X]}~ P002 Documentation Quality \\
+   \quad\textcolor{gray}{- 3/10 operations missing \texttt{summary}} \\
+   \quad\textcolor{gray}{- SuggestedFix: add summaries to GET /pets, POST /pets, \ldots} \\
+   \textcolor{sdtgreen!50!black}{[OK]} P003 Error Handling \quad
+   \textcolor{sdtgreen!50!black}{[OK]} P004 Schema Definitions \\
+   \textcolor{sdtred!70!black}{[X]}~ P005 Security Standards \\
+   \quad\textcolor{gray}{- no \texttt{securitySchemes} declared} \\
+   \textcolor{sdtgreen!50!black}{[OK]} P008 Versioning Strategy};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.3em}
+\tiny
+\begin{itemize}\setlength\itemsep{0.15em}
+\item Same JSON report, rendered as Markdown by the
+  \texttt{comment-pr-failure} exit handler.
+\item Commit status is the \emph{decision}; the PR comment is the
+  \emph{explanation} --- and the \texttt{SuggestedFix} field makes the
+  remediation actionable.
 \end{itemize}
 
 \end{frame}
