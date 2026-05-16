@@ -31,7 +31,7 @@ The DriveBy CLI (Chapter~\ref{ch:architecture}) addresses these limitations by i
 \label{subsec:stage-container}
 % ----------------------------------------------------------------------------
 
-Packaging the CLI as an OCI container image (\texttt{ghcr.io/meter-peter/driveby}) adds portability across execution environments. The same binary that runs on a developer's laptop runs inside any container runtime---Docker, containerd, CRI-O---without dependency management. The container image is the unit of deployment for all subsequent stages: workflow steps, CI jobs, and Crossplane-managed workflows all reference the same image.
+Packaging the CLI as an OCI container image (\texttt{ghcr.io/\allowbreak meter-peter/\allowbreak driveby}) adds portability across execution environments. The same binary that runs on a developer's laptop runs inside any container runtime---Docker, containerd, CRI-O---without dependency management. The container image is the unit of deployment for all subsequent stages: workflow steps, CI jobs, and Crossplane-managed workflows all reference the same image.
 
 % ----------------------------------------------------------------------------
 \subsection{Stage 4: Argo Workflow Step}
@@ -71,6 +71,7 @@ Table~\ref{tab:cli-to-cr-progression} summarizes this progression.
 \caption{Evolution from CLI tool to Kubernetes custom resource.}
 \label{tab:cli-to-cr-progression}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llll@{}}
 \toprule
 \textbf{Aspect} & \textbf{CLI (Ch.~\ref{ch:architecture})} & \textbf{Kubernetes (Ch.~\ref{ch:kubernetes})} & \textbf{GitOps (Ch.~\ref{ch:workflow})} \\
@@ -81,7 +82,8 @@ Output        & JSON to stdout         & Workflow artifacts        & Commit stat
 State         & Transient (process)    & Pod lifecycle             & Reconciled desired state \\
 Promotion     & Human decision         & Sensor-triggered          & Automated (commit status) \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The critical enabler of this progression is the CLI's architecture itself. The \texttt{types} package (zero internal dependencies) and the \texttt{spec.APISpec} interface (version-agnostic) make the validation logic portable across execution environments. The same principle checkers that run in a developer's terminal run inside an Argo Workflow container---the only difference is how the binary is invoked and where the results are consumed. The CLI was not retrofitted for Kubernetes integration; its separation of concerns (Section~\ref{subsec:design-goals}) was designed to support multiple deployment models from the outset.
@@ -475,7 +477,7 @@ The composition generates an ArgoCD Application for every environment in the pro
 \begin{itemize}
     \item \texttt{drySource}: the gitops repository, path \texttt{dry/overlays/<envName>}, revision \texttt{main}
     \item \texttt{syncSource}: the environment's active branch (\texttt{environment/<name>}), path \texttt{manifests}
-    \item \texttt{hydrateTo}: the environment's proposed branch (\texttt{environment/<name>-next})
+    \item \texttt{hydrateTo}: the environment's proposed branch (\texttt{environment/\allowbreak <name>-next})
 \end{itemize}
 
 When a developer updates dry manifests on the \texttt{main} branch, the hydrator renders the Kustomize overlay for each environment and writes the hydrated output---along with a \texttt{hydrator.metadata} file containing the dry commit SHA---to the corresponding \texttt{-next} branch. The GitOps Promoter detects the new commit on the \texttt{-next} branch and creates a promotion PR to the active branch. Quality gates fire on those PRs; ArgoCD syncs from the active branch's \texttt{manifests/} path once the PR is merged.
@@ -576,6 +578,7 @@ When a matching event arrives, the Sensor extracts parameters from the webhook p
 \caption{Parameters extracted from webhook payload by the Sensor.}
 \label{tab:sensor-params}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Parameter} & \textbf{JSONPath Source} & \textbf{Purpose} \\
@@ -591,7 +594,8 @@ When a matching event arrives, the Sensor extracts parameters from the webhook p
 \texttt{openapi-endpoint} & XRD spec (default: \texttt{/openapi.json}) & Spec URL path \\
 \texttt{app-port}         & XRD spec (default: 8000)             & Service port \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The parameter extraction combines dynamic values from the webhook payload (PR number, commit SHA, repository details) with static values from the XRD spec (app name, namespaces, service configuration). This hybrid approach enables the workflow to operate on the specific PR that triggered validation while targeting the correct application environment.
@@ -702,7 +706,7 @@ The entire Kubernetes infrastructure is packaged as a Helm chart (\texttt{driveb
 \label{subsec:chart-structure}
 % ----------------------------------------------------------------------------
 
-The chart contains Crossplane provider references (\texttt{provider-kubernetes}~v0.14.1), Crossplane functions (go-templating, auto-ready), the \texttt{XSDLC} XRD definition, the \texttt{XSDLC} composition, a ProviderConfig for the Kubernetes provider, and optional secret templates.
+The chart contains Crossplane provider references (\texttt{provider-kubernetes} v0.14.1), Crossplane functions (go-templating, auto-ready), the \texttt{XSDLC} XRD definition, the \texttt{XSDLC} composition, a ProviderConfig for the Kubernetes provider, and optional secret templates.
 
 Installation follows a four-step order designed to handle Crossplane's CRD chicken-and-egg problem: the Crossplane provider must be installed and healthy before ProviderConfig resources that reference it, and the XRD must be installed before the composition that implements it. The recommended sequence is:
 

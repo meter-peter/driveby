@@ -213,9 +213,10 @@ Table~\ref{tab:tool-comparison} presents a comparative analysis of existing API 
 \caption{Comparison of API quality approaches across six dimensions.}
 \label{tab:tool-comparison}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llcccccc@{}}
 \toprule
-\textbf{Tool} & \textbf{Category} & \rotatebox{65}{\textbf{Static}} & \rotatebox{65}{\textbf{Runtime}} & \rotatebox{65}{\textbf{Spec Quality}} & \rotatebox{65}{\textbf{Formal Method}} & \rotatebox{65}{\textbf{GitOps-Native}} & \rotatebox{65}{\textbf{Single-Artifact}} \\
+\textbf{Tool} & \textbf{Category} & \rotatebox[origin=lB]{65}{\textbf{Static}} & \rotatebox[origin=lB]{65}{\textbf{Runtime}} & \rotatebox[origin=lB]{65}{\textbf{Spec Quality}} & \rotatebox[origin=lB]{65}{\textbf{Formal Method}} & \rotatebox[origin=lB]{65}{\textbf{GitOps-Native}} & \rotatebox[origin=lB]{65}{\textbf{Single-Artifact}} \\
 \midrule
 Spectral        & Linter         & \cmark & \xmark & $\sim$ & \xmark & \xmark & ---    \\
 Vacuum          & Linter         & \cmark & \xmark & $\sim$ & \xmark & \xmark & ---    \\
@@ -229,7 +230,8 @@ Microcks        & Mock+Contract  & $\sim$ & \cmark & \xmark & \xmark & $\sim$ & 
 \midrule
 \textbf{SDT (DriveBy)} & \textbf{Unified} & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 
 \smallskip
 \noindent\footnotesize\textbf{Legend.} \cmark{} = capability present and a primary design goal of the tool; \xmark{} = capability absent (out of scope for the tool); $\sim$ = capability partially present, typically as a side effect of the tool's primary purpose rather than a first-class feature; --- = the dimension does not apply (e.g., a static linter cannot meaningfully be classified as ``single-artifact'' since it consumes only the specification by construction).

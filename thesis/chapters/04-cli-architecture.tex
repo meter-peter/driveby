@@ -53,9 +53,11 @@ The implementation draws on two classical design patterns~\cite{gof}. The \texti
 
 DriveBy is implemented as a single Go module (\texttt{github.com/\allowbreak meter-peter/\allowbreak driveby/\allowbreak driveby-cli}). The module is organized into eleven internal packages with a strict, unidirectional dependency flow:
 
+{\footnotesize
 \begin{verbatim}
 types <- spec <- loader <- principles <- testing <- engine <- cli
 \end{verbatim}
+}
 
 No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualises this strict left-to-right dependency chain at the package level. Figure~\ref{fig:component-diagram} adds the external interfaces (the OpenAPI input, the target API under HTTP probing, and the structured report output) and groups packages into architectural layers.
 
@@ -578,7 +580,7 @@ The \texttt{report} package generates validation reports in two formats: JSON fo
 The \texttt{Generator} struct is configured with an output directory. When \texttt{SaveValidationReport} is called with a \texttt{ValidationReport}, it produces four files:
 
 \begin{enumerate}
-    \item A timestamped JSON file (e.g., \texttt{validation-report-20260319T120000Z.json}) containing the full report.
+    \item A timestamped JSON file (e.g.,\\\texttt{validation-report-20260319T120000Z.json}) containing the full report.
     \item A copy at \texttt{validation-report-latest.json} for convenience.
     \item A timestamped Markdown file with the same content rendered as a human-readable document, including principle-by-principle results grouped by category, check lists, and suggested fixes.
     \item A copy at \texttt{validation-report-latest.md} for convenience.

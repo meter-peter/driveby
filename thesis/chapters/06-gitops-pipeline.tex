@@ -79,6 +79,7 @@ Traditional GitOps deployments face a tension between two concerns: the develope
 
 The XSDLC v3.0.0 model resolves this tension by separating the two concerns into two repositories. The software repository remains untouched; XSDLC auto-creates a dedicated GitOps repository per application that holds dry Kustomize manifests on the \texttt{main} branch and hydrated output on per-environment branches:
 
+{\footnotesize
 \begin{verbatim}
 perfect-api/                    # Software repository (untouched)
   src/                          # Application source
@@ -88,7 +89,7 @@ perfect-api-gitops/             # GitOps repository (auto-created)
   main branch:
     dry/
       base/                     # Shared manifests
-        kustomization.yaml      # references deployment.yaml + service.yaml
+        kustomization.yaml      # refs deployment.yaml + service.yaml
         deployment.yaml
         service.yaml
       overlays/                 # Per-environment customization
@@ -96,13 +97,14 @@ perfect-api-gitops/             # GitOps repository (auto-created)
         staging/kustomization.yaml
         prod/kustomization.yaml
 
-  environment/dev-next       → # ArgoCD-hydrated
-  environment/dev            → # Promoter merges from dev-next
-  environment/staging-next   → # ArgoCD-hydrated
-  environment/staging        → # Promoter merges (gate passed)
-  environment/prod-next      → # ArgoCD-hydrated
-  environment/prod           → # Promoter merges (gate passed)
+  environment/dev-next       -> # ArgoCD-hydrated
+  environment/dev            -> # Promoter merges from dev-next
+  environment/staging-next   -> # ArgoCD-hydrated
+  environment/staging        -> # Promoter merges (gate passed)
+  environment/prod-next      -> # ArgoCD-hydrated
+  environment/prod           -> # Promoter merges (gate passed)
 \end{verbatim}
+}
 
 The GitOps repository's \texttt{main} branch holds dry Kustomize manifests organized as a base-plus-overlays structure. Each environment has its own overlay that references the shared base and can customize deployment parameters (replicas, resource limits, environment variables, image tags). The ArgoCD Source Hydrator~\cite{argocd-hydrator} renders each overlay independently and writes the hydrated output---along with a \texttt{hydrator.metadata} file containing the dry commit SHA---to the corresponding \texttt{environment/<name>-next} branch. The GitOps Promoter detects the new commit and creates a promotion PR from the \texttt{-next} branch to the active branch. Quality gates fire on these PRs; ArgoCD syncs from the active branch once the PR is merged.
 
@@ -297,6 +299,7 @@ Table~\ref{tab:control-mapping} maps each control-theoretic role to its concrete
 \caption{Control theory mapping to DriveBy quality gate components.}
 \label{tab:control-mapping}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Control Role} & \textbf{Implementation} & \textbf{Function} \\
@@ -308,7 +311,8 @@ Controller     & Argo Workflow DAG           & Orchestrates checks, emits pass/f
 Actuator       & CommitStatus + Promoter     & Merges or blocks promotion PR \\
 Feedback       & Developer fix cycle         & Re-deploy $\rightarrow$ re-validate $\rightarrow$ converge \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that SDT explicitly prevents.

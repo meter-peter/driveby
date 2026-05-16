@@ -220,6 +220,7 @@ Table~\ref{tab:axiom-principle-mapping} presents the formal mapping between axio
 \caption{Mapping of SDT axioms to validation principles.}
 \label{tab:axiom-principle-mapping}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llllc@{}}
 \toprule
 \textbf{Axiom} & \textbf{ID} & \textbf{Principle} & \textbf{Severity} & \textbf{Status} \\
@@ -237,7 +238,8 @@ Determinism   & P009 & Test Readiness                   & Warning  & Implemented
 Observability & P007 & Performance Testing              & Warning  & Planned     \\
 Observability & P008 & API Versioning Strategy           & Warning  & Implemented \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 
 \noindent\small\textit{Severity alignment (round-2 revision).} The in-source severity constants (\texttt{driveby-cli/internal/types/report.go}) classify P001--P005 as \texttt{critical} (P006 is defined theoretically but its \texttt{PrincipleChecker} wrapper is pending implementation, so it is not yet exercised by the static gate); the table above reflects this. P002--P004 were originally assigned Warning severity on the design intent that incomplete documentation, error coverage, and schema precision degrade rather than prevent automation. Operational evidence accumulated during the controlled, large-scale, and PoC evaluations (Chapter~\ref{ch:evaluation}) reversed this judgement: specifications missing those properties systematically prevented downstream agent and code-generator consumption. The escalation was applied first in the source code (commit \texttt{c96d9c7}, ``Make P002/P003/P004 critical---validation blocks incomplete specs'') and then propagated to this thesis. The strong empirical consequence---that 84\% of public APIs in the APIs.guru sample now block at the static layer rather than degrade gracefully---is itself a load-bearing result of Chapter~\ref{ch:evaluation}: it is the quantitative form of the systemic specification-quality gap that motivates the framework's existence. Strict mode therefore functions as a true quality gate rather than an advisory layer; teams that need a non-blocking baseline use minimal or test-ready mode (Section~\ref{sec:validation-modes}).
 \end{table}
@@ -268,6 +270,7 @@ Table~\ref{tab:validation-modes} presents the mode-to-principle mapping.
 \caption{Validation modes and the principles each mode evaluates. The registry's \texttt{ForMode()} method returns only the checkers listed for each mode.}
 \label{tab:validation-modes}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lccccccccc@{}}
 \toprule
 \textbf{Mode} & \textbf{P001} & \textbf{P002} & \textbf{P003} & \textbf{P004} & \textbf{P005} & \textbf{P006} & \textbf{P007} & \textbf{P008} & \textbf{P009} \\
@@ -277,7 +280,8 @@ Test-ready & \cmark & \cmark$^\ddagger$ & \cmark$^\S$ & \cmark$^\dagger$ & & & &
 Strict     & \cmark & \cmark & \cmark & \cmark & \cmark & & & \cmark & \\
 Test-only  &        &        &        &        &        & $\circ$ & $\circ$ & & \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 
 \vspace{2mm}
 \noindent\small{$\circ$ P006 and P007 are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers. In the current implementation, \texttt{ForMode(test-only)} returns no static checkers; the mode instead triggers the runtime testing pipeline (functional and load tests) directly via separate CLI commands.}\\

@@ -40,7 +40,7 @@ The operational evaluation assesses SDT not as an isolated tool but as a proof-o
 \label{subsec:operational-initial-state}
 % ----------------------------------------------------------------------------
 
-Before any PoC artefact was deployed, the target cluster (\texttt{private.novelcore.org}) already hosted Novelcore's KubeCore-branded IDP, a Kubernetes platform layer that pre-existed this thesis. The relevant pre-existing components were: ArgoCD (cluster-wide GitOps controller, in the \texttt{argocd} namespace), Crossplane v1.16 with provider-kubernetes (in the \texttt{crossplane-system} namespace), Argo Events with a NATS-based EventBus (in the \texttt{argo-events} namespace), Argo Workflows (in the \texttt{argo-workflows} namespace), Traefik as the ingress controller, and cert-manager wired to a public-CA \texttt{ClusterIssuer}. Five GitHub repositories under the \texttt{novelcore} organisation existed for the five evaluation applications (\texttt{perfect-api}, \texttt{bad-docs-api}, \texttt{no-auth-api}, \texttt{slow-api}, \texttt{broken-api}); in line with the two-repository BYOCI model (Chapter~\ref{ch:workflow}), each application repository contained only application source code and the BYOCI workflow that builds container images.
+Before any PoC artefact was deployed, the target cluster (\texttt{private.\allowbreak novelcore.\allowbreak org}) already hosted Novelcore's KubeCore-branded IDP, a Kubernetes platform layer that pre-existed this thesis. The relevant pre-existing components were: ArgoCD (cluster-wide GitOps controller, in the \texttt{argocd} namespace), Crossplane v1.16 with provider-kubernetes (in the \texttt{crossplane-system} namespace), Argo Events with a NATS-based EventBus (in the \texttt{argo-events} namespace), Argo Workflows (in the \texttt{argo-workflows} namespace), Traefik as the ingress controller, and cert-manager wired to a public-CA \texttt{ClusterIssuer}. Five GitHub repositories under the \texttt{novelcore} organisation existed for the five evaluation applications (\texttt{perfect-api}, \texttt{bad-docs-api}, \texttt{no-auth-api}, \texttt{slow-api}, \texttt{broken-api}); in line with the two-repository BYOCI model (Chapter~\ref{ch:workflow}), each application repository contained only application source code and the BYOCI workflow that builds container images.
 
 The PoC therefore began against a stable IDP baseline. The thesis-built additions are scoped to the \texttt{driveby} namespace (Crossplane XRD, Composition, RBAC, EventBus, WorkflowTemplates, GitOps Promoter installation, and the \texttt{XSDLC} resources themselves) and to the per-application namespaces that each \texttt{XSDLC} CR generates. No modification to the pre-existing platform components was required; this is the principal architectural property the operational evaluation is designed to demonstrate.
 
@@ -102,7 +102,7 @@ The 32 CommitStatus CRDs (per~[509], the supervisor's request for approximate pe
 \label{subsec:xsdlc-idp}
 % ----------------------------------------------------------------------------
 
-The DriveBy quality gate system is deployed on \texttt{private.novelcore.org} as one component of Novelcore's internal developer platform. The IDP is built entirely on Kubernetes operators and Crossplane compositions: database provisioning, networking, observability, and now quality-gated delivery pipelines all follow the same pattern---a custom resource declares the desired state, a composition generates the implementation resources, and Kubernetes controllers reconcile toward that state.
+The DriveBy quality gate system is deployed on \texttt{private.\allowbreak novelcore.\allowbreak org} as one component of Novelcore's internal developer platform. The IDP is built entirely on Kubernetes operators and Crossplane compositions: database provisioning, networking, observability, and now quality-gated delivery pipelines all follow the same pattern---a custom resource declares the desired state, a composition generates the implementation resources, and Kubernetes controllers reconcile toward that state.
 
 Within this IDP, XSDLC is not a standalone installation. It is a \textit{composable building block} that coexists with other platform capabilities. A single \texttt{XSDLC} custom resource (\(\sim\)25 lines of YAML) provisions \textbf{approximately 45--50 Kubernetes objects} in under 15 seconds for a 3-environment pipeline---the exact number depends on how many environments are gated and whether the GitHub provider is configured to manage branch protection. Per~[370], the count decomposes (for the \texttt{perfect-api} CR observed on the cluster) as: 3 ArgoCD Applications (one per environment), 2 WorkflowTemplates (staging-gate, prod-gate), 4 Argo Events resources (EventBus, EventSource, two Sensors), 2 Ingresses (staging-gate webhook, prod-gate webhook), 5 GitOps Promoter resources (ScmProvider, GitRepository, PromotionStrategy, two CommitStatus templates), per-namespace ServiceAccount and RBAC bindings, ArgoCD push secrets and per-namespace \texttt{ghcr-creds} secrets, and---when GitHub provider is enabled---branches, BranchProtection rules, and boilerplate manifests in the auto-created GitOps repository. The 44--47 spread reported in earlier drafts reflects whether one counts the per-environment branch and protection objects once or per environment. Without XSDLC, a platform operator would need to manually create each of these resources through ClickOps---navigating the ArgoCD UI to create Applications, the GitHub UI to configure branch protection and webhooks, and \texttt{kubectl} to create RBAC, Sensors, and WorkflowTemplates. This manual process takes hours, is error-prone, non-reproducible, and impossible to version-control. XSDLC reduces it to a single declarative resource that can be reviewed in a pull request, stored in Git, and reconciled automatically.
 
@@ -146,7 +146,7 @@ Seven edge-case scenarios were tested against the proof-of-concept deployment to
 
 \begin{table}[htbp]
 \centering
-\caption{Operational edge-case test results on \texttt{private.novelcore.org}.}
+\caption{Operational edge-case test results on \texttt{private.\allowbreak novelcore.\allowbreak org}.}
 \label{tab:edge-cases}
 \small
 \begin{tabular}{@{}lp{7.5cm}c@{}}
@@ -182,7 +182,7 @@ The controlled evaluation uses this reference API as a positive control for crit
 \label{subsec:reference-api}
 % ----------------------------------------------------------------------------
 
-The \texttt{non-critical-api} is a Python FastAPI application with a hand-crafted OpenAPI specification engineered to satisfy every implemented principle (P001 through P005, P008, P009) in DriveBy's strict mode. It defines eight operations across three resource groups: five CRUD endpoints for \texttt{/products} (list, create, get by ID, update, delete), a \texttt{POST /tasks} endpoint, and two utility endpoints (\texttt{GET /test/health}, \texttt{POST /test/echo}). The specification includes a complete error-response surface (400, 401, 403, 404, 500) with consistent schemas, reusable \texttt{components.responses} entries, typed parameters with full length and range constraints, OAuth2 security with scopes referenced at the operation level, semantic versioning with migration documentation, and response examples for all 2xx responses. The API is deployed to the \texttt{perfect-api-dev} namespace on \texttt{private.novelcore.org} (the namespace name retains the historical artefact name; the API itself is the same) and serves as the validation target for all three evaluation arms. The defect APIs in Section~\ref{sec:multi-api-eval} are derived from this baseline by surgically degrading individual quality dimensions; the supervisor's renaming suggestion~[466] reflects that no critical faults were ever injected into the reference itself---each derived defect targets exactly one principle, and under the post-revision severity assignment all of P001--P005 are critical, so each derived API now carries exactly one critical-severity violation by construction.
+The \texttt{non-critical-api} is a Python FastAPI application with a hand-crafted OpenAPI specification engineered to satisfy every implemented principle (P001 through P005, P008, P009) in DriveBy's strict mode. It defines eight operations across three resource groups: five CRUD endpoints for \texttt{/products} (list, create, get by ID, update, delete), a \texttt{POST /tasks} endpoint, and two utility endpoints (\texttt{GET /test/health}, \texttt{POST /test/echo}). The specification includes a complete error-response surface (400, 401, 403, 404, 500) with consistent schemas, reusable \texttt{components.responses} entries, typed parameters with full length and range constraints, OAuth2 security with scopes referenced at the operation level, semantic versioning with migration documentation, and response examples for all 2xx responses. The API is deployed to the \texttt{perfect-api-dev} namespace on \texttt{private.\allowbreak novelcore.\allowbreak org} (the namespace name retains the historical artefact name; the API itself is the same) and serves as the validation target for all three evaluation arms. The defect APIs in Section~\ref{sec:multi-api-eval} are derived from this baseline by surgically degrading individual quality dimensions; the supervisor's renaming suggestion~[466] reflects that no critical faults were ever injected into the reference itself---each derived defect targets exactly one principle, and under the post-revision severity assignment all of P001--P005 are critical, so each derived API now carries exactly one critical-severity violation by construction.
 
 % ----------------------------------------------------------------------------
 \subsection{Baseline Validation}
@@ -224,6 +224,7 @@ To verify detection accuracy, seven defects are injected into the \texttt{non-cr
 \caption{Defect injection matrix: each injected defect targets one principle.}
 \label{tab:defect-injection}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llp{7cm}c@{}}
 \toprule
 \textbf{Target} & \textbf{Defect} & \textbf{Description} & \textbf{Detected} \\
@@ -236,7 +237,8 @@ P005 & Missing security      & Remove \texttt{components.securitySchemes} entire
 P008 & Invalid version       & Change \texttt{info.version} to ``latest'' (non-semver) & \cmark \\
 P009 & Missing examples      & Remove all parameter examples and schema types & \cmark \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 All seven injected defects are detected with zero false negatives and zero false positives (no unrelated principles are affected by a single-principle defect). The detection is deterministic: running the same validation multiple times against the same defective specification produces identical results, confirming the Axiom of Determinism.
@@ -255,6 +257,7 @@ A reproducible Python harness (\texttt{tools/per-check-defect-injection.py}) gen
 \caption{Per-check defect-injection results for \texttt{non-critical-api}. Detection means the targeted principle either (a) transitions from passing to failing, or (b) reports a new failed check that was passing in the baseline.}
 \label{tab:per-check-defect-extension}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llc@{}}
 \toprule
 \textbf{Mutation} & \textbf{Target} & \textbf{Outcome} \\
@@ -277,7 +280,8 @@ strip parameter-level examples   & P009 & \emph{missed} \\
 \midrule
 \multicolumn{3}{l}{\textbf{Single-check detection rate: 12/15 (80\%); collateral failures: 1.}} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \textbf{Combination robustness.} Three random pairs and one random triple of mutations were applied simultaneously to the baseline and validated. In every case, all targeted principles were detected as failing in the same run---confirming that the principle checkers operate independently and that simultaneous defects do not mask one another (Table~\ref{tab:combo-detection}).
@@ -287,6 +291,7 @@ strip parameter-level examples   & P009 & \emph{missed} \\
 \caption{Combination defect-injection results: simultaneous mutations on the \texttt{non-critical-api} baseline.}
 \label{tab:combo-detection}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llc@{}}
 \toprule
 \textbf{Combination kind} & \textbf{Targeted principles} & \textbf{Outcome} \\
@@ -297,7 +302,8 @@ triple & P002 + P003 + P005 & all detected (P008 also flagged as collateral) \\
 \midrule
 \multicolumn{3}{l}{\textbf{Combination detection rate: 3/3 (all targets caught).}} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \textbf{Interpretation of misses.} Two of the fifteen single-check mutations were not detected, which is itself diagnostic. The \texttt{p005-strip-op-security} miss reveals that the P005 checker treats per-operation \texttt{security} as redundant when a global \texttt{security} requirement is already in place---a defensible default that nevertheless fails to catch the case where a developer wanted to \emph{override} the global default per operation. The \texttt{p009-strip-param-examples} miss reveals that P009's example-presence check operates on schema-level examples rather than parameter-level examples; the targeted defect bypasses the check by definition. Both misses are genuine framework limitations rather than evaluation artefacts; both are recorded in the limitations discussion of Chapter~\ref{ch:discussion} and as candidate strengthenings in Chapter~\ref{ch:conclusion}.
@@ -313,7 +319,7 @@ triple & P002 + P003 + P005 & all detected (P008 also flagged as collateral) \\
 \label{sec:multi-api-eval}
 % ============================================================================
 
-The single-API controlled evaluation (Section~\ref{sec:controlled-eval}) established detection accuracy through defect injection. This section extends the evaluation to a five-API suite, where each API embodies a distinct defect class and is validated through the full XSDLC quality gate pipeline deployed on \texttt{private.novelcore.org}.
+The single-API controlled evaluation (Section~\ref{sec:controlled-eval}) established detection accuracy through defect injection. This section extends the evaluation to a five-API suite, where each API embodies a distinct defect class and is validated through the full XSDLC quality gate pipeline deployed on \texttt{private.\allowbreak novelcore.\allowbreak org}.
 
 % ----------------------------------------------------------------------------
 \subsection{Evaluation API Suite Design}
@@ -327,6 +333,7 @@ Five purpose-built FastAPI applications were designed to exercise the full SDT p
 \caption{Empirically measured strict-mode outcomes per API (source: \texttt{results/local/<api>-validate-strict.json}, captured at PoC end). \textbf{P} = principle fully passed; \textbf{F} = at least one check failed. P006 and P007 are runtime principles not exercised by static validation and are reported as ``--''.}
 \label{tab:defect-ground-truth}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lccccccc@{}}
 \toprule
 \textbf{API} & \textbf{P001} & \textbf{P002} & \textbf{P003} & \textbf{P004} & \textbf{P005} & \textbf{P008} & \textbf{P006/P007} \\
@@ -338,7 +345,8 @@ no-auth-api      & P & F & F & F & F & P & --       \\
 slow-api         & P & F & F & F & P & P & runtime fail (P007) \\
 broken-api       & P & F & F & F & P & P & runtime fail (P006) \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 Two observations follow from the measured matrix and address the contradictions flagged in the round-1 review~[473]. First, \texttt{bad-docs-api} fails on the documentation, error-handling, schema, and versioning principles---of these, P002, P003, and P004 are critical under the post-revision severity assignment (Section~\ref{sec:axiom-principle-mapping}); P008 remains warning. It \emph{passes} P001 (the loader still parses it) and P005 (security schemes are present even though documentation around them is stripped). The earlier draft's claim that \texttt{bad-docs-api} also fails P005 was wrong; the corrected mapping above is what the JSON reports actually contain. Second, with P002--P004 escalated to critical, every defect API in the suite (not just \texttt{no-auth-api}) is now blocked at the static-validation gate in strict mode: \texttt{bad-docs-api} blocks on P002/P003/P004, \texttt{no-auth-api} on P005, and the runtime defects (\texttt{slow-api}, \texttt{broken-api}) inherit P002/P003/P004 critical failures from their shared base specification. The runtime layer (P006 functional, P007 load) therefore catches the residual behavioural defects that survive the static gate, completing the layered defence.
@@ -350,6 +358,7 @@ Replacing the earlier speculative ground-truth table with the measured outcomes 
 \caption{Evaluation API suite: each API targets a distinct defect class.}
 \label{tab:api-suite}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}l p{0.30\textwidth} p{0.34\textwidth} l@{}}
 \toprule
 \textbf{API} & \textbf{Target Defect Class} & \textbf{Expected Failure} & \textbf{OpenAPI} \\
@@ -360,7 +369,8 @@ no-auth-api   & Missing authentication schemes     & P005 (critical) + critical 
 slow-api      & Performance degradation (500\,ms delay) & P007 (load test, W) & 3.0.3 \\
 broken-api    & Spec--implementation mismatch      & P006 (functional, C) & 3.1.0 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The suite was designed to verify three properties: (1)~each defect class is detected by its corresponding principle, (2)~the severity model correctly distinguishes blocking from non-blocking failures, and (3)~the layered gate architecture (staging then production) provides defense in depth.
@@ -377,6 +387,7 @@ Each API was first validated locally using the DriveBy CLI in strict mode (P001,
 \caption{Local validation results in strict mode (6 principles). \cmark{} = pass, \xmark{} = fail. Severity: \textbf{C} = critical, \textbf{W} = warning. Critical-failure counts reflect the post-revision severity assignment in which P001--P005 are all critical (Section~\ref{sec:axiom-principle-mapping}).}
 \label{tab:local-strict}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lcccccccc@{}}
 \toprule
 \textbf{API} & \textbf{P001} & \textbf{P002} & \textbf{P003} & \textbf{P004} & \textbf{P005} & \textbf{P008} & \textbf{Passed} & \textbf{Critical} \\
@@ -388,7 +399,8 @@ no-auth-api   & \cmark & \xmark & \xmark & \xmark & \xmark & \cmark & 2/6 & 4 \\
 slow-api      & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & 3/6 & 3 \\
 broken-api    & \cmark & \xmark & \xmark & \xmark & \cmark & \cmark & 3/6 & 3 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The reference \texttt{non-critical-api} achieves a clean 6/6 in strict mode (the JSON report carries top-level \texttt{"status": "passed"}), confirming that a hand-crafted, fully-enriched specification can satisfy every implemented principle. Under the post-revision severity assignment, all four defect APIs are now blocked at the static-validation gate in strict mode: \texttt{bad-docs-api} on three critical principles (P002/P003/P004 stripped from the documentation, error metadata, and schema definitions); \texttt{no-auth-api} on four (P002/P003/P004 inherited from the same documentation strip plus P005 from the security strip); and \texttt{slow-api}/\texttt{broken-api} on three each (P002/P003/P004 inherited from their shared base; their distinguishing defects are runtime-layer mutations). The runtime layer (P006/P007) still adds discrimination for the behavioural defects: \texttt{broken-api} fails P006 because endpoints return HTTP~418 instead of the documented 200, and \texttt{slow-api} fails P007 because endpoint latency exceeds the 200~ms threshold. The combination of stricter static gating and the runtime layer means no defect class escapes detection.
@@ -405,6 +417,7 @@ Each API was deployed through the XSDLC pipeline, triggering staging gate workfl
 \caption{Staging gate results for all five evaluation APIs.}
 \label{tab:staging-gates}
 \small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}l p{0.34\textwidth} l p{0.22\textwidth}@{}}
 \toprule
 \textbf{API} & \textbf{Gate Checks} & \textbf{Result} & \textbf{Blocking Failure} \\
@@ -415,7 +428,8 @@ bad-docs-api & validate-only (strict)                       & \xmark{} FAIL & P0
 no-auth-api  & validate-only (strict)                       & \xmark{} FAIL & P005 Security (critical) \\
 broken-api   & validate-only (strict) + functional-test     & \xmark{} FAIL & P006 Functional (critical) \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 Three APIs were blocked at the staging gate. \texttt{bad-docs-api} was blocked statically on P002/P003/P004 (all critical under the post-revision severity assignment); \texttt{no-auth-api} was blocked on the same three plus P005. The \texttt{broken-api} was blocked at the runtime layer on P006 (Functional Testing) when the runtime checker detected that \texttt{GET /products} returned HTTP~418 instead of the documented 200, and \texttt{POST /products} returned 200 instead of the documented 201---demonstrating that even when a specification lacks the documentation gaps that statically gate the documentation-stripped APIs, runtime validation still catches behavioural drift. \texttt{slow-api} was blocked at the runtime layer on P007 (Load Testing): all eight endpoints returned correct responses, but with \(\sim\)500\,ms p95 latency per request, exceeding the 200~ms staging threshold. Note: this paragraph reflects the post-revision severity. In the legacy severity assignment (P002--P004 warning) used in earlier drafts, \texttt{slow-api} would have passed the static gate with only warning surfacing; the staging-gate behaviour reported here is what the current source code produces.

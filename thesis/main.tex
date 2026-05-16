@@ -5,7 +5,9 @@
 \usepackage[greek,main=english]{babel}
 \usepackage{alphabeta}
 \usepackage{graphicx}
+\usepackage{microtype}
 \usepackage{hyperref}
+\usepackage{xurl}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -18,6 +20,12 @@
 \newcommand{\xmark}{\ding{55}}%
 \usepackage[backend=biber,style=numeric]{biblatex}
 \addbibresource{references.bib}
+
+% Increase TeX's tolerance for stretching inter-word spaces so long
+% inline \texttt{} keywords get pushed to the next line rather than
+% overshooting the right margin. emergencystretch gives the line-breaker
+% extra slack on its last (most-desperate) pass.
+\setlength{\emergencystretch}{3em}
 
 \lstset{
   basicstyle=\ttfamily\small,
