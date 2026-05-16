@@ -32,11 +32,15 @@
 % Developer commit on main (top)
 \node[action, minimum width=5cm] (push) at (5,0) {Developer commits dry manifests\\on \texttt{main} branch};
 
-% BYOCI boundary — labels placed clearly above and below the dashed line
-% with a small vertical gap so they do not collide with it.
-\draw[boundary=red!70!black] (-0.5,-0.75) -- (10.5,-0.75);
-\node[font=\tiny\bfseries,text=red!60!black,anchor=south east] at (10.5,-0.55) {Developer updates dry manifests on main (BYOCI)};
-\node[font=\tiny\bfseries,text=teal!60!black,anchor=north east] at (10.5,-0.95) {XSDLC hydrates, promotes, gates, syncs};
+% BYOCI boundary line and side-anchored label
+% The dashed boundary separates the developer's side (above) from the
+% XSDLC platform side (below). One single label is anchored at the
+% right edge, positioned to the right of the box stack so it does not
+% collide with any other element.
+\draw[boundary=red!70!black] (-0.5,-0.85) -- (10.5,-0.85);
+\node[font=\tiny\bfseries,text=red!60!black,anchor=west,align=left]
+  at (10.6,-0.85)
+  {BYOCI\\boundary};
 
 % ArgoCD Hydrator step
 \node[branch=violet, minimum width=8cm] (hydrator) at (5,-1.7) {ArgoCD Source Hydrator renders per-environment overlays};
@@ -52,10 +56,10 @@
 \draw[->,thick,blue!50!black] (hydrator.south) -- (stagingnext.north);
 \draw[->,thick,blue!50!black] (hydrator.south) -- ++(0,-0.1) -| (prodnext.north);
 
-% Label showing hydrated output — placed in the gap between the hydrator
-% box and the env-next row, in the small horizontal space between the
-% staging-next arrow (centred) and the prod-next arrow (rightmost).
-\node[font=\tiny,text=blue!60!black,anchor=west] at (7.0,-2.45) {manifests/ + hydrator.metadata};
+% Label showing hydrated output — anchored next to the centred
+% staging-next arrow so it sits over empty space rather than crossing
+% other arrows or boxes.
+\node[font=\tiny,text=blue!60!black,anchor=west] at (5.3,-2.4) {manifests/ + hydrator.metadata};
 
 % Promoter PRs
 \node[action] (pr1) at (0,-4.0) {auto-merge (no gate)};
