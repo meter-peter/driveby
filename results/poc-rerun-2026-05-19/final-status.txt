@@ -1,0 +1,17 @@
+Final snapshot @ 2026-05-19 18:09 UTC (13 min post-trigger)
+═════════════════════════════════════════════════════════════
+
+App           Staging                 Prod                    Matches Ch.7?
+─────────────────────────────────────────────────────────────────────────────────
+perfect-api   PR#1  open / PENDING    PR#2  open / PENDING    (workflows still running)
+bad-docs-api  PR#2  open / FAILURE    PR#3  open / PENDING    ✓ P002+P003 fail static
+no-auth-api   PR#3  open / FAILURE    PR#2  open / PENDING    ✓ P005 fail by construction
+slow-api      PR#2  MERGED / SUCCESS  PR#3  open / FAILURE    ✓ passes staging, fails prod load-test
+broken-api    PR#3  open / FAILURE    PR#2  open / PENDING    ✓ passes static, fails functional-test
+
+LIVE DECISIONS:
+- 1 PR auto-merged after passing gate (slow-api staging)
+- 4 PRs with failing checks (bad-docs/no-auth/broken staging, slow prod)
+- 5 PRs still running validation (the other 5)
+
+All 10 PRs visible at: https://github.com/novelcore/<app>-gitops/pulls
