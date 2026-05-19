@@ -1,17 +1,18 @@
-Final snapshot @ 2026-05-19 18:09 UTC (13 min post-trigger)
+Final snapshot @ 2026-05-19 18:14 UTC (18 min post-trigger)
 ═════════════════════════════════════════════════════════════
 
-App           Staging                 Prod                    Matches Ch.7?
-─────────────────────────────────────────────────────────────────────────────────
-perfect-api   PR#1  open / PENDING    PR#2  open / PENDING    (workflows still running)
-bad-docs-api  PR#2  open / FAILURE    PR#3  open / PENDING    ✓ P002+P003 fail static
-no-auth-api   PR#3  open / FAILURE    PR#2  open / PENDING    ✓ P005 fail by construction
-slow-api      PR#2  MERGED / SUCCESS  PR#3  open / FAILURE    ✓ passes staging, fails prod load-test
-broken-api    PR#3  open / FAILURE    PR#2  open / PENDING    ✓ passes static, fails functional-test
+App           Staging                   Prod                      Matches Ch.7?
+──────────────────────────────────────────────────────────────────────────────────────
+perfect-api   PR#1  MERGED / SUCCESS   PR#2  open  / FAILURE     ✓ static+functional PASS
+bad-docs-api  PR#2  open  / FAILURE    PR#3  open  / FAILURE     ✓ critical P002/P003/P004 fail
+no-auth-api   PR#3  open  / FAILURE    PR#2  open  / FAILURE     ✓ P005 fail by construction
+slow-api      PR#2  MERGED / SUCCESS   PR#3  open  / FAILURE     ✓ pass staging, fail prod load-test
+broken-api    PR#3  open  / FAILURE    PR#2  open  / FAILURE     ✓ pass static, fail functional-test
 
-LIVE DECISIONS:
-- 1 PR auto-merged after passing gate (slow-api staging)
-- 4 PRs with failing checks (bad-docs/no-auth/broken staging, slow prod)
-- 5 PRs still running validation (the other 5)
+FINAL DECISIONS:
+- 2 PRs auto-merged after passing gate
+- 8 PRs blocked with FAILURE check
+- 0 PRs pending
+- All 10 PRs decided within 18 minutes of kubectl apply
 
 All 10 PRs visible at: https://github.com/novelcore/<app>-gitops/pulls

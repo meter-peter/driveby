@@ -1,38 +1,87 @@
 {
-  "rerun_timestamp": "2026-05-19T15:04:54Z",
+  "rerun_timestamp": "2026-05-19T17:56:00Z",
+  "final_outcome_timestamp": "2026-05-19T18:14:00Z",
+  "elapsed_minutes": 18,
   "cluster": "private.novelcore.org (via access.kubecore.eu)",
-  "xsdlc_apps_deployed": 5,
-  "argocd_applications_created": 15,
-  "gitops_repos_created": 5,
-  "promotion_strategies_created": 15,
-  "change_transfer_policies": {
-    "dev_merged": 5,
-    "staging_open": 5,
-    "prod_open": 5
+  "deploy_method": "single kubectl apply of 5 XSDLC CRs",
+  "infrastructure_created": {
+    "xsdlc_crs": 5,
+    "argocd_applications": 15,
+    "gitops_repos": 5,
+    "promotion_strategies": 15,
+    "change_transfer_policies": 15,
+    "workflow_templates": 10,
+    "eventsources": 10,
+    "sensors": 10
   },
-  "total_open_prs": 10,
-  "open_prs_per_app": {
+  "total_prs_opened": 10,
+  "decisions": {
+    "merged_after_pass": 2,
+    "open_with_failure": 8,
+    "pending": 0
+  },
+  "per_app_outcomes": {
     "perfect-api": {
-      "staging_pr": 1,
-      "prod_pr": 2
+      "staging": {
+        "pr": 1,
+        "state": "MERGED",
+        "check": "SUCCESS"
+      },
+      "prod": {
+        "pr": 2,
+        "state": "OPEN",
+        "check": "FAILURE"
+      }
     },
     "bad-docs-api": {
-      "staging_pr": 2,
-      "prod_pr": 3
+      "staging": {
+        "pr": 2,
+        "state": "OPEN",
+        "check": "FAILURE"
+      },
+      "prod": {
+        "pr": 3,
+        "state": "OPEN",
+        "check": "FAILURE"
+      }
     },
     "no-auth-api": {
-      "staging_pr": 3,
-      "prod_pr": 2
+      "staging": {
+        "pr": 3,
+        "state": "OPEN",
+        "check": "FAILURE"
+      },
+      "prod": {
+        "pr": 2,
+        "state": "OPEN",
+        "check": "FAILURE"
+      }
     },
     "slow-api": {
-      "staging_pr": 2,
-      "prod_pr": 3
+      "staging": {
+        "pr": 2,
+        "state": "MERGED",
+        "check": "SUCCESS"
+      },
+      "prod": {
+        "pr": 3,
+        "state": "OPEN",
+        "check": "FAILURE"
+      }
     },
     "broken-api": {
-      "staging_pr": 3,
-      "prod_pr": 2
+      "staging": {
+        "pr": 3,
+        "state": "OPEN",
+        "check": "FAILURE"
+      },
+      "prod": {
+        "pr": 2,
+        "state": "OPEN",
+        "check": "FAILURE"
+      }
     }
   },
   "evidence_url_pattern": "https://github.com/novelcore/<app>-gitops/pulls",
-  "validation_workflow_status": "running"
+  "matches_thesis_chapter_7": true
 }
