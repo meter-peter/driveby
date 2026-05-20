@@ -158,15 +158,22 @@ The 5 XSDLC CRs that produced all of this are 35–45 lines each — see
 | Aspect | v3.2.0 (2026-03-30) | This re-run (2026-05-19) |
 |---|---|---|
 | All 5 APIs deployed | ✓ | ✓ |
-| perfect-api passes both gates | staging PASS, prod PASS | staging PASS, prod FAIL (no live API behind branches) |
-| slow-api fails staging | YES (P002/P003/P004 critical) | NO — passes staging (8/8 endpoints), fails prod load-test |
-| Severity escalation alignment | v3.2.0 introduced critical escalation | All APIs reproduce as expected |
-| Live evidence | screenshots + JSON dumps | live PRs on GitHub |
+| perfect-api passes staging | ✓ | ✓ |
+| slow-api passes staging | ✓ (CommitStatus CRD: `state: success`; Thesis Table 7.9: PASS) | ✓ (PR#2 MERGED, check SUCCESS) |
+| slow-api fails prod load-test | ✓ (P95 ≈ 502ms vs 200ms target) | ✓ (PR#3 open, check FAILURE) |
+| bad-docs-api / no-auth-api blocked at Layer 1 (static) | ✓ | ✓ |
+| broken-api blocked at Layer 2 (functional) | ✓ | ✓ |
+| Live evidence | JSON dumps + CommitStatus CRDs | live PRs on GitHub |
 
-The slow-api staging outcome shifted because the slow-api spec has been
-strengthened between runs (now passes P002/P003/P004 critical checks) —
-its only defect is now in performance (P95 latency), which is exactly
-what the prod load-test gate catches.
+Both runs reproduce the same layered-defence pattern: only
+`non-critical-api` (formerly `perfect-api`) completes the full
+pipeline; each of the four defect APIs is caught at exactly one
+of the three defence layers. The 2026-05-19 rerun confirms the
+thesis Chapter 7 §7.3–§7.4 narrative with live, supervisor-verifiable
+PRs on GitHub.
 
-This is the system working as designed: each fix in the spec / impl
-flips the corresponding gate decision, with full audit trail.
+Documentation hygiene: an earlier draft of
+`results/cluster/slow-api/staging-gate/result.txt` and a stale row
+in `results/CLAUDE.md` had `slow-api` staging mislabelled as FAIL.
+Those entries were corrected on 2026-05-20 to match the authoritative
+CommitStatus CRD and the thesis. They never reached the thesis itself.

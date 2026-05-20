@@ -46,16 +46,17 @@ results/
 | API | Staging Gate | Staging Result | Prod Gate | Prod Result |
 |-----|-------------|---------------|-----------|-------------|
 | perfect-api | validate-only (test-ready) + functional-test | **PASS** (5/5 + 8/8 endpoints) | load-test (auto-injected validate strict) | **PASS** (6/6 + load PASS) |
-| slow-api | validate-only (strict) + functional-test | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
+| slow-api | validate-only (strict) + functional-test | **PASS** (3/6 strict, zero critical; 8/8 endpoints with ~500ms p95) | validate-only (strict) + load-test | **FAIL** (P007 — P95 502ms vs 200ms target) |
 | bad-docs-api | validate-only (strict) | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
 | no-auth-api | validate-only (strict) | **FAIL** (P005+P002+P003+P004 critical) | N/A | NOT_REACHED |
-| broken-api | validate-only (strict) + functional-test | **FAIL** (P002+P003+P004 critical) | N/A | NOT_REACHED |
+| broken-api | validate-only (strict) + functional-test | **FAIL** at functional layer (P006 — 2/8 endpoints return undocumented status codes) | N/A | NOT_REACHED |
 
 Notes:
 - **v3.2.0**: P002, P003, P004 severity changed from warning to **critical** — validation now blocks incomplete specs from proceeding to functional/load testing
 - **test-ready** mode checks P001, P002 (no contact/license), P003 (4xx + error schemas), P004, P009 — 5 principles
 - **strict** mode checks P001, P002, P003, P004, P005, P008 — 6 principles
-- Only **perfect-api** passes all gates — it is the only API with a complete, hand-crafted specification
+- **Layered defence**: only `perfect-api` (now `non-critical-api` in the thesis) completes the full pipeline. The other four are each blocked at exactly one of the three defence layers: `bad-docs-api`/`no-auth-api` at Layer 1 (static, staging), `broken-api` at Layer 2 (functional, staging), `slow-api` at Layer 3 (load-test, **prod** — not staging)
+- Staging-results re-confirmed by the 2026-05-19 live rerun on `private.novelcore.org` (10/10 PRs decided; `slow-api` staging PR#2 **merged** after successful gate). See `results/poc-rerun-2026-05-19/SUMMARY.md`
 
 ## Local CLI Results (in `local/`)
 

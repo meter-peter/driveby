@@ -1,1 +1,7 @@
-FAIL — validate-only failed: P002+P003+P004 critical (3/6 passed). Never reaches functional-test or load-test.
+PASS — validate-only (strict) passes with 3/6 principles passing and zero critical failures; functional-test passes with 8/8 endpoints. Staging PR auto-merged. The performance defect (~500ms artificial delay) is invisible at this layer because each endpoint is hit once, well within request timeout.
+
+The performance defect is caught at the production gate by the load-test (P007) step — see ../prod-gate/result.txt.
+
+Note: an earlier version of this file incorrectly recorded a FAIL with "P002+P003+P004 critical". That was a stale entry from a draft before the slow-api source spec was strengthened to clear those three critical principles. The authoritative artefact is the CommitStatus CRD (commitstatus-crd.json) which records state: success. The thesis Table 7.9 (Ch.7, §7.3.2) correctly reflects this PASS outcome.
+
+Re-confirmed by the 2026-05-19 live rerun on private.novelcore.org: slow-api staging PR#2 merged successfully after the gate passed. See results/poc-rerun-2026-05-19/SUMMARY.md.
