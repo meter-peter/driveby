@@ -1,0 +1,39 @@
+\frametitle{Feedback in the developer's natural habitat}
+
+\footnotesize
+The Workflow's exit handler posts the DriveBy report \emph{as a PR
+comment} --- developers see precisely which principle failed and how
+to fix it, on the very PR the Promoter just opened.
+
+\vspace{0.5em}
+\begin{center}
+\begin{tikzpicture}[>={Stealth[length=2mm]}]
+\node[rectangle, rounded corners=3pt, draw=sdtteal!70!black,
+      fill=sdtteal!10, minimum width=10.5cm, minimum height=3.0cm,
+      align=left, font=\tiny\ttfamily, inner sep=6pt]
+  (pr) at (0,0)
+  {\textbf{driveby-bot} \textcolor{gray}{commented just now} \\[1pt]
+   \rule{9.5cm}{0.3pt} \\[2pt]
+   \textbf{\textcolor{sdtred!70!black}{[FAIL]} DriveBy --- strict mode --- 4/6 passed} \\[2pt]
+   \textcolor{sdtgreen!50!black}{[OK]} P001 OpenAPI Compliance \\
+   \textcolor{sdtred!70!black}{[X]}~ P002 Documentation Quality \\
+   \quad\textcolor{gray}{- 3/10 operations missing \texttt{summary}} \\
+   \quad\textcolor{gray}{- SuggestedFix: add summaries to GET /pets, POST /pets, \ldots} \\
+   \textcolor{sdtgreen!50!black}{[OK]} P003 Error Handling \quad
+   \textcolor{sdtgreen!50!black}{[OK]} P004 Schema Definitions \\
+   \textcolor{sdtred!70!black}{[X]}~ P005 Security Standards \\
+   \quad\textcolor{gray}{- no \texttt{securitySchemes} declared} \\
+   \textcolor{sdtgreen!50!black}{[OK]} P008 Versioning Strategy};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.3em}
+\tiny
+\begin{itemize}\setlength\itemsep{0.15em}
+\item Same JSON report, rendered as Markdown by the
+  \texttt{comment-pr-failure} exit handler.
+\item Commit status is the \emph{decision}; the PR comment is the
+  \emph{explanation} --- and the \texttt{SuggestedFix} field makes the
+  remediation actionable.
+\end{itemize}
+
