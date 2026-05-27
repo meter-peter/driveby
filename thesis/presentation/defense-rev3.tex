@@ -389,7 +389,7 @@ $f_p(s) \;=\; \mathrm{agg}\bigl(f_{p_1}(s),\, f_{p_2}(s),\, \dots,\, f_{p_n}(s)\
 \begin{columns}[T,onlytextwidth]
 
 \column{0.34\textwidth}
-\textbf{\textcolor{sdtblue}{Three axioms}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Three axioms}}\\[0.15em]
 \footnotesize
 \begin{itemize}\setlength\itemsep{0.25em}
 \item \textbf{Completeness} --- the specification fully describes
@@ -401,7 +401,7 @@ $f_p(s) \;=\; \mathrm{agg}\bigl(f_{p_1}(s),\, f_{p_2}(s),\, \dots,\, f_{p_n}(s)\
 \end{itemize}
 
 \column{0.34\textwidth}
-\textbf{\textcolor{sdtblue}{Nine principles}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Nine principles}}\\[0.15em]
 \scriptsize
 \begin{tabular}{@{}ll@{}}
 P001 & Compliance \\
@@ -417,7 +417,7 @@ P009 & Test readiness \\
 \tiny Every principle satisfies all three axioms jointly.
 
 \column{0.32\textwidth}
-\textbf{\textcolor{sdtblue}{Validation modes}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Validation modes}}\\[0.15em]
 \scriptsize
 \begin{itemize}\setlength\itemsep{0.2em}
 \item \textbf{minimal} --- P001 only.\\\textit{fast pre-commit}
@@ -920,29 +920,26 @@ with full observability and audit traceability.}
 % --------- 9c. Answers to the research questions ----------------------
 \begin{frame}{Answers to the research questions}
 
-\vspace{-0.2em}
-\begin{tabular}{@{}p{0.06\textwidth} p{0.22\textwidth} p{0.66\textwidth}@{}}
-\toprule
-& \textbf{Answer} & \textbf{Evidence} \\
-\midrule
-\textbf{RQ1} & \alert{\textbf{Yes}} & \scriptsize XSDLC declares the gate; the Workflow runs DriveBy on every PR
-and writes a CommitStatus that auto-merges or blocks. Promotion is reproducible
-and human-free at the verdict step. \\[0.3em]
+\footnotesize\vspace{-0.4em}
 
-\textbf{RQ2} & \alert{\textbf{Differentially}} & \scriptsize Validation rules come from the OpenAPI \emph{standard}
-(not the spec); functional test cases are mechanically derived from the spec via P006;
-promotion gates are declared in the XSDLC manifest --- human-authored
-but structurally typed and machine-discoverable. \\[0.3em]
+\textbf{RQ1} --- \emph{\scriptsize Can QA be operationalised without dedicated human testers gating the path?} \quad \alert{\textbf{Yes}}\\
+\scriptsize XSDLC declares the gate; Workflow runs DriveBy on every PR; CommitStatus auto-merges
+or blocks --- reproducible, human-free at the verdict step.
 
-\textbf{RQ3} & \alert{\textbf{Natively}} & \scriptsize One manifest $\to$ $\sim$45--50 reconciled
-Kubernetes objects in $<$15\,s. \textbf{11 of 12} injected drift scenarios converged
-automatically under Crossplane $+$ ArgoCD. \\[0.3em]
+\vspace{0.3em}
+\footnotesize\textbf{RQ2} --- \emph{\scriptsize To what extent are validation rules, test cases, and promotion gates mechanically derived from the spec?} \quad \alert{\textbf{Differentially}}\\
+\scriptsize Rules $\leftarrow$ OpenAPI \emph{standard}; tests $\leftarrow$ spec (P006);
+gates $\leftarrow$ XSDLC manifest (human-authored, structurally typed and machine-discoverable).
 
-\textbf{RQ4} & \alert{\textbf{Yes}} & \scriptsize XSDLC reifies the entire pipeline as a Kubernetes CRD ---
-discoverable, introspectable, and consumed identically by operators and
-autonomous agents. \\
-\bottomrule
-\end{tabular}
+\vspace{0.3em}
+\footnotesize\textbf{RQ3} --- \emph{\scriptsize How effectively does SDT compose with GitOps pipelines under continuous reconciliation?} \quad \alert{\textbf{Natively}}\\
+\scriptsize One manifest $\to$ $\sim$45--50 reconciled K8s objects in $<$15\,s;
+\textbf{11/12} injected drift scenarios converged automatically under Crossplane $+$ ArgoCD.
+
+\vspace{0.3em}
+\footnotesize\textbf{RQ4} --- \emph{\scriptsize Can the delivery pipeline itself be an ontologically structured specification?} \quad \alert{\textbf{Yes}}\\
+\scriptsize XSDLC reifies the entire pipeline as a Kubernetes CRD --- discoverable,
+introspectable, consumed identically by operators and autonomous agents.
 
 \end{frame}
 
@@ -984,7 +981,7 @@ autonomous agents. \\
 \begin{columns}[T,onlytextwidth]
 
 \column{0.48\textwidth}
-\textbf{\textcolor{sdtblue}{Closing the verdict tier}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Closing the verdict tier}}\\[0.15em]
 \begin{itemize}\setlength\itemsep{0.15em}
 \item Agent-driven remediation as a true control action ---
   the DriveBy report feeds a coding agent that proposes a spec or
@@ -996,7 +993,7 @@ autonomous agents. \\
 \end{itemize}
 
 \column{0.48\textwidth}
-\textbf{\textcolor{sdtblue}{Extending the framework}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Extending the framework}}\\[0.15em]
 \begin{itemize}\setlength\itemsep{0.15em}
 \item P006/P007 as first-class \texttt{PrincipleChecker}s.
 \item Multi-format adapters: AsyncAPI, gRPC, GraphQL behind \texttt{APISpec}.
@@ -1020,7 +1017,7 @@ autonomous agents. \\
 \begin{columns}[T,onlytextwidth]
 
 \column{0.49\textwidth}
-\textbf{\textcolor{sdtblue}{Own intellectual contribution}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Own intellectual contribution}}\\[0.15em]
 \begin{itemize}\setlength\itemsep{0.15em}
 \item \textbf{SDT paradigm} --- axioms, principles, validation modes.
 \item \textbf{DriveBy architecture} --- atomic-principle design,
@@ -1033,7 +1030,7 @@ autonomous agents. \\
 \end{itemize}
 
 \column{0.49\textwidth}
-\textbf{\textcolor{sdtblue}{Agent-assisted scope}}\\[0.3em]
+\textbf{\textcolor{sdtblue}{Agent-assisted scope}}\\[0.15em]
 \begin{itemize}\setlength\itemsep{0.15em}
 \item Routine Go boilerplate inside checker implementations
   (interfaces and tests authored by the candidate).
@@ -1075,7 +1072,7 @@ decision was authored, reviewed, and committed by the candidate.
 
 \vspace{0.6em}
 \begin{center}
-\Large\textbf{Thank you.}\\[0.3em]
+\Large\textbf{Thank you.}\\[0.15em]
 \normalsize Questions?
 \end{center}
 
