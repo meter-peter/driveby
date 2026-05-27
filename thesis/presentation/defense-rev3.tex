@@ -950,32 +950,27 @@ and consumed identically by operators and autonomous agents.
 
 \footnotesize
 
-\begin{itemize}\setlength\itemsep{0.4em}
+\begin{itemize}\setlength\itemsep{0.25em}
 \item \textbf{Verdict tier is open-loop.} The controller decides
-  \emph{promote} or \emph{block} but does not produce a corrective action on
-  the plant --- no repair, no $u$ that reduces $e(t)$.
+  \emph{promote} or \emph{block} but emits no corrective $u$ that
+  reduces $e(t)$ --- the report is consumed externally by a developer
+  or agent. (Drift between gates is \emph{not} a separate limitation:
+  the promotion chain blocks any production-bound transition that has
+  not first passed P006.)
 
-\item \textbf{Verdict-tier feedback requires external loop closure.}
-  When the gate fails, the structured report is consumed by a developer
-  or agent; the controller does not itself patch the spec or the
-  implementation. (Drift between gates is \emph{not} a separate limitation:
-  the promotion chain actively blocks any production-bound transition
-  that has not first passed P006, so divergent state cannot reach
-  production by construction.)
+\item \textbf{P006/P007 not yet \texttt{PrincipleChecker}-wrapped.}
+  Runtime checks live in \texttt{internal/testing/} but are not exposed
+  through the uniform principle interface.
 
-\item \textbf{P006 and P007 are not yet PrincipleChecker-wrapped.}
-  Runtime checks exist in \texttt{internal/testing/} but are not exposed
-  through the same uniform interface as P001--P005, P008, P009.
-
-\item \textbf{Single delivery cluster.} The evaluation runs against one
+\item \textbf{Single delivery cluster.} Evaluation runs against one
   ArgoCD/Crossplane cluster (\texttt{private.novelcore.org}); multi-cluster
-  promotion is not exercised.
+  promotion not exercised.
 
-\item \textbf{Single specification format.} OpenAPI 3.x + Swagger 2.0
-  only; AsyncAPI, gRPC, GraphQL are out of scope.
+\item \textbf{Single specification format.} OpenAPI 3.x $+$ Swagger 2.0 only;
+  AsyncAPI, gRPC, GraphQL out of scope.
 
-\item \textbf{Binary scoring.} Per-principle results are pass/fail
-  --- no risk-weighted or severity-graded composite metric.
+\item \textbf{Binary scoring.} Per-principle pass/fail --- no
+  risk-weighted or severity-graded composite metric.
 \end{itemize}
 
 \end{frame}
