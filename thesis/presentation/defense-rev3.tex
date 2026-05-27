@@ -19,6 +19,7 @@
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds,calc,decorations.pathmorphing}
 \usepackage{pifont}
 \usepackage{listings}
+\usepackage{booktabs}
 \newcommand{\cmark}{\textcolor{green!60!black}{\ding{51}}}
 \newcommand{\xmark}{\textcolor{red!70!black}{\ding{55}}}
 
@@ -919,29 +920,29 @@ with full observability and audit traceability.}
 % --------- 9c. Answers to the research questions ----------------------
 \begin{frame}{Answers to the research questions}
 
-\footnotesize
+\vspace{-0.2em}
+\begin{tabular}{@{}p{0.06\textwidth} p{0.22\textwidth} p{0.66\textwidth}@{}}
+\toprule
+& \textbf{Answer} & \textbf{Evidence} \\
+\midrule
+\textbf{RQ1} & \alert{\textbf{Yes}} & \scriptsize XSDLC declares the gate; the Workflow runs DriveBy on every PR
+and writes a CommitStatus that auto-merges or blocks. Promotion is reproducible
+and human-free at the verdict step. \\[0.3em]
 
-\textbf{RQ1} --- \emph{Can quality assurance be operationalised without dedicated human testers gating the path?}\\
-\textbf{Yes.} The XSDLC composition declares the gate; the gate Workflow executes DriveBy on every PR
-and writes a CommitStatus that auto-merges or blocks. \alert{Promotion decisions are reproducible
-and human-free at the verdict step.}
+\textbf{RQ2} & \alert{\textbf{Differentially}} & \scriptsize Validation rules come from the OpenAPI \emph{standard}
+(not the spec); functional test cases are mechanically derived from the spec via P006;
+promotion gates are declared in the XSDLC manifest --- human-authored
+but structurally typed and machine-discoverable. \\[0.3em]
 
-\vspace{0.5em}
-\textbf{RQ2} --- \emph{To what extent are validation rules, test cases, and promotion gates mechanically derived from the spec?}\\
-\textbf{Differentially.} (i) Validation rules are derived from the \emph{OpenAPI standard}, not the spec;
-(ii) functional test cases are mechanically derived from the spec (P006);
-(iii) promotion gates are declared in the XSDLC manifest --- still human-authored,
-but structurally typed and machine-discoverable.
+\textbf{RQ3} & \alert{\textbf{Natively}} & \scriptsize One manifest $\to$ $\sim$45--50 reconciled
+Kubernetes objects in $<$15\,s. \textbf{11 of 12} injected drift scenarios converged
+automatically under Crossplane $+$ ArgoCD. \\[0.3em]
 
-\vspace{0.5em}
-\textbf{RQ3} --- \emph{How effectively does SDT compose with GitOps pipelines under continuous reconciliation?}\\
-\textbf{Natively.} A single manifest produces $\sim$45--50 reconciled Kubernetes objects in $<$15\,s;
-\textbf{11 of 12} injected drift scenarios converged automatically under Crossplane $+$ ArgoCD.
-
-\vspace{0.5em}
-\textbf{RQ4} --- \emph{Can the delivery pipeline itself be expressed as an ontologically structured specification?}\\
-\textbf{Yes.} XSDLC reifies the entire pipeline as a Kubernetes CRD --- discoverable, introspectable,
-and consumed identically by operators and autonomous agents.
+\textbf{RQ4} & \alert{\textbf{Yes}} & \scriptsize XSDLC reifies the entire pipeline as a Kubernetes CRD ---
+discoverable, introspectable, and consumed identically by operators and
+autonomous agents. \\
+\bottomrule
+\end{tabular}
 
 \end{frame}
 
