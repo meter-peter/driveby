@@ -107,6 +107,37 @@ Combining the conceptual ownership (the framework, the architecture, the evaluat
 
 No deviation in the project was driven by the AI agent suggesting a more interesting pathway. The Phase~B partnership accelerated execution of the design that already existed; it did not redirect the design.
 
+% ----------------------------------------------------------------------------
+\subsection{Demarcation of Intellectual Contribution}
+\label{subsec:contribution-boundary}
+% ----------------------------------------------------------------------------
+
+The quantitative evidence above answers ``how much'' was authored solo. This subsection answers ``what specifically'' is the author's intellectual contribution as distinct from the agent-assisted scope. The distinction is stated explicitly because supervisor review of the defence presentation requested a precise demarcation, and because in an academic defence the burden of separating one's own contribution from agent-assisted artefact production rests with the candidate.
+
+\textbf{Author's intellectual contribution.} The conceptual and design content of this thesis, traceable to author-only commits and to design decisions made before or independently of any AI session:
+
+\begin{itemize}\setlength\itemsep{0.25em}
+\item The \textbf{SDT paradigm} as a whole---the three framework-wide axioms (Completeness, Determinism, Observability), the nine validation principles (P001--P009), the validation modes (\texttt{minimal}, \texttt{strict}, \texttt{test-ready}, \texttt{test-only}), and the explicit rejection of an axiom-to-principle partition in favour of axioms as framework-wide invariants (Chapter~\ref{ch:methodology}).
+\item The \textbf{formal model of validation as parallel application and aggregation}, $f_p(s) = \mathrm{agg}(f_{p_1}(s), \dots, f_{p_n}(s))$, with the explicit non-composition claim and its three consequences for Determinism, modular modes, and concurrent evaluation (Section~\ref{subsec:fp-formalism}).
+\item The \textbf{DriveBy architecture}: the \texttt{APISpec} abstraction layer that hides OpenAPI~3.x / Swagger~2.0 differences, the atomic-principle design and the \texttt{PrincipleChecker} interface, the deterministic engine and registry pattern, the structured-report contract.
+\item The \textbf{XSDLC composition design}: a single declarative CRD that reifies the full delivery pipeline, the two-repo BYOCI boundary, the per-environment overlay model with ArgoCD source-hydrator, the promotion-chain mechanics through GitOps Promoter and CommitStatus.
+\item The \textbf{two-tier closed-loop quality-control framing} of the gate: verdict tier (open-loop) versus platform tier (closed-loop, autonomous repair across Crossplane, ArgoCD, gitops-promoter, \texttt{provider-upjet-github}, Argo Workflows, Argo Events), and the architectural claim that drift between gate evaluations is blocked by construction rather than detected after the fact (Section~\ref{subsec:controller-stack}).
+\item The \textbf{evaluation methodology}: the three-arm evaluation design (controlled, large-scale, operational), the principle-injection scheme against the five evaluation APIs, the APIs.guru large-scale study design, and the single-iteration agent-feedback experiment that grounds the framework's claim to be machine-actionable feedback infrastructure (Chapter~\ref{ch:evaluation}).
+\item The \textbf{five project-wide code-quality invariants} (Section~\ref{subsec:quant-authorship}) and the \texttt{CLAUDE.md} hierarchy that operationalises them as constraints on every later agent-assisted edit (Section~\ref{sec:claudemd-protocol}).
+\item The \textbf{thesis chapter structure} and the chapter-to-source-code feed map (\texttt{thesis/CLAUDE.md}), which together define what each chapter argues and which source artefacts it must remain faithful to.
+\end{itemize}
+
+\textbf{Agent-assisted scope.} The agent contribution, concentrated in the 12-day Phase~B and bounded above by the author's review and acceptance of every committed output:
+
+\begin{itemize}\setlength\itemsep{0.25em}
+\item \textbf{Routine Go boilerplate} within the principle checkers---loop scaffolding, error-message formatting, severity-tag plumbing---authored against the \texttt{PrincipleChecker} interface and the \texttt{APISpec} types the author had already designed. The conceptual content of each checker (what to check, why, with what severity) was author-specified; the agent rendered it as Go.
+\item \textbf{LaTeX typesetting and prose-level revisions} of thesis chapters that the author had outlined in CLAUDE.md feed-maps. The agent produced first drafts of prose around author-supplied bullet points; the author reviewed, edited, and committed.
+\item \textbf{Documentation scaffolding}: per-package \texttt{CLAUDE.md} stubs, per-package READMEs, the documentation-completeness CI check. The hierarchical \texttt{CLAUDE.md} protocol itself, and the content of the root \texttt{CLAUDE.md}, are author-designed; the per-package files were drafted with agent help and then verified.
+\item \textbf{Operational tooling}: batch-validation scripts for the APIs.guru harvest, log-parsing helpers, the harness that produces evaluation tables from raw JSON, and the per-PR comment formatter used in the GitOps Promoter feedback flow. The evaluation methodology these scripts serve is author-designed; the scripts themselves are an engineering surface above it.
+\end{itemize}
+
+\textbf{The boundary in one line.} Every architectural, formal, and methodological decision in this thesis was authored, reviewed, and committed by the candidate. Agent assistance is a development methodology---a way of accelerating the realisation of a design that already exists---not a substitute for the conceptual contribution that defines what is being realised.
+
 % ============================================================================
 \section{The CLAUDE.md Knowledge Protocol}
 \label{sec:claudemd-protocol}
