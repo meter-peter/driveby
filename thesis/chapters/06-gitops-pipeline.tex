@@ -285,7 +285,7 @@ The \texttt{autoMerge: false} setting on production environments adds an explici
 \label{sec:control-loop}
 % ============================================================================
 
-The quality gate system forms a \textit{closed-loop negative feedback} controller~\cite{astrom-feedback}: the OpenAPI specification defines the desired contract, DriveBy measures the deployed API against it, and the result either advances or blocks promotion. This section maps the system's components to control-theoretic primitives and explains why this framing matters for convergence and robustness.
+The quality gate system forms a \textit{closed-loop negative feedback} controller~\cite{astrom-feedback}. Two declarative artefacts together define the reference signal: the OpenAPI specification declares the desired API contract, and the XSDLC manifest declares the desired delivery pipeline (gates, thresholds, environment policy). DriveBy measures the deployed API against the first, and a stack of Kubernetes controllers reconciles the cluster against the second. The result either advances or blocks promotion. This section first presents the classical block-diagram view that pedagogically clarifies the feedback structure, then decomposes the abstract ``Controller'' of that view into the two-tier stack that the implementation actually instantiates---a verdict tier that is open-loop and a platform tier that performs continuous closed-loop repair.
 
 % ----------------------------------------------------------------------------
 \subsection{Control Theory Mapping}
@@ -304,7 +304,7 @@ Table~\ref{tab:control-mapping} maps each control-theoretic role to its concrete
 \toprule
 \textbf{Control Role} & \textbf{Implementation} & \textbf{Function} \\
 \midrule
-Setpoint       & OpenAPI specification       & Desired API contract \\
+Setpoint       & OpenAPI spec $+$ XSDLC manifest & Desired API contract $+$ desired delivery pipeline \\
 Plant          & API deployment (source env) & Running service under test \\
 Sensor         & DriveBy CLI                 & Validates spec against live API \\
 Controller     & Argo Workflow DAG           & Orchestrates checks, emits pass/fail \\
@@ -315,7 +315,7 @@ Feedback       & Developer fix cycle         & Re-deploy $\rightarrow$ re-valida
 }
 \end{table}
 
-The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that SDT explicitly prevents.
+The key property is that the feedback is \textit{negative}: validation failure blocks promotion rather than advancing it. Without this, a failing API would propagate unchecked from development to staging to production---the shift-right antipattern that SDT explicitly prevents. The reader should hold this view as the verdict-tier picture only; Section~\ref{subsec:controller-stack} below decomposes the abstract ``Controller'' into the stack of reconcilers that actually realises it on the cluster.
 
 Figure~\ref{fig:quality-control-loop} illustrates the closed loop.
 
@@ -324,29 +324,59 @@ Figure~\ref{fig:quality-control-loop} illustrates the closed loop.
 \resizebox{\textwidth}{!}{%
 \input{figures/quality-control-loop.tex}%
 }
-\caption{Quality gate as control loop. The OpenAPI specification is the setpoint; the DriveBy CLI is the sensor; the Argo Workflow is the controller; the CommitStatus and Promoter form the actuator. Negative feedback blocks promotion on validation failure, driving convergence.}
+\caption{Quality gate as a classical control loop---the verdict-tier view. The OpenAPI specification is the setpoint; the DriveBy CLI is the sensor; the Argo Workflow is the controller; the CommitStatus and Promoter form the actuator. Negative feedback blocks promotion on validation failure, driving convergence. This view collapses the platform tier into the single ``Controller'' block; Section~\ref{subsec:controller-stack} and Figure~\ref{fig:controller-stack} decompose that block into the stack of CRDs and reconcilers that actually realise it.}
 \label{fig:quality-control-loop}
 \end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{The Controller is a Stack: Verdict Tier and Platform Tier}
+\label{subsec:controller-stack}
+% ----------------------------------------------------------------------------
+
+The classical mapping in Table~\ref{tab:control-mapping} and Figure~\ref{fig:quality-control-loop} is pedagogically useful but architecturally lossy: it collapses what is in fact a \emph{stack of controllers} into a single ``Controller'' block. The system separates cleanly into two tiers with different control-theoretic character.
+
+\textbf{Verdict tier} (open-loop). The verdict tier contains the DriveBy CLI as sensor and the Argo Workflow as the controller that emits a pass/fail signal materialised as a \texttt{CommitStatus}. The controller observes the error $e(t) = r_{\text{OpenAPI}}(t) - H(y(t))$, where $H$ is the DriveBy validator and $y$ is the deployed API. It decides \emph{promote} or \emph{block}. This tier is honest about its limitation: \textit{it produces no actuation signal $u$ that reduces $e(t)$ on the plant}. There is no spec re-write, no implementation patch, no automated remediation. The error signal is exported as a structured report; the corrective action is performed externally---by a developer who reads the report, or, in the experiment of Section~\ref{sec:sdt-feedback-experiment}, by an AI coding agent that consumes the same report as machine-actionable input. The verdict tier is the deliberate, scoped open-loop component of an otherwise self-reconciling system; closing it with autonomous remediation is recorded as future work (Chapter~\ref{ch:conclusion}, Section~\ref{sec:future-work}).
+
+\textbf{Platform tier} (closed-loop, autonomous). Beneath the verdict tier sits the second reference signal: $r_{\text{XSDLC}}$, the XSDLC manifest, which declares the entire delivery pipeline---gate workflows, event sources, sensors, branch protection, the GitOps repository, the ArgoCD Application, the PromotionStrategy, ingress routes, RBAC. This reference is reconciled by a \emph{stack} of Kubernetes controllers, each with its own observe-diff-act loop in the sense of Section~\ref{subsec:reconciliation-loop}. Three of them perform continuous state reconciliation in the strict sense: Crossplane composes the $\sim$45--50 managed objects from the manifest and re-creates any that are deleted; ArgoCD reconciles cluster state against the GitOps repository (with \texttt{selfHeal} enabled); the GitOps Promoter reconciles promotion branches and reopens PRs that go missing; \texttt{provider-upjet-github} reconciles GitHub-side state, restoring branch protection rules and push secrets if they are removed. Two further controllers manage event-time machinery rather than persistent state: Argo Workflows executes the gate as a DAG and retries failed steps under its own retry policy, and Argo Events reconciles the EventSource and Sensor CRDs that keep the webhook plumbing armed. Crossplane plays the role of meta-orchestrator over the stack: the XSDLC composition is what creates and parameterises every controller-managed object in the first place. Figure~\ref{fig:controller-stack} draws the decomposition.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/controller-stack.tex}%
+}
+\caption{The controller stack. The verdict tier (DriveBy) is open-loop: it emits a structured report but performs no repair on the API or the spec. The platform tier is closed-loop and autonomous: Crossplane composes the managed objects from the XSDLC manifest and orchestrates a stack of controllers, each performing continuous reconciliation within its CRD domain. The captions under each platform-tier box name the dominant repair action each controller performs when its declared state diverges from observed state.}
+\label{fig:controller-stack}
+\end{figure}
+
+This two-tier reading sharpens what ``self-reconciling'' actually means in this thesis. The platform tier exhibits the classical closed-loop properties of Kubernetes controllers~\cite{k8s-controllers}: drift between $r_{\text{XSDLC}}$ and observed cluster state is detected and corrected without human intervention; transient failures of individual controllers do not produce permanent state divergence because the reconciliation is level-triggered. The verdict tier deliberately does not have these properties on the API contract---automatic spec or implementation repair is a research direction, not a present capability---but it inherits the platform tier's robustness for everything \textit{around} the verdict: missing gate workflows are recreated, deleted commit statuses are re-issued, drifted RBAC is restored.
+
+The architectural value of the two-tier separation is precisely that it forces the open-loop component to be small, scoped, and visible. The system is honest about where it intervenes autonomously (platform configuration) and where it relies on a human or agent loop closure (specification and implementation quality).
+
+Drift between specification and implementation deserves explicit treatment in this context, because it is sometimes incorrectly held to be a pre-condition that SDT must externally assume, and a continuous drift-watching loop is sometimes proposed as a missing capability. Both framings understate the architecture. P006 (Functional Testing) detects spec--implementation divergence \textit{at the moment the gate fires}---it probes the live API and compares observed behaviour against the declared contract---making drift detection a first-class capability of the verdict tier rather than an assumption.
+
+The deeper point is that under the XSDLC promotion chain, \textit{the pipeline actively prevents drift from reaching production}---it does not merely detect it after the fact. ArgoCD synchronises a target environment exclusively from its \texttt{environment/<env>} branch; that branch is updated exclusively by Promoter-mediated merges from \texttt{<env>-next}; the Promoter blocks the merge as long as any required CommitStatus is not in the success state; CommitStatuses are written exclusively by gate workflows that run the principle checkers, including P006. GitHub-side branch protection, reconciled by \texttt{provider-upjet-github}, blocks direct pushes to the \texttt{environment/*} branches, preventing the chain from being bypassed at the source-control layer. There is therefore no path by which an implementation change can reach production without first passing a gate that has executed P006 against it. Every state transition that could introduce a spec--implementation divergence triggers a fresh gate execution that runs P006 against the new state \textit{and blocks promotion if divergence is detected}, before the divergent state can land in production. The pipeline does not lack continuous drift detection; it makes continuous drift detection unnecessary by enforcing, at every transition, the very property that continuous detection would later have to recover. The only path by which undetected drift could appear in a production deployment is an out-of-band intervention that bypasses the pipeline altogether---a violation of the GitOps discipline that the architecture is designed to enforce, and a problem that precedes drift detection rather than being solved by it.
 
 % ----------------------------------------------------------------------------
 \subsection{Convergence and Robustness}
 \label{subsec:negative-feedback}
 % ----------------------------------------------------------------------------
 
-Each quality gate evaluation is a discrete sample: pass or fail. When validation fails, the developer fixes the issue and re-triggers the deploy workflow. The new manifests land on the \texttt{-next} branch, the Promoter updates the PR, and the gate re-evaluates. The loop iterates until the API conforms to its specification---convergence is driven by the developer's corrective action, gated by DriveBy's objective assessment.
+Convergence has a distinct character in each tier. In the \textit{verdict tier}, each quality gate evaluation is a discrete sample: pass or fail. When validation fails, the developer (or agent) fixes the issue and re-triggers the deploy workflow. The new manifests land on the \texttt{-next} branch, the Promoter updates the PR, and the gate re-evaluates. The loop iterates until the API conforms to its specification---convergence is driven by external corrective action, gated by DriveBy's objective assessment. The verdict tier converges over PRs, not over time within a PR.
 
-The Kubernetes controller model (Section~\ref{subsec:reconciliation-loop}) makes this loop robust to transient failures. If a workflow fails due to pod eviction or network timeout, the exit handler posts a ``failure'' status. On the next branch change, the Promoter triggers re-evaluation automatically. No manual re-triggering is needed because the system is level-triggered: it reacts to current state, not to events it might have missed.
+In the \textit{platform tier}, convergence is autonomous and continuous. The Kubernetes controller model (Section~\ref{subsec:reconciliation-loop}) makes the platform tier robust to transient failures by construction. If a workflow fails due to pod eviction or network timeout, the exit handler posts a \texttt{failure} status; on the next branch change, the Promoter triggers re-evaluation automatically. If a generated child resource is deleted, the Crossplane composition controller re-creates it on the next reconciliation pass. If a branch protection rule is removed manually, \texttt{provider-upjet-github} restores it. No manual re-triggering is needed because the system is level-triggered: it reacts to current state, not to events it might have missed.
+
+The two convergence modes compose. The platform tier guarantees that the gate machinery itself remains in its declared configuration even under operator error or transient infrastructure failure; the verdict tier then operates on top of that guarantee, with developer-driven (or agent-driven) iteration the only loop that requires external action.
 
 % ----------------------------------------------------------------------------
 \subsection{Connecting Axioms to Control Requirements}
 \label{subsec:theory-implementation}
 % ----------------------------------------------------------------------------
 
-This control-theoretic framing connects to the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation}: the specification is the ontological artifact, the DriveBy CLI is the reconciliation agent, and the quality gate is the correction mechanism.
+This control-theoretic framing connects to the ontological state reconciliation pattern introduced in Section~\ref{subsec:ontological-reconciliation}: each tier has its own ontological artefact and its own reconciliation agent. The OpenAPI specification is the ontological artefact for the verdict tier, with DriveBy as reconciliation sensor and the developer (or agent) as the external corrective actor; the XSDLC manifest is the ontological artefact for the platform tier, with Crossplane and the downstream controllers as the autonomous reconciliation stack.
 
 The three SDT axioms map to necessary control-loop properties. \textit{Completeness} requires that the setpoint fully characterizes the desired behavior---an incomplete specification produces an under-determined loop that cannot distinguish conforming from non-conforming APIs. \textit{Determinism} requires consistent sensor output---a non-deterministic validator would oscillate between pass and fail for identical states. \textit{Observability} requires structured, actionable output---without it, feedback degenerates into a binary gate with no diagnostic value, and developers cannot identify what to fix.\footnote{This control-theoretic framing is illustrative rather than formally rigorous. The system does not satisfy the classical control-theory definitions of \textit{stability} (convergence of the error signal under a defined metric), \textit{controllability} (state reachability), or \textit{observability} (state reconstructibility from outputs); the use of the latter term in the SDT axiom set is deliberately coincidental in language but distinct in content---SDT's Observability axiom refers to structured, machine-readable output, not state-reconstructibility. What the framing does capture is the structural \textit{pattern} of closed-loop feedback control: a setpoint (the specification), a sensor (the validator), a controller (the gate workflow), and an actuator (the promoter) that together drive the system toward the declared state and self-correct deviations. A fully formal control-theoretic treatment would require additional assumptions about API behaviour and validator determinism that exceed the scope of this thesis; it is recorded as a research direction in Chapter~\ref{ch:conclusion}, Section~\ref{sec:future-work}.}
 
-This is not a metaphorical mapping. Each component---setpoint, sensor, controller, actuator, feedback path---has a concrete implementation. The correspondence explains why the system converges, why it self-heals, and why the axiomatic foundation is necessary rather than merely desirable.
+This is not a metaphorical mapping. Each component---setpoint, sensor, controller, actuator, feedback path---has a concrete implementation, and the decomposition into verdict tier and platform tier is faithful to the architecture rather than rhetorical. The correspondence explains why the platform tier converges autonomously and self-heals, why the verdict tier requires external loop closure today, and why the axiomatic foundation is necessary rather than merely desirable. It also makes explicit the open-loop boundary of the present system, so that future work---autonomous remediation, continuous drift watching---has a precise object of study rather than a vague gap to fill.
 
 % ============================================================================
 \section{CI/CD of DriveBy Itself}

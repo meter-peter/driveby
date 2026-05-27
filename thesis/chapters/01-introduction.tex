@@ -151,7 +151,7 @@ This thesis investigates the following research questions:
 This thesis presents a proof-of-concept system and makes six contributions. Section~\ref{sec:rq-contribution-mapping} provides an explicit mapping between these contributions and the four research questions of Section~\ref{sec:research-questions}.
 
 \begin{enumerate}
-  \item \textbf{A Conceptual Framework for Specification-Driven API Validation.} We define Specification-Driven Testing (SDT) as a conceptual framework---a strong theoretical core for a future formal methodology---built on three axioms (Completeness, Determinism, Observability) and nine validation principles (P001--P009) systematically mapped to these axioms. SDT provides a reusable, specification-agnostic basis for deriving API quality gates from a formal API contract. We claim it as a conceptual framework rather than a complete software-testing methodology: the elements that would elevate it to a full methodology---a formal test derivation procedure, execution and failure semantics, and lifecycle governance---are scoped as future work (see Chapter~\ref{ch:conclusion}).
+  \item \textbf{A Conceptual Framework for Specification-Driven API Validation.} We define Specification-Driven Testing (SDT) as a conceptual framework---a strong theoretical core for a future formal methodology---built on three framework-wide axioms (Completeness, Determinism, Observability) that every validation must jointly satisfy, and nine validation principles (P001--P009) that operationalize the framework in practice. SDT provides a reusable, specification-agnostic basis for deriving API quality gates from a formal API contract. We claim it as a conceptual framework rather than a complete software-testing methodology: the elements that would elevate it to a full methodology---a formal test derivation procedure, execution and failure semantics, and lifecycle governance---are scoped as future work (see Chapter~\ref{ch:conclusion}).
 
   \item \textbf{The DriveBy Framework.} We present DriveBy~\cite{driveby}, an open-source command-line tool that implements SDT for OpenAPI specifications. DriveBy supports OpenAPI~3.x and Swagger~2.x, operates in multiple validation modes (minimal, strict, test-only, test-ready), and produces structured reports suitable for CI/CD integration.
 
@@ -198,7 +198,7 @@ The remainder of this thesis is organized as follows:
 \begin{description}
   \item[Chapter~\ref{ch:related-work}] surveys related work in API testing, OpenAPI tooling, GitOps, infrastructure-as-code, and AI-assisted software engineering, positioning SDT within the existing landscape and identifying six research gaps.
 
-  \item[Chapter~\ref{ch:methodology}] presents the SDT framework: three axioms, nine validation principles, the formal axiom-to-principle mapping, and four validation modes that enable incremental adoption.
+  \item[Chapter~\ref{ch:methodology}] presents the SDT framework: three framework-wide axioms, nine validation principles, the parallel-application semantics under which the principles compose, and four validation modes that enable incremental adoption.
 
   \item[Chapter~\ref{ch:architecture}] describes the DriveBy CLI architecture: the \texttt{APISpec} abstraction layer for version-agnostic validation, the principle checker pattern, the engine's mode-based orchestration, and the structured report generation system.
 

@@ -1,0 +1,85 @@
+% Controller Stack — Chapter 6, Section 6.6
+% Two-tier architecture: verdict tier (DriveBy, open-loop) on top,
+% platform tier (Crossplane meta-orchestrator + 5 CRDs, closed-loop) below.
+% Companion to figures/quality-control-loop.tex (which shows the verdict
+% tier in classical block-diagram form). This figure shows what the
+% monolithic "Controller" of that diagram actually decomposes into.
+\begin{tikzpicture}[
+    >={Stealth[length=2.5mm]},
+    font=\small,
+    tier/.style={
+        rectangle,
+        draw=black!75,
+        fill=white,
+        minimum width=2.4cm,
+        minimum height=0.85cm,
+        align=center,
+        font=\scriptsize,
+        line width=0.7pt
+    },
+    meta/.style={
+        rectangle,
+        draw=black!75,
+        fill=black!4,
+        minimum width=3.0cm,
+        minimum height=0.95cm,
+        align=center,
+        font=\small\bfseries,
+        line width=0.8pt
+    },
+    verdict/.style={
+        rectangle,
+        draw=red!70!black,
+        fill=red!8,
+        minimum width=2.6cm,
+        minimum height=0.9cm,
+        align=center,
+        font=\scriptsize,
+        line width=0.7pt
+    },
+    caplab/.style={
+        font=\tiny\itshape,
+        text=black!60
+    }
+]
+
+% Verdict tier (top)
+\node[verdict] (driveby) at (0, 2.4)
+  {DriveBy CLI\\\scriptsize verdict sensor};
+\node[caplab, anchor=west] at (1.7, 2.4) {open-loop: emits report, no repair};
+
+% Meta-orchestrator
+\node[meta] (cp) at (0, 0.8) {Crossplane\\\scriptsize meta-orchestrator};
+
+% Platform tier (bottom row)
+\node[tier] (argo)   at (-5.2, -1.0) {ArgoCD\\\scriptsize Application};
+\node[tier] (promo)  at (-2.3, -1.0) {gitops-\\promoter};
+\node[tier] (wf)     at ( 0.6, -1.0) {Argo\\Workflows};
+\node[tier] (upjet)  at ( 3.5, -1.0) {provider-\\upjet-github};
+\node[tier] (events) at ( 6.4, -1.0) {Argo\\Events};
+
+% Crossplane orchestrates each platform controller
+\draw[->, line width=0.7pt, black!75] (cp.south) -- (argo.north);
+\draw[->, line width=0.7pt, black!75] (cp.south) -- (promo.north);
+\draw[->, line width=0.7pt, black!75] (cp.south) -- (wf.north);
+\draw[->, line width=0.7pt, black!75] (cp.south) -- (upjet.north);
+\draw[->, line width=0.7pt, black!75] (cp.south) -- (events.north);
+
+% DriveBy writes to gate (CommitStatus)
+\draw[->, line width=0.7pt, black!50, dashed]
+  (driveby.south) -- node[caplab, right=2pt, pos=0.5] {CommitStatus} (cp.north);
+
+% Repair caption row (under each platform controller)
+\node[caplab] at (-5.2, -1.85) {selfHeal};
+\node[caplab] at (-2.3, -1.85) {reopen PR};
+\node[caplab] at ( 0.6, -1.85) {retry gate};
+\node[caplab] at ( 3.5, -1.85) {restore policy};
+\node[caplab] at ( 6.4, -1.85) {re-trigger};
+
+% Tier labels
+\node[font=\scriptsize\bfseries, text=red!70!black, anchor=west, align=center]
+  at (-6.9, 2.4) {verdict\\tier};
+\node[font=\scriptsize\bfseries, text=black!70, anchor=west, align=center]
+  at (-6.9, 0.8) {platform\\tier};
+
+\end{tikzpicture}
