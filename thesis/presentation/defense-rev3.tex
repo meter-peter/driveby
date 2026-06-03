@@ -266,7 +266,7 @@ deterministic verification pipeline?
 % Bottom register: observed runtime
 % =====================================================================
 \node[ablock, minimum width=2.7cm, fill=black!4]
-  (live) at (-3.6, -0.8) {Deployed service\\\scriptsize live behaviour};
+  (live) at (-3.6, -0.8) {Deployed service\\\scriptsize live spec $+$ behaviour};
 \node[asubject, minimum width=2.7cm, minimum height=1.1cm,
       font=\small\bfseries]
   (cli)  at ( 0.0, -0.8) {DriveBy CLI\\\scriptsize\textnormal{validator $f$}};
@@ -278,7 +278,7 @@ deterministic verification pipeline?
 \node[anchor=west, font=\scriptsize\bfseries, text=black!70]
   at (5.1, -1.00) {runtime};
 
-\draw[aflow] (live) -- node[asig, above] {probe} (cli);
+\draw[aflow] (live) -- node[asig, above] {fetch} (cli);
 \draw[aflow] (cli)  -- node[asig, above] {emit} (rep);
 
 % =====================================================================
@@ -300,9 +300,12 @@ deterministic verification pipeline?
   contract} with semantic descriptors --- example payloads for requests and responses,
   error semantics, operation summaries, security schemes --- that render the spec
   consumable by humans, tooling, and autonomous agents.
-\item \textbf{\textcolor{sdtgreen}{Solution: DriveBy.}} The CLI treats the running
-  service as ground truth: it probes the \emph{live contract}, compares it against the
-  declared specification, and surfaces divergence as structured, actionable findings.
+\item \textbf{\textcolor{sdtgreen}{Solution: DriveBy.}} The running service is ground
+  truth on two fronts --- the \emph{live spec} it publishes (\texttt{/openapi.json},
+  checked against the declared spec) and its \emph{live behaviour} (real responses,
+  exercised by P006/P007). \alert{No contradiction with ``spec is the source of truth'':}
+  the declared spec is the committed contract; the deployed service is what actually runs,
+  and divergence between them is the finding.
 \end{itemize}
 
 \end{frame}
@@ -507,37 +510,37 @@ machine-discoverable specification.}
 % --------- 6b. XSDLC manifest example ---------------------------------
 \begin{frame}[fragile]{What an XSDLC manifest actually looks like}
 
-\vspace{0.2em}
+\vspace{0.1em}
 \begin{lstlisting}
 apiVersion: driveby.io/v1alpha1
 kind: XSDLC
 metadata: { name: perfect-api }
 spec:
   gitopsRepository: { owner: novelcore, name: perfect-api-gitops }
-  apiConfig:        { port: 8000, openapiEndpoint: /openapi.json }
+  apiConfig:          { port: 8000, openapiEndpoint: /openapi.json }
   validationDefaults: { validationMode: strict }
   environments:
     - { name: dev }
     - name: staging
-      gate:
-        checks:
-          - type: validate-only
-            validationConfig: { validationMode: test-ready }
-          - type: functional-test
+      gate: { checks: [ { type: validate-only,
+              validationConfig: { validationMode: test-ready } },
+              { type: functional-test } ] }
     - name: prod
       autoMerge: false
-      gate:
-        checks:
-          - { type: load-test, loadTestConfig:
+      gate: { checks: [ { type: load-test, loadTestConfig:
               { concurrentUsers: 10, testDuration: "15s",
-                maxLatencyP95: "2s", minSuccessRate: 0.5 } }
+                maxLatencyP95: "2s", minSuccessRate: 0.5 } } ] }
 \end{lstlisting}
 
-\vspace{0.2em}
-\footnotesize
-$\sim$35 YAML lines $\to$ $\sim$45--50 Kubernetes objects in $<$15\,s.
-The \texttt{Promoter} (Argo project) opens PRs between environment branches;
-each PR triggers the declared gate checks before auto-merge.
+\vspace{0.15em}
+\scriptsize
+$\sim$35 YAML lines $\to$ $\sim$45--50 Kubernetes objects in $<$15\,s; the
+\texttt{Promoter} opens PRs between environment branches and each PR triggers the
+declared gate checks before auto-merge.\\[0.2em]
+\alert{Check types map to principles:}\quad
+\texttt{validate-only} $\to$ P001--P005, P008 \;$\cdot$\;
+\texttt{functional-test} $\to$ P006 \;$\cdot$\;
+\texttt{load-test} $\to$ P007
 
 \end{frame}
 
@@ -870,13 +873,17 @@ P008 & \xmark \\
 
 \end{columns}
 
-\vspace{0.8em}
+\vspace{0.6em}
 \footnotesize
-\begin{itemize}\setlength\itemsep{0.25em}
-\item Input to agent: \emph{only} the DriveBy JSON report. No remediation prompt. No exemplar.
-\item Agent autonomously edited the spec; re-validation confirmed 4/6.
+\begin{itemize}\setlength\itemsep{0.2em}
+\item Agent inputs: the DriveBy JSON report \emph{and} the OpenAPI spec under repair
+  --- \emph{not} the implementation codebase (Petstore is a third-party API). No
+  remediation prompt, no exemplar fix.
+\item The agent edited the \emph{specification document} to satisfy the failing
+  principles; re-validation confirmed 4/6. The report told it \emph{what} was wrong;
+  the spec was \emph{where} it fixed it.
 \item \alert{SDT's structured output suffices as machine-actionable feedback}
-  --- empirical evidence for the framework's agent-consumable semantics.
+  --- the agent needed no access to source code to close four of six gaps.
 \end{itemize}
 
 \end{frame}
