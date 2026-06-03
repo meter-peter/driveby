@@ -236,17 +236,17 @@ deterministic verification pipeline?
 % Top register: the declared contract (what tooling sees)
 % =====================================================================
 \node[ablock, minimum width=2.7cm] (fw)
-  at (-3.6, 2.1) {Web framework\\\scriptsize FastAPI / Spring};
+  at (-3.6, 1.7) {Web framework\\\scriptsize FastAPI / Spring};
 \node[ablock, minimum width=2.7cm] (skel)
-  at ( 0.0, 2.1) {Skeleton spec\\\scriptsize routes $+$ types};
+  at ( 0.0, 1.7) {Skeleton spec\\\scriptsize routes $+$ types};
 \node[ablock, minimum width=2.7cm, draw=black!30, text=black!50,
       densely dashed]
-  (enr)  at ( 3.6, 2.1) {Enriched spec\\\scriptsize \itshape rarely produced};
+  (enr)  at ( 3.6, 1.7) {Enriched spec\\\scriptsize \itshape rarely produced};
 
 \node[anchor=west, font=\scriptsize\bfseries, text=black!70]
-  at (5.1, 2.1) {declared};
+  at (5.1, 1.7) {declared};
 \node[anchor=west, font=\scriptsize\bfseries, text=black!70]
-  at (5.1, 1.75) {contract};
+  at (5.1, 1.4) {contract};
 
 \draw[aflow] (fw) -- node[asig, above] {emit} (skel);
 \draw[->, line width=0.8pt, black!40, densely dashed]
@@ -257,26 +257,26 @@ deterministic verification pipeline?
 % =====================================================================
 \draw[decorate, decoration={zigzag, segment length=4mm, amplitude=1mm},
       line width=0.9pt, sdtred!70!black]
-  (-5.1, 0.6) -- (5.0, 0.6);
+  (-5.1, 0.45) -- (5.0, 0.45);
 \node[anchor=west, font=\scriptsize\bfseries\itshape, text=sdtred!70!black,
       fill=white, inner sep=2pt]
-  at (5.1, 0.6) {divergence};
+  at (5.1, 0.45) {divergence};
 
 % =====================================================================
 % Bottom register: observed runtime
 % =====================================================================
 \node[ablock, minimum width=2.7cm, fill=black!4]
-  (live) at (-3.6, -0.8) {Deployed service\\\scriptsize live spec $+$ behaviour};
+  (live) at (-3.6, -0.6) {Deployed service\\\scriptsize live spec $+$ behaviour};
 \node[asubject, minimum width=2.7cm, minimum height=1.1cm,
       font=\small\bfseries]
-  (cli)  at ( 0.0, -0.8) {DriveBy CLI\\\scriptsize\textnormal{validator $f$}};
+  (cli)  at ( 0.0, -0.6) {DriveBy CLI\\\scriptsize\textnormal{validator $f$}};
 \node[ablock, minimum width=2.7cm]
-  (rep)  at ( 3.6, -0.8) {Validation report\\\scriptsize structured findings};
+  (rep)  at ( 3.6, -0.6) {Validation report\\\scriptsize structured findings};
 
 \node[anchor=west, font=\scriptsize\bfseries, text=black!70]
-  at (5.1, -0.65) {observed};
+  at (5.1, -0.45) {observed};
 \node[anchor=west, font=\scriptsize\bfseries, text=black!70]
-  at (5.1, -1.00) {runtime};
+  at (5.1, -0.80) {runtime};
 
 \draw[aflow] (live) -- node[asig, above] {fetch} (cli);
 \draw[aflow] (cli)  -- node[asig, above] {emit} (rep);
