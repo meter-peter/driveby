@@ -302,10 +302,9 @@ deterministic verification pipeline?
   consumable by humans, tooling, and autonomous agents.
 \item \textbf{\textcolor{sdtgreen}{Solution: DriveBy.}} The running service is ground
   truth on two fronts --- the \emph{live spec} it publishes (\texttt{/openapi.json},
-  checked against the declared spec) and its \emph{live behaviour} (real responses,
-  exercised by P006/P007). \alert{No contradiction with ``spec is the source of truth'':}
-  the declared spec is the committed contract; the deployed service is what actually runs,
-  and divergence between them is the finding.
+  checked against the declared spec) and its \emph{live behaviour} (P006/P007).
+  \alert{No contradiction with ``spec is the source of truth'':} the declared spec is
+  the committed contract; the service is what actually runs; divergence is the finding.
 \end{itemize}
 
 \end{frame}
@@ -313,9 +312,9 @@ deterministic verification pipeline?
 % --------- 4. The DriveBy CLI: parallel principles + aggregation ------
 \begin{frame}{DriveBy: the reference implementation}
 
-\vspace{-0.4em}
+\vspace{-0.6em}
 \begin{center}
-\begin{tikzpicture}[>={Stealth[length=2.5mm]}, font=\small]
+\begin{tikzpicture}[>={Stealth[length=2.5mm]}, font=\small, yscale=0.82]
 
 % Input spec
 \node[asubject, minimum width=2.6cm, minimum height=1.1cm,
@@ -369,15 +368,15 @@ deterministic verification pipeline?
 \end{tikzpicture}
 \end{center}
 
-\vspace{-0.2em}
+\vspace{-0.4em}
 \begin{center}
 \small
 $f_p(s) \;=\; \mathrm{agg}\bigl(f_{p_1}(s),\, f_{p_2}(s),\, \dots,\, f_{p_n}(s)\bigr)$
 \end{center}
 
-\vspace{0.2em}
+\vspace{0.1em}
 \footnotesize
-\begin{itemize}\setlength\itemsep{0.15em}
+\begin{itemize}\setlength\itemsep{0.1em}
 \item \emph{Parallel application}, not composition: no $f_{p_i}$ consumes another's output.
 \item Each $f_{p_i}$ is atomic, side-effect-free, order-independent --- the
   property that makes Determinism hold and validation modes modular.
