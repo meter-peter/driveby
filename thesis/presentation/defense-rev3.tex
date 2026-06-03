@@ -691,12 +691,12 @@ The promotion gate is the actuator; \emph{the verdict tier is open-loop} ---
 the controller decides pass/block, but does not emit a corrective $u$ that reduces $e(t)$.
 \end{center}
 
-\vspace{0.1em}
+\vspace{0.05em}
 \begin{center}
 \tiny\itshape
 The promotion chain blocks any production-bound transition that has not first passed P006 ---
-spec--implementation drift cannot land in production by construction.
-Closing the verdict tier with agent-driven remediation is the natural continuation --- see Future Work.
+drift cannot land in production by construction. Closing the verdict tier (agent-driven
+remediation) is the natural continuation --- see Future Work.
 \end{center}
 
 \end{frame}
@@ -1004,11 +1004,10 @@ introspectable, consumed identically by operators and autonomous agents.
 \item P006/P007 as first-class \texttt{PrincipleChecker}s.
 \item Multi-format adapters: AsyncAPI, gRPC, GraphQL behind \texttt{APISpec}.
 \item Multi-cluster promotion --- outer control loops over a fleet.
-\item Scheduled prod-environment gate --- CronWorkflow trigger over the
-  same XSDLC composition, covering residual drift from out-of-band
-  changes (engineering extension, not research).
-\item Longitudinal agent-feedback study --- the single-iteration result
-  of slide 16 generalised to multi-agent, multi-pass statistics.
+\item Scheduled prod-environment gate --- CronWorkflow over the same XSDLC
+  composition, covering residual out-of-band drift (engineering, not research).
+\item Longitudinal agent-feedback study --- slide 16's single iteration
+  generalised to multi-agent, multi-pass statistics.
 \end{itemize}
 
 \end{columns}
