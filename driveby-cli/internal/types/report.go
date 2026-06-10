@@ -277,7 +277,7 @@ var CorePrinciples = []Principle{
 		Name:        "Performance Requirements",
 		Description: "Validates that the API meets performance targets and SLAs",
 		Category:    "Performance",
-		Severity:    "warning",
+		Severity:    "critical",
 		Tags:        []string{"performance", "sla", "load-testing"},
 		AutoFixable: false,
 		Checks: []string{
