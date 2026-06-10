@@ -1,246 +1,260 @@
 {
-    "status": "failed",
-    "exit_code": 1,
-    "version": "1.0.0",
-    "environment": "production",
-    "timestamp": "2026-03-21T19:04:56.536621004+02:00",
-    "principles": [
-        {
-            "Principle": {
-                "id": "P006",
-                "name": "API Contract Testing",
-                "description": "Validates that the API implementation matches its specification through functional testing",
-                "category": "Testing",
-                "severity": "critical",
-                "tags": [
-                    "testing",
-                    "contract",
-                    "implementation"
-                ],
-                "auto_fixable": false,
-                "checks": [
-                    "All endpoints are reachable",
-                    "Response status codes match documentation",
-                    "Response schemas match documentation",
-                    "Authentication works as documented",
-                    "Required parameters are enforced",
-                    "Request validation works as documented",
-                    "Error responses match documentation"
-                ]
-            },
-            "Passed": false,
-            "Message": "Some endpoints failed functional tests. Failed: 2/8",
-            "Details": {
-                "all_results": [
-                    {
-                        "method": "GET",
-                        "path": "/test/health",
-                        "status": "success",
-                        "status_code": 200,
-                        "response_time": 797518,
-                        "response_body": "eyJzdGF0dXMiOiJoZWFsdGh5IiwidmVyc2lvbiI6IjEuMC4wIiwidGltZXN0YW1wIjoiMjAyNi0wMy0yMVQxNzowNDo1Ni41MjIwMDEifQ=="
-                    },
-                    {
-                        "method": "GET",
-                        "path": "/products",
-                        "status": "warning",
-                        "status_code": 418,
-                        "response_time": 724050,
-                        "response_body": "eyJlcnJvciI6IkknbSBhIHRlYXBvdCJ9",
-                        "errors": [
-                            "Status code 418 is not documented in the OpenAPI spec"
-                        ]
-                    },
-                    {
-                        "method": "POST",
-                        "path": "/products",
-                        "status": "warning",
-                        "status_code": 200,
-                        "response_time": 2559562,
-                        "response_body": "eyJpZCI6IjE5ZThjNzc1LTU0YTEtNDZlMy04ZTgzLWJlNWJhMjRhNTEyMCIsIm5hbWUiOiJXaXJlbGVzcyBIZWFkcGhvbmVzIiwiZGVzY3JpcHRpb24iOiJOb2lzZS1jYW5jZWxsaW5nIHdpcmVsZXNzIGhlYWRwaG9uZXMgd2l0aCAyMGggYmF0dGVyeSBsaWZlIiwicHJpY2UiOjk5Ljk5LCJjYXRlZ29yeSI6ImVsZWN0cm9uaWNzIiwiaW5fc3RvY2siOnRydWUsInRhZ3MiOlsid2lyZWxlc3MiLCJhdWRpbyIsImJsdWV0b290aCJdLCJjcmVhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNzowNDo1Ni41MjQ2ODAiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wMy0yMVQxNzowNDo1Ni41MjQ2ODAifQ==",
-                        "errors": [
-                            "Status code 200 is not documented in the OpenAPI spec"
-                        ]
-                    },
-                    {
-                        "method": "DELETE",
-                        "path": "/products/{product_id}",
-                        "status": "success",
-                        "status_code": 404,
-                        "response_time": 2242603,
-                        "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19"
-                    },
-                    {
-                        "method": "GET",
-                        "path": "/products/{product_id}",
-                        "status": "success",
-                        "status_code": 200,
-                        "response_time": 1904692,
-                        "response_body": "eyJyZXN1bHQiOiJub3QgZm91bmQifQ==",
-                        "errors": [
-                            "Missing required field in response: name",
-                            "Missing required field in response: description",
-                            "Missing required field in response: price",
-                            "Missing required field in response: category",
-                            "Missing required field in response: id",
-                            "Missing required field in response: created_at",
-                            "Missing required field in response: updated_at"
-                        ]
-                    },
-                    {
-                        "method": "PUT",
-                        "path": "/products/{product_id}",
-                        "status": "success",
-                        "status_code": 404,
-                        "response_time": 2026095,
-                        "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19"
-                    },
-                    {
-                        "method": "POST",
-                        "path": "/tasks",
-                        "status": "success",
-                        "status_code": 201,
-                        "response_time": 2186045,
-                        "response_body": "eyJpZCI6IjM2MTFhYWIxLTNhMTMtNGJjNi04OTEwLWNlNjY1NWViZGU5NyIsInRpdGxlIjoiU2FtcGxlIFRhc2siLCJkZXNjcmlwdGlvbiI6IkV4YW1wbGUgZGVzY3JpcHRpb24ifQ=="
-                    },
-                    {
-                        "method": "POST",
-                        "path": "/test/echo",
-                        "status": "success",
-                        "status_code": 200,
-                        "response_time": 1766220,
-                        "response_body": "eyJhY3RpdmUiOnRydWUsIm1lc3NhZ2UiOiJUZXN0IG1lc3NhZ2UiLCJudW1iZXIiOjQyfQ=="
-                    }
-                ],
-                "failed_endpoints": [
-                    "GET /products (Status: warning, Code: 418)",
-                    "POST /products (Status: warning, Code: 200)"
-                ]
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
-        }
-    ],
-    "total_checks": 1,
-    "passed_checks": 0,
-    "failed_checks": 1,
-    "summary": {
-        "CriticalIssues": 0,
-        "Warnings": 0,
-        "Info": 0,
-        "Categories": null,
-        "FailedTags": null,
-        "TestSummary": null
-    },
-    "test_results": {
-        "Functional": {
-            "TotalEndpoints": 8,
-            "TestedEndpoints": 8,
-            "PassedEndpoints": 6,
-            "FailedEndpoints": 2,
-            "SkippedEndpoints": 0,
-            "EndpointResults": [
-                {
-                    "Method": "GET",
-                    "Path": "/test/health",
-                    "Status": "passed",
-                    "StatusCode": 200,
-                    "ResponseTime": 797518,
-                    "Errors": null,
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "GET",
-                    "Path": "/products",
-                    "Status": "failed",
-                    "StatusCode": 418,
-                    "ResponseTime": 724050,
-                    "Errors": [
-                        "Status code 418 is not documented in the OpenAPI spec"
-                    ],
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "POST",
-                    "Path": "/products",
-                    "Status": "failed",
-                    "StatusCode": 200,
-                    "ResponseTime": 2559562,
-                    "Errors": [
-                        "Status code 200 is not documented in the OpenAPI spec"
-                    ],
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "DELETE",
-                    "Path": "/products/{product_id}",
-                    "Status": "passed",
-                    "StatusCode": 404,
-                    "ResponseTime": 2242603,
-                    "Errors": null,
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "GET",
-                    "Path": "/products/{product_id}",
-                    "Status": "passed",
-                    "StatusCode": 200,
-                    "ResponseTime": 1904692,
-                    "Errors": [
-                        "Missing required field in response: name",
-                        "Missing required field in response: description",
-                        "Missing required field in response: price",
-                        "Missing required field in response: category",
-                        "Missing required field in response: id",
-                        "Missing required field in response: created_at",
-                        "Missing required field in response: updated_at"
-                    ],
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "PUT",
-                    "Path": "/products/{product_id}",
-                    "Status": "passed",
-                    "StatusCode": 404,
-                    "ResponseTime": 2026095,
-                    "Errors": null,
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "POST",
-                    "Path": "/tasks",
-                    "Status": "passed",
-                    "StatusCode": 201,
-                    "ResponseTime": 2186045,
-                    "Errors": null,
-                    "Warnings": null,
-                    "TestCases": null
-                },
-                {
-                    "Method": "POST",
-                    "Path": "/test/echo",
-                    "Status": "passed",
-                    "StatusCode": 200,
-                    "ResponseTime": 1766220,
-                    "Errors": null,
-                    "Warnings": null,
-                    "TestCases": null
-                }
-            ],
-            "AverageResponseTime": 1775848,
-            "MaxResponseTime": 2559562,
-            "MinResponseTime": 724050
-        },
-        "Performance": null,
-        "StartTime": "2026-03-21T19:04:56.536621108+02:00",
-        "EndTime": "2026-03-21T19:04:56.536621196+02:00",
-        "Status": "failed"
+  "status": "failed",
+  "exit_code": 1,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-06-09T22:52:00.543469348+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P006",
+        "name": "API Contract Testing",
+        "description": "Validates that the API implementation matches its specification through functional testing",
+        "category": "Testing",
+        "severity": "critical",
+        "tags": [
+          "testing",
+          "contract",
+          "implementation"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "All endpoints are reachable",
+          "Response status codes match documentation",
+          "Response schemas match documentation",
+          "Authentication works as documented",
+          "Required parameters are enforced",
+          "Request validation works as documented",
+          "Error responses match documentation"
+        ]
+      },
+      "Passed": false,
+      "Message": "Some endpoints failed functional tests. Failed: 2/8",
+      "Details": {
+        "all_results": [
+          {
+            "method": "POST",
+            "path": "/products",
+            "status": "warning",
+            "status_code": 200,
+            "response_time": 1357894,
+            "response_body": "eyJpZCI6IjI4Mzg1N2U5LTk5OTQtNGEyMS1iMDJmLTA0ZWMzMjllZjBkYiIsIm5hbWUiOiJXaXJlbGVzcyBIZWFkcGhvbmVzIiwiZGVzY3JpcHRpb24iOiJOb2lzZS1jYW5jZWxsaW5nIHdpcmVsZXNzIGhlYWRwaG9uZXMgd2l0aCAyMGggYmF0dGVyeSBsaWZlIiwicHJpY2UiOjk5Ljk5LCJjYXRlZ29yeSI6ImVsZWN0cm9uaWNzIiwiaW5fc3RvY2siOnRydWUsInRhZ3MiOlsid2lyZWxlc3MiLCJhdWRpbyIsImJsdWV0b290aCJdLCJjcmVhdGVkX2F0IjoiMjAyNi0wNi0wOVQxOTo1MjowMC41Mzc1OTQiLCJ1cGRhdGVkX2F0IjoiMjAyNi0wNi0wOVQxOTo1MjowMC41Mzc1OTQifQ==",
+            "errors": [
+              "Status code 200 is not documented in the OpenAPI spec"
+            ]
+          },
+          {
+            "method": "GET",
+            "path": "/products",
+            "status": "warning",
+            "status_code": 418,
+            "response_time": 771488,
+            "response_body": "eyJlcnJvciI6IkknbSBhIHRlYXBvdCJ9",
+            "errors": [
+              "Status code 418 is not documented in the OpenAPI spec"
+            ]
+          },
+          {
+            "method": "PUT",
+            "path": "/products/{product_id}",
+            "status": "success",
+            "status_code": 404,
+            "response_time": 888240,
+            "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19",
+            "errors": [
+              "Missing required field in response: error",
+              "Missing required field in response: code"
+            ]
+          },
+          {
+            "method": "DELETE",
+            "path": "/products/{product_id}",
+            "status": "success",
+            "status_code": 404,
+            "response_time": 617868,
+            "response_body": "eyJkZXRhaWwiOnsiZXJyb3IiOiJQcm9kdWN0IG5vdCBmb3VuZCIsImNvZGUiOjQwNH19",
+            "errors": [
+              "Missing required field in response: error",
+              "Missing required field in response: code"
+            ]
+          },
+          {
+            "method": "GET",
+            "path": "/products/{product_id}",
+            "status": "success",
+            "status_code": 200,
+            "response_time": 544856,
+            "response_body": "eyJyZXN1bHQiOiJub3QgZm91bmQifQ==",
+            "errors": [
+              "Missing required field in response: name",
+              "Missing required field in response: description",
+              "Missing required field in response: price",
+              "Missing required field in response: category",
+              "Missing required field in response: id",
+              "Missing required field in response: created_at",
+              "Missing required field in response: updated_at"
+            ]
+          },
+          {
+            "method": "POST",
+            "path": "/tasks",
+            "status": "success",
+            "status_code": 201,
+            "response_time": 733168,
+            "response_body": "eyJpZCI6IjAzODczYzMzLWMzMjEtNGFlNy05MjJiLTI5NjU5YjkyZmUzZSIsInRpdGxlIjoiU2FtcGxlIFRhc2siLCJkZXNjcmlwdGlvbiI6IkV4YW1wbGUgZGVzY3JpcHRpb24ifQ=="
+          },
+          {
+            "method": "POST",
+            "path": "/test/echo",
+            "status": "success",
+            "status_code": 200,
+            "response_time": 982998,
+            "response_body": "eyJhY3RpdmUiOnRydWUsIm1lc3NhZ2UiOiJUZXN0IG1lc3NhZ2UiLCJudW1iZXIiOjQyfQ=="
+          },
+          {
+            "method": "GET",
+            "path": "/test/health",
+            "status": "success",
+            "status_code": 200,
+            "response_time": 464698,
+            "response_body": "eyJzdGF0dXMiOiJoZWFsdGh5IiwidmVyc2lvbiI6IjEuMC4wIiwidGltZXN0YW1wIjoiMjAyNi0wNi0wOVQxOTo1MjowMC41NDMxODMifQ=="
+          }
+        ],
+        "failed_endpoints": [
+          "POST /products (Status: warning, Code: 200)",
+          "GET /products (Status: warning, Code: 418)"
+        ]
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
     }
+  ],
+  "total_checks": 1,
+  "passed_checks": 0,
+  "failed_checks": 1,
+  "summary": {
+    "CriticalIssues": 0,
+    "Warnings": 0,
+    "Info": 0,
+    "Categories": null,
+    "FailedTags": null,
+    "TestSummary": null
+  },
+  "test_results": {
+    "Functional": {
+      "TotalEndpoints": 8,
+      "TestedEndpoints": 8,
+      "PassedEndpoints": 6,
+      "FailedEndpoints": 2,
+      "SkippedEndpoints": 0,
+      "EndpointResults": [
+        {
+          "Method": "POST",
+          "Path": "/products",
+          "Status": "failed",
+          "StatusCode": 200,
+          "ResponseTime": 1357894,
+          "Errors": [
+            "Status code 200 is not documented in the OpenAPI spec"
+          ],
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "GET",
+          "Path": "/products",
+          "Status": "failed",
+          "StatusCode": 418,
+          "ResponseTime": 771488,
+          "Errors": [
+            "Status code 418 is not documented in the OpenAPI spec"
+          ],
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "PUT",
+          "Path": "/products/{product_id}",
+          "Status": "passed",
+          "StatusCode": 404,
+          "ResponseTime": 888240,
+          "Errors": [
+            "Missing required field in response: error",
+            "Missing required field in response: code"
+          ],
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "DELETE",
+          "Path": "/products/{product_id}",
+          "Status": "passed",
+          "StatusCode": 404,
+          "ResponseTime": 617868,
+          "Errors": [
+            "Missing required field in response: error",
+            "Missing required field in response: code"
+          ],
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "GET",
+          "Path": "/products/{product_id}",
+          "Status": "passed",
+          "StatusCode": 200,
+          "ResponseTime": 544856,
+          "Errors": [
+            "Missing required field in response: name",
+            "Missing required field in response: description",
+            "Missing required field in response: price",
+            "Missing required field in response: category",
+            "Missing required field in response: id",
+            "Missing required field in response: created_at",
+            "Missing required field in response: updated_at"
+          ],
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "POST",
+          "Path": "/tasks",
+          "Status": "passed",
+          "StatusCode": 201,
+          "ResponseTime": 733168,
+          "Errors": null,
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "POST",
+          "Path": "/test/echo",
+          "Status": "passed",
+          "StatusCode": 200,
+          "ResponseTime": 982998,
+          "Errors": null,
+          "Warnings": null,
+          "TestCases": null
+        },
+        {
+          "Method": "GET",
+          "Path": "/test/health",
+          "Status": "passed",
+          "StatusCode": 200,
+          "ResponseTime": 464698,
+          "Errors": null,
+          "Warnings": null,
+          "TestCases": null
+        }
+      ],
+      "AverageResponseTime": 795151,
+      "MaxResponseTime": 1357894,
+      "MinResponseTime": 464698
+    },
+    "Performance": null,
+    "StartTime": "2026-06-09T22:52:00.543469412+03:00",
+    "EndTime": "2026-06-09T22:52:00.543469471+03:00",
+    "Status": "failed"
+  }
 }

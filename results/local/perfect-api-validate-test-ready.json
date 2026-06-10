@@ -1,207 +1,207 @@
 {
-    "status": "passed",
-    "exit_code": 0,
-    "version": "1.0.0",
-    "environment": "production",
-    "timestamp": "2026-03-30T00:12:07.954257697+03:00",
-    "principles": [
-        {
-            "Principle": {
-                "id": "P001",
-                "name": "OpenAPI Specification Compliance",
-                "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
-                "category": "Specification",
-                "severity": "critical",
-                "tags": [
-                    "openapi",
-                    "specification",
-                    "compliance"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "OpenAPI version is 3.0.x or 3.1.0",
-                    "Required info fields (title, version) are present",
-                    "Paths are properly defined",
-                    "Components are valid",
-                    "References are resolvable",
-                    "No duplicate operationIds",
-                    "Valid HTTP methods used"
-                ]
-            },
-            "Passed": true,
-            "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
-            "Details": {
-                "checks": {
-                    "Components are valid": true,
-                    "No duplicate operationIds": true,
-                    "Paths are properly defined": true,
-                    "Required info fields (title, version) are present": true,
-                    "Specification structure is valid": true,
-                    "Specification version is present": true,
-                    "Valid HTTP methods used": true
-                },
-                "messages": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
+  "status": "passed",
+  "exit_code": 0,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-06-09T22:51:18.153886726+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P001",
+        "name": "OpenAPI Specification Compliance",
+        "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+        "category": "Specification",
+        "severity": "critical",
+        "tags": [
+          "openapi",
+          "specification",
+          "compliance"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "OpenAPI version is 3.0.x or 3.1.0",
+          "Required info fields (title, version) are present",
+          "Paths are properly defined",
+          "Components are valid",
+          "References are resolvable",
+          "No duplicate operationIds",
+          "Valid HTTP methods used"
+        ]
+      },
+      "Passed": true,
+      "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
+      "Details": {
+        "checks": {
+          "Components are valid": true,
+          "No duplicate operationIds": true,
+          "Paths are properly defined": true,
+          "Required info fields (title, version) are present": true,
+          "Specification structure is valid": true,
+          "Specification version is present": true,
+          "Valid HTTP methods used": true
         },
-        {
-            "Principle": {
-                "id": "P002",
-                "name": "API Documentation Quality",
-                "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
-                "category": "Documentation",
-                "severity": "critical",
-                "tags": [
-                    "documentation",
-                    "quality",
-                    "usability"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All operations have clear summaries",
-                    "All operations have detailed descriptions",
-                    "All operations have unique operationIds",
-                    "All parameters have descriptions",
-                    "All request/response bodies have examples",
-                    "All schemas have descriptions",
-                    "All enums have descriptions",
-                    "API has a general description",
-                    "Contact information is provided",
-                    "License information is provided"
-                ]
-            },
-            "Passed": true,
-            "Message": "API documentation is comprehensive and high quality",
-            "Details": {
-                "checks": {
-                    "API has a general description": true
-                },
-                "messages": {},
-                "missing_docs": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
+        "messages": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P002",
+        "name": "API Documentation Quality",
+        "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
+        "category": "Documentation",
+        "severity": "critical",
+        "tags": [
+          "documentation",
+          "quality",
+          "usability"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations have clear summaries",
+          "All operations have detailed descriptions",
+          "All operations have unique operationIds",
+          "All parameters have descriptions",
+          "All request/response bodies have examples",
+          "All schemas have descriptions",
+          "All enums have descriptions",
+          "API has a general description",
+          "Contact information is provided",
+          "License information is provided"
+        ]
+      },
+      "Passed": true,
+      "Message": "API documentation is comprehensive and high quality",
+      "Details": {
+        "checks": {
+          "API has a general description": true
         },
-        {
-            "Principle": {
-                "id": "P003",
-                "name": "Error Handling Standards",
-                "description": "Validates comprehensive error response documentation and consistent error handling patterns",
-                "category": "Error Handling",
-                "severity": "critical",
-                "tags": [
-                    "errors",
-                    "responses",
-                    "standards"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All operations document 4xx error responses",
-                    "All operations document 5xx error responses",
-                    "Error responses include error codes",
-                    "Error responses include error messages",
-                    "Error responses include error details schema",
-                    "Common error responses are defined in components",
-                    "Error responses follow consistent format"
-                ]
-            },
-            "Passed": true,
-            "Message": "Error handling is well-documented and follows consistent patterns",
-            "Details": {
-                "checks": {
-                    "All operations document 4xx error responses": true,
-                    "Error responses include error details schema": true
-                },
-                "messages": {},
-                "missing_errors": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
+        "messages": {},
+        "missing_docs": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P003",
+        "name": "Error Handling Standards",
+        "description": "Validates comprehensive error response documentation and consistent error handling patterns",
+        "category": "Error Handling",
+        "severity": "critical",
+        "tags": [
+          "errors",
+          "responses",
+          "standards"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations document 4xx error responses",
+          "All operations document 5xx error responses",
+          "Error responses include error codes",
+          "Error responses include error messages",
+          "Error responses include error details schema",
+          "Common error responses are defined in components",
+          "Error responses follow consistent format"
+        ]
+      },
+      "Passed": true,
+      "Message": "Error handling is well-documented and follows consistent patterns",
+      "Details": {
+        "checks": {
+          "All operations document 4xx error responses": true,
+          "Error responses include error details schema": true
         },
-        {
-            "Principle": {
-                "id": "P004",
-                "name": "Request Schema Definitions",
-                "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
-                "category": "Schema",
-                "severity": "critical",
-                "tags": [
-                    "schema",
-                    "validation",
-                    "request"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All path parameters have schemas",
-                    "All query parameters have schemas",
-                    "All header parameters have schemas",
-                    "All request bodies have content schemas",
-                    "All schemas specify data types",
-                    "All schemas have appropriate constraints",
-                    "All required fields are marked",
-                    "All enums have valid values",
-                    "All numeric fields have min/max values",
-                    "All string fields have length constraints"
-                ]
-            },
-            "Passed": true,
-            "Message": "All requests have schema definitions with type specifications",
-            "Details": {},
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
+        "messages": {},
+        "missing_errors": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P004",
+        "name": "Request Schema Definitions",
+        "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+        "category": "Schema",
+        "severity": "critical",
+        "tags": [
+          "schema",
+          "validation",
+          "request"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All path parameters have schemas",
+          "All query parameters have schemas",
+          "All header parameters have schemas",
+          "All request bodies have content schemas",
+          "All schemas specify data types",
+          "All schemas have appropriate constraints",
+          "All required fields are marked",
+          "All enums have valid values",
+          "All numeric fields have min/max values",
+          "All string fields have length constraints"
+        ]
+      },
+      "Passed": true,
+      "Message": "All requests have schema definitions with type specifications",
+      "Details": {},
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P009",
+        "name": "Test Readiness",
+        "description": "Validates that the specification provides enough detail for meaningful functional and load testing",
+        "category": "Testing",
+        "severity": "warning",
+        "tags": [
+          "testing",
+          "readiness",
+          "examples",
+          "schemas"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Path parameters have examples or typed schemas",
+          "Request bodies have examples or typed schema properties",
+          "2xx responses have schemas defined",
+          "2xx responses have examples defined"
+        ]
+      },
+      "Passed": true,
+      "Message": "Specification is ready for meaningful functional and load testing",
+      "Details": {
+        "checks": {
+          "2xx responses have examples defined": true,
+          "2xx responses have schemas defined": true,
+          "Path parameters have examples or typed schemas": true,
+          "Request bodies have examples or typed schema properties": true
         },
-        {
-            "Principle": {
-                "id": "P009",
-                "name": "Test Readiness",
-                "description": "Validates that the specification provides enough detail for meaningful functional and load testing",
-                "category": "Testing",
-                "severity": "warning",
-                "tags": [
-                    "testing",
-                    "readiness",
-                    "examples",
-                    "schemas"
-                ],
-                "auto_fixable": false,
-                "checks": [
-                    "Path parameters have examples or typed schemas",
-                    "Request bodies have examples or typed schema properties",
-                    "2xx responses have schemas defined",
-                    "2xx responses have examples defined"
-                ]
-            },
-            "Passed": true,
-            "Message": "Specification is ready for meaningful functional and load testing",
-            "Details": {
-                "checks": {
-                    "2xx responses have examples defined": true,
-                    "2xx responses have schemas defined": true,
-                    "Path parameters have examples or typed schemas": true,
-                    "Request bodies have examples or typed schema properties": true
-                },
-                "issues": {},
-                "warnings": null
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
-        }
-    ],
-    "total_checks": 5,
-    "passed_checks": 5,
-    "failed_checks": 0,
-    "summary": {
-        "CriticalIssues": 0,
-        "Warnings": 0,
-        "Info": 0,
-        "Categories": null,
-        "FailedTags": null,
-        "TestSummary": null
+        "issues": {},
+        "warnings": null
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
     }
+  ],
+  "total_checks": 5,
+  "passed_checks": 5,
+  "failed_checks": 0,
+  "summary": {
+    "CriticalIssues": 0,
+    "Warnings": 0,
+    "Info": 0,
+    "Categories": null,
+    "FailedTags": null,
+    "TestSummary": null
+  }
 }

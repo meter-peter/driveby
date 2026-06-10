@@ -1,61 +1,61 @@
 {
-    "status": "failed",
-    "exit_code": 0,
-    "version": "1.0.0",
-    "environment": "production",
-    "timestamp": "2026-03-21T19:05:29.677606483+02:00",
-    "principles": [
-        {
-            "Principle": {
-                "id": "P007",
-                "name": "Performance Requirements",
-                "description": "Validates that the API meets performance targets and SLAs",
-                "category": "Performance",
-                "severity": "warning",
-                "tags": [
-                    "performance",
-                    "sla",
-                    "load-testing"
-                ],
-                "auto_fixable": false,
-                "checks": [
-                    "Response time meets targets",
-                    "Success rate meets targets",
-                    "Error rate is within limits",
-                    "Latency percentiles are acceptable",
-                    "Throughput meets requirements",
-                    "Concurrent request handling",
-                    "Resource utilization is acceptable"
-                ]
-            },
-            "Passed": false,
-            "Message": "P95 latency (506.316482ms) exceeded target (200ms)",
-            "Details": {
-                "start_time": "2026-03-21T19:05:14.677606653+02:00",
-                "end_time": "2026-03-21T19:05:29.677607061+02:00",
-                "total_requests": 150,
-                "success_count": 149,
-                "error_count": 1,
-                "error_rate": 0.006666666666666667,
-                "latency_p50": 5331060,
-                "latency_p95": 506316482,
-                "latency_p99": 507144999,
-                "requests_per_sec": 10.066951126911844
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
-        }
-    ],
-    "total_checks": 1,
-    "passed_checks": 0,
-    "failed_checks": 1,
-    "summary": {
-        "CriticalIssues": 0,
-        "Warnings": 0,
-        "Info": 0,
-        "Categories": null,
-        "FailedTags": null,
-        "TestSummary": null
+  "status": "failed",
+  "exit_code": 0,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-06-09T23:33:36.464554702+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P007",
+        "name": "Performance Requirements",
+        "description": "Validates that the API meets performance targets and SLAs",
+        "category": "Performance",
+        "severity": "critical",
+        "tags": [
+          "performance",
+          "sla",
+          "load-testing"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Response time meets targets",
+          "Success rate meets targets",
+          "Error rate is within limits",
+          "Latency percentiles are acceptable",
+          "Throughput meets requirements",
+          "Concurrent request handling",
+          "Resource utilization is acceptable"
+        ]
+      },
+      "Passed": false,
+      "Message": "P95 latency (504.763415ms) exceeded target (200ms)",
+      "Details": {
+        "start_time": "2026-06-09T23:33:21.464554792+03:00",
+        "end_time": "2026-06-09T23:33:36.464555141+03:00",
+        "total_requests": 150,
+        "success_count": 149,
+        "error_count": 1,
+        "error_rate": 0.006666666666666667,
+        "latency_p50": 4484043,
+        "latency_p95": 504763415,
+        "latency_p99": 506149299,
+        "requests_per_sec": 10.06700159420346
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
     }
+  ],
+  "total_checks": 1,
+  "passed_checks": 0,
+  "failed_checks": 1,
+  "summary": {
+    "CriticalIssues": 0,
+    "Warnings": 0,
+    "Info": 0,
+    "Categories": null,
+    "FailedTags": null,
+    "TestSummary": null
+  }
 }

@@ -1,400 +1,400 @@
 {
-    "status": "failed",
-    "exit_code": 1,
-    "version": "1.0.0",
-    "environment": "production",
-    "timestamp": "2026-03-30T00:12:07.818959525+03:00",
-    "principles": [
-        {
-            "Principle": {
-                "id": "P001",
-                "name": "OpenAPI Specification Compliance",
-                "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
-                "category": "Specification",
-                "severity": "critical",
-                "tags": [
-                    "openapi",
-                    "specification",
-                    "compliance"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "OpenAPI version is 3.0.x or 3.1.0",
-                    "Required info fields (title, version) are present",
-                    "Paths are properly defined",
-                    "Components are valid",
-                    "References are resolvable",
-                    "No duplicate operationIds",
-                    "Valid HTTP methods used"
-                ]
-            },
-            "Passed": true,
-            "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
-            "Details": {
-                "checks": {
-                    "Components are valid": true,
-                    "No duplicate operationIds": true,
-                    "Paths are properly defined": true,
-                    "Required info fields (title, version) are present": true,
-                    "Specification structure is valid": true,
-                    "Specification version is present": true,
-                    "Valid HTTP methods used": true
-                },
-                "messages": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
+  "status": "failed",
+  "exit_code": 1,
+  "version": "1.0.0",
+  "environment": "production",
+  "timestamp": "2026-06-09T22:50:01.026285166+03:00",
+  "principles": [
+    {
+      "Principle": {
+        "id": "P001",
+        "name": "OpenAPI Specification Compliance",
+        "description": "Validates that the API specification follows OpenAPI 3.0/3.1 standards and best practices",
+        "category": "Specification",
+        "severity": "critical",
+        "tags": [
+          "openapi",
+          "specification",
+          "compliance"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "OpenAPI version is 3.0.x or 3.1.0",
+          "Required info fields (title, version) are present",
+          "Paths are properly defined",
+          "Components are valid",
+          "References are resolvable",
+          "No duplicate operationIds",
+          "Valid HTTP methods used"
+        ]
+      },
+      "Passed": true,
+      "Message": "OpenAPI specification is fully compliant with 3.0/3.1 standards",
+      "Details": {
+        "checks": {
+          "Components are valid": true,
+          "No duplicate operationIds": true,
+          "Paths are properly defined": true,
+          "Required info fields (title, version) are present": true,
+          "Specification structure is valid": true,
+          "Specification version is present": true,
+          "Valid HTTP methods used": true
         },
-        {
-            "Principle": {
-                "id": "P002",
-                "name": "API Documentation Quality",
-                "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
-                "category": "Documentation",
-                "severity": "critical",
-                "tags": [
-                    "documentation",
-                    "quality",
-                    "usability"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All operations have clear summaries",
-                    "All operations have detailed descriptions",
-                    "All operations have unique operationIds",
-                    "All parameters have descriptions",
-                    "All request/response bodies have examples",
-                    "All schemas have descriptions",
-                    "All enums have descriptions",
-                    "API has a general description",
-                    "Contact information is provided",
-                    "License information is provided"
-                ]
-            },
-            "Passed": false,
-            "Message": "Documentation quality issues found: All operations have detailed descriptions: DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health, GET /legacy/products, POST /products, GET /products; All parameters have descriptions: DELETE /products/{product_id}: parameter product_id, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, GET /products: parameter category, GET /products: parameter min_price, GET /products: parameter max_price, GET /products: parameter in_stock; All request/response bodies have examples: DELETE /products/{product_id}: 422 application/json response, GET /products/{product_id}: 422 application/json response, GET /products/{product_id}: 200 application/json response, PUT /products/{product_id}: request body, PUT /products/{product_id}: application/json request body, PUT /products/{product_id}: 200 application/json response, PUT /products/{product_id}: 422 application/json response, POST /tasks: request body, POST /tasks: application/json request body, POST /tasks: 201 application/json response, POST /tasks: 422 application/json response, POST /test/echo: request body, POST /test/echo: application/json request body, POST /test/echo: 422 application/json response, POST /test/echo: 200 application/json response, GET /test/health: 200 application/json response, GET /legacy/products: 200 application/json response, POST /products: request body, POST /products: application/json request body, POST /products: 201 application/json response, POST /products: 422 application/json response, GET /products: 200 application/json response, GET /products: 422 application/json response; All schemas have descriptions: ValidationError, ProductCreate, HTTPValidationError, Product, Task, TaskCreate, ProductBase, ProductCategory; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other",
-            "Details": {
-                "checks": {
-                    "API has a general description": true,
-                    "All enums have descriptions": false,
-                    "All operations have detailed descriptions": false,
-                    "All parameters have descriptions": false,
-                    "All request/response bodies have examples": false,
-                    "All schemas have descriptions": false,
-                    "Contact information is provided": false,
-                    "License information is provided": false
-                },
-                "messages": {
-                    "Contact information is provided": "Contact information is missing",
-                    "License information is provided": "License information is missing"
-                },
-                "missing_docs": {
-                    "All enums have descriptions": [
-                        "ProductCategory: enum value electronics",
-                        "ProductCategory: enum value clothing",
-                        "ProductCategory: enum value food",
-                        "ProductCategory: enum value books",
-                        "ProductCategory: enum value other"
-                    ],
-                    "All operations have detailed descriptions": [
-                        "DELETE /products/{product_id}",
-                        "GET /products/{product_id}",
-                        "PUT /products/{product_id}",
-                        "POST /tasks",
-                        "POST /test/echo",
-                        "GET /test/health",
-                        "GET /legacy/products",
-                        "POST /products",
-                        "GET /products"
-                    ],
-                    "All parameters have descriptions": [
-                        "DELETE /products/{product_id}: parameter product_id",
-                        "GET /products/{product_id}: parameter product_id",
-                        "PUT /products/{product_id}: parameter product_id",
-                        "GET /products: parameter category",
-                        "GET /products: parameter min_price",
-                        "GET /products: parameter max_price",
-                        "GET /products: parameter in_stock"
-                    ],
-                    "All request/response bodies have examples": [
-                        "DELETE /products/{product_id}: 422 application/json response",
-                        "GET /products/{product_id}: 422 application/json response",
-                        "GET /products/{product_id}: 200 application/json response",
-                        "PUT /products/{product_id}: request body",
-                        "PUT /products/{product_id}: application/json request body",
-                        "PUT /products/{product_id}: 200 application/json response",
-                        "PUT /products/{product_id}: 422 application/json response",
-                        "POST /tasks: request body",
-                        "POST /tasks: application/json request body",
-                        "POST /tasks: 201 application/json response",
-                        "POST /tasks: 422 application/json response",
-                        "POST /test/echo: request body",
-                        "POST /test/echo: application/json request body",
-                        "POST /test/echo: 422 application/json response",
-                        "POST /test/echo: 200 application/json response",
-                        "GET /test/health: 200 application/json response",
-                        "GET /legacy/products: 200 application/json response",
-                        "POST /products: request body",
-                        "POST /products: application/json request body",
-                        "POST /products: 201 application/json response",
-                        "POST /products: 422 application/json response",
-                        "GET /products: 200 application/json response",
-                        "GET /products: 422 application/json response"
-                    ],
-                    "All schemas have descriptions": [
-                        "ValidationError",
-                        "ProductCreate",
-                        "HTTPValidationError",
-                        "Product",
-                        "Task",
-                        "TaskCreate",
-                        "ProductBase",
-                        "ProductCategory"
-                    ]
-                }
-            },
-            "Explanation": "",
-            "SuggestedFix": "Add missing documentation including descriptions, examples, and operation details",
-            "TestImpact": null
+        "messages": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P002",
+        "name": "API Documentation Quality",
+        "description": "Ensures comprehensive and high-quality API documentation including descriptions, examples, and usage guidelines",
+        "category": "Documentation",
+        "severity": "critical",
+        "tags": [
+          "documentation",
+          "quality",
+          "usability"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "All operations have clear summaries",
+          "All operations have detailed descriptions",
+          "All operations have unique operationIds",
+          "All parameters have descriptions",
+          "All request/response bodies have examples",
+          "All schemas have descriptions",
+          "All enums have descriptions",
+          "API has a general description",
+          "Contact information is provided",
+          "License information is provided"
+        ]
+      },
+      "Passed": false,
+      "Message": "Documentation quality issues found: All operations have detailed descriptions: DELETE /products/{product_id}, GET /products/{product_id}, PUT /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health, GET /legacy/products, GET /products, POST /products; All parameters have descriptions: DELETE /products/{product_id}: parameter product_id, GET /products/{product_id}: parameter product_id, PUT /products/{product_id}: parameter product_id, GET /products: parameter category, GET /products: parameter min_price, GET /products: parameter max_price, GET /products: parameter in_stock; All request/response bodies have examples: DELETE /products/{product_id}: 422 application/json response, GET /products/{product_id}: 200 application/json response, GET /products/{product_id}: 422 application/json response, PUT /products/{product_id}: request body, PUT /products/{product_id}: application/json request body, PUT /products/{product_id}: 200 application/json response, PUT /products/{product_id}: 422 application/json response, POST /tasks: request body, POST /tasks: application/json request body, POST /tasks: 201 application/json response, POST /tasks: 422 application/json response, POST /test/echo: request body, POST /test/echo: application/json request body, POST /test/echo: 200 application/json response, POST /test/echo: 422 application/json response, GET /test/health: 200 application/json response, GET /legacy/products: 200 application/json response, GET /products: 200 application/json response, GET /products: 422 application/json response, POST /products: request body, POST /products: application/json request body, POST /products: 201 application/json response, POST /products: 422 application/json response; All schemas have descriptions: ProductCreate, ValidationError, ProductBase, TaskCreate, Task, HTTPValidationError, Product, ProductCategory; All enums have descriptions: ProductCategory: enum value electronics, ProductCategory: enum value clothing, ProductCategory: enum value food, ProductCategory: enum value books, ProductCategory: enum value other",
+      "Details": {
+        "checks": {
+          "API has a general description": true,
+          "All enums have descriptions": false,
+          "All operations have detailed descriptions": false,
+          "All parameters have descriptions": false,
+          "All request/response bodies have examples": false,
+          "All schemas have descriptions": false,
+          "Contact information is provided": false,
+          "License information is provided": false
         },
-        {
-            "Principle": {
-                "id": "P003",
-                "name": "Error Handling Standards",
-                "description": "Validates comprehensive error response documentation and consistent error handling patterns",
-                "category": "Error Handling",
-                "severity": "critical",
-                "tags": [
-                    "errors",
-                    "responses",
-                    "standards"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All operations document 4xx error responses",
-                    "All operations document 5xx error responses",
-                    "Error responses include error codes",
-                    "Error responses include error messages",
-                    "Error responses include error details schema",
-                    "Common error responses are defined in components",
-                    "Error responses follow consistent format"
-                ]
-            },
-            "Passed": false,
-            "Message": "Error handling issues found: All operations document 4xx error responses: GET /legacy/products, GET /test/health; All operations document 5xx error responses: GET /legacy/products, POST /products, GET /products, PUT /products/{product_id}, DELETE /products/{product_id}, GET /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health; Error responses include error details schema: POST /products: 422 response, GET /products: 422 response, PUT /products/{product_id}: 422 response, DELETE /products/{product_id}: 422 response, GET /products/{product_id}: 422 response, POST /tasks: 422 response, POST /test/echo: 422 response",
-            "Details": {
-                "checks": {
-                    "All operations document 4xx error responses": false,
-                    "All operations document 5xx error responses": false,
-                    "Common error responses are defined in components": false,
-                    "Error responses follow consistent format": true,
-                    "Error responses include error details schema": false
-                },
-                "messages": {
-                    "Common error responses are defined in components": "No common error responses defined in components"
-                },
-                "missing_errors": {
-                    "All operations document 4xx error responses": [
-                        "GET /legacy/products",
-                        "GET /test/health"
-                    ],
-                    "All operations document 5xx error responses": [
-                        "GET /legacy/products",
-                        "POST /products",
-                        "GET /products",
-                        "PUT /products/{product_id}",
-                        "DELETE /products/{product_id}",
-                        "GET /products/{product_id}",
-                        "POST /tasks",
-                        "POST /test/echo",
-                        "GET /test/health"
-                    ],
-                    "Error responses include error details schema": [
-                        "POST /products: 422 response",
-                        "GET /products: 422 response",
-                        "PUT /products/{product_id}: 422 response",
-                        "DELETE /products/{product_id}: 422 response",
-                        "GET /products/{product_id}: 422 response",
-                        "POST /tasks: 422 response",
-                        "POST /test/echo: 422 response"
-                    ]
-                }
-            },
-            "Explanation": "",
-            "SuggestedFix": "Add comprehensive error response documentation including codes, messages, and consistent error schemas",
-            "TestImpact": null
+        "messages": {
+          "Contact information is provided": "Contact information is missing",
+          "License information is provided": "License information is missing"
         },
-        {
-            "Principle": {
-                "id": "P004",
-                "name": "Request Schema Definitions",
-                "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
-                "category": "Schema",
-                "severity": "critical",
-                "tags": [
-                    "schema",
-                    "validation",
-                    "request"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "All path parameters have schemas",
-                    "All query parameters have schemas",
-                    "All header parameters have schemas",
-                    "All request bodies have content schemas",
-                    "All schemas specify data types",
-                    "All schemas have appropriate constraints",
-                    "All required fields are marked",
-                    "All enums have valid values",
-                    "All numeric fields have min/max values",
-                    "All string fields have length constraints"
-                ]
-            },
-            "Passed": false,
-            "Message": "Request validation issues found: All string fields have length constraints: POST /tasks.description: application/json schema, POST /products.description: application/json schema, POST /products.tags[]: application/json schema, POST /products.category: application/json schema, PUT /products/{product_id}.category: application/json schema, PUT /products/{product_id}.description: application/json schema, PUT /products/{product_id}.tags[]: application/json schema",
-            "Details": {
-                "checks": {
-                    "All enums have valid values": true,
-                    "All header parameters have schemas": true,
-                    "All numeric fields have min/max values": true,
-                    "All path parameters have schemas": true,
-                    "All query parameters have schemas": true,
-                    "All request bodies have content schemas": true,
-                    "All required fields are marked": true,
-                    "All schemas have appropriate constraints": true,
-                    "All schemas specify data types": true,
-                    "All string fields have length constraints": false
-                },
-                "messages": {},
-                "missing_validation": {
-                    "All string fields have length constraints": [
-                        "POST /tasks.description: application/json schema",
-                        "POST /products.description: application/json schema",
-                        "POST /products.tags[]: application/json schema",
-                        "POST /products.category: application/json schema",
-                        "PUT /products/{product_id}.category: application/json schema",
-                        "PUT /products/{product_id}.description: application/json schema",
-                        "PUT /products/{product_id}.tags[]: application/json schema"
-                    ]
-                }
-            },
-            "Explanation": "",
-            "SuggestedFix": "Add comprehensive schema validation including data types, constraints, and required fields",
-            "TestImpact": null
-        },
-        {
-            "Principle": {
-                "id": "P005",
-                "name": "Security Standards",
-                "description": "Validates comprehensive security requirements and authentication mechanisms",
-                "category": "Security",
-                "severity": "critical",
-                "tags": [
-                    "security",
-                    "authentication",
-                    "authorization"
-                ],
-                "auto_fixable": false,
-                "checks": [
-                    "Security schemes are defined",
-                    "Global security requirements are set",
-                    "Operation-level security is defined",
-                    "OAuth2 scopes are documented",
-                    "API keys are properly described",
-                    "Authentication headers are specified",
-                    "Security requirements are consistent"
-                ]
-            },
-            "Passed": true,
-            "Message": "All security requirements are properly defined and consistent",
-            "Details": {
-                "checks": {
-                    "API keys are properly described": true,
-                    "Authentication headers are specified": true,
-                    "Global security requirements are set": true,
-                    "OAuth2 scopes are documented": true,
-                    "Operation-level security is defined": true,
-                    "Security requirements are consistent": true,
-                    "Security schemes are defined": true
-                },
-                "messages": {}
-            },
-            "Explanation": "",
-            "SuggestedFix": "",
-            "TestImpact": null
-        },
-        {
-            "Principle": {
-                "id": "P008",
-                "name": "API Versioning Strategy",
-                "description": "Validates proper API versioning implementation and documentation",
-                "category": "Versioning",
-                "severity": "warning",
-                "tags": [
-                    "versioning",
-                    "compatibility",
-                    "lifecycle"
-                ],
-                "auto_fixable": true,
-                "checks": [
-                    "API version is specified",
-                    "Version follows semantic versioning",
-                    "Versioning strategy is documented",
-                    "Deprecation notices are present",
-                    "Breaking changes are documented",
-                    "Version compatibility is specified",
-                    "Migration guides are referenced"
-                ]
-            },
-            "Passed": false,
-            "Message": "Versioning validation failed: Deprecation notices are present: Deprecated operations missing deprecation details in description: GET /legacy/products",
-            "Details": {
-                "checks": {
-                    "API version is specified": true,
-                    "Breaking changes are documented": true,
-                    "Deprecation notices are present": false,
-                    "Migration guides are referenced": true,
-                    "Version compatibility is specified": true,
-                    "Version follows semantic versioning": true,
-                    "Versioning strategy is documented": true
-                },
-                "messages": {
-                    "Deprecation notices are present": "Deprecated operations missing deprecation details in description: GET /legacy/products"
-                }
-            },
-            "Explanation": "",
-            "SuggestedFix": "Update the info section with version details, deprecation notices, and migration references",
-            "TestImpact": null
+        "missing_docs": {
+          "All enums have descriptions": [
+            "ProductCategory: enum value electronics",
+            "ProductCategory: enum value clothing",
+            "ProductCategory: enum value food",
+            "ProductCategory: enum value books",
+            "ProductCategory: enum value other"
+          ],
+          "All operations have detailed descriptions": [
+            "DELETE /products/{product_id}",
+            "GET /products/{product_id}",
+            "PUT /products/{product_id}",
+            "POST /tasks",
+            "POST /test/echo",
+            "GET /test/health",
+            "GET /legacy/products",
+            "GET /products",
+            "POST /products"
+          ],
+          "All parameters have descriptions": [
+            "DELETE /products/{product_id}: parameter product_id",
+            "GET /products/{product_id}: parameter product_id",
+            "PUT /products/{product_id}: parameter product_id",
+            "GET /products: parameter category",
+            "GET /products: parameter min_price",
+            "GET /products: parameter max_price",
+            "GET /products: parameter in_stock"
+          ],
+          "All request/response bodies have examples": [
+            "DELETE /products/{product_id}: 422 application/json response",
+            "GET /products/{product_id}: 200 application/json response",
+            "GET /products/{product_id}: 422 application/json response",
+            "PUT /products/{product_id}: request body",
+            "PUT /products/{product_id}: application/json request body",
+            "PUT /products/{product_id}: 200 application/json response",
+            "PUT /products/{product_id}: 422 application/json response",
+            "POST /tasks: request body",
+            "POST /tasks: application/json request body",
+            "POST /tasks: 201 application/json response",
+            "POST /tasks: 422 application/json response",
+            "POST /test/echo: request body",
+            "POST /test/echo: application/json request body",
+            "POST /test/echo: 200 application/json response",
+            "POST /test/echo: 422 application/json response",
+            "GET /test/health: 200 application/json response",
+            "GET /legacy/products: 200 application/json response",
+            "GET /products: 200 application/json response",
+            "GET /products: 422 application/json response",
+            "POST /products: request body",
+            "POST /products: application/json request body",
+            "POST /products: 201 application/json response",
+            "POST /products: 422 application/json response"
+          ],
+          "All schemas have descriptions": [
+            "ProductCreate",
+            "ValidationError",
+            "ProductBase",
+            "TaskCreate",
+            "Task",
+            "HTTPValidationError",
+            "Product",
+            "ProductCategory"
+          ]
         }
-    ],
-    "total_checks": 6,
-    "passed_checks": 2,
-    "failed_checks": 4,
-    "summary": {
-        "CriticalIssues": 3,
-        "Warnings": 1,
-        "Info": 0,
-        "Categories": [
-            "Documentation",
-            "Error Handling",
-            "Schema",
-            "Versioning"
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add missing documentation including descriptions, examples, and operation details",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P003",
+        "name": "Error Handling Standards",
+        "description": "Validates comprehensive error response documentation and consistent error handling patterns",
+        "category": "Error Handling",
+        "severity": "critical",
+        "tags": [
+          "errors",
+          "responses",
+          "standards"
         ],
-        "FailedTags": [
-            "quality",
-            "usability",
-            "responses",
-            "versioning",
-            "compatibility",
-            "lifecycle",
-            "documentation",
-            "errors",
-            "standards",
-            "schema",
-            "validation",
-            "request"
+        "auto_fixable": true,
+        "checks": [
+          "All operations document 4xx error responses",
+          "All operations document 5xx error responses",
+          "Error responses include error codes",
+          "Error responses include error messages",
+          "Error responses include error details schema",
+          "Common error responses are defined in components",
+          "Error responses follow consistent format"
+        ]
+      },
+      "Passed": false,
+      "Message": "Error handling issues found: All operations document 4xx error responses: GET /legacy/products, GET /test/health; All operations document 5xx error responses: GET /legacy/products, GET /products, POST /products, GET /products/{product_id}, PUT /products/{product_id}, DELETE /products/{product_id}, POST /tasks, POST /test/echo, GET /test/health; Error responses include error details schema: GET /products: 422 response, POST /products: 422 response, GET /products/{product_id}: 422 response, PUT /products/{product_id}: 422 response, DELETE /products/{product_id}: 422 response, POST /tasks: 422 response, POST /test/echo: 422 response",
+      "Details": {
+        "checks": {
+          "All operations document 4xx error responses": false,
+          "All operations document 5xx error responses": false,
+          "Common error responses are defined in components": false,
+          "Error responses follow consistent format": true,
+          "Error responses include error details schema": false
+        },
+        "messages": {
+          "Common error responses are defined in components": "No common error responses defined in components"
+        },
+        "missing_errors": {
+          "All operations document 4xx error responses": [
+            "GET /legacy/products",
+            "GET /test/health"
+          ],
+          "All operations document 5xx error responses": [
+            "GET /legacy/products",
+            "GET /products",
+            "POST /products",
+            "GET /products/{product_id}",
+            "PUT /products/{product_id}",
+            "DELETE /products/{product_id}",
+            "POST /tasks",
+            "POST /test/echo",
+            "GET /test/health"
+          ],
+          "Error responses include error details schema": [
+            "GET /products: 422 response",
+            "POST /products: 422 response",
+            "GET /products/{product_id}: 422 response",
+            "PUT /products/{product_id}: 422 response",
+            "DELETE /products/{product_id}: 422 response",
+            "POST /tasks: 422 response",
+            "POST /test/echo: 422 response"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive error response documentation including codes, messages, and consistent error schemas",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P004",
+        "name": "Request Schema Definitions",
+        "description": "Ensures all API requests have comprehensive schema definitions with proper data types, validation rules, and constraints",
+        "category": "Schema",
+        "severity": "critical",
+        "tags": [
+          "schema",
+          "validation",
+          "request"
         ],
-        "TestSummary": null
+        "auto_fixable": true,
+        "checks": [
+          "All path parameters have schemas",
+          "All query parameters have schemas",
+          "All header parameters have schemas",
+          "All request bodies have content schemas",
+          "All schemas specify data types",
+          "All schemas have appropriate constraints",
+          "All required fields are marked",
+          "All enums have valid values",
+          "All numeric fields have min/max values",
+          "All string fields have length constraints"
+        ]
+      },
+      "Passed": false,
+      "Message": "Request validation issues found: All string fields have length constraints: POST /products.tags[]: application/json schema, POST /products.category: application/json schema, POST /products.description: application/json schema, PUT /products/{product_id}.tags[]: application/json schema, PUT /products/{product_id}.category: application/json schema, PUT /products/{product_id}.description: application/json schema, POST /tasks.description: application/json schema",
+      "Details": {
+        "checks": {
+          "All enums have valid values": true,
+          "All header parameters have schemas": true,
+          "All numeric fields have min/max values": true,
+          "All path parameters have schemas": true,
+          "All query parameters have schemas": true,
+          "All request bodies have content schemas": true,
+          "All required fields are marked": true,
+          "All schemas have appropriate constraints": true,
+          "All schemas specify data types": true,
+          "All string fields have length constraints": false
+        },
+        "messages": {},
+        "missing_validation": {
+          "All string fields have length constraints": [
+            "POST /products.tags[]: application/json schema",
+            "POST /products.category: application/json schema",
+            "POST /products.description: application/json schema",
+            "PUT /products/{product_id}.tags[]: application/json schema",
+            "PUT /products/{product_id}.category: application/json schema",
+            "PUT /products/{product_id}.description: application/json schema",
+            "POST /tasks.description: application/json schema"
+          ]
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Add comprehensive schema validation including data types, constraints, and required fields",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P005",
+        "name": "Security Standards",
+        "description": "Validates comprehensive security requirements and authentication mechanisms",
+        "category": "Security",
+        "severity": "critical",
+        "tags": [
+          "security",
+          "authentication",
+          "authorization"
+        ],
+        "auto_fixable": false,
+        "checks": [
+          "Security schemes are defined",
+          "Global security requirements are set",
+          "Operation-level security is defined",
+          "OAuth2 scopes are documented",
+          "API keys are properly described",
+          "Authentication headers are specified",
+          "Security requirements are consistent"
+        ]
+      },
+      "Passed": true,
+      "Message": "All security requirements are properly defined and consistent",
+      "Details": {
+        "checks": {
+          "API keys are properly described": true,
+          "Authentication headers are specified": true,
+          "Global security requirements are set": true,
+          "OAuth2 scopes are documented": true,
+          "Operation-level security is defined": true,
+          "Security requirements are consistent": true,
+          "Security schemes are defined": true
+        },
+        "messages": {}
+      },
+      "Explanation": "",
+      "SuggestedFix": "",
+      "TestImpact": null
+    },
+    {
+      "Principle": {
+        "id": "P008",
+        "name": "API Versioning Strategy",
+        "description": "Validates proper API versioning implementation and documentation",
+        "category": "Versioning",
+        "severity": "warning",
+        "tags": [
+          "versioning",
+          "compatibility",
+          "lifecycle"
+        ],
+        "auto_fixable": true,
+        "checks": [
+          "API version is specified",
+          "Version follows semantic versioning",
+          "Versioning strategy is documented",
+          "Deprecation notices are present",
+          "Breaking changes are documented",
+          "Version compatibility is specified",
+          "Migration guides are referenced"
+        ]
+      },
+      "Passed": false,
+      "Message": "Versioning validation failed: Deprecation notices are present: Deprecated operations missing deprecation details in description: GET /legacy/products",
+      "Details": {
+        "checks": {
+          "API version is specified": true,
+          "Breaking changes are documented": true,
+          "Deprecation notices are present": false,
+          "Migration guides are referenced": true,
+          "Version compatibility is specified": true,
+          "Version follows semantic versioning": true,
+          "Versioning strategy is documented": true
+        },
+        "messages": {
+          "Deprecation notices are present": "Deprecated operations missing deprecation details in description: GET /legacy/products"
+        }
+      },
+      "Explanation": "",
+      "SuggestedFix": "Update the info section with version details, deprecation notices, and migration references",
+      "TestImpact": null
     }
+  ],
+  "total_checks": 6,
+  "passed_checks": 2,
+  "failed_checks": 4,
+  "summary": {
+    "CriticalIssues": 3,
+    "Warnings": 1,
+    "Info": 0,
+    "Categories": [
+      "Documentation",
+      "Error Handling",
+      "Schema",
+      "Versioning"
+    ],
+    "FailedTags": [
+      "quality",
+      "usability",
+      "errors",
+      "responses",
+      "schema",
+      "validation",
+      "request",
+      "compatibility",
+      "documentation",
+      "standards",
+      "versioning",
+      "lifecycle"
+    ],
+    "TestSummary": null
+  }
 }
