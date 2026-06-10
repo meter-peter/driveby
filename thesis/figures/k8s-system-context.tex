@@ -1,6 +1,16 @@
 % Kubernetes System Context — Chapter 5
 % Updated 2026-05 (round-1 review): added colour semantics legend and
 % "existing vs thesis-built" annotations per comments [336], [337], [338].
+% Updated 2026-06 (round-2 review):
+%  - [216] arrow defects fixed: the control-plane components are now shown
+%    inside a namespace containment box (the previous ns->component fan
+%    arrows passed behind other nodes), the environment namespaces are laid
+%    out as three rows so no arrow crosses or hides behind a node, and the
+%    validate arrow is routed orthogonally through a free channel.
+%  - [217] namespace labels genericized to <app>-dev/-staging/-prod (the PoC
+%    instance used the historical name perfect-api; noted in the caption).
+%  - [218] promotion arrows are now solid (consistent with the comparable
+%    figure elsewhere) and labelled as PR-mediated via the GitOps Promoter.
 % This is a deployment view of the cluster the system runs on, not a context
 % diagram in the strict SSADM sense (the true context diagram is
 % figures/system-context.tex, referenced from Chapter 4).
@@ -69,43 +79,55 @@
 \node[cluster] (cluster) at (6.5,-2.8) {};
 \node[clabel] (clusterlabel) at (6.5,0.5) {Kubernetes Cluster: private.novelcore.org};
 
-% Control Plane namespace (left column) — thesis-built artifacts live here
-\node[ns=teal] (driveby-ns) at (2.5,-0.3) {\textbf{driveby}\,$\bigstar$};
-\node[new=teal] (xrds) at (1.2,-1.3) {Crossplane\\XRDs $\bigstar$};
-\node[new=teal] (argo-events) at (3.8,-1.3) {Argo Events\\(EventBus) $\bigstar$};
-\node[new=teal] (workflows) at (1.2,-2.3) {Argo Workflows\\(Templates) $\bigstar$};
-\node[new=teal] (promoter) at (3.8,-2.3) {GitOps\\Promoter $\bigstar$};
+% Control Plane namespace (left) — thesis-built artifacts live here.
+% Containment is drawn as a namespace box (no ns->component arrows; the
+% previous fan arrows passed behind the component nodes — comment [216]).
+\draw[teal!60!black, rounded corners=4pt, thick, fill=teal!4]
+    (-0.3,-2.8) rectangle (5.3,-0.55);
+\node[ns=teal] (driveby-ns) at (2.5,-0.55) {\textbf{driveby}\,$\bigstar$};
+\node[new=teal] (xrds) at (1.2,-1.45) {Crossplane\\XRDs $\bigstar$};
+\node[new=teal] (argo-events) at (3.8,-1.45) {Argo Events\\(EventBus) $\bigstar$};
+\node[new=teal] (workflows) at (1.2,-2.35) {Argo Workflows\\(Templates) $\bigstar$};
+\node[new=teal] (promoter) at (3.8,-2.35) {GitOps\\Promoter $\bigstar$};
 
-\draw[->,thick,teal!50!black] (driveby-ns) -- (xrds);
-\draw[->,thick,teal!50!black] (driveby-ns) -- (argo-events);
-\draw[->,thick,teal!50!black] (driveby-ns) -- (workflows);
-\draw[->,thick,teal!50!black] (driveby-ns) -- (promoter);
+% Application namespaces (right region) — generated per-app by XSDLC.
+% One row per environment: namespace box (left) hosts the app box (right),
+% so no namespace-to-app arrow crosses another environment's nodes.
+% Labels are generic <app>-{dev,staging,prod}; the PoC used perfect-api.
+\node[ns=blue]   (dev-ns)     at (8.0,-0.6) {$\langle$\textit{app}$\rangle$-dev};
+\node[ns=orange] (staging-ns) at (8.0,-2.1) {$\langle$\textit{app}$\rangle$-staging};
+\node[ns=red]    (prod-ns)    at (8.0,-3.6) {$\langle$\textit{app}$\rangle$-prod};
 
-% Application namespaces (right column) — generated per-app by XSDLC
-\node[ns=blue] (dev-ns) at (7.5,-0.3) {perfect-api-dev};
-\node[ns=orange] (staging-ns) at (10.5,-0.3) {perfect-api-staging};
-\node[ns=red] (prod-ns) at (10.5,-1.5) {perfect-api-prod};
+\node[new=blue]   (dev-app)  at (11.8,-0.6) {API + DB\\(auto-sync) $\bigstar$};
+\node[new=orange] (stg-app)  at (11.8,-2.1) {API + DB\\(gated) $\bigstar$};
+\node[new=red]    (prod-app) at (11.8,-3.6) {API + DB\\(manual) $\bigstar$};
 
-\node[new=blue] (dev-app) at (7.5,-1.3) {API + DB\\(auto-sync) $\bigstar$};
-\node[new=orange] (stg-app) at (10.5,-2.5) {API + DB\\(gated) $\bigstar$};
-\node[new=red] (prod-app) at (10.5,-3.7) {API + DB\\(manual) $\bigstar$};
+\draw[->,thick,blue!50!black]   (dev-ns.east)     -- (dev-app.west);
+\draw[->,thick,orange!50!black] (staging-ns.east) -- (stg-app.west);
+\draw[->,thick,red!50!black]    (prod-ns.east)    -- (prod-app.west);
 
-\draw[->,thick,blue!50!black] (dev-ns) -- (dev-app);
-\draw[->,thick,orange!50!black] (staging-ns) -- (stg-app);
-\draw[->,thick,red!50!black] (prod-ns) -- (prod-app);
+% Shared infrastructure (bottom left) — pre-existing on the target cluster
+\node[existing=violet] (argocd)     at (2.0,-3.9) {ArgoCD};
+\node[existing=violet] (crossplane) at (2.0,-4.9) {Crossplane\\(provider-k8s)};
+\node[existing=violet] (traefik)    at (4.8,-3.9) {Traefik\\Ingress};
+\node[existing=violet] (cert-mgr)   at (4.8,-4.9) {cert-manager};
 
-% Shared infrastructure (bottom) — pre-existing on the target cluster
-\node[existing=violet] (argocd) at (2.5,-3.7) {ArgoCD};
-\node[existing=violet] (crossplane) at (2.5,-4.7) {Crossplane\\(provider-k8s)};
-\node[existing=violet] (traefik) at (5.5,-3.7) {Traefik\\Ingress};
-\node[existing=violet] (cert-mgr) at (5.5,-4.7) {cert-manager};
+% Promotion arrows — solid (consistent with the GitOps pipeline figure).
+% Promotion is not a direct environment-to-environment transfer: the GitOps
+% Promoter opens/merges a promotion PR for each transition, hence the label.
+\draw[->,thick,green!50!black] (dev-app.south)
+    -- node[left,font=\tiny,green!50!black,align=right]
+       {promote\\(PR via Promoter)} (stg-app.north);
+\draw[->,thick,green!50!black] (stg-app.south)
+    -- node[left,font=\tiny,green!50!black,align=right]
+       {promote\\(PR via Promoter)} (prod-app.north);
 
-% Promotion arrows
-\draw[->,thick,dashed,green!50!black] (dev-app.east) -- node[above,font=\tiny,green!50!black] {promote} (stg-app.west);
-\draw[->,thick,dashed,green!50!black] (stg-app.south) -- node[right,font=\tiny,green!50!black] {promote} (prod-app.north);
-
-% Validation arrow
-\draw[->,thick,dashed,teal!50!black] (workflows.south) -- ++(0,-0.5) -| node[below,font=\tiny,teal!50!black,pos=0.25] {validate} (dev-app.south);
+% Validation arrow — Argo Workflows validates the source (dev) environment.
+% Routed orthogonally through the free channel between the control-plane
+% box and the environment rows so it never passes behind a node.
+\draw[->,thick,teal!50!black]
+    (workflows.south) -- (1.2,-3.25) -- (5.9,-3.25) -- (5.9,-0.6) -- (dev-ns.west);
+\node[font=\tiny,teal!50!black,anchor=south] at (3.8,-3.2) {validate};
 
 % ==================== Legend ====================
 % Colour semantics + "existing vs thesis-built" key per comments [337], [338].

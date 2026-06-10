@@ -39,6 +39,8 @@
   framexleftmargin=1.5em
 }
 
+\setcounter{tocdepth}{1}
+
 \begin{document}
 
 % Custom title page
@@ -101,6 +103,8 @@ in the GitOps Era}\\[1cm]}
 \selectlanguage{english}
 \end{titlepage}
 
+\include{chapters/acknowledgements}
+
 \include{chapters/abstract-en}
 \include{chapters/abstract-gr}
 
@@ -111,6 +115,7 @@ in the GitOps Era}\\[1cm]}
 \include{chapters/01-introduction}
 \include{chapters/02-related-work}
 \include{chapters/03-methodology-ddt}
+\include{chapters/04-system-architecture}
 \include{chapters/04-cli-architecture}
 \include{chapters/05-kubernetes-architecture}
 \include{chapters/06-gitops-pipeline}

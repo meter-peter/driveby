@@ -1,20 +1,32 @@
-% System Context Diagram — Chapter 4 (DriveBy + XSDLC system boundary)
-% Added 2026-05 (round-1 review) per supervisor comments [247], [248], [336].
-% Shows: the system under study (DriveBy CLI + XSDLC composition) inside a
-% boundary, with the external actors and systems that interact with it.
-% This is a true context diagram in the SSADM/SysML sense: one box per
-% external entity, no internal decomposition of the system itself.
+% System Context Diagram — System Architecture chapter
+% Shows: the system under study (DriveBy CLI + XSDLC composition + generated
+% gate infrastructure + GitOps Promoter) inside an expanded boundary, resting
+% on the infrastructure substrate (Kubernetes + Crossplane control plane and
+% inherited platform services), with the external actors and systems that
+% interact with the boundary. One box per external entity; the system boundary
+% encloses every component that participates in producing the promotion verdict.
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
-    sysbox/.style={
+    syscomp/.style={
         rectangle,
-        rounded corners=8pt,
+        rounded corners=4pt,
         draw=blue!50!black,
         thick,
         fill=blue!8,
-        minimum width=6.5cm,
-        minimum height=2.4cm,
-        font=\bfseries\small,
+        minimum width=2.9cm,
+        minimum height=1.1cm,
+        font=\scriptsize\bfseries,
+        align=center
+    },
+    substrate/.style={
+        rectangle,
+        rounded corners=6pt,
+        draw=brown!60!black,
+        thick,
+        fill=brown!10,
+        minimum width=13.4cm,
+        minimum height=1.2cm,
+        font=\scriptsize\bfseries,
         align=center
     },
     actor/.style={
@@ -35,63 +47,61 @@
     }
 ]
 
-% ---- The system under study (centre) ----
-\node[sysbox] (sys) at (0,0) {DriveBy + XSDLC\\{\small\itshape specification-driven validation}\\{\small\itshape and quality-gated delivery}};
+% ---- The system under study: four constituent components inside one boundary ----
+\node[syscomp] (cli)      at (-4.9,0.6)  {DriveBy CLI\\{\tiny\itshape validation engine}};
+\node[syscomp] (xsdlc)    at (-1.7,0.6)  {XSDLC\\Composition\\{\tiny\itshape pipeline generator}};
+\node[syscomp] (gates)    at ( 1.5,0.6)  {Generated Gate\\Infrastructure\\{\tiny\itshape Events, Workflows, Ingress}};
+\node[syscomp] (promoter) at ( 4.7,0.6)  {GitOps\\Promoter\\{\tiny\itshape promotion controller}};
 
-% ---- External actors / systems around the boundary ----
-% North: developer, CI
-\node[actor=teal]   (dev)     at (-4,2.6) {API\\Developer};
-\node[actor=teal]   (ci)      at ( 4,2.6) {Application CI\\(GitHub Actions)};
+\node[font=\scriptsize\bfseries, blue!50!black] at (0,1.55) {The System: specification-driven validation and quality-gated delivery};
 
-% West: target API and its OpenAPI spec
-\node[actor=violet] (api)     at (-7,0)   {Target API\\(under test)};
-\node[actor=violet] (spec)    at (-7,-2)  {OpenAPI\\Specification};
-
-% East: ArgoCD, Promoter, GitOps repo
-\node[actor=orange] (argocd)  at ( 7,1)   {ArgoCD};
-\node[actor=orange] (promoter)at ( 7,-1)  {GitOps\\Promoter};
-\node[actor=orange] (gitops)  at ( 7,-2.6){GitOps\\Repository};
-
-% South: Crossplane control plane and operator
-\node[actor=brown]  (xplane)  at (-4,-2.6){Crossplane\\Control Plane};
-\node[actor=brown]  (operator)at ( 0,-2.6){Platform\\Operator};
-
-% North-east: the audience for the validation report
-\node[actor=gray]   (report)  at ( 0,3.5) {Validation\\Report (JSON, exit code)};
-
-% ---- Flows (label on every edge — what is exchanged) ----
-\draw[flow] (dev.south)     -- node[right]{commits, CRs} (sys.north west);
-\draw[flow] (ci.south)      -- node[left]{triggers}     (sys.north east);
-\draw[flow] (sys.north)     -- node[right]{produces}    (report.south);
-
-\draw[flow] (spec.east)     -- node[above]{spec URL}    (sys.west);
-\draw[flow] (sys.west)      -- node[below]{HTTP probes}    (api.east);
-
-\draw[flow] (sys.east)      -- node[above]{Application\\manifests} (argocd.west);
-\draw[flow] (promoter.west) -- node[above]{commit\\status} (sys.east);
-\draw[flow] (sys.south east)-- node[right]{PRs, branches}(gitops.north);
-
-\draw[flow] (sys.south west)-- node[left] {XRD, composition,\\WorkflowTemplates} (xplane.north);
-\draw[flow] (operator.north)-- node[right]{installs / inspects} (sys.south);
-
-% ---- System-boundary band ----
+% ---- System boundary (encloses all four components) ----
 \begin{scope}[on background layer]
-    \node[draw=blue!30, dashed, rounded corners=10pt, fit=(sys), inner sep=4pt] (boundary) {};
+    \node[draw=blue!40, dashed, thick, rounded corners=10pt,
+          fit=(cli)(xsdlc)(gates)(promoter), inner xsep=10pt,
+          inner ysep=10pt, yshift=14pt, fill=blue!2] (boundary) {};
 \end{scope}
 
+% ---- Infrastructure substrate the system runs on ----
+\node[substrate] (substrate) at (0,-1.9)
+    {Infrastructure substrate: Kubernetes + Crossplane control plane
+     \quad{\tiny\itshape (+ inherited platform services: ArgoCD, Argo Events/Workflows engines, Traefik, cert-manager)}};
+\draw[flow, <->] (boundary.south) -- node[right]{declares desired state /\\reconciles \& hosts} (substrate.north);
+
+% ---- External actors / systems ----
+\node[actor=teal]   (dev)      at (-6.4,4.2) {API\\Developer};
+\node[actor=teal]   (operator) at ( 6.4,4.2) {Platform\\Operator};
+\node[actor=violet] (spec)     at (-9.0,1.6) {OpenAPI\\Specification};
+\node[actor=violet] (api)      at (-9.0,-0.6){Target API\\(under test)};
+\node[actor=orange] (github)   at ( 9.6,1.0) {GitHub\\{\tiny software repo + CI,}\\{\tiny GitOps repository}};
+\node[actor=gray]   (report)   at ( 0,4.6)   {Validation Report\\(JSON, exit code, commit status)};
+
+% ---- Flows (label on every edge — what is exchanged) ----
+\draw[flow] (dev.south)      -- node[left]{XSDLC CR,\\commits}        (boundary.150);
+\draw[flow] (operator.south) -- node[right]{installs /\\inspects}     (boundary.30);
+\draw[flow] (boundary.north) -- node[right]{produces}                 (report.south);
+
+\draw[flow] (spec.east)      -- node[above]{spec URL}                 (boundary.175);
+\draw[flow] (boundary.185)   -- node[below]{HTTP probes}              (api.east);
+
+\draw[flow] (boundary.10)    -- node[pos=0.35, above]{promotion PRs,\\branches} (github.165);
+\draw[flow] (github.195)     -- node[pos=0.25, below]{webhooks,\\dry manifests} (boundary.350);
+
 % ---- Legend (colour semantics) ----
-\node[font=\scriptsize\bfseries, anchor=west] at (-7,-4.6) {Legend};
-\begin{scope}[shift={(-7,-5.0)}]
+\node[font=\scriptsize\bfseries, anchor=west] at (-9.0,-3.4) {Legend};
+\begin{scope}[shift={(-9.0,-3.8)}]
   \fill[teal!10,draw=teal!60!black]   (0.0,0.0) rectangle (0.3,0.3);
-  \node[font=\tiny, anchor=west] at (0.4,0.15) {Human / CI actor};
-  \fill[violet!10,draw=violet!60!black] (3.0,0.0) rectangle (3.3,0.3);
-  \node[font=\tiny, anchor=west] at (3.4,0.15) {Target API \& its spec};
-  \fill[orange!10,draw=orange!60!black] (6.0,0.0) rectangle (6.3,0.3);
-  \node[font=\tiny, anchor=west] at (6.4,0.15) {GitOps delivery};
-  \fill[brown!10,draw=brown!60!black]  (9.0,0.0) rectangle (9.3,0.3);
-  \node[font=\tiny, anchor=west] at (9.4,0.15) {Cluster control};
-  \fill[gray!15,draw=gray!60!black]    (12.0,0.0) rectangle (12.3,0.3);
-  \node[font=\tiny, anchor=west] at (12.4,0.15) {Output};
+  \node[font=\tiny, anchor=west] at (0.4,0.15) {Human actor};
+  \fill[violet!10,draw=violet!60!black] (2.8,0.0) rectangle (3.1,0.3);
+  \node[font=\tiny, anchor=west] at (3.2,0.15) {Target API \& its spec};
+  \fill[orange!10,draw=orange!60!black] (6.4,0.0) rectangle (6.7,0.3);
+  \node[font=\tiny, anchor=west] at (6.8,0.15) {External repositories};
+  \fill[blue!8,draw=blue!50!black]  (9.9,0.0) rectangle (10.2,0.3);
+  \node[font=\tiny, anchor=west] at (10.3,0.15) {System component};
+  \fill[brown!10,draw=brown!60!black]  (13.0,0.0) rectangle (13.3,0.3);
+  \node[font=\tiny, anchor=west] at (13.4,0.15) {Substrate};
+  \fill[gray!15,draw=gray!60!black]    (15.6,0.0) rectangle (15.9,0.3);
+  \node[font=\tiny, anchor=west] at (16.0,0.15) {Output};
 \end{scope}
 
 \end{tikzpicture}

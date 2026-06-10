@@ -1,6 +1,9 @@
 % Human-in-the-Loop — Chapter 6
 % Modular environment pipeline: 3 configurable slots per environment
 % Shows how independent parameters compose different automation profiles
+% Updated 2026-06 (round-2 review, [268]): slot arrows were too thin/faint
+% (thick + black!40) after \resizebox to \textwidth; now line width=1.2pt
+% and black!70 so they remain visible after downscaling.
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     % Slot styles
@@ -80,9 +83,9 @@
 \node[auto slot]   (a3) at (7.8,2.0)  {Auto-merge};
 \node[fixed slot]  (a4) at (10.6,2.0) {Auto-sync};
 
-\draw[->,thick,black!40] (a1) -- (a2);
-\draw[->,thick,black!40] (a2) -- (a3);
-\draw[->,thick,black!40] (a3) -- (a4);
+\draw[->,line width=1.2pt,black!70] (a1) -- (a2);
+\draw[->,line width=1.2pt,black!70] (a2) -- (a3);
+\draw[->,line width=1.2pt,black!70] (a3) -- (a4);
 
 % === Environment template row 2: gate + auto ===
 \node[env label=teal] at (0.2,0.5) {Env$_2$};
@@ -91,9 +94,9 @@
 \node[auto slot]   (b3) at (7.8,0.5)  {Auto-merge};
 \node[fixed slot]  (b4) at (10.6,0.5) {Auto-sync};
 
-\draw[->,thick,black!40] (b1) -- (b2);
-\draw[->,thick,black!40] (b2) -- (b3);
-\draw[->,thick,black!40] (b3) -- (b4);
+\draw[->,line width=1.2pt,black!70] (b1) -- (b2);
+\draw[->,line width=1.2pt,black!70] (b2) -- (b3);
+\draw[->,line width=1.2pt,black!70] (b3) -- (b4);
 
 % === Environment template row 3: gate + human approval ===
 \node[env label=red] at (0.2,-1.0) {Env$_N$};
@@ -102,9 +105,9 @@
 \node[human slot]  (c3) at (7.8,-1.0) {Manual\\approval};
 \node[fixed slot]  (c4) at (10.6,-1.0) {Auto-sync};
 
-\draw[->,thick,black!40] (c1) -- (c2);
-\draw[->,thick,black!40] (c2) -- (c3);
-\draw[->,thick,black!40] (c3) -- (c4);
+\draw[->,line width=1.2pt,black!70] (c1) -- (c2);
+\draw[->,line width=1.2pt,black!70] (c2) -- (c3);
+\draw[->,line width=1.2pt,black!70] (c3) -- (c4);
 
 % Row backgrounds
 \begin{scope}[on background layer]

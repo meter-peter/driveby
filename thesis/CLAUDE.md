@@ -14,6 +14,7 @@ thesis/
     01-introduction.tex
     02-related-work.tex
     03-methodology-ddt.tex
+    04-system-architecture.tex
     04-cli-architecture.tex
     05-kubernetes-architecture.tex
     06-gitops-pipeline.tex
@@ -51,7 +52,11 @@ thesis/
 - Axiom mapping: Completeness -> P001-P004, Determinism -> P006, Observability -> P005/P007/P008
 - Validation modes: minimal, strict, test-only, test-ready
 
-### Chapter 4 — CLI Architecture (`04-cli-architecture.tex`)
+### Chapter 4 — System Architecture (`04-system-architecture.tex`)
+**Expected sections**: System Context, The Three-Layer Model, From CLI Tool to Custom Resource, Chapter Roadmap
+**Key content**: Defines the system boundary (DriveBy CLI + XSDLC composition + generated gate infrastructure + GitOps Promoter) vs the infrastructure substrate (Kubernetes + Crossplane + inherited platform services). Holds `figures/system-context.tex` (`fig:system-context`), the three-layer model (`sec:three-layer-model`), the five-stage CLI→CR evolution (`sec:cli-to-cr-evolution`, migrated from Ch.5), and `tab:cli-to-cr-progression`. Created per supervisor headline #10 (chapter numbering shifts: CLI=5, K8s=6, GitOps=7, Eval=8, AI=9, Discussion=10, Conclusion=11; file names keep their historical numbers).
+
+### Chapter 5 — CLI Internal Architecture (`04-cli-architecture.tex`)
 **Expected sections**: Architecture Overview, Dependency Flow, Spec Abstraction Layer, Engine Design, Principle Checker Pattern, Report Generation, CLI Design
 **Source files to read**: `docs/CLI_USAGE.md`, `docs/architecture.md`
 **Code files to read**:

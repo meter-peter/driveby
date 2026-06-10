@@ -19,24 +19,26 @@
     extlabel/.style={font=\scriptsize\itshape, align=center}
 ]
 
-% Top: CLI
-\node[pkg=teal] (cli)        at (0,0)   {\texttt{cli}\\\mdseries\scriptsize\textnormal{root, validate, test commands}};
+% Layer colours match figures/dependency-flow.tex:
+%   blue = data layer, green!60!black = validation layer, orange = interface layer.
+% Top: CLI (interface layer)
+\node[pkg=orange] (cli)        at (0,0)   {\texttt{cli}\\\mdseries\scriptsize\textnormal{root, validate, test commands}};
 
-% Layer 2: orchestration
-\node[pkg=blue] (engine)     at (-4.0,-2.5) {\texttt{engine}\\\mdseries\scriptsize\textnormal{mode-based orchestration}};
-\node[pkg=blue] (testing)    at ( 0,-2.5)   {\texttt{testing}\\\mdseries\scriptsize\textnormal{functional, load runners}};
-\node[pkg=blue] (report)     at ( 4.0,-2.5) {\texttt{report}\\\mdseries\scriptsize\textnormal{JSON / Markdown}};
+% Interface layer: orchestration + output
+\node[pkg=orange] (engine)     at (-4.0,-2.5) {\texttt{engine}\\\mdseries\scriptsize\textnormal{mode-based orchestration}};
+\node[pkg=green!60!black] (testing)    at ( 0,-2.5)   {\texttt{testing}\\\mdseries\scriptsize\textnormal{functional, load runners}};
+\node[pkg=orange] (report)     at ( 4.0,-2.5) {\texttt{report}\\\mdseries\scriptsize\textnormal{JSON / Markdown}};
 
-% Layer 3: principles
-\node[pkg=orange] (principles) at (-4.0,-5.0)
+% Validation layer: principles
+\node[pkg=green!60!black] (principles) at (-4.0,-5.0)
   {\texttt{principles}\\\mdseries\scriptsize\textnormal{P001--P005, P008, P009 checkers}};
 
-% Layer 4: spec abstraction
-\node[pkg=violet] (spec)     at (0,-5.0)   {\texttt{spec}\\\mdseries\scriptsize\textnormal{APISpec interface, adapters}};
+% Data layer: spec abstraction
+\node[pkg=blue] (spec)     at (0,-5.0)   {\texttt{spec}\\\mdseries\scriptsize\textnormal{APISpec interface, adapters}};
 
-% Layer 5: foundation
-\node[pkg=brown]  (loader)   at (-4.0,-7.5)  {\texttt{loader}\\\mdseries\scriptsize\textnormal{file / URL loader}};
-\node[pkg=gray]   (types)    at ( 0,-7.5)   {\texttt{types}\\\mdseries\scriptsize\textnormal{value types, modes}};
+% Validation layer (loader) + data layer (types)
+\node[pkg=green!60!black]  (loader)   at (-4.0,-7.5)  {\texttt{loader}\\\mdseries\scriptsize\textnormal{file / URL loader}};
+\node[pkg=blue]   (types)    at ( 0,-7.5)   {\texttt{types}\\\mdseries\scriptsize\textnormal{value types, modes}};
 
 % Internal dependencies
 \draw[dep] (cli.south)         -- (engine.north);

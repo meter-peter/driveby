@@ -1,5 +1,10 @@
 % Provider Architecture — Chapter 5, Section 5.3.4
 % Updated 2026-05 (round-1 review): added colour-semantics legend per [338].
+% Updated 2026-06 (round-2 review, [222]): arrows inside the two provider
+% resource groups were clipped (node gap was smaller than the arrowhead) and
+% the provider→resource arrow crossed the group label. Resources are now
+% spaced 0.9cm apart, every arrow is anchored on node borders, and each
+% provider arrow ends on the group box border with the label inside the box.
 % Colours encode the *control plane* a resource targets (blue = Kubernetes
 % API, orange = GitHub API, violet = thesis-built composition layer).
 % Shows: XSDLC CR → Composition → provider-kubernetes + provider-upjet-github
@@ -55,65 +60,71 @@
 % Middle: Composition + functions
 \node[comp, draw=teal!70!black, fill=teal!12] (composition) at (4.5,-1.8) {Composition Pipeline\\go-templating $\rightarrow$ auto-ready};
 
-\draw[->,thick,violet!60!black] (xsdlc) -- node[right,font=\scriptsize] {spec} (composition);
+\draw[->,thick,violet!60!black] (xsdlc.south) -- node[right,font=\scriptsize] {spec} (composition.north);
 
 % Left branch: provider-kubernetes
 \node[provider=blue] (pk) at (1.2,-3.6) {\textbf{provider-kubernetes}\\v0.14.1};
-\node[grouplabel=blue] at (1.2,-4.5) {In-Cluster Resources};
 
-\node[resource=blue] (sa)     at (1.2,-5.2) {ServiceAccount, RBAC};
-\node[resource=blue] (events) at (1.2,-5.9) {EventBus, EventSource, Sensor};
-\node[resource=blue] (wf)     at (1.2,-6.6) {WorkflowTemplate, Ingress};
-\node[resource=blue] (promo)  at (1.2,-7.3) {PromotionStrategy, ArgoCD Apps};
+% Group label sits INSIDE the group box (top), so the provider arrow
+% ends cleanly on the box border without crossing any text.
+\node[grouplabel=blue] (pklabel) at (1.2,-4.85) {In-Cluster Resources};
+
+\node[resource=blue] (sa)     at (1.2,-5.45) {ServiceAccount, RBAC};
+\node[resource=blue] (events) at (1.2,-6.35) {EventBus, EventSource, Sensor};
+\node[resource=blue] (wf)     at (1.2,-7.25) {WorkflowTemplate, Ingress};
+\node[resource=blue] (promo)  at (1.2,-8.15) {PromotionStrategy, ArgoCD Apps};
 
 % Right branch: provider-upjet-github
 \node[provider=orange] (pg) at (7.8,-3.6) {\textbf{provider-upjet-github}\\v0.18.0};
-\node[grouplabel=orange] at (7.8,-4.5) {GitHub API Resources};
+\node[grouplabel=orange] (pglabel) at (7.8,-4.85) {GitHub API Resources};
 
-\node[resource=orange] (branches) at (7.8,-5.2) {Branch (env + env-next)};
-\node[resource=orange] (files)    at (7.8,-5.9) {RepositoryFile (workflows)};
-\node[resource=orange] (protect)  at (7.8,-6.6) {BranchProtection};
+\node[resource=orange] (branches) at (7.8,-5.45) {Branch (env + env-next)};
+\node[resource=orange] (files)    at (7.8,-6.35) {RepositoryFile (workflows)};
+\node[resource=orange] (protect)  at (7.8,-7.25) {BranchProtection};
 
-% Arrows from composition to providers
+% Background groups (named so arrows can anchor on their borders)
+\begin{scope}[on background layer]
+    \node[group=blue, fit={(pklabel) ($(sa.north west)+(-0.3,0.1)$) ($(promo.south east)+(0.3,-0.3)$)}] (pkgrp) {};
+    \node[group=orange, fit={(pglabel) ($(branches.north west)+(-0.3,0.1)$) ($(protect.south east)+(0.3,-0.3)$)}] (pggrp) {};
+\end{scope}
+
+% Arrows from composition to providers (anchored on node borders)
 \draw[->,thick,blue!50!black] (composition.south) -- ++(0,-0.4) -| (pk.north);
 \draw[->,thick,orange!50!black] (composition.south) -- ++(0,-0.4) -| (pg.north);
 
-% Provider to resources
-\draw[->,thick,blue!40!black] (pk) -- (sa);
-\draw[->,thick,blue!40!black] (sa) -- (events);
-\draw[->,thick,blue!40!black] (events) -- (wf);
-\draw[->,thick,blue!40!black] (wf) -- (promo);
+% Provider to resource group (ends on group box border, full line visible)
+\draw[->,thick,blue!40!black] (pk.south) -- (pkgrp.north);
+\draw[->,thick,orange!40!black] (pg.south) -- (pggrp.north);
 
-\draw[->,thick,orange!40!black] (pg) -- (branches);
-\draw[->,thick,orange!40!black] (branches) -- (files);
-\draw[->,thick,orange!40!black] (files) -- (protect);
+% Chained arrows inside the groups: 0.3cm gap between node borders so the
+% 2.5mm arrowheads and a visible line segment always render completely.
+\draw[->,thick,blue!40!black] (sa.south) -- (events.north);
+\draw[->,thick,blue!40!black] (events.south) -- (wf.north);
+\draw[->,thick,blue!40!black] (wf.south) -- (promo.north);
 
-% Background groups
-\begin{scope}[on background layer]
-    \node[group=blue, fit={($(sa.north west)+(-0.3,0.3)$) ($(promo.south east)+(0.3,-0.3)$)}] {};
-    \node[group=orange, fit={($(branches.north west)+(-0.3,0.3)$) ($(protect.south east)+(0.3,-0.3)$)}] {};
-\end{scope}
+\draw[->,thick,orange!40!black] (branches.south) -- (files.north);
+\draw[->,thick,orange!40!black] (files.south) -- (protect.north);
 
 % Control plane labels
-\node[font=\tiny\itshape,text=blue!60!black] at (1.2,-8.0) {Kubernetes control plane};
-\node[font=\tiny\itshape,text=orange!60!black] at (7.8,-7.3) {GitHub control plane};
+\node[font=\tiny\itshape,text=blue!60!black] at (1.2,-9.3) {Kubernetes control plane};
+\node[font=\tiny\itshape,text=orange!60!black] at (7.8,-8.4) {GitHub control plane};
 
 % ==================== Legend (colour semantics) ====================
 % Per comment [338]: indicate what the colours mean.
 % Legend rows are stacked vertically (one entry per row) to avoid label
 % overlap when the figure is resized to text width.
-\node[anchor=west, font=\scriptsize\bfseries] at (-1.2,-9.0) {Legend (colour = target control plane)};
+\node[anchor=west, font=\scriptsize\bfseries] at (-1.2,-9.9) {Legend (colour = target control plane)};
 
-\fill[violet!15,draw=violet!70!black] (-1.2,-9.55) rectangle (-0.85,-9.30);
-\node[anchor=west, font=\tiny] at (-0.8,-9.425) {thesis-built (XSDLC CR \& composition layer)};
+\fill[violet!15,draw=violet!70!black] (-1.2,-10.45) rectangle (-0.85,-10.20);
+\node[anchor=west, font=\tiny] at (-0.8,-10.325) {thesis-built (XSDLC CR \& composition layer)};
 
-\fill[teal!12,draw=teal!70!black] (-1.2,-9.95) rectangle (-0.85,-9.70);
-\node[anchor=west, font=\tiny] at (-0.8,-9.825) {composition pipeline (Crossplane functions)};
+\fill[teal!12,draw=teal!70!black] (-1.2,-10.85) rectangle (-0.85,-10.60);
+\node[anchor=west, font=\tiny] at (-0.8,-10.725) {composition pipeline (Crossplane functions)};
 
-\fill[blue!12,draw=blue!60!black] (-1.2,-10.35) rectangle (-0.85,-10.10);
-\node[anchor=west, font=\tiny] at (-0.8,-10.225) {provider-kubernetes \textemdash{} in-cluster resources};
+\fill[blue!12,draw=blue!60!black] (-1.2,-11.25) rectangle (-0.85,-11.00);
+\node[anchor=west, font=\tiny] at (-0.8,-11.125) {provider-kubernetes \textemdash{} in-cluster resources};
 
-\fill[orange!12,draw=orange!60!black] (-1.2,-10.75) rectangle (-0.85,-10.50);
-\node[anchor=west, font=\tiny] at (-0.8,-10.625) {provider-upjet-github \textemdash{} GitHub API resources};
+\fill[orange!12,draw=orange!60!black] (-1.2,-11.65) rectangle (-0.85,-11.40);
+\node[anchor=west, font=\tiny] at (-0.8,-11.525) {provider-upjet-github \textemdash{} GitHub API resources};
 
 \end{tikzpicture}

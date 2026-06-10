@@ -44,18 +44,21 @@
 \node[detail=teal] (d1d) at (4.2,-1.2) {Apply XSDLC CR\\45--50 children\\generated\\READY=True};
 \draw[->,thick,teal!40!black] (d1) -- (d1d);
 
-% Reconciliation loop under Day 1
-\draw[loop=teal] (d1d.south) -- ++(0,-0.5) -- ++(1.2,0) -- ++(0,1.6) -- ++(-1.2,0);
-\node[font=\tiny\itshape,text=teal!60!black] at (5.5,-2.0) {reconcile};
+% Reconciliation loop under Day 1.
+% Round-2 review [241]: the loop starts AND ends on the rectangle boundary
+% (both endpoints lie on the south border), and the "reconcile" label sits
+% below the loop so the dashed arrow no longer crosses it.
+\draw[loop=teal] ($(d1d.south)+(0.6,0)$) -- ++(0,-0.45) -- ++(-1.2,0) -- ($(d1d.south)+(-0.6,0)$);
+\node[font=\tiny\itshape,text=teal!60!black] at ($(d1d.south)+(0,-0.7)$) {reconcile};
 
 % Day 2
 \node[day=orange] (d2) at (7.9,1.2) {Day 2\\Operate};
-\node[detail=orange] (d2d) at (7.9,-1.2) {Drift detection\\Self-healing\\Deleted Sensor\\$\rightarrow$ re-created};
+\node[detail=orange] (d2d) at (7.9,-1.2) {Drift detection\\Self-healing\\e.g.\ deleted Sensor\\$\rightarrow$ re-created};
 \draw[->,thick,orange!40!black] (d2) -- (d2d);
 
-% Reconciliation loop under Day 2
-\draw[loop=orange] (d2d.south) -- ++(0,-0.5) -- ++(1.2,0) -- ++(0,1.6) -- ++(-1.2,0);
-\node[font=\tiny\itshape,text=orange!60!black] at (9.2,-2.0) {reconcile};
+% Reconciliation loop under Day 2 (same boundary-anchored routing)
+\draw[loop=orange] ($(d2d.south)+(0.6,0)$) -- ++(0,-0.45) -- ++(-1.2,0) -- ($(d2d.south)+(-0.6,0)$);
+\node[font=\tiny\itshape,text=orange!60!black] at ($(d2d.south)+(0,-0.7)$) {reconcile};
 
 % Day N
 \node[day=red!70!black] (dn) at (11.6,1.2) {Day N\\Update / Delete};
@@ -67,8 +70,9 @@
 \draw[->,thick,gray!50] (d1) -- (d2);
 \draw[->,thick,gray!50] (d2) -- (dn);
 
-% Annotations
-\node[font=\tiny\itshape,text=blue!50!black] at (0.5,-2.5) {No XSDLC instances};
-\node[font=\tiny\itshape,text=teal!50!black] at (4.2,-2.5) {Platform accepts CRs};
+% Annotations (positioned relative to the detail boxes, below the
+% reconcile loops and their labels so nothing overlaps)
+\node[font=\tiny\itshape,text=blue!50!black] at ($(d0d.south)+(0,-1.05)$) {No XSDLC instances};
+\node[font=\tiny\itshape,text=teal!50!black] at ($(d1d.south)+(0,-1.05)$) {Platform accepts CRs};
 
 \end{tikzpicture}

@@ -1,22 +1,11 @@
-\chapter{The DriveBy System}
+\chapter{The DriveBy CLI: Internal Architecture}
 \label{ch:architecture}
 
-Chapter~\ref{ch:methodology} defined Specification-Driven Testing as a two-layer conceptual framework: three axioms and nine validation principles. This chapter describes how the DriveBy command-line tool implements those definitions. The presentation follows the data flow through the system: from specification loading, through normalization and principle evaluation, to report generation and CLI output. Each section explains the design decisions behind a specific subsystem and references the source code that realizes them.
+Chapter~\ref{ch:system-architecture} situated the DriveBy CLI within the overall architecture as the validation-logic layer; this chapter descends into that component and describes how it implements the SDT definitions of Chapter~\ref{ch:methodology}. The presentation follows the data flow through the tool---specification loading, normalization, principle evaluation, report generation, CLI output---and each section explains the design decisions behind a subsystem and references the source code that realizes them.
 
-The scope of this chapter is the DriveBy binary itself---its internal packages, interfaces, and data structures. The Kubernetes infrastructure that hosts DriveBy as a quality gate is presented in Chapter~\ref{ch:kubernetes}, and the GitOps pipelines that trigger and consume its output are described in Chapter~\ref{ch:workflow}.
+The scope of this chapter is the DriveBy binary itself---its internal packages, interfaces, and data structures; the Kubernetes infrastructure that hosts DriveBy as a quality gate is presented in Chapter~\ref{ch:kubernetes}, and the GitOps pipelines that trigger and consume its output in Chapter~\ref{ch:workflow}.
 
-Before describing the internal structure of the system, Figure~\ref{fig:system-context} situates DriveBy within its environment. The system under study is the DriveBy CLI together with the XSDLC composition that wraps it; the context shows the external actors and systems that interact with this boundary---the API developer, the application's CI, the OpenAPI specification and target API, ArgoCD, the GitOps Promoter, the GitOps repository, the Crossplane control plane, and the platform operator---together with the structured validation report that is the system's primary output.
-
-\begin{figure}[htbp]
-\centering
-\resizebox{\textwidth}{!}{%
-\input{figures/system-context.tex}%
-}
-\caption{System context. The dashed boundary encloses the system under study (DriveBy CLI plus XSDLC composition). External actors and systems are coloured by category (legend at lower-left). Edge labels indicate the artifact or signal exchanged across the boundary.}
-\label{fig:system-context}
-\end{figure}
-
-Figure~\ref{fig:component-diagram} then opens that boundary to expose the major internal Go packages of the CLI and their dependencies, and Figure~\ref{fig:class-diagram} (Section~\ref{sec:principle-checker-pattern}) shows the two central interfaces---\texttt{APISpec} and \texttt{PrincipleChecker}---together with their concrete realisations.
+Where Figure~\ref{fig:system-context} (Chapter~\ref{ch:system-architecture}) drew the boundary around the whole delivery system, Figures~\ref{fig:component-diagram} and~\ref{fig:class-diagram} open the DriveBy binary to expose its internal packages and central interfaces.
 
 % ============================================================================
 \section{Architecture Overview}
@@ -35,16 +24,14 @@ The DriveBy architecture is shaped by five design goals derived from the SDT axi
 
     \item \textbf{Extensibility.} Adding a new validation principle must not require modifying existing checkers or the engine. The architecture must support open extension without closed modification.
 
-    \item \textbf{Determinism by construction.} Static validation must be free of side effects, randomness, and environment-dependent behavior. The engine must produce identical reports given identical inputs.
+    \item \textbf{Determinism by construction.} Static validation must be free of side effects, randomness, and environment-dependent behavior, producing identical reports for identical inputs. The same discipline extends to dynamic validation: runtime test cases are derived deterministically from the specification, never randomly (Section~\ref{sec:runtime-testing}).
 
     \item \textbf{Machine-readable output.} All validation output must be structured JSON suitable for consumption by CI/CD pipelines, quality dashboards, and downstream tooling.
 
     \item \textbf{Separation of concerns.} Type definitions, specification parsing, validation logic, runtime testing, report generation, and CLI presentation must reside in distinct packages with unidirectional dependencies.
 \end{enumerate}
 
-These goals map directly to the SDT axioms. Version agnosticism enables Completeness (the same checks apply regardless of specification version). Determinism by construction enforces the Axiom of Determinism. Machine-readable output satisfies Observability.
-
-The implementation draws on two classical design patterns~\cite{gof}. The \textit{Adapter pattern} provides version agnosticism: each specification format is wrapped by an adapter that exposes a common interface. The \textit{Strategy pattern} provides extensibility: each principle checker is an interchangeable strategy that the engine selects based on validation mode.
+Three of these goals map directly to the SDT axioms: version agnosticism enables Completeness (the same checks apply regardless of specification version), determinism by construction enforces Determinism, and machine-readable output satisfies Observability. The remaining two protect the mapping itself: extensibility lets new principles be added without perturbing the deterministic behaviour of existing checkers, and separation of concerns ensures each axiom's guarantee is enforced---and auditable---in exactly one place. Two classical design patterns~\cite{gof} realise the first two goals: the \textit{Adapter pattern} for version agnosticism (Section~\ref{sec:spec-abstraction}) and the \textit{Strategy pattern} for extensibility (Section~\ref{sec:principle-checker}).
 
 % ----------------------------------------------------------------------------
 \subsection{Module and Dependency Structure}
@@ -59,7 +46,7 @@ types <- spec <- loader <- principles <- testing <- engine <- cli
 \end{verbatim}
 }
 
-No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualises this strict left-to-right dependency chain at the package level. Figure~\ref{fig:component-diagram} adds the external interfaces (the OpenAPI input, the target API under HTTP probing, and the structured report output) and groups packages into architectural layers.
+No package may import a package to its left. The \texttt{types} package has zero internal dependencies, ensuring that data structures can be shared across all layers without introducing cycles. Figure~\ref{fig:dependency-flow} visualises this chain for the packages on the critical validation path; Figure~\ref{fig:component-diagram} adds the off-chain \texttt{report} package and the external interfaces.
 
 \begin{figure}[htbp]
 \centering
@@ -71,11 +58,11 @@ No package may import a package to its left. The \texttt{types} package has zero
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{\input{figures/component-diagram.tex}}
-\caption{Component diagram of the DriveBy CLI. Solid arrows are internal package dependencies; dashed violet arrows cross the system boundary to external interfaces. Colour denotes architectural layer (entry point, orchestration, principles, spec abstraction, foundation).}
+\caption{Component diagram of the DriveBy CLI. Solid arrows are internal package dependencies; dashed violet arrows cross the system boundary to external interfaces. Colour denotes architectural layer (data, validation, interface), matching Figure~\ref{fig:dependency-flow}; the off-chain \texttt{report} package is assigned to the interface layer. The cross-cutting packages \texttt{util}, \texttt{github}, and \texttt{logger} (Table~\ref{tab:package-map}) are omitted.}
 \label{fig:component-diagram}
 \end{figure}
 
-Table~\ref{tab:package-map} summarizes each package's responsibility and size.
+Table~\ref{tab:package-map} summarizes each package's responsibility and size; the four verbs in the \texttt{engine} row name the pipeline steps detailed in Section~\ref{subsec:validation-pipeline}, and the \emph{registry} in the \texttt{principles} row is the checker catalogue of Section~\ref{subsec:registry}.
 
 \begin{table}[htbp]
 \centering
@@ -89,7 +76,7 @@ Table~\ref{tab:package-map} summarizes each package's responsibility and size.
 \texttt{types}      & Value types, report model, exit codes, config     & 655 \\
 \texttt{spec}       & \texttt{APISpec} interface + version-specific adapters     & 831 \\
 \texttt{loader}     & Specification loading, version detection, preprocessing & 322 \\
-\texttt{principles} & Principle checkers (P001--P008), registry        & 1{,}690 \\
+\texttt{principles} & Principle checkers (P001--P005, P008, P009), registry & 1{,}690 \\
 \texttt{testing}    & Runtime functional and performance testing        & 860 \\
 \texttt{engine}     & Orchestrator: load, select, evaluate, aggregate   & 117 \\
 \texttt{report}     & JSON and Markdown report generation               & 670 \\
@@ -101,14 +88,12 @@ Table~\ref{tab:package-map} summarizes each package's responsibility and size.
 \end{tabular}
 \end{table}
 
-The dependency flow enforces a clean separation of concerns. The \texttt{types} package defines \textit{what} validation produces. The \texttt{spec} package defines \textit{what} validation consumes. The \texttt{principles} package defines \textit{how} validation runs. The \texttt{engine} package \textit{orchestrates} the process. The \texttt{cli} package \textit{exposes} it to users.
-
 % ============================================================================
 \section{The Type System}
 \label{sec:type-system}
 % ============================================================================
 
-The \texttt{types} package defines all value types shared across the framework. It has zero internal imports, making it the foundation layer that all other packages depend on.
+The \texttt{types} package defines all value types shared across the framework---the zero-dependency foundation layer.
 
 % ----------------------------------------------------------------------------
 \subsection{Value Types}
@@ -117,7 +102,7 @@ The \texttt{types} package defines all value types shared across the framework. 
 
 Two core enumerations govern the framework's behavior: \texttt{ValidationMode} controls which principles are evaluated, and the exit code constants control the CLI's return value.
 
-\begin{lstlisting}[language=Go,caption={ValidationMode and exit code definitions (\texttt{types/modes.go}).},label={lst:modes}]
+\begin{lstlisting}[language=Go,float=htbp,caption={ValidationMode and exit code definitions (\texttt{types/modes.go}).},label={lst:modes}]
 type ValidationMode string
 
 const (
@@ -135,7 +120,7 @@ const (
 )
 \end{lstlisting}
 
-The four validation modes correspond directly to the modes defined in Section~\ref{sec:validation-modes} of Chapter~\ref{ch:methodology}. The exit code protocol enables CI/CD pipelines to distinguish between validation failures (exit~1, actionable) and execution errors (exit~2, infrastructure issues), a distinction that is critical for quality gate decisions.
+The four validation modes correspond directly to the modes defined in Section~\ref{sec:validation-modes} of Chapter~\ref{ch:methodology}; the exit code protocol and its operational rationale are detailed in Section~\ref{subsec:exit-codes}.
 
 The \texttt{types} package also defines \texttt{TestMode} (none, functional, performance, all) and \texttt{TestStatus} (passed, failed, warning, skipped, incomplete), which govern the runtime testing subsystem described in Section~\ref{sec:runtime-testing}.
 
@@ -144,9 +129,9 @@ The \texttt{types} package also defines \texttt{TestMode} (none, functional, per
 \label{subsec:report-model}
 % ----------------------------------------------------------------------------
 
-The \texttt{ValidationReport} struct is the central output artifact of every DriveBy run. It aggregates per-principle results, summary statistics, and optional test results into a single JSON-serializable structure.
+The \texttt{ValidationReport} struct is the central output artifact of every DriveBy run, aggregating per-principle results, summary statistics, and optional test results into one JSON-serializable structure.
 
-\begin{lstlisting}[language=Go,caption={ValidationReport and PrincipleResult (\texttt{types/report.go}).},label={lst:report}]
+\begin{lstlisting}[language=Go,float=htbp,caption={ValidationReport and PrincipleResult (\texttt{types/report.go}).},label={lst:report}]
 type ValidationReport struct {
     Status       string            `json:"status"`
     ExitCode     int               `json:"exit_code"`
@@ -171,23 +156,23 @@ type PrincipleResult struct {
 }
 \end{lstlisting}
 
-The \texttt{PrincipleResult} struct captures not only the pass/fail status but also a human-readable message, structured details (type-dependent per principle), a suggested remediation, and the impact on downstream testing. The \texttt{TestImpact} field connects static validation to runtime testing: when a critical principle fails, the impact assessment indicates whether functional or performance tests can proceed and which endpoints are affected.
+The \texttt{PrincipleResult} struct captures the pass/fail status, a human-readable message, structured details, a suggested remediation, and the impact on downstream testing. The \texttt{TestImpact} field connects static validation to runtime testing, and its gating semantics are deliberate: when a critical principle fails, functional and performance tests do \emph{not} proceed for the affected endpoints, since failures against a contract already known to be unreliable cannot be attributed to the implementation; the assessment tells the pipeline which tests to skip and why.
 
-The \texttt{Principle} struct itself carries metadata---ID, name, description, category, severity, tags, and the list of checks---enabling the report to be self-documenting. A consumer of the JSON report can understand what was validated without consulting external documentation.
+The \texttt{Principle} struct itself carries metadata---ID, name, description, category, severity, tags, and the list of checks---making the report self-documenting.
 
 % ============================================================================
 \section{The Specification Abstraction Layer}
 \label{sec:spec-abstraction}
 % ============================================================================
 
-The specification abstraction layer is the architectural centerpiece of DriveBy. It decouples all validation logic from the concrete specification format, enabling version-agnostic principle checking.
+The specification abstraction layer is the architectural centerpiece of DriveBy: it decouples all validation logic from the concrete specification format.
 
 % ----------------------------------------------------------------------------
 \subsection{The APISpec Interface}
 \label{subsec:apispec-interface}
 % ----------------------------------------------------------------------------
 
-The \texttt{APISpec} interface defines a version-agnostic view over any API specification. All principle checkers and the engine receive an \texttt{APISpec} value; they never interact with the raw kin-openapi~\cite{kin-openapi} types (\texttt{*openapi3.T}, \texttt{*openapi2.T}).
+The \texttt{APISpec} interface defines a version-agnostic view over any API specification. All principle checkers and the engine receive an \texttt{APISpec} value; they never interact with the raw types (\texttt{*openapi3.T}, \texttt{*openapi2.T}) of kin-openapi~\cite{kin-openapi}, the third-party parser library underlying the implementation.
 
 \begin{lstlisting}[language=Go,caption={The APISpec interface (\texttt{spec/spec.go}).},label={lst:apispec}]
 type APISpec interface {
@@ -201,16 +186,16 @@ type APISpec interface {
 }
 \end{lstlisting}
 
-The interface is intentionally minimal. It exposes only the concepts that DriveBy's validators need: metadata (\texttt{Info}), the operation tree (\texttt{Paths}), reusable definitions (\texttt{Components}), global security requirements (\texttt{Security}), and a structural validation hook (\texttt{ValidateStructure}). The \texttt{Type} and \texttt{RawVersion} methods allow callers to inspect the specification flavour when necessary (e.g., P001's null type check), but principle checkers are strongly discouraged from branching on version.
+The interface is intentionally minimal, exposing only what DriveBy's validators need: metadata (\texttt{Info}), the operation tree (\texttt{Paths}), reusable definitions (\texttt{Components}), global security requirements (\texttt{Security}), and a structural validation hook (\texttt{ValidateStructure}). \texttt{Type} returns DriveBy's own \texttt{SpecType} enumeration---not a kin-openapi document type, which never crosses the interface boundary---and \texttt{RawVersion} returns the verbatim version string; both let callers inspect the flavour when necessary (e.g., P001's null type check), though checkers are strongly discouraged from branching on version.
 
-This design realizes the Adapter pattern~\cite{gof}: each specification format provides its own adapter that translates native types into the normalized \texttt{APISpec} interface. Adding support for a new specification format (e.g., AsyncAPI) requires implementing the interface without modifying any existing checker.
+This design realizes the Adapter pattern~\cite{gof}: supporting a new format (e.g., AsyncAPI) means implementing the interface, with no change to any existing checker.
 
 % ----------------------------------------------------------------------------
 \subsection{Normalized Types}
 \label{subsec:normalized-types}
 % ----------------------------------------------------------------------------
 
-The \texttt{APISpec} interface returns normalized types that abstract away version-specific representation differences. Table~\ref{tab:normalized-types} lists the key types and their purpose.
+The \texttt{APISpec} interface returns normalized types that abstract away version-specific representation differences; Table~\ref{tab:normalized-types} lists the key types reached through the methods of Listing~\ref{lst:apispec}.
 
 \begin{table}[htbp]
 \centering
@@ -232,7 +217,7 @@ The \texttt{APISpec} interface returns normalized types that abstract away versi
 \end{tabular}
 \end{table}
 
-The \texttt{Schema} type deserves particular attention. It normalizes the three composition mechanisms (allOf, oneOf, anyOf) into slice fields, handles nullable semantics across OpenAPI versions, and recursively normalizes nested properties and array items. This recursive normalization ensures that principle checkers like P004 (Schema Definitions) can traverse the full schema tree without version-specific logic.
+The \texttt{Schema} type normalizes the three composition mechanisms (allOf, oneOf, anyOf) into slice fields, handles nullable semantics across OpenAPI versions, and recursively normalizes nested properties and array items, so checkers like P004 can traverse the full schema tree without version-specific logic.
 
 % ----------------------------------------------------------------------------
 \subsection{Version-Specific Adapters}
@@ -241,9 +226,9 @@ The \texttt{Schema} type deserves particular attention. It normalizes the three 
 
 Two adapters implement the \texttt{APISpec} interface: \texttt{openAPI3Spec} for OpenAPI~3.0.x and 3.1.0, and \texttt{swagger2Spec} for Swagger~2.0. Both are constructed by the loader (Section~\ref{sec:loading}) and wrap the kin-openapi library's~\cite{kin-openapi} native document types.
 
-The OpenAPI~3.x adapter (\texttt{openapi3.go}, 324~LOC) performs the bulk of the normalization work. Listing~\ref{lst:normalize-schema} shows an excerpt from the schema normalization function, which recursively translates a kin-openapi \texttt{*openapi3.Schema} into the normalized \texttt{spec.Schema}.
+The OpenAPI~3.x adapter (\texttt{openapi3.go}, 324~LOC) performs the bulk of the normalization work; Listing~\ref{lst:normalize-schema} excerpts the function that recursively translates a kin-openapi \texttt{*openapi3.Schema} into the normalized \texttt{spec.Schema}.
 
-\begin{lstlisting}[language=Go,caption={Schema normalization excerpt (\texttt{spec/openapi3.go}).},label={lst:normalize-schema}]
+\begin{lstlisting}[language=Go,float=htbp,caption={Schema normalization excerpt (\texttt{spec/openapi3.go}).},label={lst:normalize-schema}]
 func normalizeSchema(s *openapi3.Schema) *Schema {
     if s == nil { return nil }
     out := &Schema{
@@ -267,16 +252,14 @@ func normalizeSchema(s *openapi3.Schema) *Schema {
 }
 \end{lstlisting}
 
-The Swagger~2.0 adapter (\texttt{swagger2.go}, 293~LOC) performs analogous normalization but must account for Swagger-specific conventions: parameters with \texttt{in: body} are translated to \texttt{RequestBody}, security definitions map to \texttt{SecurityScheme}, and the single-host model is normalized to match the OpenAPI~3.x multi-server paradigm. The structural validation for Swagger~2.0 is implemented as a focused set of sanity checks rather than full schema validation, since kin-openapi does not provide a \texttt{Validate()} method for Swagger~2.0 documents.
+The Swagger~2.0 adapter (\texttt{swagger2.go}, 293~LOC) performs analogous normalization but must account for Swagger-specific conventions: \texttt{in: body} parameters become \texttt{RequestBody}, security definitions map to \texttt{SecurityScheme}, and the single-host model is normalized to the multi-server paradigm. Because kin-openapi provides no \texttt{Validate()} for Swagger~2.0, structural validation on this path is a focused set of sanity checks (version discriminator, mandatory \texttt{info.title} and \texttt{info.version}, at least one path) rather than the full Swagger~2.0 JSON Schema. Load-time validation is therefore knowingly partial: deeper structural defects pass loading but surface through the principle checkers, which operate on the normalized model and apply identically to both formats.
 
 % ----------------------------------------------------------------------------
 \subsection{Schema Composition Handling}
 \label{subsec:schema-composition}
 % ----------------------------------------------------------------------------
 
-OpenAPI specifications frequently use \texttt{allOf} to compose schemas---combining a base model with additional properties. Principle checkers that need a flat view of all properties (e.g., P004's required-field validation) would need to recursively merge \texttt{allOf} members, duplicating logic across checkers.
-
-The \texttt{FlattenAllOf} utility in \texttt{spec.go} centralizes this concern. It takes a \texttt{*Schema} with \texttt{allOf} members and returns a merged schema where all properties and required fields from all members are combined into a single level. If the parent schema has no \texttt{allOf}, it is returned unchanged. This utility is used by both the P004 checker and the functional testing subsystem (Section~\ref{sec:runtime-testing}) when generating example request bodies from composed schemas.
+OpenAPI specifications frequently use \texttt{allOf} to compose schemas. The \texttt{FlattenAllOf} utility in \texttt{spec.go} centralizes the recursive merge: it returns a schema where all properties and required fields from all \texttt{allOf} members are combined into a single level. It is used by both the P004 checker and the functional testing subsystem (Section~\ref{sec:runtime-testing}) when generating example request bodies from composed schemas, avoiding duplicated merge logic across checkers.
 
 % ============================================================================
 \section{Specification Loading and Preprocessing}
@@ -290,11 +273,9 @@ The \texttt{loader} package is responsible for loading API specifications from f
 \label{subsec:version-dispatch}
 % ----------------------------------------------------------------------------
 
-The loader accepts specifications from local files or HTTP URLs. The \texttt{LoadFromFileOrURL} method detects the source type by inspecting the path prefix (\texttt{http://} or \texttt{https://}) and delegates to file reading or HTTP fetching accordingly.
+The \texttt{LoadFromFileOrURL} method detects the source type by path prefix (\texttt{http://} or \texttt{https://}) and delegates to file reading or HTTP fetching. After obtaining the raw bytes, the loader performs version detection by unmarshalling into a generic \texttt{map[string]interface\{\}} and inspecting two discriminator fields:
 
-After obtaining the raw bytes, the loader performs version detection by unmarshalling into a generic \texttt{map[string]interface\{\}} and inspecting two discriminator fields:
-
-\begin{lstlisting}[language=Go,caption={Specification version detection (\texttt{loader/loader.go}).},label={lst:version-detect}]
+\begin{lstlisting}[language=Go,float=htbp,caption={Specification version detection (\texttt{loader/loader.go}).},label={lst:version-detect}]
 func (l *Loader) loadFromData(source string, data []byte) error {
     var raw map[string]interface{}
     if err := json.Unmarshal(data, &raw); err != nil {
@@ -310,18 +291,13 @@ func (l *Loader) loadFromData(source string, data []byte) error {
         l.doc = spec.NewOpenAPI3Spec(doc)
         return nil
     }
-    // Swagger 2.0: has "swagger" field with value "2.0"
-    if ver, ok := raw["swagger"].(string); ok && ver == "2.0" {
-        var doc openapi2.T
-        json.Unmarshal(data, &doc)
-        l.doc = spec.NewSwagger2Spec(&doc)
-        return nil
-    }
-    return fmt.Errorf("unsupported spec format: %s", source)
+    // Swagger 2.0 ("swagger" == "2.0"): analogous branch
+    // constructing spec.NewSwagger2Spec; else error.
+    ...
 }
 \end{lstlisting}
 
-This approach---unmarshal once into a generic map, inspect a discriminator field, then unmarshal again into the typed struct---avoids speculative parsing with multiple libraries. The preprocessing step (lines 7--9 in Listing~\ref{lst:version-detect}) is applied only to OpenAPI~3.x specifications and is described in the next section.
+This approach---unmarshal once into a generic map, inspect a discriminator field, then unmarshal again into the typed struct---avoids speculative parsing with multiple libraries. The preprocessing step is applied only to OpenAPI~3.x specifications and is described in the next section.
 
 % ----------------------------------------------------------------------------
 \subsection{Compatibility Preprocessing}
@@ -330,11 +306,11 @@ This approach---unmarshal once into a generic map, inspect a discriminator field
 
 The kin-openapi library~\cite{kin-openapi} provides comprehensive support for OpenAPI~3.0.x but has limitations with certain OpenAPI~3.1.0 constructs. DriveBy addresses this through two preprocessing transforms applied to the raw JSON before kin-openapi parses it.
 
-\textbf{PreprocessNullableAnyOf.} OpenAPI~3.1.0 represents nullable types as \texttt{anyOf: [\{type: X\}, \{type: null\}]}. The kin-openapi library rejects \texttt{type: null}, causing valid 3.1.0 specifications to fail loading. The preprocessor detects two-member \texttt{anyOf} arrays where one member is \texttt{\{type: null\}} and rewrites them to the OpenAPI~3.0.x equivalent: the concrete type with \texttt{nullable: true}. This transformation is applied recursively to all schema definitions in the document.
+\textbf{PreprocessNullableAnyOf.} OpenAPI~3.1.0 represents nullable types as \texttt{anyOf: [\{type: X\}, \{type: null\}]}, which kin-openapi rejects. The preprocessor recursively rewrites such two-member \texttt{anyOf} arrays to the OpenAPI~3.0.x equivalent: the concrete type with \texttt{nullable: true}.
 
 \textbf{PreprocessExclusiveMinMax.} OpenAPI~3.1.0 adopted JSON Schema 2020-12 semantics where \texttt{exclusiveMinimum} and \texttt{exclusiveMaximum} are numeric values. OpenAPI~3.0.x uses boolean values paired with \texttt{minimum}/\texttt{maximum}. The preprocessor converts numeric exclusive bounds to booleans when paired with their non-exclusive counterparts, and removes them otherwise.
 
-Both transforms operate on the raw \texttt{map[string]interface\{\}} before any typed parsing occurs. This ensures that the kin-openapi library receives a document it can parse, while preserving the semantic content of the original specification. The approach trades strict 3.1.0 fidelity for broad compatibility---a pragmatic choice given that kin-openapi is the most mature OpenAPI parser available for Go.
+Both transforms operate on the raw \texttt{map[string]interface\{\}} before any typed parsing, preserving the semantic content of the original specification. The approach trades strict 3.1.0 fidelity for broad compatibility---a pragmatic choice given that kin-openapi is the most mature OpenAPI parser available for Go.
 
 % ============================================================================
 \section{The Principle Checker Pattern}
@@ -342,12 +318,12 @@ Both transforms operate on the raw \texttt{map[string]interface\{\}} before any 
 \label{sec:principle-checker-pattern}
 % ============================================================================
 
-The two design abstractions introduced so far---the \texttt{APISpec} interface (Section~\ref{sec:spec-abstraction}) and the \texttt{PrincipleChecker} interface defined below---are summarised together in Figure~\ref{fig:class-diagram}. The figure shows: the two interfaces with their methods; the two version-specific adapters that realise \texttt{APISpec} (\texttt{openAPI3Spec} and \texttt{swagger2Spec}); the seven implemented and two planned concrete principle checkers that realise \texttt{PrincipleChecker}; and how the \texttt{Engine} consumes both interfaces to drive validation.
+Figure~\ref{fig:class-diagram} summarises the two design abstractions of this chapter---the \texttt{APISpec} interface (Section~\ref{sec:spec-abstraction}) and the \texttt{PrincipleChecker} interface defined below---together with their concrete realisations and the \texttt{Engine} that consumes both.
 
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{\input{figures/class-diagram.tex}}
-\caption{Class / interface diagram of DriveBy's two central abstractions. Dashed grey arrows denote interface realisation (concrete class implements interface); solid grey arrows denote use. Dashed nodes (P006, P007) are defined theoretically but not yet implemented as \texttt{PrincipleChecker} wrappers.}
+\caption{Class / interface diagram of DriveBy's two central abstractions. Dashed grey arrows denote interface realisation (concrete class implements interface); solid grey arrows denote use. Dashed nodes (P006, P007) are realised by the runtime testing subsystem (Section~\ref{sec:runtime-testing}); their \texttt{PrincipleChecker} wrappers are pending.}
 \label{fig:class-diagram}
 \end{figure}
 
@@ -366,9 +342,7 @@ type PrincipleChecker interface {
 }
 \end{lstlisting}
 
-The interface is deliberately minimal. \texttt{ID()} returns the principle identifier (e.g., \texttt{"P001"}). \texttt{Check()} receives the normalized specification, the validation mode, and a context for cancellation, and returns a structured result. The \texttt{spec.APISpec} parameter enforces the abstraction boundary: checkers cannot access raw kin-openapi types.
-
-This design realizes the Strategy pattern~\cite{gof}. Each checker is an interchangeable strategy that the engine selects based on validation mode. Adding a new principle requires implementing the interface and registering the checker; no existing code is modified.
+The interface is deliberately minimal. \texttt{ID()} returns the principle identifier (e.g., \texttt{"P001"}); \texttt{Check()} receives the normalized specification, the validation mode, and a cancellation context, and returns a structured result. The \texttt{spec.APISpec} parameter enforces the abstraction boundary: checkers cannot access raw kin-openapi types. This design realizes the Strategy pattern~\cite{gof}: adding a new principle means implementing the interface and registering the checker, with no modification to existing code.
 
 % ----------------------------------------------------------------------------
 \subsection{Checker Implementation Pattern}
@@ -377,7 +351,7 @@ This design realizes the Strategy pattern~\cite{gof}. Each checker is an interch
 
 All seven implemented checkers follow a consistent internal pattern. Listing~\ref{lst:p001} shows an abbreviated version of P001 (OpenAPI Specification Compliance) to illustrate the pattern.
 
-\begin{lstlisting}[language=Go,caption={P001 checker pattern (abbreviated, \texttt{principles/p001\_compliance.go}).},label={lst:p001}]
+\begin{lstlisting}[language=Go,float=htbp,caption={P001 checker pattern (abbreviated, \texttt{principles/p001\_compliance.go}).},label={lst:p001}]
 type P001Compliance struct{}
 
 func (p *P001Compliance) ID() string { return "P001" }
@@ -405,7 +379,7 @@ func (p *P001Compliance) Check(ctx context.Context,
 }
 \end{lstlisting}
 
-The pattern has four steps: (1)~initialize a \texttt{PrincipleResult} with the principle metadata from \texttt{CorePrinciples}; (2)~execute individual checks against the \texttt{APISpec}, recording each as a named boolean; (3)~aggregate failures into the result's message and details; (4)~return the result. This consistency simplifies testing (each checker has a corresponding test file in \texttt{test/}) and makes the codebase predictable for contributors.
+The pattern has four steps: initialize a \texttt{PrincipleResult} with metadata from \texttt{CorePrinciples}, execute individual checks recording each as a named boolean, aggregate failures into the result, and return it. This consistency simplifies testing (each checker has a corresponding test file in \texttt{test/}) and makes the codebase predictable.
 
 Table~\ref{tab:checker-implementations} lists all principle checker implementations with their check counts and sizes.
 
@@ -429,7 +403,7 @@ Table~\ref{tab:checker-implementations} lists all principle checker implementati
 \end{tabular}
 \end{table}
 
-The check counts correspond to those enumerated in Section~\ref{sec:nine-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal requires handling nested objects, arrays, allOf compositions, and enum validation at every level. P009 (Test Readiness) completes the seven-checker set, validating whether the specification provides sufficient examples and typed schemas for meaningful runtime testing.
+The check counts correspond to those enumerated in Section~\ref{sec:nine-principles} of Chapter~\ref{ch:methodology}. P004 is the largest checker because recursive schema traversal must handle nested objects, arrays, allOf compositions, and enums at every level. P009 (Test Readiness) completes the seven-checker set, validating whether the specification provides sufficient examples and typed schemas for meaningful runtime testing.
 
 % ----------------------------------------------------------------------------
 \subsection{The Registry and Mode-Based Selection}
@@ -438,7 +412,7 @@ The check counts correspond to those enumerated in Section~\ref{sec:nine-princip
 
 The \texttt{Registry} manages all registered checkers and selects subsets based on validation mode. This centralizes the mode-to-checker mapping defined in Table~\ref{tab:validation-modes} (Chapter~\ref{ch:methodology}).
 
-\begin{lstlisting}[language=Go,caption={Mode-based checker selection (\texttt{principles/registry.go}).},label={lst:formode}]
+\begin{lstlisting}[language=Go,float=htbp,caption={Mode-based checker selection (\texttt{principles/registry.go}).},label={lst:formode}]
 func NewRegistry() *Registry {
     return &Registry{
         checkers: []PrincipleChecker{
@@ -469,7 +443,7 @@ func (r *Registry) ForMode(mode types.ValidationMode) []PrincipleChecker {
 }
 \end{lstlisting}
 
-The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P002 (test-critical documentation, excluding contact/license), P003 (error schemas for 4xx responses), P004 (type checks only), and P009; strict mode evaluates all six static principles (P001--P005, P008); test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only and combined mode selections.
+The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:validation-modes}: minimal mode evaluates only P001; test-ready mode evaluates P001, P002 (test-critical documentation, excluding contact/license), P003 (error schemas for 4xx responses), P004 (type checks only), and P009; strict mode evaluates all six static principles (P001--P005, P008); test-only mode returns no static checkers, deferring entirely to the runtime testing subsystem. When P006 and P007 are implemented as \texttt{PrincipleChecker} wrappers, they will be added to the registry and included in the test-only mode selection.
 
 % ============================================================================
 \section{The Validation Engine}
@@ -481,17 +455,17 @@ The \texttt{ForMode} method encodes the mode semantics from Section~\ref{sec:val
 \label{subsec:engine-config}
 % ----------------------------------------------------------------------------
 
-The \texttt{Engine} struct ties together the loader, the registry, and the user's configuration. It is the single entry point for all validation operations.
+The \texttt{Engine} struct ties together the loader, the registry, and the user's configuration. It is the single entry point for all static, principle-based validation; the runtime testing commands (\texttt{function-only}, \texttt{load-only}; Section~\ref{sec:cli}) bypass it and invoke the \texttt{testing} package directly, as Figure~\ref{fig:component-diagram} shows.
 
-\begin{verbatim}
+\begin{lstlisting}[language=Go,caption={The Engine struct (\texttt{engine/engine.go}).},label={lst:engine-struct}]
 type Engine struct {
     config   types.ValidatorConfig
     loader   *loader.Loader
     registry *principles.Registry
 }
-\end{verbatim}
+\end{lstlisting}
 
-The \texttt{New} constructor validates the configuration (requiring a spec path, base URL, and positive timeout), sets a default validation mode of \texttt{minimal} if none is specified, and instantiates the loader and registry. This validation-at-construction approach ensures that the engine is always in a valid state when \texttt{ValidateSpec} is called.
+The \texttt{New} constructor validates the configuration (spec path, base URL, positive timeout), defaults the validation mode to \texttt{minimal}, and instantiates the loader and registry, so the engine is always in a valid state when \texttt{ValidateSpec} is called.
 
 % ----------------------------------------------------------------------------
 \subsection{The Validation Pipeline}
@@ -500,7 +474,7 @@ The \texttt{New} constructor validates the configuration (requiring a spec path,
 
 The core validation pipeline is implemented in a single method, \texttt{ValidateSpec}, which executes four steps sequentially:
 
-\begin{lstlisting}[language=Go,caption={The validation pipeline (\texttt{engine/engine.go}).},label={lst:validate-spec}]
+\begin{lstlisting}[language=Go,float=htbp,caption={The validation pipeline (\texttt{engine/engine.go}).},label={lst:validate-spec}]
 func (e *Engine) ValidateSpec(ctx context.Context,
 ) (*types.ValidationReport, error) {
     // Step 1: Load and normalize the specification
@@ -531,11 +505,11 @@ func (e *Engine) ValidateSpec(ctx context.Context,
 }
 \end{lstlisting}
 
-Step~1 invokes the loader, which performs version detection, preprocessing, and adapter construction (Section~\ref{sec:loading}). Step~2 initializes the report with metadata from the engine's configuration. Step~3 iterates over the mode-selected checkers, invoking each with the normalized specification and accumulating results. Step~4 computes summary statistics---counts of critical issues, warnings, affected categories, and failed tags---that the report generator and CLI use for presentation.
+Step~1 delegates to the loader of Section~\ref{sec:loading}; step~4 computes the summary statistics---counts of critical issues, warnings, affected categories, and failed tags---that the report generator and CLI use for presentation.
 
 The pipeline is deterministic by construction: given the same specification and mode, the same checkers run in the same order and produce the same results. The only non-deterministic element is the timestamp, which is metadata rather than validation output.
 
-The engine also provides a \texttt{Validate} method that wraps \texttt{ValidateSpec} with logging output for backward compatibility. The CLI commands use \texttt{Validate} to write structured logs to stderr while the JSON report is written to stdout.
+A thin \texttt{Validate} wrapper adds logging (structured logs to stderr, JSON report to stdout), preserving backward compatibility with the \texttt{APIValidator} component it replaced.
 
 % ============================================================================
 \section{Runtime Testing Subsystem}
@@ -549,26 +523,28 @@ While the principle checkers (P001--P005, P008) operate on the specification as 
 \label{subsec:functional-testing}
 % ----------------------------------------------------------------------------
 
-The \texttt{FunctionalTester} in \texttt{testing/functional.go} (552~LOC) derives test cases from the specification and executes them against a live API instance. For each non-deprecated operation, the tester:
+The \texttt{FunctionalTester} (\texttt{testing/functional.go}, 552~LOC) derives test cases from the specification and executes them against a live API. For each non-deprecated operation, it:
 
 \begin{enumerate}
-    \item \textbf{Substitutes path parameters} using examples from the specification or type-based defaults (e.g., UUID format generates a valid UUID, integer generates \texttt{1}).
-    \item \textbf{Constructs request bodies} for POST, PUT, and PATCH operations by extracting examples from the specification or generating them from the schema definition, including recursive \texttt{allOf} flattening.
-    \item \textbf{Adds authentication headers} when the user provides credentials (Bearer token, API key, or basic authentication).
-    \item \textbf{Executes the request} with retry logic for transient failures (502, 503, 504) using exponential backoff.
+    \item \textbf{Substitutes path parameters} using examples from the specification or type-based defaults (e.g., UUID format generates a valid UUID, integer generates \texttt{1}). Example-derived values satisfy the schema's value constraints by construction; generated fallbacks honour type and format but not value-level restrictions (\texttt{enum}, \texttt{minimum}/\texttt{maximum}, \texttt{pattern})---a known limitation of the current generator.
+    \item \textbf{Constructs request bodies} for POST, PUT, and PATCH operations from specification examples or schema-generated values, including recursive \texttt{allOf} flattening.
+    \item \textbf{Adds authentication headers} when credentials (Bearer token, API key, or basic authentication) are provided via the root-command flags of Section~\ref{subsec:command-structure}.
+    \item \textbf{Executes the request} with exponential-backoff retries for transient failures (502, 503, 504).
     \item \textbf{Validates the response} by checking that the status code is documented in the specification and that the response body conforms to the declared schema (required fields, type checks).
 \end{enumerate}
 
-Authentication awareness is a distinctive feature. If the API returns a 401 status code and no authentication was configured, the endpoint is marked as \textit{skipped} rather than failed. This prevents false negatives when testing APIs that require authentication without credentials, while still reporting the authentication requirement.
+Step~5 is deliberately scoped to \emph{contract conformance}: the status code must be documented and the body must match the declared schema. Whether the returned \emph{values} are semantically correct is outside P006's scope by design---the specification declares structure, not business semantics, so structural conformance is the strongest property checkable without an additional oracle. This is an acknowledged limitation; deriving content assertions from the specification's response examples is noted as future work.
 
-The test inputs are derived deterministically from the specification---parameter examples, schema-generated values, and format-based defaults---rather than generated randomly. This aligns with the Axiom of Determinism: the same specification produces the same test cases and, given a stable API, the same results.
+The tester is authentication-aware: if the API returns 401 and no credentials were configured, the endpoint is marked \textit{skipped} rather than failed, preventing false negatives while still reporting the authentication requirement.
+
+All test inputs are derived deterministically from the specification rather than generated randomly, upholding the Axiom of Determinism: the same specification produces the same test cases and, given a stable API, the same results.
 
 % ----------------------------------------------------------------------------
 \subsection{Performance Testing}
 \label{subsec:performance-testing}
 % ----------------------------------------------------------------------------
 
-The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from non-destructive endpoints, runs a configurable load profile---vegeta's terminology refers to this as an ``attack'', but the test issues only well-formed, specification-derived requests at a configurable rate, duration, and concurrency level; no penetration testing or security probing is performed---and collects latency percentiles and throughput metrics. Results are compared against user-defined thresholds, producing binary pass/fail outcomes suitable for CI/CD quality gates. The \texttt{PrincipleChecker} wrapper for P007 that integrates these results into the unified validation report is pending.
+The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses the vegeta library~\cite{vegeta} to execute load tests against the API. It constructs targets from non-destructive endpoints---excluding \texttt{DELETE} and \texttt{PATCH}, retaining primarily safe methods such as \texttt{GET}---and runs a configurable load profile: request rate, test duration (\texttt{--test-duration}), and concurrency level (\texttt{--concurrent-users}). Vegeta calls this an ``attack'', but only well-formed, specification-derived requests are issued; no penetration testing or security probing is performed. Collected latency percentiles and throughput metrics are compared against user-defined thresholds---maximum p95 latency (\texttt{--max-latency-p95}) and minimum success rate (\texttt{--min-success-rate})---producing binary pass/fail outcomes suitable for CI/CD quality gates. Neither profile nor thresholds are embedded in the OpenAPI specification: on the command line they are supplied as the flags above; inside a quality gate they come from the XSDLC \texttt{loadTestConfig} block (Chapter~\ref{ch:kubernetes}). The \texttt{PrincipleChecker} wrapper for P007 that integrates these results into the unified validation report is pending.
 
 % ============================================================================
 \section{Report Generation}
@@ -577,24 +553,13 @@ The \texttt{PerformanceTester} in \texttt{testing/performance.go} (205~LOC) uses
 
 The \texttt{report} package generates validation reports in two formats: JSON for machine consumption and Markdown for human review.
 
-The \texttt{Generator} struct is configured with an output directory. When \texttt{SaveValidationReport} is called with a \texttt{ValidationReport}, it produces four files:
+The \texttt{Generator} writes each \texttt{ValidationReport} as a timestamped JSON file and a timestamped Markdown rendering (per-principle results grouped by category, check lists, suggested fixes), each accompanied by a \texttt{validation-report-latest} copy. The timestamped series enables longitudinal comparison across versions or deployments; the ``latest'' copies provide a stable path for CI/CD scripts. Separate renderers handle functional test reports (per-endpoint results with status codes and response times) and load test reports (latency percentiles, throughput, error rates).
 
-\begin{enumerate}
-    \item A timestamped JSON file (e.g.,\\\texttt{validation-report-20260319T120000Z.json}) containing the full report.
-    \item A copy at \texttt{validation-report-latest.json} for convenience.
-    \item A timestamped Markdown file with the same content rendered as a human-readable document, including principle-by-principle results grouped by category, check lists, and suggested fixes.
-    \item A copy at \texttt{validation-report-latest.md} for convenience.
-\end{enumerate}
+The JSON-first design supports the Axiom of Observability: dashboards, monitoring systems, and downstream pipeline stages consume the structured output without text parsing.
 
-The timestamped naming convention enables longitudinal tracking: successive validation runs produce an append-only series of reports that can be compared across versions or deployments. The ``latest'' copies provide a stable path for CI/CD scripts that always need the most recent result.
+To make this contract machine-checkable, DriveBy publishes a JSON Schema (Draft~07) for the \texttt{ValidationReport} format at \texttt{driveby-cli/schemas/report.\allowbreak schema.\allowbreak json}. Downstream consumers can validate report payloads against it, and the schema itself is verified against every sample report under \texttt{results/local/} during the release process so that documentation and implementation cannot drift silently.
 
-The Markdown renderer groups principles by category (Specification, Documentation, Schema, Error Handling, Security, Testing, Performance, Versioning) and renders each with its status, message, individual check results as JSON, and suggested fixes. Separate renderers handle functional test reports (per-endpoint results with status codes and response times) and load test reports (latency percentiles, throughput, error rates).
-
-The JSON-first design supports the Axiom of Observability: structured JSON output can be parsed by quality dashboards, fed into monitoring systems, or consumed by downstream pipeline stages without text parsing.
-
-To make this contract machine-checkable, DriveBy publishes a JSON Schema (Draft~07) for the \texttt{ValidationReport} format at \texttt{driveby-cli/schemas/report.\allowbreak schema.\allowbreak json} in the source repository. Downstream consumers---CI gates, dashboards, agent integrations---can validate report payloads against this schema using any standard JSON Schema validator, and the schema itself is verified against every sample report under \texttt{results/local/} during the release process so that documentation and implementation cannot drift silently.
-
-This JSON-first design also enables a class of consumer that the architecture anticipates but does not require: autonomous engineering agents. Each \texttt{PrincipleResult} in the JSON report carries a machine-readable principle ID, a boolean pass/fail status, structured check outcomes, and a \texttt{SuggestedFix} string. An agent consuming this report can programmatically determine \textit{what} failed (principle and check), \textit{why} it failed (details and message), and \textit{how to fix it} (suggested remediation)~\cite{swe-agent}. The validation report is therefore not merely a quality signal---it is an instruction set for autonomous API specification improvement. As agent architectures mature, SDT's structured output positions it as a natural feedback source in agent-driven development loops where the agent validates, diagnoses, remediates, and re-validates without human intervention.
+The JSON-first design also anticipates autonomous engineering agents as consumers: each \texttt{PrincipleResult} tells an agent \textit{what} failed (principle ID and checks), \textit{why} (details and message), and \textit{how to fix it} (\texttt{SuggestedFix})~\cite{swe-agent}. Chapter~\ref{ch:ai-development} develops this agent-feedback role of the validation report in full.
 
 % ============================================================================
 \section{Command-Line Interface}
@@ -628,9 +593,9 @@ DriveBy's CLI is built with the Cobra framework~\cite{cobra} and organized as a 
 \end{tabular}
 \end{table}
 
-Each subcommand follows the same execution pattern: assemble a \texttt{ValidatorConfig} from CLI flags (via Viper for environment variable binding), create the appropriate tester or engine, execute, generate reports, write JSON to stdout, and return an exit code. All logging goes to stderr in JSON format, ensuring that stdout contains only the structured report---a critical property for pipeline integration where the output is piped to \texttt{jq} or consumed by a downstream stage.
+Each subcommand follows the same execution pattern: assemble a \texttt{ValidatorConfig} from CLI flags (via Viper, which also binds each flag to an environment variable for pipeline configuration), create the appropriate tester or engine, execute, generate reports, write JSON to stdout, and return an exit code. All logging goes to stderr in JSON format, so stdout contains only the structured report---a critical property for pipeline integration.
 
-The \texttt{config.go} file centralizes configuration assembly, preventing flag duplication across commands. Authentication flags (\texttt{--auth-token}, \texttt{--auth-api-key}, \texttt{--auth-username}/\texttt{--auth-password}) are defined on the root command and available to all subcommands.
+The \texttt{config.go} file centralizes configuration assembly, preventing flag duplication. Authentication flags (\texttt{--auth-token}, \texttt{--auth-api-key}, \texttt{--auth-username}/\texttt{--auth-password}) are defined on the root command and available to all subcommands.
 
 % ----------------------------------------------------------------------------
 \subsection{Exit Code Protocol}
@@ -665,15 +630,11 @@ Command handlers return errors via Cobra's \texttt{RunE} convention rather than 
 \label{subsec:cicd-integration}
 % ----------------------------------------------------------------------------
 
-DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocation. Three properties make this practical: (1)~\textit{zero configuration defaults}---minimal mode with default timeouts requires only a specification path and a base URL; (2)~\textit{stdout/stderr separation}---the JSON report on stdout can be piped to \texttt{jq} or consumed by downstream stages without parsing logs; and (3)~\textit{GitHub integration}---the \texttt{--github-comment} flag enables DriveBy to post validation results as PR comments using either personal access tokens or GitHub App authentication. Chapter~\ref{ch:workflow} describes the full CI/CD pipelines that exercise these integration points.
+DriveBy is designed to be embedded in CI/CD pipelines as a single binary invocation. Three properties make this practical: (1)~\textit{zero configuration defaults}---minimal mode requires only a specification path and a base URL; (2)~\textit{stdout/stderr separation}---the JSON report on stdout is consumable without parsing logs; and (3)~\textit{GitHub integration}---\texttt{github-comment} posts validation results as PR comments and \texttt{github-status} sets a commit status on a specific SHA so branch-protection rules can block merges on failed validation. Chapter~\ref{ch:workflow} describes the pipelines that exercise these integration points.
 
 % ============================================================================
 \section{Summary}
 \label{sec:architecture-summary}
 % ============================================================================
 
-This chapter described the architecture of the DriveBy framework across eleven internal packages. The specification abstraction layer (Section~\ref{sec:spec-abstraction}) provides version-agnostic validation through the Adapter pattern, ensuring that principle checkers operate identically on OpenAPI~3.x and Swagger~2.0 specifications. The principle checker pattern (Section~\ref{sec:principle-checker}) uses the Strategy pattern to encapsulate each SDT principle as an interchangeable validator selected by the registry based on validation mode. Seven principle checkers (P001--P005, P008, P009) are registered; P006 and P007 are implemented as dedicated test runners outside the registry. The engine (Section~\ref{sec:engine}) orchestrates the four-step pipeline---load, select, evaluate, aggregate---that produces deterministic, structured reports.
-
-The runtime testing subsystem (Section~\ref{sec:runtime-testing}) extends validation beyond static analysis to live API verification, deriving test cases deterministically from the specification. The report generator (Section~\ref{sec:report-generation}) produces JSON and Markdown outputs suitable for both machine consumption and human review. The CLI (Section~\ref{sec:cli}) exposes all capabilities through a four-command interface with structured exit codes designed for CI/CD integration.
-
-While the DriveBy CLI is a complete, self-contained validation tool, its full potential is realized when embedded within declarative infrastructure. The architecture described in this chapter---zero-dependency types, a version-agnostic specification interface, and structured machine-readable output---was designed to support multiple execution models. The same principle checkers that run in a developer's terminal can run inside a Kubernetes workflow container without modification. Chapter~\ref{ch:kubernetes} describes how the CLI becomes part of a declarative, event-driven quality gate system using Crossplane custom resources, and Chapter~\ref{ch:workflow} describes the GitOps pipelines that trigger validation and promote environments based on its results.
+The DriveBy CLI realises the SDT definitions through two central abstractions---the version-agnostic \texttt{APISpec} adapter layer and the \texttt{PrincipleChecker} strategy pattern---orchestrated by a deterministic four-step engine pipeline, with seven checkers registered (P001--P005, P008, P009) and P006/P007 implemented as dedicated test runners outside the registry. Its zero-dependency types and structured, machine-readable output let the same binary run unmodified in a developer's terminal or a Kubernetes workflow container. Chapter~\ref{ch:kubernetes} embeds the CLI in declarative quality gates, and Chapter~\ref{ch:workflow} describes the GitOps pipelines that trigger validation and promote environments on its results.

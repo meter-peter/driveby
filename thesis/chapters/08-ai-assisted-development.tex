@@ -1,16 +1,16 @@
 \chapter{AI-Assisted Development: Authorship, Process, and Reflection}
 \label{ch:ai-development}
 
-This thesis was conceived, designed, evaluated, and written by the author. It was \emph{built} with substantial help from an AI agent during a focused twelve-day productisation sprint near the end of the project. This chapter draws that distinction precisely. It opens with a self-assessment of authorship and the author's role (Section~\ref{sec:authorship}), then describes the knowledge protocol and persistent memory that made the human--agent collaboration tractable (Sections~\ref{sec:claudemd-protocol} and~\ref{sec:agent-memory}), and closes with a reflection on what worked, what would change in a follow-on project, and how the framework defined in earlier chapters relates to autonomous-agent feedback loops (Sections~\ref{sec:agent-eval}--\ref{sec:personal-lessons}).
+This thesis was conceived, designed, evaluated, and written by the author. It was \emph{built} with substantial help from an AI agent during a focused twelve-day productisation sprint near the end of the project. This chapter draws that distinction precisely: it assesses authorship (Section~\ref{sec:authorship}), describes the knowledge protocol and persistent memory behind the human--agent collaboration (Sections~\ref{sec:claudemd-protocol} and~\ref{sec:agent-memory}), and closes with reflection and the relation of the framework to autonomous-agent feedback loops (Sections~\ref{sec:agent-eval}--\ref{sec:personal-lessons}).
 
-The chapter makes three claims. First, that the author's intellectual ownership---over the SDT framework, the XSDLC architecture, the evaluation design, and the thesis narrative---is unambiguous and traceable through the version-control record. Second, that the CLAUDE.md knowledge protocol the author designed is the enabling infrastructure that allowed an AI agent to accelerate implementation without dictating direction. Third, that SDT's structured, machine-readable output positions it as a natural feedback source for future autonomous-agent loops---an observation grounded in the experience of this project and to be tested empirically as future work (Section~\ref{sec:agent-feedback-future}).
+The chapter makes three claims: the author's intellectual ownership---over the SDT framework, the XSDLC architecture, the evaluation design, and the thesis narrative---is traceable through the version-control record; the author-designed CLAUDE.md knowledge protocol is what allowed an AI agent to accelerate implementation without dictating direction; and SDT's structured output positions it as a natural feedback source for autonomous-agent loops, to be tested further as future work (Section~\ref{sec:agent-feedback-future}).
 
 % ============================================================================
 \section{Authorship and the Author's Role}
 \label{sec:authorship}
 % ============================================================================
 
-This section answers, head-on, the question of who did what in this thesis. The data underlying every claim below is reproducible from the project's git history, the persistent agent-memory directory at \texttt{\textasciitilde/.claude/\allowbreak projects/\allowbreak -home-meter-peter-\allowbreak development-driveby/}, and the sixteen \texttt{CLAUDE.md} files in the monorepo.
+This section answers who did what in this thesis. Every claim below is reproducible from the project's git history, the persistent agent-memory directory at \texttt{\textasciitilde/.claude/\allowbreak projects/\allowbreak -home-meter-peter-\allowbreak development-driveby/}, and the sixteen \texttt{CLAUDE.md} files in the monorepo.
 
 % ----------------------------------------------------------------------------
 \subsection{The Two Phases of Development}
@@ -19,9 +19,9 @@ This section answers, head-on, the question of who did what in this thesis. The 
 
 The repository's commit history makes a clean distinction between two phases.
 
-\textbf{Phase~A --- Solo development (3 April 2025 -- 18 March 2026, 350 days).} During this phase the author worked alone. The DDT/SDT axioms were drafted, the nine principles were enumerated, the \texttt{APISpec} abstraction was designed, the first principle checkers were written, the OpenAPI~3.x and Swagger~2.0 adapters were built, the validation modes were specified, the monorepo was restructured, the five evaluation APIs were designed and implemented, and the Crossplane composition was prototyped. All twenty-six commits in this phase carry no \texttt{Co-Authored-By} trailer; they are entirely the author's work.
+\textbf{Phase~A --- Solo development (3 April 2025 -- 18 March 2026, 350 days).} During this phase the author worked alone. The DDT/SDT axioms were drafted, the nine principles were enumerated, the \texttt{APISpec} abstraction was designed, the first principle checkers were written, the OpenAPI~3.x and Swagger~2.0 adapters were built, the validation modes were specified, the monorepo was restructured, the five evaluation APIs were designed and implemented, and the Crossplane composition was prototyped. All twenty-six commits in this phase carry no \texttt{Co-Authored-By} trailer; they are entirely the author's work. No generative AI assistance was used in this phase---neither an agentic tool nor a Copilot-style IDE assistant; development used a conventional IDE whose code intelligence was limited to non-generative tooling (symbol completion, navigation, linting).
 
-\textbf{Phase~B --- Author-directed AI partnership (19--30 March 2026, 12 days).} During this phase the author engaged Claude Code intensively for productisation: the GitOps pipeline was wired together, OSS-polish cleanup was performed, the multi-API evaluation tooling was developed, the XSDLC composition was hardened, and the thesis manuscript was drafted under the author's chapter specifications and feed map (Section~\ref{sec:agent-thesis}). Twenty-six of the fifty-two commits in the project carry the \texttt{Co-Authored-By: Claude} trailer; all of them fall in this 12-day window. Crucially, human-only commits continued throughout this phase too---the last human-only commit (2026-03-29) was made one day before the final commit---answering directly the supervisor's question about whether the author kept making manual code changes in later commits.
+\textbf{Phase~B --- Author-directed AI partnership (19--30 March 2026, 12 days).} During this phase the author engaged Claude Code intensively for productisation: the principle checking was finalised and DriveBy was brought to its released form, the GitOps pipeline was wired together, the multi-API evaluation tooling was developed, the XSDLC composition was hardened, and the thesis manuscript was drafted under the author's chapter specifications and feed map (Section~\ref{sec:agent-thesis}). Twenty-six of the fifty-two commits in the project carry the \texttt{Co-Authored-By: Claude} trailer; all fall in this 12-day window. Human-only commits continued throughout this phase---the last (2026-03-29) one day before the final commit---so the author kept making manual code changes throughout the partnership.
 
 This timeline matters. The conceptual content of the thesis---the axioms, the principles, the architecture, the evaluation design---predates the AI partnership by nearly a year. The AI's role was not to invent the framework; it was to accelerate the implementation and writing of a framework that already existed in design.
 
@@ -49,20 +49,20 @@ Phase                   & both A and B & only B & --- \\
 \end{tabular}
 \end{table}
 
-Although the commit count is split evenly, the line counts tell a different story: the author authored almost three quarters of all source lines added to the project across its lifetime. The co-authored commits are a productisation surface on top of an author-built foundation, not a takeover.
+Although the commit count is split evenly, the author authored almost three quarters of all source lines added across the project's lifetime: the co-authored commits are a productisation surface on top of an author-built foundation. The roughly 29{,}000 removed lines trace deliberate design iteration, not churn: the v3.0.0 monorepo restructuring, the deletion of the obsolete \texttt{samples/} directory, and the mid-project redesign to the two-repo BYOCI architecture (Chapter~\ref{ch:workflow}) each removed superseded code in bulk.
 
-\textbf{Code quality rules authored solo.} The five mandatory project-wide invariants---\texttt{spec.APISpec} abstraction is mandatory; each principle checker implements \texttt{PrincipleChecker}; no \texttt{os.Exit()} in command handlers; types live in \texttt{internal/types/} with no circular dependencies; CLI config shared via \texttt{config.go} with no duplication---are listed in the root \texttt{CLAUDE.md} and were authored by the author during Phase~A. They served as constraints on every later AI-generated edit; the agent did not negotiate them, the agent obeyed them. This addresses the supervisor's request~([535]) to surface the code-quality rules in the chapter text rather than only by reference.
+\textbf{Code quality rules authored solo.} The five mandatory project-wide invariants (enumerated in Section~\ref{subsec:content-categories}) are listed in the root \texttt{CLAUDE.md} and were authored during Phase~A. They constrained every later AI-generated edit; the agent did not negotiate them, the agent obeyed them.
 
 \textbf{The maintenance rules and the CLAUDE.md hierarchy} (Section~\ref{sec:claudemd-protocol}) are author-designed. The hierarchy of sixteen \texttt{CLAUDE.md} files was authored solo during Phase~A; subsequent updates during Phase~B were verified by the author before being committed.
 
-\textbf{The persistent-memory feedback corrections} are not the agent learning autonomously. Each of the twelve memory entries (Section~\ref{sec:agent-memory}) is the author teaching the agent: a behaviour was observed, judged wrong, corrected, and the correction was persisted. The author authored every correction; the agent obeyed them.
+\textbf{The persistent-memory feedback corrections} are the author teaching the agent, not autonomous learning: the author authored every one of the twelve entries (Section~\ref{sec:agent-memory}); the agent obeyed them.
 
 % ----------------------------------------------------------------------------
 \subsection{Effort Allocation}
 \label{subsec:effort-allocation}
 % ----------------------------------------------------------------------------
 
-The supervisor's question about \emph{how} the author spent time during Phase~B---writing \texttt{.md} files, reviewing AI-authored code, intervening to correct things---is answered below. These are author estimates from session notes and from the persistent-memory log; they are not exact wall-clock measurements.
+How the author spent Phase~B is broken down below, as author estimates from session notes and the persistent-memory log, not exact wall-clock measurements.
 
 \begin{table}[htbp]
 \centering
@@ -83,25 +83,29 @@ Cluster operations (kubectl, ArgoCD, debugging GitOps state) & 5\% \\
 \end{tabular}
 \end{table}
 
-Roughly 70\% of the author's time during Phase~B went to \emph{directing and verifying}: scoping work, reviewing outputs, writing and updating the knowledge protocol, and persisting corrections back into agent memory. The remaining 30\% went to direct hands-on work---manual code edits, debugging, and cluster operations---which produced the 26 human-only commits made during Phase~B in addition to the co-authored ones.
+Roughly 70\% of the author's time during Phase~B went to \emph{directing and verifying}: scoping work, reviewing outputs, maintaining the knowledge protocol, and persisting corrections. The remaining 30\% went to direct hands-on work, which produced the 26 human-only commits made during Phase~B.
 
-\textbf{Forms of feedback supplied to the agent.} Feedback was supplied in four distinct forms, in increasing order of permanence: (i)~in-session corrections (rejecting a suggestion or asking for a rework, with no persistent effect); (ii)~commit-message reviews and amendments before pushing; (iii)~edits to the relevant \texttt{CLAUDE.md} file when a recurring class of mistake was identified, so the next session would not repeat it; (iv)~entries in the persistent-memory directory (Section~\ref{sec:agent-memory}) for cross-session, project-spanning behavioural rules. The hierarchy from~(i) to~(iv) is itself a contribution of the agent-driven development framework: it lets the human escalate corrections from one-shot to permanent based on how often the same mistake recurs.
+\textbf{How debugging was carried out.} The ``manual code changes, debugging, hot-fixes'' row combined three methods: the Go test suite (\texttt{go test ./test/...}), where the author wrote a failing test before fixing so the fix is regression-protected; manual reproduction against the five evaluation APIs or the live cluster; and artifact inspection---JSON validation reports, Crossplane composition status, controller logs---to localise faults in the GitOps pipeline, where no unit test reaches.
 
-\textbf{Manual review of almost-final artifacts.} Beyond the automated CI checks (the documentation-completeness script, the Go test suite, the Crossplane composition validation), the author conducted manual reviews of every artifact that was committed: every Crossplane composition was inspected against the live cluster behaviour, every evaluation result was spot-checked against the underlying JSON, every thesis chapter was read end-to-end and edited before being pushed, and every commit message was reviewed before publication. The automated checks catch structural drift; the manual review catches content errors that no test can.
+\textbf{Forms of feedback supplied to the agent.} Feedback took four forms, in increasing order of permanence: (i)~in-session corrections; (ii)~commit-message reviews and amendments before pushing; (iii)~edits to the relevant \texttt{CLAUDE.md} file when a recurring class of mistake was identified; (iv)~entries in the persistent-memory directory (Section~\ref{sec:agent-memory}) for cross-session behavioural rules. This escalation hierarchy is itself a contribution of the agent-driven development framework: corrections move from one-shot to permanent based on how often the same mistake recurs.
+
+\textbf{Manual review of almost-final artifacts.} Beyond the automated CI checks, the author manually reviewed every committed artifact: every Crossplane composition against live cluster behaviour, every evaluation result against the underlying JSON, every thesis chapter end-to-end, every commit message before publication. The automated checks catch structural drift; the manual review catches content errors that no test can.
+
+\textbf{Report-side effort.} Of the 30\% in Table~\ref{tab:effort-allocation} spent reviewing AI-authored outputs, roughly half---about 15\% of total Phase~B effort---went to the thesis manuscript itself: checking each chapter against the source code and evaluation data, correcting factual and numerical claims, and rewriting substantive passages (Section~\ref{sec:agent-thesis}). Every chapter received at least two full author read-throughs before commit; this too is a session-notes estimate.
 
 % ----------------------------------------------------------------------------
 \subsection{Overall Authorship Claim and Role}
 \label{subsec:authorship-claim}
 % ----------------------------------------------------------------------------
 
-Combining the conceptual ownership (the framework, the architecture, the evaluation design, the chapter structure), the quantitative line-level evidence (approximately 74\%---73.7\% of lines added and 73.5\% of lines removed---authored solo, per the table above), the timeline (a year of solo work followed by 12 days of directed partnership), and the reviewer-of-record role for every artifact, the author claims overall authorship of approximately \textbf{80\%} of this thesis and the DriveBy project. The remaining 20\% is acknowledged AI co-authorship, concentrated in the Phase~B productisation surface and in initial drafts of several thesis sections that were then reviewed and edited by the author before being committed.
+Combining the conceptual ownership (the framework, the architecture, the evaluation design, the thesis report structure), the quantitative line-level evidence (approximately 74\%---73.7\% of lines added and 73.5\% of lines removed---authored solo, per the table above), the timeline (a year of solo work followed by 12 days of directed partnership), and the reviewer-of-record role for every artifact, the author claims overall authorship of approximately \textbf{80\%} of this thesis and the DriveBy project. The remaining 20\% is acknowledged AI co-authorship, concentrated in the Phase~B productisation surface and in initial drafts of several thesis sections. The author---not the agent---rewrote, corrected, and finalised the content of every chapter, so the final text of the thesis is in every case author-authored (Section~\ref{sec:agent-thesis}).
 
-\textbf{Role in software-project terms.} If this work were positioned within a conventional software project, the author's role would map most cleanly to \emph{architect-and-tech-lead}: defining the technical vision (the SDT axioms and principles), designing the system architecture (the \texttt{APISpec} abstraction, the principle-checker pattern, the XSDLC composition, the two-repo BYOCI model), establishing the project-wide invariants (the five code-quality rules), and reviewing every output before integration. During Phase~B, the role expanded to include explicit \emph{agent orchestrator}: deciding which work to delegate, supplying the structured context (CLAUDE.md and persistent memory) the agent required, and accepting or rejecting each output. The author did not act primarily as an analyst or as an implementor.
+\textbf{Role in software-project terms.} The author's role maps most cleanly to \emph{architect-and-tech-lead}: defining the technical vision (the SDT axioms and principles), designing the system architecture (the \texttt{APISpec} abstraction, the principle-checker pattern, the XSDLC composition, the two-repo BYOCI model), establishing the five code-quality invariants, and reviewing every output before integration. During Phase~B the role expanded to explicit \emph{agent orchestrator}: deciding what to delegate, supplying the structured context the agent required, and accepting or rejecting each output. The author did not act primarily as an analyst or as an implementor.
 
 \textbf{Did the original idea survive?} The original idea---a framework that derives validation rules from the API specification rather than from manually authored tests, with a CLI that integrates into a GitOps pipeline---was implemented in full. Two notable scope changes occurred during the project, both author-driven decisions made before Phase~B:
 
 \begin{itemize}
-    \item The framing was sharpened to a \emph{conceptual framework} rather than a complete formal methodology (Chapter~\ref{ch:methodology}, and following supervisor review of an earlier draft also reflected in Chapter~\ref{ch:introduction}). This is a sharpening of the original claim, not a deviation from it.
+    \item The framing was sharpened to a \emph{conceptual framework} rather than a complete formal methodology (Chapter~\ref{ch:methodology}; also reflected in Chapter~\ref{ch:introduction}). This is a sharpening of the original claim, not a deviation from it.
     \item The Kubernetes integration was redesigned mid-project from a single-repo model into the two-repo BYOCI architecture (Chapter~\ref{ch:workflow}). This change was driven by an architectural insight about source hydration that the author identified independently; it expanded the contribution rather than replacing it.
 \end{itemize}
 
@@ -112,17 +116,17 @@ No deviation in the project was driven by the AI agent suggesting a more interes
 \label{subsec:contribution-boundary}
 % ----------------------------------------------------------------------------
 
-The quantitative evidence above answers ``how much'' was authored solo. This subsection answers ``what specifically'' is the author's intellectual contribution as distinct from the agent-assisted scope. The distinction is stated explicitly because supervisor review of the defence presentation requested a precise demarcation, and because in an academic defence the burden of separating one's own contribution from agent-assisted artefact production rests with the candidate.
+The quantitative evidence above answers ``how much'' was authored solo; this subsection answers ``what specifically,'' because in an academic defence the burden of separating one's own contribution from agent-assisted artefact production rests with the candidate.
 
 \textbf{Author's intellectual contribution.} The conceptual and design content of this thesis, traceable to author-only commits and to design decisions made before or independently of any AI session:
 
 \begin{itemize}\setlength\itemsep{0.25em}
 \item The \textbf{SDT paradigm} as a whole---the three framework-wide axioms (Completeness, Determinism, Observability), the nine validation principles (P001--P009), the validation modes (\texttt{minimal}, \texttt{strict}, \texttt{test-ready}, \texttt{test-only}), and the explicit rejection of an axiom-to-principle partition in favour of axioms as framework-wide invariants (Chapter~\ref{ch:methodology}).
 \item The \textbf{formal model of validation as parallel application and aggregation}, $f_p(s) = \mathrm{agg}(f_{p_1}(s), \dots, f_{p_n}(s))$, with the explicit non-composition claim and its three consequences for Determinism, modular modes, and concurrent evaluation (Section~\ref{subsec:fp-formalism}).
-\item The \textbf{DriveBy architecture}: the \texttt{APISpec} abstraction layer that hides OpenAPI~3.x / Swagger~2.0 differences, the atomic-principle design and the \texttt{PrincipleChecker} interface, the deterministic engine and registry pattern, the structured-report contract.
-\item The \textbf{XSDLC composition design}: a single declarative CRD that reifies the full delivery pipeline, the two-repo BYOCI boundary, the per-environment overlay model with ArgoCD source-hydrator, the promotion-chain mechanics through GitOps Promoter and CommitStatus.
-\item The \textbf{two-tier closed-loop quality-control framing} of the gate: verdict tier (open-loop) versus platform tier (closed-loop, autonomous repair across Crossplane, ArgoCD, gitops-promoter, \texttt{provider-upjet-github}, Argo Workflows, Argo Events), and the architectural claim that drift between gate evaluations is blocked by construction rather than detected after the fact (Section~\ref{subsec:controller-stack}).
-\item The \textbf{evaluation methodology}: the three-arm evaluation design (controlled, large-scale, operational), the principle-injection scheme against the five evaluation APIs, the APIs.guru large-scale study design, and the single-iteration agent-feedback experiment that grounds the framework's claim to be machine-actionable feedback infrastructure (Chapter~\ref{ch:evaluation}).
+\item The \textbf{DriveBy architecture}: the \texttt{APISpec} abstraction layer, the atomic-principle design and \texttt{PrincipleChecker} interface, the deterministic engine and registry pattern, the structured-report contract (Chapter~\ref{ch:architecture}).
+\item The \textbf{XSDLC composition design}: a single declarative CRD reifying the full delivery pipeline, the two-repo BYOCI boundary, the per-environment overlay model, the promotion-chain mechanics (Chapters~\ref{ch:kubernetes} and~\ref{ch:workflow}).
+\item The \textbf{two-tier closed-loop quality-control framing} of the gate: verdict tier (open-loop) versus platform tier (closed-loop, autonomous repair across the controller stack), and the claim that drift between gate evaluations is blocked by construction rather than detected after the fact (Section~\ref{subsec:controller-stack}).
+\item The \textbf{evaluation methodology}: the four-arm design (controlled, large-scale, operational, agent-feedback), the principle-injection scheme against the five evaluation APIs, and the single-iteration agent-feedback experiment (Chapter~\ref{ch:evaluation}).
 \item The \textbf{five project-wide code-quality invariants} (Section~\ref{subsec:quant-authorship}) and the \texttt{CLAUDE.md} hierarchy that operationalises them as constraints on every later agent-assisted edit (Section~\ref{sec:claudemd-protocol}).
 \item The \textbf{thesis chapter structure} and the chapter-to-source-code feed map (\texttt{thesis/CLAUDE.md}), which together define what each chapter argues and which source artefacts it must remain faithful to.
 \end{itemize}
@@ -130,10 +134,10 @@ The quantitative evidence above answers ``how much'' was authored solo. This sub
 \textbf{Agent-assisted scope.} The agent contribution, concentrated in the 12-day Phase~B and bounded above by the author's review and acceptance of every committed output:
 
 \begin{itemize}\setlength\itemsep{0.25em}
-\item \textbf{Routine Go boilerplate} within the principle checkers---loop scaffolding, error-message formatting, severity-tag plumbing---authored against the \texttt{PrincipleChecker} interface and the \texttt{APISpec} types the author had already designed. The conceptual content of each checker (what to check, why, with what severity) was author-specified; the agent rendered it as Go.
-\item \textbf{LaTeX typesetting and prose-level revisions} of thesis chapters that the author had outlined in CLAUDE.md feed-maps. The agent produced first drafts of prose around author-supplied bullet points; the author reviewed, edited, and committed.
-\item \textbf{Documentation scaffolding}: per-package \texttt{CLAUDE.md} stubs, per-package READMEs, the documentation-completeness CI check. The hierarchical \texttt{CLAUDE.md} protocol itself, and the content of the root \texttt{CLAUDE.md}, are author-designed; the per-package files were drafted with agent help and then verified.
-\item \textbf{Operational tooling}: batch-validation scripts for the APIs.guru harvest, log-parsing helpers, the harness that produces evaluation tables from raw JSON, and the per-PR comment formatter used in the GitOps Promoter feedback flow. The evaluation methodology these scripts serve is author-designed; the scripts themselves are an engineering surface above it.
+\item \textbf{Routine Go boilerplate} within the principle checkers, authored against the interface and types the author had already designed. The conceptual content of each checker (what to check, why, with what severity) was author-specified; the agent rendered it as Go.
+\item \textbf{LaTeX typesetting and prose-level revisions}: first drafts of prose around author-supplied chapter outlines and feed-maps; the author reviewed, edited, and committed.
+\item \textbf{Documentation scaffolding}: per-package \texttt{CLAUDE.md} stubs and READMEs, and the documentation-completeness CI check. The hierarchical protocol itself and the root \texttt{CLAUDE.md} are author-designed.
+\item \textbf{Operational tooling}: batch-validation scripts for the APIs.guru harvest, log-parsing helpers, the evaluation-table harness, and the per-PR comment formatter. The evaluation methodology these scripts serve is author-designed.
 \end{itemize}
 
 \textbf{The boundary in one line.} Every architectural, formal, and methodological decision in this thesis was authored, reviewed, and committed by the candidate. Agent assistance is a development methodology---a way of accelerating the realisation of a design that already exists---not a substitute for the conceptual contribution that defines what is being realised.
@@ -143,7 +147,7 @@ The quantitative evidence above answers ``how much'' was authored solo. This sub
 \label{sec:claudemd-protocol}
 % ============================================================================
 
-The central enabling infrastructure for the Phase~B partnership---and the author's most reusable methodological contribution from the agentic-development framework (Contribution~6 in Chapter~\ref{ch:introduction})---is a hierarchical system of \texttt{CLAUDE.md} files distributed across the monorepo. These files are not READMEs and not configuration. They are agent context files: structured knowledge artifacts designed to be consumed by AI agents at the start of every working session, providing the persistent context that enables cross-session continuity.
+The central enabling infrastructure for the Phase~B partnership---and the author's most reusable methodological contribution from the agentic-development framework (Contribution~6 in Chapter~\ref{ch:introduction})---is a hierarchical system of \texttt{CLAUDE.md} files distributed across the monorepo. These are neither READMEs nor configuration but agent context files: structured knowledge artifacts consumed by AI agents at the start of every session, providing the persistent context that enables cross-session continuity.
 
 % ----------------------------------------------------------------------------
 \subsection{Hierarchical Structure}
@@ -181,11 +185,11 @@ The DriveBy project contains sixteen CLAUDE.md files organised in a tree that mi
 \end{tabular}
 \end{table}
 
-When an agent begins working in a directory, the CLAUDE.md files in the path from root to that directory are loaded into the agent's context. An agent modifying \texttt{driveby-cli/internal/principles/p004\_schema.go} receives context from three CLAUDE.md files: the root (project-wide conventions), the CLI (package structure), and the principles directory (interface contract, axiom assignments). This layered loading ensures that the agent always has both the global invariants and the local domain knowledge needed for the task at hand.
+When an agent begins working in a directory, the CLAUDE.md files in the path from root to that directory are loaded into its context---e.g.\ an agent modifying \texttt{driveby-cli/internal/principles/p004\_schema.go} receives the root, CLI, and principles files. This layered loading gives the agent both the global invariants and the local domain knowledge for the task at hand.
 
-\textbf{Hierarchy depth and rationale.} The hierarchy is three levels deep at most (root $\to$ package $\to$ component) because deeper nesting exceeded the practical context budget per session and produced redundant content. The depth was chosen empirically by the author during Phase~A: an initial flat structure produced agent sessions that lacked package-level context, and an initial five-level structure produced redundant content that the agent's context window could not absorb without truncation. The three-level depth that the project settled on was a deliberate engineering trade-off, not an arbitrary one.
+\textbf{Hierarchy depth and rationale.} The hierarchy is at most three levels deep (root $\to$ package $\to$ component), a trade-off chosen empirically during Phase~A: a flat structure left sessions without package-level context, while a five-level structure produced redundant content the agent's context window could not absorb without truncation.
 
-\textbf{Containment vs.\ repetition.} Some sub-directory CLAUDE.md files repeat invariants from the root file. The supervisor noted~([534]) that repetition is in tension with the layered-loading model. The author's choice was to repeat \emph{critical} invariants (the five code-quality rules) in the leaf files where they are most relevant, on the principle that an agent operating under context-window pressure may truncate ancestor content but is unlikely to truncate the file it is actively editing. The cost is duplication; the benefit is robustness against context-window truncation. This is a defensible engineering choice rather than a methodological mistake.
+\textbf{Containment vs.\ repetition.} Some sub-directory CLAUDE.md files repeat invariants from the root file. The supervisor suggested stating each invariant exactly once in the highest applicable file and letting layered loading propagate it downward; the author instead retained the repetition of the five \emph{critical} code-quality rules in the leaf files. The justification is observational: in the Phase~A depth experiments, sessions demonstrably truncated ancestor content, whereas the file being actively edited was never truncated---the leaf file is the only placement observed to survive context-window pressure. The cost is duplication; the benefit is empirically needed robustness.
 
 % ----------------------------------------------------------------------------
 \subsection{Content Categories}
@@ -194,13 +198,13 @@ When an agent begins working in a directory, the CLAUDE.md files in the path fro
 
 Each CLAUDE.md file contains four categories of knowledge:
 
-\textbf{Structural knowledge}: what exists, where it lives, and how it connects. The root CLAUDE.md contains the monorepo directory table with status indicators. The CLI CLAUDE.md contains the package dependency graph. The principles CLAUDE.md contains a per-file table with line counts, axiom assignments, and implementation status---one row per principle file.
+\textbf{Structural knowledge}: what exists, where it lives, and how it connects---the root monorepo directory table, the CLI package dependency graph, the per-principle status table.
 
-\textbf{Invariants}: rules that must never be violated. The root file specifies the five code quality rules listed in Section~\ref{subsec:quant-authorship}: (1)~the mandatory \texttt{spec.APISpec} abstraction; (2)~the \texttt{PrincipleChecker} interface for every checker; (3)~no \texttt{os.Exit()} in command handlers; (4)~types confined to \texttt{internal/types/} with no circular dependencies; (5)~CLI configuration shared via \texttt{config.go} with no duplication. These invariants are repeated in the sub-directory CLAUDE.md files where they are most relevant, ensuring that an agent working in a leaf directory still encounters the project-wide rules.
+\textbf{Invariants}: rules that must never be violated. The root file specifies the five code quality rules: (1)~the mandatory \texttt{spec.APISpec} abstraction; (2)~the \texttt{PrincipleChecker} interface for every checker; (3)~no \texttt{os.Exit()} in command handlers; (4)~types confined to \texttt{internal/types/} with no circular dependencies; (5)~CLI configuration shared via \texttt{config.go} with no duplication. These are repeated in leaf files per the placement rationale of Section~\ref{subsec:hierarchy}.
 
-\textbf{Procedures}: step-by-step instructions for common tasks. The principles CLAUDE.md includes the procedure for adding a new principle (create source file, test file, docs entry, update CLAUDE.md). The root file includes procedures for building, testing, and releasing. These procedures transform tribal knowledge (``ask Peter how to add a new principle'') into structured, machine-executable instructions.
+\textbf{Procedures}: step-by-step instructions for common tasks---adding a new principle, building, testing, releasing---transforming tribal knowledge into structured, machine-executable instructions.
 
-\textbf{Thesis mapping}: bidirectional traceability between code and academic writing. Every sub-directory CLAUDE.md includes a Thesis Mapping section identifying which thesis chapter describes that code. The thesis CLAUDE.md includes a Complete Feed Map table mapping every thesis section to the code files and documentation files the agent should read before writing. This bidirectional mapping enables two critical workflows: updating thesis content when code changes, and updating code when thesis analysis reveals inconsistencies.
+\textbf{Thesis mapping}: bidirectional traceability between code and academic writing. Every sub-directory CLAUDE.md names the thesis chapter describing that code; the thesis CLAUDE.md's Complete Feed Map maps every thesis section to its code and documentation sources. This enables both updating thesis content when code changes and updating code when thesis analysis reveals inconsistencies.
 
 % ----------------------------------------------------------------------------
 \subsection{Maintenance Rules and Self-Enforcement}
@@ -216,11 +220,9 @@ The CLAUDE.md protocol includes four maintenance rules encoded in the root file:
     \item When adding a new directory, create a CLAUDE.md in it and add it to the root monorepo table.
 \end{enumerate}
 
-The fourth rule deserves a clarification. Directories in this project were planned by the author up-front during the monorepo restructuring at the start of Phase~B; very few directories were created reactively by the agent during the partnership. The rule was therefore exercised more often as a verification step (``did the agent forget to add a CLAUDE.md to a new directory it created?'') than as a frequent operational requirement. It would matter more in projects where AI agents drive the directory layout, which was not the case here.
+One clarification on the fourth rule: directories were planned up-front by the author during the monorepo restructuring, so the rule was exercised mainly as a verification step; it would matter more in projects where AI agents drive the directory layout.
 
-These rules are not merely advisory. The project's CI pipeline includes a documentation completeness check (\texttt{tools/check-docs.sh}) that mechanically verifies CLAUDE.md coverage. The script performs nine categories of checks: CLAUDE.md existence in required directories, principle documentation completeness, documentation-versus-reality consistency (detecting stale claims like ``Not yet implemented'' when the source file exists), thesis chapter status (flagging stubs under 20 lines), and test coverage gaps. When any check fails, the CI build fails.
-
-This CI enforcement closes the loop. The CLAUDE.md protocol tells agents what to update; the CI check verifies that updates were made. The combination prevents knowledge drift---the same problem that SDT prevents for API specifications. In both cases, the solution is the same: treat documentation as a testable artifact and gate on its completeness.
+These rules are not merely advisory: the CI pipeline includes a documentation completeness check (\texttt{tools/check-docs.sh}) performing nine categories of checks---CLAUDE.md existence, principle documentation completeness, documentation-versus-reality consistency (detecting stale claims like ``Not yet implemented'' when the source file exists), thesis chapter status, and test coverage gaps---and fails the build on any violation. This closes the loop: the protocol tells agents what to update, the CI check verifies updates were made, preventing knowledge drift---the same problem SDT prevents for API specifications, by the same means: treat documentation as a testable artifact and gate on its completeness.
 
 % ============================================================================
 \section{Persistent Agent Memory}
@@ -229,36 +231,36 @@ This CI enforcement closes the loop. The CLAUDE.md protocol tells agents what to
 
 Beyond the per-directory CLAUDE.md files, the project maintains a persistent memory system that survives across agent sessions. This memory captures information that cannot be derived from the codebase: user preferences, learned corrections, project decisions, and external references.
 
-\textbf{Category of memory system.} In the taxonomy of memory architectures for AI systems, this falls under \emph{external, file-backed, semantic} memory: external (state lives outside the agent process, in files on disk), file-backed (each entry is a Markdown file with frontmatter, version-controllable independently), and semantic (entries store generalised knowledge---rules, preferences, project facts---rather than verbatim conversation transcripts). It is not episodic memory (no per-session conversation logs are persisted in this directory) and not procedural memory (procedures live in the CLAUDE.md files, not here). This addresses the supervisor's request~([544]) to name the category explicitly.
+\textbf{Category of memory system.} In the taxonomy of memory architectures for AI systems, this is \emph{external, file-backed, semantic} memory: state lives outside the agent process in version-controllable Markdown files storing generalised knowledge---rules, preferences, project facts---rather than conversation transcripts. It is neither episodic (no per-session logs) nor procedural (procedures live in the CLAUDE.md files).
 
 The memory directory contains twelve files: an index file (\texttt{MEMORY.md}) and eleven content entries.
 
 \begin{itemize}
     \item \textbf{User profile} (1 file): the developer's role (diploma thesis student), expertise (deep Go and Kubernetes, new to LaTeX), and communication preferences.
-    \item \textbf{Feedback corrections} (8 files): learned behaviours from iterative interaction. Examples include \texttt{feedback\_docs\_updates} (``always update CLAUDE.md, docs, and thesis drafts after each implementation session''), \texttt{feedback\_ask\_questions} (``don't assume; ask meaningful questions when decisions are ambiguous''), \texttt{feedback\_save\_test\_results} (``every DriveBy test result must be saved as pretty-printed JSON in \texttt{results/}''), and \texttt{feedback\_runtime\_spec} (``sample APIs generate specs at runtime, not from static \texttt{openapi.json}''---a correction made after the agent assumed file-backed specs).
+    \item \textbf{Feedback corrections} (8 files): learned behaviours from iterative interaction, e.g.\ \texttt{feedback\_docs\_updates} (``always update CLAUDE.md, docs, and thesis drafts after each implementation session'') and \texttt{feedback\_runtime\_spec} (``sample APIs generate specs at runtime, not from static \texttt{openapi.json}''---a correction made after the agent assumed file-backed specs).
     \item \textbf{Project decisions} (1 file): the monorepo restructuring rationale.
     \item \textbf{External references} (1 file): the target cluster URL and the instruction to never reinstall ArgoCD.
 \end{itemize}
 
-The feedback corrections are the most active part of the system. Each correction encodes a lesson learned from a failed interaction: the agent did something wrong, the user corrected it, and the correction was persisted so that the same mistake would not recur in future sessions. Over the 12-day Phase~B partnership these corrections accumulated into a behavioural profile that shaped the agent's approach to the project. This is analogous to organisational learning in human teams~\cite{nonaka-knowledge}: tacit knowledge (``Peter wants docs updated after every session'') is externalised into explicit, persistent artifacts that new sessions inherit.
+The feedback corrections are the most active part of the system. Each encodes a lesson from a failed interaction, persisted so the same mistake would not recur; over Phase~B these accumulated into a behavioural profile that shaped the agent's approach. This is analogous to organisational learning in human teams~\cite{nonaka-knowledge}: tacit knowledge is externalised into explicit, persistent artifacts that new sessions inherit.
 
-A clarification on what this memory is \emph{not}: it is not an autonomous learning system. The agent does not write to memory on its own initiative; the author authors every entry, the agent obeys. The persistence mechanism is what compounds the corrections, not any agentic learning capability.
+A clarification on what this memory is \emph{not}: it is not an autonomous learning system. The agent does not write to memory on its own initiative; the author writes every entry, the agent obeys. The persistence mechanism is what compounds the corrections, not any agentic learning capability.
 
 % ============================================================================
 \section{Agent-Driven Multi-API Evaluation}
 \label{sec:agent-eval}
 % ============================================================================
 
-The evaluation described in Chapter~\ref{ch:evaluation} was not conducted manually. The large-scale evaluation against APIs.guru was designed by the author, tooled and executed through an agentic workflow during Phase~B, and analysed jointly.
+The evaluation in Chapter~\ref{ch:evaluation} was not conducted manually. All four arms---controlled defect-injection, large-scale APIs.guru, operational deployment, and the agent-feedback experiment---were designed by the author. The APIs.guru arm, the focus of this section, was tooled and executed through an agentic workflow during Phase~B and analysed jointly.
 
 % ----------------------------------------------------------------------------
 \subsection{Tooling Development}
 \label{subsec:tooling-dev}
 % ----------------------------------------------------------------------------
 
-The three-step batch testing pipeline (\texttt{tools/harvest-openapi-apisguru.py}, \texttt{tools/probe-openapi-endpoints.py}, \texttt{tools/run-openapi-batch.sh}) was developed collaboratively. The author specified the experimental protocol (harvest from APIs.guru, filter for reachable endpoints, validate in both minimal and strict modes) and reviewed every script before it was committed; the agent implemented the tooling under that specification. The harvester script queries the APIs.guru registry, filters for OpenAPI 3.x specifications, and produces a CSV of API names, specification URLs, and base hosts. The prober validates reachability by testing simple GET endpoints. The batch runner executes DriveBy against each entry and collects results.
+The three-step batch testing pipeline (\texttt{tools/harvest-openapi-apisguru.py}, \texttt{tools/probe-openapi-endpoints.py}, \texttt{tools/run-openapi-batch.sh}) was developed collaboratively: the author specified the experimental protocol (harvest from APIs.guru, filter for reachable endpoints, validate in both minimal and strict modes) and reviewed every script before commit; the agent implemented the tooling under that specification. Reachability filtering is necessary even though the static specification is the object of validation: it excludes abandoned registry entries so the reported pass rates reflect currently operated services, and it is a precondition for P006--P007, which require a responding host.
 
-This tooling enabled evaluation at a scale that would have been impractical manually. The batch runner processed APIs from major providers (Stripe, Twilio, GitHub, AWS) alongside smaller independent APIs, producing per-principle pass rates that revealed the systematic documentation quality gaps reported in Section~\ref{sec:wild-eval} of Chapter~\ref{ch:evaluation}.
+This tooling enabled evaluation at a scale impractical manually, producing the per-principle pass rates reported in Section~\ref{sec:wild-eval} of Chapter~\ref{ch:evaluation}.
 
 % ----------------------------------------------------------------------------
 \subsection{Agent as Experimenter}
@@ -267,45 +269,45 @@ This tooling enabled evaluation at a scale that would have been impractical manu
 
 The agentic workflow extended beyond tooling development. The agent executed the evaluation runs, drafted summary tables of the results, and identified candidate patterns (e.g., the universal gap between P001 pass rates and P002--P004 pass rates). The author reviewed every analysis, verified the numbers against raw output, refined the interpretation, and is responsible for every numerical claim in Chapter~\ref{ch:evaluation}. The agent did not interpret the results in the thesis; the author did.
 
-This workflow illustrates a key property of SDT's structured output. The validation reports produced by DriveBy are JSON documents with per-principle pass/fail status, specific check results, and suggested remediations. An AI agent can parse these reports, identify patterns across multiple APIs, and generate comparative analysis under human supervision. The same property that makes SDT output suitable for CI/CD quality gates---structured, machine-readable, deterministic---makes it suitable for agent-driven evaluation. The Axiom of Observability, which requires that validation produces measurable, actionable results, is what enables this workflow.
+This workflow illustrates a key property of SDT's structured output: the same structured, machine-readable, deterministic reports that suit CI/CD quality gates also suit agent-driven evaluation under human supervision. The Axiom of Observability (Chapter~\ref{ch:methodology}) is what enables this workflow.
 
 % ----------------------------------------------------------------------------
 \subsection{The Limit Acknowledged: Coverage of Per-Check Cases}
 \label{subsec:eval-coverage-limit}
 % ----------------------------------------------------------------------------
 
-The supervisor noted~([551]) that the controlled evaluation should have considered all checks within each principle rather than the one or two cases per principle that the original draft reported. The author accepts this limit and addresses it as part of the controlled-evaluation rerun in Chapter~\ref{ch:evaluation}; the new run injects a defect at every check within each principle, plus selected combinations of two and three simultaneous defects, to demonstrate that the validator's detection accuracy holds across the full check matrix and not only on the cases originally reported.
+Exercising only one or two cases per principle would leave most of the check matrix untested. The controlled evaluation in Chapter~\ref{ch:evaluation} therefore injects a defect at every check within each principle, plus selected combinations of two and three simultaneous defects, demonstrating that the validator's detection accuracy holds across the full check matrix. The injection scheme---which defect at which check, with what expected verdict---was specified by the author; the agent implemented the injection harness under that specification, and the author reviewed every injected defect and verified every verdict before accepting the runs.
 
 % ============================================================================
 \section{Agent-Driven Thesis Writing}
 \label{sec:agent-thesis}
 % ============================================================================
 
-This thesis document was produced through an agentic workflow during Phase~B, but with a clear division of labour between the author and the agent. The supervisor's expectation~([549]) that the thesis was written by the author---with the agent serving as a checker against the codebase rather than as the primary writer---is partially correct but not the full picture. The actual division was:
+The crucial fact first: the agent's contribution to the thesis was confined to initial, code-grounded drafts; after each draft the author took over completely, fully rewriting substantive sections, so the final content of every chapter is the author's. Within that model, the Phase~B agentic workflow divided labour as follows:
 
 \begin{itemize}
     \item \textbf{Author}: chapter structure (the ten-chapter outline of \texttt{thesis/main.tex}), every research question, every contribution, every figure design, every claim that maps to a specific code element, every numerical result, and the final edited form of every chapter.
-    \item \textbf{Agent}: first drafts of prose paragraphs against author-supplied chapter specifications and the feed map; LaTeX formatting; cross-reference plumbing; mechanical edits (e.g.\ the SDT renaming pass after supervisor review).
+    \item \textbf{Agent}: first drafts of prose paragraphs against author-supplied chapter specifications and the feed map; LaTeX formatting; cross-reference plumbing; mechanical edits (e.g.\ the SDT renaming pass).
     \item \textbf{Both}: identification of inconsistencies between thesis claims and code reality. The agent could query the codebase faster, but the author judged whether each flagged inconsistency was a thesis error, a code error, or an acceptable simplification.
 \end{itemize}
 
-The thesis CLAUDE.md file (171 lines) provides chapter-by-chapter specifications that function as agent task descriptions: for each chapter, it lists the expected sections, the source code files to read, the documentation files to consult, and the key content requirements. The Complete Feed Map table maps every thesis section to both its code and documentation sources. When the agent drafts a thesis section, it follows a structured protocol:
+The thesis CLAUDE.md file (171 lines) provides chapter-by-chapter specifications that function as agent task descriptions: expected sections, source files to read, and key content requirements, with the Complete Feed Map mapping every thesis section to its code and documentation sources. When drafting a section the agent follows a structured protocol:
 
 \begin{enumerate}
-    \item \textbf{Read the specification}: the thesis CLAUDE.md's chapter entry identifies what the chapter should contain.
-    \item \textbf{Read the source}: the feed map identifies which code files and documentation files to read for factual accuracy.
-    \item \textbf{Draft the content}: the agent produces LaTeX content grounded in the actual implementation, using the code as the authoritative source.
-    \item \textbf{Author review}: the author reads the draft, edits for accuracy and tone, and accepts or rejects. Substantive sections were fully rewritten by the author after the draft.
+    \item \textbf{Read the specification}: the chapter entry in the thesis CLAUDE.md.
+    \item \textbf{Read the source}: the code and documentation files named in the feed map.
+    \item \textbf{Draft the content}: LaTeX grounded in the actual implementation as the authoritative source.
+    \item \textbf{Author takeover}: the author rewrites substantive sections, edits for accuracy and tone, and accepts or rejects.
 \end{enumerate}
 
-\textbf{Thesis as specification: a worked example.} The supervisor asked~([542]) for a concrete example justifying the claim that the thesis can be treated as a kind of specification against which the code is checked. One representative case: the thesis statement that ``DriveBy implements seven of nine principles as \texttt{PrincipleChecker} instances, with P006 and P007 as planned wrappers'' is treated as authoritative. The CI documentation check (\texttt{tools/check-docs.sh}) cross-references this against the actual files in \texttt{driveby-cli/\allowbreak internal/principles/}: if a P006 file appeared in source without a corresponding update to the thesis status, the build would fail. In this sense the thesis is treated as a high-level specification that gates code state---an asymmetric relationship where the thesis is the source of truth for the project's claimed scope, and the code is checked against it. This is more limited than treating the entire thesis as formal specification, but it does formalise one specific claim per chapter as a CI-enforced invariant.
+\textbf{Thesis as specification: a worked example.} The thesis statement that ``DriveBy implements seven of nine principles as \texttt{PrincipleChecker} instances, with P006 and P007 as planned wrappers'' is treated as authoritative: the CI documentation check cross-references it against the actual files in \texttt{driveby-cli/\allowbreak internal/principles/}, and if a P006 file appeared in source without a corresponding thesis-status update, the build would fail. The thesis is thus the source of truth for the project's claimed scope, and the code is checked against it---more limited than treating the entire thesis as formal specification, but formalising one claim per chapter as a CI-enforced invariant.
 
 % ============================================================================
 \section{SDT as Agent Feedback Infrastructure}
 \label{sec:ddt-agent-feedback}
 % ============================================================================
 
-The experience of building DriveBy with an AI agent over Phase~B supports a claim made throughout this thesis: that SDT's structured output is naturally suited for consumption by autonomous agents. This section formalises the connection and notes its current empirical status.
+The experience of building DriveBy with an AI agent supports a claim made throughout this thesis: that SDT's structured output is naturally suited for consumption by autonomous agents. This section formalises the connection and notes its empirical status.
 
 % ----------------------------------------------------------------------------
 \subsection{The Agent Validation Loop}
@@ -315,19 +317,19 @@ The experience of building DriveBy with an AI agent over Phase~B supports a clai
 Consider an autonomous agent tasked with improving an API specification's SDT compliance. The agent executes the following loop:
 
 \begin{enumerate}
-    \item \textbf{Validate}: Run \texttt{driveby validate-only --validation-mode strict} against the specification.
-    \item \textbf{Parse}: Read the JSON report. Identify failing principles and specific check failures.
-    \item \textbf{Diagnose}: For each failure, read the \texttt{SuggestedFix} field and the \texttt{Details} map to determine what is missing or incorrect.
-    \item \textbf{Remediate}: Generate specification changes that address the diagnosed issues---add missing descriptions (P002), document error responses (P003), add schema constraints (P004), define security schemes (P005).
-    \item \textbf{Re-validate}: Run DriveBy again to confirm that the remediation resolved the issue without introducing new failures.
+    \item \textbf{Validate}: run \texttt{driveby validate-only --validation-mode strict}.
+    \item \textbf{Parse}: read the JSON report; identify failing principles and check failures.
+    \item \textbf{Diagnose}: read each failure's \texttt{SuggestedFix} field and \texttt{Details} map.
+    \item \textbf{Remediate}: generate specification changes addressing the diagnosed issues---missing descriptions (P002), error responses (P003), schema constraints (P004), security schemes (P005).
+    \item \textbf{Re-validate}: run DriveBy again to confirm the fix without new failures.
 \end{enumerate}
 
 This loop is feasible because of three properties guaranteed by SDT's axioms:
 
 \begin{itemize}
-    \item \textbf{Completeness} ensures that the validation report identifies \textit{what} is missing. A P002 failure with a details map listing ``44 request/response bodies missing examples'' gives the agent a precise remediation target.
-    \item \textbf{Determinism} ensures that the agent can distinguish genuine fixes from noise. If the agent adds examples and re-runs validation, a P002 pass confirms the fix; a continued failure indicates the fix was incomplete. Non-deterministic validation would make this feedback loop unreliable.
-    \item \textbf{Observability} ensures that the report is structured and machine-readable. The JSON format with per-principle results, named checks, and suggested fixes is parseable without natural language understanding---the agent reads fields, not prose.
+    \item \textbf{Completeness} ensures the report identifies \textit{what} is missing: a P002 failure listing ``44 request/response bodies missing examples'' gives the agent a precise remediation target.
+    \item \textbf{Determinism} lets the agent distinguish genuine fixes from noise: on re-run, a P002 pass confirms the fix; a continued failure indicates it was incomplete.
+    \item \textbf{Observability} ensures the report is structured and machine-readable---the agent reads fields, not prose.
 \end{itemize}
 
 % ----------------------------------------------------------------------------
@@ -335,47 +337,43 @@ This loop is feasible because of three properties guaranteed by SDT's axioms:
 \label{sec:agent-feedback-future}
 % ----------------------------------------------------------------------------
 
-The supervisor noted~([550]) that the theoretical connection above between SDT feedback and agent corrections is well-argued but lacks an empirical demonstration in the current evaluation. The author accepts this critique. The evidence currently in this thesis is indirect: the development of DriveBy itself shows that SDT's output is consumable by an agent under human supervision, but the thesis does not yet contain a controlled experiment in which an agent autonomously improves an API specification's SDT score using only the validation report as input.
+The theoretical connection above between SDT feedback and agent corrections requires empirical demonstration; the development experience alone is indirect evidence---it shows SDT's output is consumable by an agent under human supervision, but not that an agent can autonomously improve a specification's SDT score using only the validation report as input.
 
-Such an experiment is added as a new sub-section of Chapter~\ref{ch:evaluation} (Section~\ref{sec:sdt-feedback-experiment}): one or two real-world public APIs with low P002--P004 scores are taken as starting points, the DriveBy validation report is supplied as the sole input to an AI agent, and the agent's revised specification is re-validated to measure the score delta. The result of this experiment converts the theoretical connection of this section into an empirical one. The author considers a more comprehensive version of this experiment (multiple agents, multiple specification revisions per API, controlled comparison against human-revised specifications) to be an important direction for follow-on doctoral work (Chapter~\ref{ch:conclusion}).
+Such an experiment is reported in Chapter~\ref{ch:evaluation} (Section~\ref{sec:sdt-feedback-experiment}): the Swagger Petstore specification---a real-world public API scoring 1/6 in strict mode---is taken as the starting point, the DriveBy validation report is supplied as the sole input to an AI agent, and the agent's revised specification is re-validated. A single agent-revision pass raised the score from 1/6 to 4/6, converting the theoretical connection of this section into an empirical one. The author considers a more comprehensive version of this experiment (multiple agents, multiple specification revisions per API, controlled comparison against human-revised specifications) to be an important direction for follow-up doctoral work (Chapter~\ref{ch:conclusion}).
 
 % ----------------------------------------------------------------------------
 \subsection{From Validation to Remediation}
 \label{subsec:validation-remediation}
 % ----------------------------------------------------------------------------
 
-The \texttt{SuggestedFix} field in each \texttt{PrincipleResult} is the interface between validation and remediation. For P002 failures, the suggested fix identifies specific operations lacking descriptions and specific schemas lacking examples. For P004 failures, it identifies specific fields lacking type constraints. For P005 failures, it identifies missing security scheme definitions.
+The \texttt{SuggestedFix} field in each \texttt{PrincipleResult} is the interface between validation and remediation: it names the specific operations, schemas, fields, or security definitions at fault. These fixes are not aspirational---in the agent-feedback experiment (Section~\ref{sec:sdt-feedback-experiment}) the agent translated the \texttt{SuggestedFix} entries of the baseline Petstore report into concrete edits: descriptions and examples (P002), 4xx/5xx error responses wired to all 19 operations (P003), schema constraints (P004), security schemes (P005), and versioning metadata (P008). When DriveBy reports ``string field \texttt{email} lacks length constraints,'' the remediation is unambiguous: add \texttt{maxLength} and \texttt{pattern} to the field's schema, derivable from the report without external documentation, a human, or inferred intent.
 
-These suggested fixes are not aspirational---they are actionable specifications that an agent can translate into concrete specification edits. When DriveBy reports ``string field \texttt{email} lacks length constraints,'' the remediation is unambiguous: add \texttt{maxLength} and \texttt{pattern} properties to the field's schema. The specification change is derivable from the failure report without consulting external documentation, querying a human, or inferring intent from context.
+That the validation report contains sufficient information for autonomous remediation is the Axiom of Completeness applied to the validation output rather than the specification input; the \texttt{SuggestedFix} field ensures it.
 
-This property---that the validation report contains sufficient information for autonomous remediation---is a direct consequence of the Axiom of Completeness applied to the validation output rather than the specification input. Just as SDT requires the specification to be complete enough for validation, SDT's own output must be complete enough for remediation. The \texttt{SuggestedFix} field ensures this.
+\textbf{A limitation: invented constraint values.} One caveat tempers the remediation claim. An agent that supplies concrete constraint values---a \texttt{maxLength} bound, a \texttt{pattern} regular expression---without grounding them in the actual implementation can produce a specification that \emph{passes} the principles while \emph{misrepresenting} the API's real behaviour. The divergence is not necessarily detectable even by functional testing (the implementation may accept inputs the invented constraint forbids), and such a specification would mislead API clients. Agent-remediated specifications must therefore be verified against the implementation by its owners before promotion to production; automating this verification (e.g.\ cross-checking proposed constraints against observed traffic or implementation code) is left as future work.
 
 % ============================================================================
 \section{Personal Lessons Learned}
 \label{sec:personal-lessons}
 % ============================================================================
 
-The two preceding generations of ``lessons learned'' material in earlier drafts of this chapter conflated two different things: lessons about the agentic-development \emph{framework} (which generalise) and lessons \emph{the author} learned (which are specific to this experience). The supervisor asked~([528], part~c) for the latter, distinct from the former. This section provides them.
+Whereas lessons about the agentic-development \emph{framework} generalise (Sections~\ref{sec:claudemd-protocol} and~\ref{sec:agent-memory}; Chapter~\ref{ch:discussion}), this section records what \emph{the author} learned from this specific experience.
 
-\textbf{The 350-day solo investment was decisive, not the 12-day partnership.} The most useful single piece of self-feedback is that the AI partnership only became productive because of the year of solo work that preceded it. Without the SDT axioms, the principle catalogue, the \texttt{APISpec} abstraction, the five code-quality rules, and the monorepo layout already in place, Phase~B would have produced architecturally inconsistent code. In a follow-on project, the author would resist the temptation to engage AI assistance early; the up-front design work is the thing that makes later acceleration possible.
+\textbf{The 350-day solo investment was decisive, not the 12-day partnership.} The AI partnership only became productive because of the year of solo work that preceded it: without the SDT axioms, the principle catalogue, the \texttt{APISpec} abstraction, the code-quality rules, and the monorepo layout already in place, Phase~B would have produced architecturally inconsistent code. In a follow-up project the author would again resist engaging AI assistance early. Could the agent also have supplied design ideas worth adopting? In this project it did not: the division of labour was deliberately strict---architect and executor---all architectural and design decisions originated with the author, and the agent's suggestions stayed at implementation-level tactics, none adopted as a design-level idea (Section~\ref{subsec:authorship-claim}).
 
-\textbf{Persisting corrections is the highest-leverage skill.} The single behaviour that made the largest difference during Phase~B was treating every recurring agent mistake as a CLAUDE.md or memory entry rather than as a one-shot correction. A correction that lives in a chat session dies with the session; a correction that lives in a file compounds. In a follow-on project, the author would invest more effort earlier in writing this kind of structured feedback rather than re-explaining the same constraint three times.
+\textbf{Persisting corrections is the highest-leverage skill.} The behaviour that made the largest difference was treating every recurring agent mistake as a CLAUDE.md or memory entry rather than a one-shot correction: a correction that lives in a chat session dies with the session; one that lives in a file compounds.
 
-\textbf{Code review remained the bottleneck.} During Phase~B, the agent could produce more output than the author could verify. The output rate was a temptation; the verification rate was the rate-limit. The author would in a follow-on project budget time explicitly for verification before each session---e.g.\ committing to review the previous session's output to completion before starting the next session, even if that means a quieter sprint.
+\textbf{Code review remained the bottleneck.} The agent could produce more output than the author could verify; the verification rate was the rate-limit. In a follow-up project the author would budget explicit verification time---reviewing the previous session's output to completion before starting the next.
 
-\textbf{The thesis benefited from being treated as one of the artifacts.} Drafting the thesis with the same protocol used for code (chapter specifications, feed map, CI documentation check) produced a tighter alignment between the document and the implementation than a separate writing process would have. In follow-on projects the author would adopt this pattern by default---treat the thesis or final report as a first-class artifact in the development pipeline from the start, rather than as a downstream deliverable to be written at the end.
+\textbf{The thesis benefited from being treated as one of the artifacts.} Drafting the thesis with the same protocol used for code (chapter specifications, feed map, CI documentation check) produced tighter alignment between document and implementation than a separate writing process would have; the author would adopt this pattern by default in follow-up projects.
 
-\textbf{What the author would do differently.} Three specific changes for a follow-on project: (i)~record exact wall-clock time per activity from day one (so that questions like ``how much time did you spend reviewing AI output?'' have measured rather than estimated answers); (ii)~set up the controlled-experiment harness for the SDT-feedback evaluation (Section~\ref{sec:agent-feedback-future}) before starting Phase~B, so that the empirical proof of the framework's most consequential claim is part of the deliverable from the start; (iii)~establish the precision/accuracy axiom debate (Chapter~\ref{ch:methodology}) earlier, so that the framework is presented as four-axioms-with-precision rather than three-axioms-with-precision-as-future-work.
+\textbf{What the author would do differently.} Three specific changes for a follow-up project are planned: (i)~record exact wall-clock time per activity from day one (so that questions like ``how much time did you spend reviewing AI output?'' have measured rather than estimated answers); (ii)~set up the controlled-experiment harness for the SDT-feedback evaluation (Section~\ref{sec:agent-feedback-future}) before starting Phase~B, so that the empirical proof of the framework's most consequential claim is part of the deliverable from the start; (iii)~establish the precision/accuracy axiom debate (Chapter~\ref{ch:methodology}) earlier, so that the framework is presented as four-axioms-with-precision rather than three-axioms-with-precision-as-future-work.
 
-These are the author's lessons, not the agent's. They are what the experience of running this project taught the author about how to run the next one.
+\textbf{Not every lesson is AI-specific.} Three transferable practices carry forward irrespective of agentic tooling: fixing architectural invariants up front as non-negotiable constraints; treating documentation as a CI-gated, testable artifact (the practice SDT itself generalises); and maintaining authorship traceability through disciplined commit metadata, which made the quantitative analysis of Section~\ref{subsec:quant-authorship} possible at all.
 
 % ============================================================================
 \section{Summary}
 \label{sec:ai-summary}
 % ============================================================================
 
-This chapter answered the supervisor's question of who did what in this thesis. The author owns the conceptual content (the SDT framework, the architecture, the evaluation design, the chapter structure) and the majority of the source lines (approximately 74\% of all source lines added across the project's lifetime). The AI partnership was concentrated in a 12-day productisation sprint at the end of a 361-day project, and during that sprint the author acted as architect, agent orchestrator, and reviewer of every output.
-
-The CLAUDE.md knowledge protocol and the persistent-memory system are the enabling infrastructure that made the author's directing role tractable. SDT's structured output is a natural feedback source for autonomous agent loops; the empirical proof of that connection is added to Chapter~\ref{ch:evaluation} as a new experiment. The personal lessons section captures what the author learned from running this project---distinct from the methodological framework that the project produced.
-
-The author claims overall authorship of approximately 80\% of this thesis and the DriveBy project, in the role of architect-and-tech-lead with explicit agent-orchestrator responsibilities during the productisation sprint.
+The author owns the conceptual content of this thesis and approximately 74\% of all source lines added across the project's lifetime; the AI partnership was concentrated in a 12-day productisation sprint at the end of a 361-day project, during which the author acted as architect, agent orchestrator, and reviewer of every output. The CLAUDE.md knowledge protocol and the persistent-memory system made that directing role tractable, and SDT's structured output as agent feedback is demonstrated empirically in Chapter~\ref{ch:evaluation}. The author claims overall authorship of approximately 80\% of this thesis and the DriveBy project, in the role of architect-and-tech-lead with explicit agent-orchestrator responsibilities during the productisation sprint.

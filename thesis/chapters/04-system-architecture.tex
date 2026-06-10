@@ -1,0 +1,112 @@
+\chapter{System Architecture}
+\label{ch:system-architecture}
+
+Chapter~\ref{ch:methodology} defined Specification-Driven Testing as three axioms and nine validation principles. Before any single component is examined, this chapter establishes the architecture of the \emph{system} that realizes the framework: its components, its boundary, its infrastructure, and how the work of turning a specification into a promotion decision is divided.
+
+The system is larger than the tool: the DriveBy CLI is only the validation engine and cannot, by itself, gate a delivery pipeline. The system under study comprises four components---the DriveBy CLI, which evaluates specifications against the SDT principles; the XSDLC Crossplane composition, which generates per-application pipeline infrastructure; the generated gate infrastructure itself (event sources, sensors, validation workflows, ingress routes); and the GitOps Promoter, which converts validation verdicts into promotion decisions. Removing any one of them breaks the chain from specification to promotion.
+
+Equally important is what the system is \emph{not}. Kubernetes and Crossplane are not components but the system's \textit{infrastructure substrate}: the control plane that hosts it, reconciles its declared resources, and provides the shared platform services (ArgoCD, the Argo Events and Argo Workflows engines, ingress, certificate management) that the system references but does not install. This system-on-substrate separation recurs throughout the thesis; the operational evaluation (Chapter~\ref{ch:evaluation}) demonstrates that the system can be installed on, coexist with, and be surgically removed from a pre-existing substrate.
+
+% ============================================================================
+\section{System Context}
+\label{sec:system-context}
+% ============================================================================
+
+Figure~\ref{fig:system-context} fixes the system boundary: the dashed boundary encloses the four components, with the substrate band---the Kubernetes and Crossplane control plane plus inherited platform services---underneath. Outside remain only the entities the system does not control: the API developer, the platform operator, the target API and its OpenAPI specification, the external GitHub repositories (Chapter~\ref{ch:workflow}), and the structured validation report---the system's primary output.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{figures/system-context.tex}%
+}
+\caption{System context. The dashed boundary encloses the system under study: the DriveBy CLI (validation engine), the XSDLC composition (pipeline generator), the generated gate infrastructure, and the GitOps Promoter (promotion controller), resting on the infrastructure substrate that hosts and reconciles it. External entities: human actors, the target API and its specification, the GitHub repositories, and the validation report.}
+\label{fig:system-context}
+\end{figure}
+
+Two boundary decisions deserve justification. First, the \textit{GitOps Promoter is inside the boundary}: it consumes the gate verdicts (as commit statuses) and performs the promotion the gates exist to control; placing it outside would sever the defining feedback loop---validation results driving promotion decisions---and reduce the system to a passive report generator. Second, \textit{ArgoCD and the Argo engines are substrate, not system}: they pre-exist on the target cluster, serve many tenants, and are referenced rather than installed by XSDLC. The system's contribution is the declarative configuration that instructs these engines, not the engines themselves.
+
+% ============================================================================
+\section{The Three-Layer Model}
+\label{sec:three-layer-model}
+% ============================================================================
+
+The system divides its work into three abstraction layers, each described by one of the implementation chapters that follow. A standalone validation CLI, however well-designed, cannot satisfy the operational demands of continuous delivery at scale; three requirements drive the layering.
+
+First, \textit{execution must be automated}. A manually invoked CLI is useful for debugging but cannot serve as a quality gate, which must fire on every relevant event---a promotion pull request, a scheduled regression, a new deployment---without human intervention.
+
+Second, \textit{configuration must be declarative}. Imperative validation (``run this command with these flags'') lives in scripts, CI pipelines, or developer knowledge; declarative validation (``this API must pass strict SDT validation before promotion to staging'') is a versioned, reconcilable Kubernetes resource that supports drift detection, audit trails, and self-healing.
+
+Third, \textit{results must drive automated decisions}. The CLI's JSON report and exit code suffice for a human reviewer but not for a GitOps reconciliation loop, which requires structured commit statuses, webhook callbacks, and status conditions rather than stdout parsing.
+
+These requirements map directly to the three layers, summarized in Table~\ref{tab:cli-to-cr-progression}: the CLI (Chapter~\ref{ch:architecture}) provides the \textit{validation logic}, the Kubernetes infrastructure (Chapter~\ref{ch:kubernetes}) the \textit{execution and provisioning layer}, and the GitOps pipeline (Chapter~\ref{ch:workflow}) the \textit{decision layer}.
+
+\begin{table}[htbp]
+\centering
+\caption{The three abstraction layers of the system.}
+\label{tab:cli-to-cr-progression}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Aspect} & \textbf{CLI (Ch.~\ref{ch:architecture})} & \textbf{Kubernetes (Ch.~\ref{ch:kubernetes})} & \textbf{GitOps (Ch.~\ref{ch:workflow})} \\
+\midrule
+Execution     & Manual invocation      & Event-driven workflows   & Promotion-triggered \\
+Configuration & CLI flags, env vars    & XRD spec fields, Helm values & Git-versioned manifests \\
+Output        & JSON to stdout         & Workflow artifacts        & Commit statuses \\
+State         & Transient (process)    & Pod lifecycle             & Reconciled desired state \\
+Promotion     & Human decision         & Sensor-triggered          & Automated (commit status) \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+% ============================================================================
+\section{From CLI Tool to Custom Resource}
+\label{sec:cli-to-cr-evolution}
+% ============================================================================
+
+The three-layer structure is the end point of an architectural evolution through five stages, each subsuming the previous while adding a new capability. Tracing them explains \emph{why} the system has the shape that Figure~\ref{fig:system-context} fixes.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 1: Shell Script}
+\label{subsec:stage-shell}
+% ----------------------------------------------------------------------------
+
+The earliest form of API validation is a shell pipeline: \texttt{curl} fetches the specification, \texttt{jq} extracts fields, and conditional logic checks for missing descriptions or undocumented error codes. It requires nothing beyond a POSIX shell, but lacks structure (ad-hoc string matches), reusability (a custom script per API), and determinism (each developer encodes different checks and thresholds), and cannot produce structured reports, compose into pipelines, or participate in automated decision-making.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 2: Go CLI}
+\label{subsec:stage-cli}
+% ----------------------------------------------------------------------------
+
+The DriveBy CLI (Chapter~\ref{ch:architecture}) addresses these limitations with typed principles, a version-agnostic spec abstraction (\texttt{APISpec}), a deterministic validation engine, and structured JSON reporting. Of the nine SDT principles (P001--P009), the CLI implements seven as \texttt{PrincipleChecker} instances (P001--P005, P008, P009); P006 (functional testing) and P007 (performance testing) are handled by dedicated test runners (Section~\ref{subsec:gate-types}). The same principle set runs on every specification, producing comparable, machine-readable results from a self-contained binary with zero runtime dependencies.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 3: Container Image}
+\label{subsec:stage-container}
+% ----------------------------------------------------------------------------
+
+Packaging the CLI as an OCI container image (\texttt{ghcr.io/\allowbreak meter-peter/\allowbreak driveby}) adds portability: the same binary runs on a developer's laptop or inside any container runtime---Docker, containerd, CRI-O---without dependency management. The image is the unit of deployment for all subsequent stages; workflow steps, CI jobs, and Crossplane-managed workflows all reference it.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 4: Argo Workflow Step}
+\label{subsec:stage-workflow}
+% ----------------------------------------------------------------------------
+
+Embedding the container image as a step in an Argo Workflows DAG adds event-driven execution, dependency ordering, artifact persistence, and exit handling. Argo Events triggers the workflow from GitHub webhooks; the workflow runs validation alongside health checking, commit-status posting, and PR commenting, and posts results back to the Git control plane---transforming the CLI from a manual tool into an automated quality gate.
+
+% ----------------------------------------------------------------------------
+\subsection{Stage 5: Crossplane Custom Resource}
+\label{subsec:stage-cr}
+% ----------------------------------------------------------------------------
+
+The final stage---the \texttt{XSDLC} custom resource described in Section~\ref{sec:xrd-design}---declares the entire pipeline as a single Kubernetes resource: from one CR (\(\sim\)25 lines of YAML) declaring the desired end state, Crossplane's reconciliation loop provisions the complete gate infrastructure.
+
+The key insight is that each stage \textit{subsumes} the previous: the CR still runs the same CLI binary, inside the same container image, as a step in the same Argo Workflows DAG. Nothing is discarded; each layer adds a capability (portability, automation, declarative management) while preserving the core validation logic. The critical enabler is the CLI's own architecture (Section~\ref{subsec:design-goals}), which makes the validation logic portable across execution environments---the same principle checkers run in a developer's terminal and inside an Argo Workflow container. The CLI was not retrofitted for Kubernetes integration; it was designed from the outset to support multiple deployment models.
+
+% ============================================================================
+\section{Chapter Roadmap}
+\label{sec:architecture-roadmap}
+% ============================================================================
+
+The three chapters that follow descend through the layers: Chapter~\ref{ch:architecture} opens the DriveBy binary, Chapter~\ref{ch:kubernetes} describes the execution and provisioning layer, and Chapter~\ref{ch:workflow} the decision layer.

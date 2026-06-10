@@ -78,21 +78,26 @@
 \draw[->,thick,orange!50!black] (pr3) -- (gate2);
 
 % Active branches
-\node[branch=teal] (dev)     at (0,-5.8) {environment/\\dev};
-\node[branch=teal] (staging) at (5,-5.8) {environment/\\staging};
-\node[branch=teal] (prod)    at (10,-5.8) {environment/\\prod};
+% Round-2 review [264]: row moved from y=-5.8 to y=-6.2. The two-line branch
+% nodes previously left <2.5mm between the gate's south border and the branch
+% node's north border, so the gate1->staging arrow (head longer than the gap)
+% rendered clipped. All arrows are now border-anchored with room to render
+% completely, which also restores a correct bounding box.
+\node[branch=teal] (dev)     at (0,-6.2) {environment/\\dev};
+\node[branch=teal] (staging) at (5,-6.2) {environment/\\staging};
+\node[branch=teal] (prod)    at (10,-6.2) {environment/\\prod};
 
-\draw[->,thick,teal!50!black] (pr1) -- (dev);
-\draw[->,thick,teal!50!black] (gate1) -- (staging);
-\draw[->,thick,teal!50!black] (gate2) -- (prod);
+\draw[->,thick,teal!50!black] (pr1.south) -- (dev.north);
+\draw[->,thick,teal!50!black] (gate1.south) -- (staging.north);
+\draw[->,thick,teal!50!black] (gate2.south) -- (prod.north);
 
 % ArgoCD sync (all auto)
-\node[branch=green!60!black] (argodev) at (0,-7.0) {ArgoCD sync\\(auto)};
-\node[branch=green!60!black] (argostg) at (5,-7.0) {ArgoCD sync\\(auto)};
-\node[branch=green!60!black] (argoprod) at (10,-7.0) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argodev) at (0,-7.6) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argostg) at (5,-7.6) {ArgoCD sync\\(auto)};
+\node[branch=green!60!black] (argoprod) at (10,-7.6) {ArgoCD sync\\(auto)};
 
-\draw[->,thick,green!40!black] (dev) -- (argodev);
-\draw[->,thick,green!40!black] (staging) -- (argostg);
-\draw[->,thick,green!40!black] (prod) -- (argoprod);
+\draw[->,thick,green!40!black] (dev.south) -- (argodev.north);
+\draw[->,thick,green!40!black] (staging.south) -- (argostg.north);
+\draw[->,thick,green!40!black] (prod.south) -- (argoprod.north);
 
 \end{tikzpicture}

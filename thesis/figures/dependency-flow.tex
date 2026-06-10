@@ -24,7 +24,7 @@
 \node[box=blue]   (types)      {\texttt{types} \textemdash\ value types, report model, exit codes};
 \node[box=blue]   (spec)       [above=of types] {\texttt{spec} \textemdash\ APISpec interface + version adapters};
 \node[box=green!60!black]  (loader)     [above=of spec] {\texttt{loader} \textemdash\ spec loading, version detection};
-\node[box=green!60!black]  (principles) [above=of loader] {\texttt{principles} \textemdash\ P001--P008 checkers, registry};
+\node[box=green!60!black]  (principles) [above=of loader] {\texttt{principles} \textemdash\ P001--P005, P008, P009 checkers, registry};
 \node[box=green!60!black]  (testing)    [above=of principles] {\texttt{testing} \textemdash\ functional + performance tests};
 \node[box=orange] (engine)     [above=of testing] {\texttt{engine} \textemdash\ orchestrator: load, select, evaluate};
 \node[box=orange] (cli)        [above=of engine] {\texttt{cli} \textemdash\ Cobra commands, flag binding};

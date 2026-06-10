@@ -53,12 +53,13 @@
 \node[iface] (apispec) at (0,0) {%
   \textbf{$\langle\!\langle$\,interface\,$\rangle\!\rangle$ APISpec}\\[2pt]
   \rule{4cm}{0.4pt}\\[2pt]
-  \texttt{Version() string}\\
-  \texttt{Title() string}\\
+  \texttt{Type() SpecType}\\
+  \texttt{RawVersion() string}\\
+  \texttt{Info() *SpecInfo}\\
   \texttt{Paths() map[string]*PathItem}\\
-  \texttt{Operations() []*Operation}\\
   \texttt{Components() *Components}\\
-  \texttt{ValidateStructure() error}%
+  \texttt{Security() []SecurityRequirement}\\
+  \texttt{ValidateStructure(ctx) error}%
 };
 
 \node[cls] (oa3) at (-5.5,-3.5) {%
@@ -73,8 +74,9 @@
   \textbf{swagger2Spec}\\[2pt]
   \rule{3cm}{0.4pt}\\[2pt]
   wraps \texttt{*openapi2.T}\\
-  downgrades to 3.0.x\\
-  via \texttt{openapi2conv}%
+  normalizes Swagger 2.0\\
+  directly (body params,\\
+  security definitions)%
 };
 
 \draw[realize] (oa3.north) -- (apispec.south west);
@@ -84,7 +86,7 @@
 \node[cls] (engine) at (5.5,0.3) {%
   \textbf{Engine}\\[2pt]
   \rule{3cm}{0.4pt}\\[2pt]
-  \texttt{Validate(spec, mode)}\\
+  \texttt{ValidateSpec(ctx)}\\
   selects checkers via\\
   \texttt{Registry.ForMode()}\\
   aggregates results%
@@ -96,10 +98,8 @@
   \textbf{$\langle\!\langle$\,interface\,$\rangle\!\rangle$ PrincipleChecker}\\[2pt]
   \rule{4cm}{0.4pt}\\[2pt]
   \texttt{ID() string}\\
-  \texttt{Axiom() Axiom}\\
-  \texttt{Severity() Severity}\\
-  \texttt{Modes() []ValidationMode}\\
-  \texttt{Check(spec APISpec)}\\
+  \texttt{Check(ctx, spec APISpec,}\\
+  \quad\texttt{mode ValidationMode)}\\
   \quad\texttt{PrincipleResult}%
 };
 
@@ -115,8 +115,8 @@
 \node[plcheck]         (p005) at ( 1.7,-9.8) {P005\\Security};
 \node[plcheck]         (p008) at ( 3.5,-9.8) {P008\\Versioning};
 \node[plcheck]         (p009) at ( 5.3,-9.8) {P009\\Test\\Readiness};
-\node[plcheck-planned] (p006) at (-1.0,-11.3){P006\\Functional\\(planned)};
-\node[plcheck-planned] (p007) at ( 2.5,-11.3){P007\\Performance\\(planned)};
+\node[plcheck-planned] (p006) at (-1.0,-11.3){P006\\Functional\\(runtime)};
+\node[plcheck-planned] (p007) at ( 2.5,-11.3){P007\\Performance\\(runtime)};
 
 \foreach \n in {p001,p002,p003,p004,p005,p008,p009,p006,p007} {
   \draw[realize] (\n.north) -- (pcint.south);
@@ -128,7 +128,7 @@
 \node[anchor=west, font=\tiny] at (-4.4,-13.2) {realises (interface implementation)};
 \draw[use] (1.0,-13.2) -- (2.0,-13.2);
 \node[anchor=west, font=\tiny] at (2.1,-13.2) {uses};
-\node[plcheck-planned, scale=0.55] at (4.0,-13.2) {planned};
-\node[anchor=west, font=\tiny] at (4.65,-13.2) {dashed = defined, not yet implemented};
+\node[plcheck-planned, scale=0.55] at (4.0,-13.2) {runtime};
+\node[anchor=west, font=\tiny] at (4.65,-13.2) {dashed = runtime testers; checker wrappers pending};
 
 \end{tikzpicture}

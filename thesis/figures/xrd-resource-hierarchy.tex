@@ -1,5 +1,13 @@
 % XSDLC Resource Hierarchy — Chapter 5
-% Shows: Single XSDLC CR generating app-level and per-gate resources
+% Shows: Single XSDLC CR generating app-level, per-environment, and per-gate
+% resources (three groups, matching the figure caption).
+% Updated 2026-06 (round-2 review):
+%   [234] arrows render completely — nodes are spaced 0.9cm apart (0.3cm gap
+%         between borders > 2.5mm arrowhead) and every arrow is anchored on
+%         node boundaries.
+%   [235] added the Per-environment group (PromotionStrategy, Branches,
+%         overlay RepositoryFile, ghcr-creds, ArgoCD Application) so the
+%         figure agrees with the caption's three resource groups.
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.7cm,
@@ -37,60 +45,76 @@
 ]
 
 % XSDLC CR at top
-\node[xrd] (xsdlc) at (3.25,0) {XSDLC\\(single CR per application)};
+\node[xrd] (xsdlc) at (4.6,0) {XSDLC\\(single CR per application)};
 
 % --- App-level resources (left column) ---
-% Group label on the left of the column so the XSDLC arrow has a clear path.
-\node[grouplabel=teal,anchor=east] at (-2.0,-1.2) {App-level (shared)};
-
 \node[resource] (sa)       at (0,-2.0) {ServiceAccount};
-\node[resource] (eb)       at (0,-2.8) {EventBus};
-\node[resource] (scm)      at (0,-3.6) {ScmProvider};
-\node[resource] (gitrepo)  at (0,-4.4) {GitRepository};
-\node[resource] (promstrat) at (0,-5.2) {PromotionStrategy};
-\node[resource] (commitst) at (0,-6.0) {ArgoCDCommitStatus};
+\node[resource] (eb)       at (0,-2.9) {EventBus};
+\node[resource] (scm)      at (0,-3.8) {ScmProvider};
+\node[resource] (gitrepo)  at (0,-4.7) {GitRepository};
+\node[resource] (commitst) at (0,-5.6) {ArgoCDCommitStatus};
 
 \begin{scope}[on background layer]
     \node[group=teal, fit={($(sa.north west)+(-0.3,0.3)$) ($(commitst.south east)+(0.3,-0.3)$)}] (appgrp) {};
 \end{scope}
 
-% Arrows from XSDLC to app-level
-\draw[->,thick,violet!50!black] (xsdlc.south) -- ++(0,-0.5) -| (sa.north);
-
-\draw[->,thick,teal!50!black] (sa) -- (eb);
-\draw[->,thick,teal!50!black] (eb) -- (scm);
-\draw[->,thick,teal!50!black] (scm) -- (gitrepo);
-\draw[->,thick,teal!50!black] (gitrepo) -- (promstrat);
-\draw[->,thick,teal!50!black] (promstrat) -- (commitst);
-
-% --- Per-gate resources (right column) ---
-% Group label on the right of the column so the XSDLC arrow has a clear path.
-\node[grouplabel=orange,anchor=west] at (8.5,-1.2) {Per-gate (one set each)};
-
-\node[resource] (role)    at (6.5,-2.0) {Role};
-\node[resource] (rb)      at (6.5,-2.8) {RoleBinding};
-\node[resource] (wft)     at (6.5,-3.6) {WorkflowTemplate};
-\node[resource] (es)      at (6.5,-4.4) {EventSource};
-\node[resource] (sensor)  at (6.5,-5.2) {Sensor};
-\node[resource] (svc)     at (6.5,-6.0) {Service};
-\node[resource] (ing)     at (6.5,-6.8) {Ingress};
+% --- Per-environment resources (middle column) ---
+\node[resource] (promstrat) at (4.6,-2.0) {PromotionStrategy};
+\node[resource] (branch)    at (4.6,-2.9) {Branch (env + env-next)};
+\node[resource] (overlay)   at (4.6,-3.8) {Overlay RepositoryFile};
+\node[resource] (ghcr)      at (4.6,-4.7) {ghcr-creds Secret};
+\node[resource] (argoapp)   at (4.6,-5.6) {ArgoCD Application};
 
 \begin{scope}[on background layer]
-    \node[group=orange, fit={($(role.north west)+(-0.3,0.3)$) ($(ing.south east)+(0.3,-0.3)$)}] (gategrp) {};
+    \node[group=blue, fit={($(promstrat.north west)+(-0.3,0.3)$) ($(argoapp.south east)+(0.3,-0.3)$)}] (envgrp) {};
 \end{scope}
 
-% Arrows from XSDLC to per-gate
+% --- Per-gate resources (right column) ---
+\node[resource] (role)    at (9.2,-2.0) {Role};
+\node[resource] (rb)      at (9.2,-2.9) {RoleBinding};
+\node[resource] (wft)     at (9.2,-3.8) {WorkflowTemplate};
+\node[resource] (es)      at (9.2,-4.7) {EventSource};
+\node[resource] (sensor)  at (9.2,-5.6) {Sensor};
+\node[resource] (svc)     at (9.2,-6.5) {Service};
+\node[resource] (ing)     at (9.2,-7.4) {Ingress};
+\node[resource] (bp)      at (9.2,-8.3) {BranchProtection};
+
+\begin{scope}[on background layer]
+    \node[group=orange, fit={($(role.north west)+(-0.3,0.3)$) ($(bp.south east)+(0.3,-0.3)$)}] (gategrp) {};
+\end{scope}
+
+% Arrows from XSDLC to the three groups (anchored on node boundaries)
+\draw[->,thick,violet!50!black] (xsdlc.south) -- ++(0,-0.5) -| (sa.north);
+\draw[->,thick,violet!50!black] (xsdlc.south) -- (promstrat.north);
 \draw[->,thick,violet!50!black] (xsdlc.south) -- ++(0,-0.5) -| (role.north);
 
-\draw[->,thick,orange!50!black] (role) -- (rb);
-\draw[->,thick,orange!50!black] (rb) -- (wft);
-\draw[->,thick,orange!50!black] (wft) -- (es);
-\draw[->,thick,orange!50!black] (es) -- (sensor);
-\draw[->,thick,orange!50!black] (sensor) -- (svc);
-\draw[->,thick,orange!50!black] (svc) -- (ing);
+% Chained arrows inside each group (border-to-border, 0.3cm gaps)
+\draw[->,thick,teal!50!black] (sa.south) -- (eb.north);
+\draw[->,thick,teal!50!black] (eb.south) -- (scm.north);
+\draw[->,thick,teal!50!black] (scm.south) -- (gitrepo.north);
+\draw[->,thick,teal!50!black] (gitrepo.south) -- (commitst.north);
 
-% Legend
-\node[font=\tiny\itshape,text=teal!60!black] at (0,-6.9) {(one instance per XSDLC)};
-\node[font=\tiny\itshape,text=orange!60!black] at (6.5,-7.7) {(replicated per gated environment)};
+\draw[->,thick,blue!50!black] (promstrat.south) -- (branch.north);
+\draw[->,thick,blue!50!black] (branch.south) -- (overlay.north);
+\draw[->,thick,blue!50!black] (overlay.south) -- (ghcr.north);
+\draw[->,thick,blue!50!black] (ghcr.south) -- (argoapp.north);
+
+\draw[->,thick,orange!50!black] (role.south) -- (rb.north);
+\draw[->,thick,orange!50!black] (rb.south) -- (wft.north);
+\draw[->,thick,orange!50!black] (wft.south) -- (es.north);
+\draw[->,thick,orange!50!black] (es.south) -- (sensor.north);
+\draw[->,thick,orange!50!black] (sensor.south) -- (svc.north);
+\draw[->,thick,orange!50!black] (svc.south) -- (ing.north);
+\draw[->,thick,orange!50!black] (ing.south) -- (bp.north);
+
+% Group labels + cardinality, placed below each group (clear of all arrows)
+\node[grouplabel=teal] at (0,-6.7) {App-level (shared)};
+\node[font=\tiny\itshape,text=teal!60!black] at (0,-7.05) {(one instance per XSDLC)};
+
+\node[grouplabel=blue] at (4.6,-6.7) {Per-environment};
+\node[font=\tiny\itshape,text=blue!60!black] at (4.6,-7.05) {(replicated per environment)};
+
+\node[grouplabel=orange] at (9.2,-9.4) {Per-gate};
+\node[font=\tiny\itshape,text=orange!60!black] at (9.2,-9.75) {(replicated per gated environment)};
 
 \end{tikzpicture}

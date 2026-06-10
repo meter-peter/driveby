@@ -1,7 +1,12 @@
 % Quality Gate as Control Loop — Chapter 6, Section 6.6
-% Control theory block diagram: Desired State → Controller → Actuator → Plant → Sensor → feedback
+% Control theory block diagram: Setpoint (promotion policy) → Controller → Actuator → Plant (delivery system) → Sensor → feedback
+% Mapping kept in lockstep with Table 6.1 (tab:control-mapping):
+%   Setpoint = promotion-policy predicate (OpenAPI spec + XSDLC manifest)
+%   Plant    = delivery system (pipeline + promotion workflow)
+%   Actuator = CommitStatus + Promoter (merges/blocks promotion PR — acts ON the delivery system)
+%   Sensor   = DriveBy CLI; measurement = validation verdict
 \begin{tikzpicture}[
-    >={Stealth[length=2.5mm]},
+    >={Stealth[length=4mm,width=3mm]},
     block/.style={
         rectangle,
         rounded corners=4pt,
@@ -13,8 +18,8 @@
         align=center
     },
     signal/.style={
-        font=\scriptsize,
-        text=gray!70!black
+        font=\footnotesize,
+        text=gray!40!black
     },
     sum/.style={
         circle,
@@ -22,11 +27,12 @@
         fill=gray!5,
         minimum size=0.5cm,
         font=\scriptsize
-    }
+    },
+    flow/.style={->,line width=1.1pt}
 ]
 
-% Desired state (setpoint)
-\node[block=violet] (setpoint) at (0,0) {\textbf{Desired State}\\OpenAPI Spec};
+% Setpoint: promotion-policy predicate
+\node[block=violet] (setpoint) at (0,0) {\textbf{Setpoint}\\Promotion Policy\\(OpenAPI $+$ XSDLC)};
 
 % Sum point
 \node[sum] (sum) at (2.4,0) {$\Sigma$};
@@ -37,33 +43,33 @@
 % Actuator
 \node[block=orange] (actuator) at (7.7,0) {\textbf{Actuator}\\CommitStatus +\\Promoter};
 
-% Plant
-\node[block=blue] (plant) at (10.7,0) {\textbf{Plant}\\API Deployment\\(source env)};
+% Plant: the delivery system
+\node[block=blue] (plant) at (10.7,0) {\textbf{Plant}\\Delivery System\\(pipeline $+$ promotion)};
 
 % Sensor
 \node[block=red!70!black] (sensor) at (7.7,-2.5) {\textbf{Sensor}\\DriveBy CLI\\(validation engine)};
 
 % Forward path
-\draw[->,thick,violet!50!black] (setpoint) -- (sum);
-\draw[->,thick,gray!60] (sum) -- node[above,signal] {error} (controller);
-\draw[->,thick,teal!50!black] (controller) -- node[above,signal] {pass/fail} (actuator);
-\draw[->,thick,orange!50!black] (actuator) -- node[above,signal] {promote/block} (plant);
+\draw[flow,violet!50!black] (setpoint) -- (sum);
+\draw[flow,gray!50!black] (sum) -- node[above,signal] {error} (controller);
+\draw[flow,teal!50!black] (controller) -- node[above,signal] {pass/fail} (actuator);
+\draw[flow,orange!50!black] (actuator) -- node[above,signal] {merge/block PR} (plant);
 
-% Feedback path
-\draw[->,thick,blue!50!black] (plant.south) -- ++(0,-1) -- node[above,signal] {runtime behavior} (sensor.east);
-\draw[->,thick,red!50!black] (sensor.west) -| node[left,signal,pos=0.3,align=right] {validation\\report} (sum.south);
+% Feedback path: the plant's deployed API (source env) is measured by the sensor
+\draw[flow,blue!50!black] (plant.south) -- ++(0,-1) -- node[above,signal] {deployed API (source env)} (sensor.east);
+\draw[flow,red!50!black] (sensor.west) -| node[left,signal,pos=0.3,align=right] {validation\\verdict} (sum.south);
 
 % Negative feedback annotation
-\node[font=\tiny\bfseries,text=red!60!black] at (2.8,-1.2) {$-$};
+\node[font=\small\bfseries,text=red!60!black] at (2.8,-1.2) {$-$};
 
 % Labels for control theory mapping
-\node[font=\tiny\itshape,text=violet!50!black,anchor=north] at (0,-0.7) {(specification)};
-\node[font=\tiny\itshape,text=teal!50!black,anchor=north] at (4.7,-0.7) {(orchestrator)};
-\node[font=\tiny\itshape,text=orange!50!black,anchor=north] at (7.7,-0.7) {(gate signal)};
-\node[font=\tiny\itshape,text=blue!50!black,anchor=north] at (10.7,-0.7) {(deployment)};
-\node[font=\tiny\itshape,text=red!50!black,anchor=north] at (7.7,-3.2) {(SDT validator)};
+\node[font=\footnotesize\itshape,text=violet!50!black,anchor=north] at (0,-0.7) {(allowed transitions)};
+\node[font=\footnotesize\itshape,text=teal!50!black,anchor=north] at (4.7,-0.7) {(orchestrator)};
+\node[font=\footnotesize\itshape,text=orange!50!black,anchor=north] at (7.7,-0.7) {(acts on delivery system)};
+\node[font=\footnotesize\itshape,text=blue!50!black,anchor=north] at (10.7,-0.7) {(promotion PRs, branches)};
+\node[font=\footnotesize\itshape,text=red!50!black,anchor=north] at (7.7,-3.2) {(SDT validator)};
 
 % Convergence annotation
-\node[font=\scriptsize\itshape,text=gray!60,align=center] at (4.7,-3.8) {Closed-loop negative feedback:\\failure blocks promotion $\rightarrow$ developer fixes $\rightarrow$ re-validates $\rightarrow$ converges};
+\node[font=\footnotesize\itshape,text=gray!40!black,align=center] at (4.7,-3.9) {Closed-loop negative feedback: a non-conforming artifact blocks the transition\\$\rightarrow$ developer fixes $\rightarrow$ re-validates $\rightarrow$ only conforming artifacts are promoted};
 
 \end{tikzpicture}

@@ -3,11 +3,11 @@
 % Data source: results/local/*-validate-strict.json (perfect-api, bad-docs-api, no-auth-api, slow-api, broken-api)
 %
 % P001: 5/5 pass (100%) — all APIs have valid OpenAPI 3.x specs
-% P002: 0/5 pass (0%)   — all fail (missing examples, enum descriptions, contact/license)
-% P003: 0/5 pass (0%)   — all fail (missing 5xx docs, error detail schemas, no components)
-% P004: 0/5 pass (0%)   — all fail (missing data types or string length constraints)
+% P002: 4/5 pass (80%)  — bad-docs-api fails (missing examples, enum descriptions, contact/license)
+% P003: 4/5 pass (80%)  — bad-docs-api fails (missing 5xx docs, error detail schemas)
+% P004: 4/5 pass (80%)  — bad-docs-api fails (missing schema descriptions and constraints)
 % P005: 4/5 pass (80%)  — no-auth-api fails (no security schemes defined)
-% P008: 4/5 pass (80%)  — bad-docs-api fails (missing deprecation notice details)
+% P008: 4/5 pass (80%)  — bad-docs-api fails (missing versioning documentation)
 \begin{tikzpicture}[
     bar/.style={fill=teal!60, draw=teal!80!black, minimum width=1.2cm},
     label/.style={font=\small, anchor=north},
@@ -30,19 +30,19 @@
 \node[value] at (1.1,5) {100\%};
 \node[label] at (1.1,-0.1) {P001};
 
-% P002: 0%
-\fill[teal!60, draw=teal!80!black] (2.3,0) rectangle (3.5,0.05);
-\node[value] at (2.9,0.15) {0\%};
+% P002: 80%
+\fill[teal!60, draw=teal!80!black] (2.3,0) rectangle (3.5,4);
+\node[value] at (2.9,4) {80\%};
 \node[label] at (2.9,-0.1) {P002};
 
-% P003: 0%
-\fill[teal!60, draw=teal!80!black] (4.1,0) rectangle (5.3,0.05);
-\node[value] at (4.7,0.15) {0\%};
+% P003: 80%
+\fill[teal!60, draw=teal!80!black] (4.1,0) rectangle (5.3,4);
+\node[value] at (4.7,4) {80\%};
 \node[label] at (4.7,-0.1) {P003};
 
-% P004: 0%
-\fill[teal!60, draw=teal!80!black] (5.9,0) rectangle (7.1,0.05);
-\node[value] at (6.5,0.15) {0\%};
+% P004: 80%
+\fill[teal!60, draw=teal!80!black] (5.9,0) rectangle (7.1,4);
+\node[value] at (6.5,4) {80\%};
 \node[label] at (6.5,-0.1) {P004};
 
 % P005: 80%
@@ -57,10 +57,9 @@
 
 % Severity annotations
 \node[font=\tiny, teal!80!black] at (1.1,-0.6) {Critical};
-\node[font=\tiny, gray] at (2.9,-0.6) {Warning};
-\node[font=\tiny, gray] at (4.7,-0.6) {Warning};
-\node[font=\tiny, gray] at (6.5,-0.6) {Warning};
+\node[font=\tiny, teal!80!black] at (2.9,-0.6) {Critical};
+\node[font=\tiny, teal!80!black] at (4.7,-0.6) {Critical};
+\node[font=\tiny, teal!80!black] at (6.5,-0.6) {Critical};
 \node[font=\tiny, teal!80!black] at (8.3,-0.6) {Critical};
 \node[font=\tiny, gray] at (10.1,-0.6) {Warning};
-
 \end{tikzpicture}
