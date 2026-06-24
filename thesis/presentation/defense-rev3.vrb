@@ -1,0 +1,34 @@
+\frametitle{What an XSDLC manifest actually looks like}
+
+\vspace{0.1em}
+\begin{lstlisting}
+apiVersion: driveby.io/v1alpha1
+kind: XSDLC
+metadata: { name: perfect-api }
+spec:
+  gitopsRepository: { owner: novelcore, name: perfect-api-gitops }
+  apiConfig:          { port: 8000, openapiEndpoint: /openapi.json }
+  validationDefaults: { validationMode: strict }
+  environments:
+    - { name: dev }
+    - name: staging
+      gate: { checks: [ { type: validate-only,
+              validationConfig: { validationMode: test-ready } },
+              { type: functional-test } ] }
+    - name: prod
+      autoMerge: false
+      gate: { checks: [ { type: load-test, loadTestConfig:
+              { concurrentUsers: 10, testDuration: "15s",
+                maxLatencyP95: "2s", minSuccessRate: 0.5 } } ] }
+\end{lstlisting}
+
+\vspace{0.15em}
+\scriptsize
+$\sim$35 YAML lines $\to$ $\sim$45--50 Kubernetes objects in $<$15\,s; the
+\texttt{Promoter} opens PRs between environment branches and each PR triggers the
+declared gate checks before auto-merge.\\[0.2em]
+\alert{Check types map to principles:}\quad
+\texttt{validate-only} $\to$ P001--P005, P008 \;$\cdot$\;
+\texttt{functional-test} $\to$ P006 \;$\cdot$\;
+\texttt{load-test} $\to$ P007
+
