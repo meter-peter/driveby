@@ -1,7 +1,7 @@
 # Thesis Writing Agent
 
 ## Thesis
-**Title**: Documentation-Driven Testing (DDT): A Paradigm for Automated API Quality Assurance in the GitOps Era
+**Title**: Specification-Driven Testing (SDT): A Conceptual Framework for Automated API Quality Assurance in the GitOps Era (renamed from Documentation-Driven Testing (DDT) per supervisor review; tool/repo keep the old name)
 
 ## Files
 ```
@@ -176,9 +176,7 @@ thesis/
 
 ## Figure Requirements
 - [DONE] Architecture diagram: dependency flow (Ch.4) — `figures/dependency-flow.tex`, `fig:dependency-flow`
-- [DONE] Axiom-to-principle mapping (Ch.3) — `figures/axiom-principle-mapping.tex`, `fig:axiom-mapping`
 - [DONE] Pipeline diagram: GitOps event-driven workflow (Ch.5) — `figures/workflow-pipeline.tex`, `fig:gitops-pipeline`
-- [DONE] Staging promotion DAG (Ch.5) — `figures/staging-promotion-dag.tex`, `fig:staging-dag`
 - [DONE] Evaluation framework (Ch.6) — `figures/evaluation-methodology.tex`, `fig:eval-methodology`
 - [DONE] Provider architecture (Ch.5) — `figures/provider-architecture.tex`, `fig:provider-architecture`
 - [DONE] Kubernetes system context (Ch.5) — `figures/k8s-system-context.tex`, `fig:k8s-system-context`

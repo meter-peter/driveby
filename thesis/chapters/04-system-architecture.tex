@@ -1,7 +1,7 @@
 \chapter{System Architecture}
 \label{ch:system-architecture}
 
-Chapter~\ref{ch:methodology} defined Specification-Driven Testing as three axioms and nine validation principles. Before any single component is examined, this chapter establishes the architecture of the \emph{system} that realizes the framework: its components, its boundary, its infrastructure, and how the work of turning a specification into a promotion decision is divided.
+Chapter~\ref{ch:methodology} defined Specification-Driven Testing as three axioms and nine validation principles. Before any single component is examined, this chapter establishes the architecture of the \emph{system} that realises the framework: its components, its boundary, its infrastructure, and how the work of turning a specification into a promotion decision is divided.
 
 The system is larger than the tool: the DriveBy CLI is only the validation engine and cannot, by itself, gate a delivery pipeline. The system under study comprises four components---the DriveBy CLI, which evaluates specifications against the SDT principles; the XSDLC Crossplane composition, which generates per-application pipeline infrastructure; the generated gate infrastructure itself (event sources, sensors, validation workflows, ingress routes); and the GitOps Promoter, which converts validation verdicts into promotion decisions. Removing any one of them breaks the chain from specification to promotion.
 
@@ -38,7 +38,7 @@ Second, \textit{configuration must be declarative}. Imperative validation (``run
 
 Third, \textit{results must drive automated decisions}. The CLI's JSON report and exit code suffice for a human reviewer but not for a GitOps reconciliation loop, which requires structured commit statuses, webhook callbacks, and status conditions rather than stdout parsing.
 
-These requirements map directly to the three layers, summarized in Table~\ref{tab:cli-to-cr-progression}: the CLI (Chapter~\ref{ch:architecture}) provides the \textit{validation logic}, the Kubernetes infrastructure (Chapter~\ref{ch:kubernetes}) the \textit{execution and provisioning layer}, and the GitOps pipeline (Chapter~\ref{ch:workflow}) the \textit{decision layer}.
+These requirements map directly to the three layers, summarised in Table~\ref{tab:cli-to-cr-progression}: the CLI (Chapter~\ref{ch:architecture}) provides the \textit{validation logic}, the Kubernetes infrastructure (Chapter~\ref{ch:kubernetes}) the \textit{execution and provisioning layer}, and the GitOps pipeline (Chapter~\ref{ch:workflow}) the \textit{decision layer}.
 
 \begin{table}[htbp]
 \centering
@@ -52,7 +52,7 @@ These requirements map directly to the three layers, summarized in Table~\ref{ta
 \midrule
 Execution     & Manual invocation      & Event-driven workflows   & Promotion-triggered \\
 Configuration & CLI flags, env vars    & XRD spec fields, Helm values & Git-versioned manifests \\
-Output        & JSON to stdout         & Workflow artifacts        & Commit statuses \\
+Output        & JSON to stdout         & Workflow artefacts        & Commit statuses \\
 State         & Transient (process)    & Pod lifecycle             & Reconciled desired state \\
 Promotion     & Human decision         & Sensor-triggered          & Automated (commit status) \\
 \bottomrule
@@ -93,14 +93,14 @@ Packaging the CLI as an OCI container image (\texttt{ghcr.io/\allowbreak meter-p
 \label{subsec:stage-workflow}
 % ----------------------------------------------------------------------------
 
-Embedding the container image as a step in an Argo Workflows DAG adds event-driven execution, dependency ordering, artifact persistence, and exit handling. Argo Events triggers the workflow from GitHub webhooks; the workflow runs validation alongside health checking, commit-status posting, and PR commenting, and posts results back to the Git control plane---transforming the CLI from a manual tool into an automated quality gate.
+Embedding the container image as a step in an Argo Workflows DAG adds event-driven execution, dependency ordering, artefact persistence, and exit handling. Argo Events triggers the workflow from GitHub webhooks; the workflow runs validation alongside health checking, commit-status posting, and PR commenting, and posts results back to the Git control plane---transforming the CLI from a manual tool into an automated quality gate.
 
 % ----------------------------------------------------------------------------
 \subsection{Stage 5: Crossplane Custom Resource}
 \label{subsec:stage-cr}
 % ----------------------------------------------------------------------------
 
-The final stage---the \texttt{XSDLC} custom resource described in Section~\ref{sec:xrd-design}---declares the entire pipeline as a single Kubernetes resource: from one CR (\(\sim\)25 lines of YAML) declaring the desired end state, Crossplane's reconciliation loop provisions the complete gate infrastructure.
+The final stage---the \texttt{XSDLC} custom resource described in Section~\ref{sec:xrd-design}---declares the entire pipeline as a single Kubernetes resource: from one CR (\(\sim\)35 lines of YAML) declaring the desired end state, Crossplane's reconciliation loop provisions the complete gate infrastructure.
 
 The key insight is that each stage \textit{subsumes} the previous: the CR still runs the same CLI binary, inside the same container image, as a step in the same Argo Workflows DAG. Nothing is discarded; each layer adds a capability (portability, automation, declarative management) while preserving the core validation logic. The critical enabler is the CLI's own architecture (Section~\ref{subsec:design-goals}), which makes the validation logic portable across execution environments---the same principle checkers run in a developer's terminal and inside an Argo Workflow container. The CLI was not retrofitted for Kubernetes integration; it was designed from the outset to support multiple deployment models.
 
